@@ -1,0 +1,39 @@
+name: studynotion-integration
+
+services:
+  mongo:
+    image: mongo:8.0
+    restart: "no"
+    environment:
+      MONGO_INITDB_DATABASE: studynotion_integration
+    ports:
+      - "127.0.0.1:${INTEGRATION_MONGO_PORT:-27018}:27017"
+    tmpfs:
+      - /data/configdb
+      - /data/db
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - "quit(db.adminCommand('ping').ok ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  redis:
+    image: redis:7.4-alpine
+    restart: "no"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "127.0.0.1:${INTEGRATION_REDIS_PORT:-6380}:6379"
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s

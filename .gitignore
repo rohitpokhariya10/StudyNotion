@@ -7,6 +7,9 @@
 
 # testing
 /coverage
+/blob-report/
+/playwright-report/
+/test-results/
 
 # production
 /build
@@ -18,6 +21,14 @@
 .env*
 !.env.example
 !.env.production.example
+
+# local source/release archives
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.zip
 
 npm-debug.log*
 yarn-debug.log*

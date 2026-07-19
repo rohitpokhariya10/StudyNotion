@@ -4,3 +4,12 @@ build
 .env*
 .git
 coverage
+blob-report
+playwright-report
+test-results
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.zip
