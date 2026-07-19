@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react"
 import {
   TiStarFullOutline,
   TiStarHalfOutline,
@@ -6,22 +5,21 @@ import {
 } from "react-icons/ti"
 
 function RatingStars({ Review_Count, Star_Size }) {
-  const [starCount, SetStarCount] = useState({
-    full: 0,
-    half: 0,
-    empty: 0,
-  })
+  const rating = Math.min(5, Math.max(0, Number(Review_Count) || 0))
+  const wholeStars = Math.floor(rating)
+  const hasHalfStar = rating > wholeStars
+  const starCount = {
+    full: wholeStars,
+    half: hasHalfStar ? 1 : 0,
+    empty: 5 - wholeStars - (hasHalfStar ? 1 : 0),
+  }
 
-  useEffect(() => {
-    const wholeStars = Math.floor(Review_Count) || 0
-    SetStarCount({
-      full: wholeStars,
-      half: Number.isInteger(Review_Count) ? 0 : 1,
-      empty: Number.isInteger(Review_Count) ? 5 - wholeStars : 4 - wholeStars,
-    })
-  }, [Review_Count])
   return (
-    <div className="flex gap-1 text-yellow-100">
+    <div
+      className="flex gap-1 text-yellow-100"
+      role="img"
+      aria-label={`${rating.toFixed(1)} out of 5 stars`}
+    >
       {[...new Array(starCount.full)].map((_, i) => {
         return <TiStarFullOutline key={i} size={Star_Size || 20} />
       })}

@@ -1,59 +1,33 @@
-import React from "react"
 import copy from "copy-to-clipboard"
 import { toast } from "react-hot-toast"
 import { BsFillCaretRightFill } from "react-icons/bs"
 import { FaShareSquare } from "react-icons/fa"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 
-import { addToCart } from "../../../slices/cartSlice"
-import { ACCOUNT_TYPE } from "../../../utils/constants"
+import CheckoutPolicyAcknowledgement from "../../Common/CheckoutPolicyAcknowledgement"
 
-// const CourseIncludes = [
-//   "8 hours on-demand video",
-//   "Full Lifetime access",
-//   "Access on Mobile and TV",
-//   "Certificate of completion",
-// ]
-
-function CourseDetailsCard({ course, setConfirmationModal, handleBuyCourse }) {
+function CourseDetailsCard({
+  checkoutPolicyAccepted,
+  course,
+  isEnrolled,
+  handleBuyCourse,
+  handleAddToCart,
+  policyConfig,
+  policyError,
+  policyLoading,
+  reloadPolicyConfig,
+  setCheckoutPolicyAccepted,
+}) {
   const { user } = useSelector((state) => state.profile)
-  const { token } = useSelector((state) => state.auth)
   const navigate = useNavigate()
-  const dispatch = useDispatch()
 
-  const {
-    thumbnail: ThumbnailImage,
-    price: CurrentPrice,
-    _id: courseId,
-  } = course
+  const { thumbnail: ThumbnailImage, price: CurrentPrice } = course
 
   const handleShare = () => {
     copy(window.location.href)
     toast.success("Link copied to clipboard")
   }
-
-  const handleAddToCart = () => {
-    if (user && user?.accountType === ACCOUNT_TYPE.INSTRUCTOR) {
-      toast.error("You are an Instructor. You can't buy a course.")
-      return
-    }
-    if (token) {
-      dispatch(addToCart(course))
-      return
-    }
-    setConfirmationModal({
-      text1: "You are not logged in!",
-      text2: "Please login to add To Cart",
-      btn1Text: "Login",
-      btn2Text: "Cancel",
-      btn1Handler: () => navigate("/login"),
-      btn2Handler: () => setConfirmationModal(null),
-    })
-  }
-
-  // console.log("Student already enrolled ", course?.studentsEnroled, user?._id)
-
   return (
     <>
       <div
@@ -71,19 +45,47 @@ function CourseDetailsCard({ course, setConfirmationModal, handleBuyCourse }) {
             Rs. {CurrentPrice}
           </div>
           <div className="flex flex-col gap-4">
+            {(!user || !isEnrolled) && (
+              <CheckoutPolicyAcknowledgement
+                checked={checkoutPolicyAccepted}
+                disabled={policyLoading}
+                id="desktop-checkout-policy"
+                onChange={setCheckoutPolicyAccepted}
+                policyConfig={policyConfig}
+              />
+            )}
+            {policyLoading && !isEnrolled && (
+              <p className="text-xs text-richblack-300" role="status">
+                Loading current checkout policies…
+              </p>
+            )}
+            {policyError && !isEnrolled && (
+              <div className="text-xs text-pink-100" role="alert">
+                <p>{policyError}</p>
+                <button
+                  type="button"
+                  className="mt-1 font-medium text-yellow-100 underline"
+                  onClick={reloadPolicyConfig}
+                >
+                  Try again
+                </button>
+              </div>
+            )}
             <button
               className="yellowButton"
+              disabled={
+                !isEnrolled &&
+                (!checkoutPolicyAccepted || !policyConfig || policyLoading)
+              }
               onClick={
-                user && course?.studentsEnroled.includes(user?._id)
+                user && isEnrolled
                   ? () => navigate("/dashboard/enrolled-courses")
                   : handleBuyCourse
               }
             >
-              {user && course?.studentsEnroled.includes(user?._id)
-                ? "Go To Course"
-                : "Buy Now"}
+              {user && isEnrolled ? "Go To Course" : "Buy Now"}
             </button>
-            {(!user || !course?.studentsEnroled.includes(user?._id)) && (
+            {(!user || !isEnrolled) && (
               <button onClick={handleAddToCart} className="blackButton">
                 Add to Cart
               </button>
@@ -91,12 +93,12 @@ function CourseDetailsCard({ course, setConfirmationModal, handleBuyCourse }) {
           </div>
           <div>
             <p className="pb-3 pt-6 text-center text-sm text-richblack-25">
-              30-Day Money-Back Guarantee
+              Secure checkout &bull; Access after verified payment
             </p>
           </div>
 
           <div className={``}>
-            <p className={`my-2 text-xl font-semibold `}>
+            <p className={`my-2 text-xl font-semibold`}>
               This Course Includes :
             </p>
             <div className="flex flex-col gap-3 text-sm text-caribbeangreen-100">
@@ -112,7 +114,7 @@ function CourseDetailsCard({ course, setConfirmationModal, handleBuyCourse }) {
           </div>
           <div className="text-center">
             <button
-              className="mx-auto flex items-center gap-2 py-6 text-yellow-100 "
+              className="mx-auto flex items-center gap-2 py-6 text-yellow-100"
               onClick={handleShare}
             >
               <FaShareSquare size={15} /> Share

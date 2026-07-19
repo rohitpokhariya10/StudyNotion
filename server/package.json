@@ -1,11 +1,22 @@
 {
 	"name": "studynotion-backend",
 	"version": "1.0.0",
-	"description": "studynotion-backend",
+	"description": "StudyNotion production API",
+	"private": true,
+	"engines": {
+		"node": ">=24 <25",
+		"npm": ">=10"
+	},
 	"main": "index.js",
 	"scripts": {
 		"start": "node index.js",
-		"dev": "nodemon index.js"
+		"dev": "node --watch index.js",
+		"seed": "node seed",
+		"preflight:production": "node scripts/preflight-production.js",
+		"db:backfill-security": "node scripts/backfill-security-fields.js",
+		"db:indexes": "node scripts/create-indexes.js",
+		"admin:provision": "node scripts/provision-admin.js",
+		"test": "node --test"
 	},
 	"keywords": [
 		"studynotion-backend"
@@ -13,21 +24,23 @@
 	"author": "Saikat Mukherjee",
 	"license": "ISC",
 	"dependencies": {
-		"bcrypt": "^5.1.0",
-		"bcryptjs": "^2.4.3",
-		"cloudinary": "^1.36.4",
+		"bcryptjs": "^3.0.3",
+		"cloudinary": "^2.10.0",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
-		"crypto-random-string": "^5.0.0",
-		"dotenv": "^16.0.3",
-		"express": "^4.18.2",
+		"dotenv": "^17.4.2",
+		"express": "^5.2.1",
 		"express-fileupload": "^1.4.0",
+		"express-rate-limit": "^8.6.0",
+		"google-auth-library": "^10.9.0",
+		"helmet": "^8.3.0",
 		"jsonwebtoken": "^9.0.0",
-		"mongoose": "^7.0.3",
-		"node-schedule": "^2.1.1",
-		"nodemailer": "^6.9.1",
-		"nodemon": "^2.0.22",
-		"otp-generator": "^4.0.1",
-		"razorpay": "^2.8.6"
+		"mongoose": "^8.24.1",
+		"rate-limit-redis": "^6.0.0",
+		"razorpay": "^2.8.6",
+		"redis": "^6.1.0"
+	},
+	"optionalDependencies": {
+		"gcp-metadata": "^5.3.0"
 	}
 }

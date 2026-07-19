@@ -1,98 +1,131 @@
-import React, { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 
-import "video-react/dist/video-react.css"
-import { useLocation } from "react-router-dom"
-import { BigPlayButton, Player } from "video-react"
-
-import { markLectureAsComplete } from "../../../services/operations/courseDetailsAPI"
+import {
+  getLessonPlaybackUrl,
+  markLectureAsComplete,
+} from "../../../services/operations/courseDetailsAPI"
 import { updateCompletedLectures } from "../../../slices/viewCourseSlice"
 import IconBtn from "../../Common/IconBtn"
 
 const VideoDetails = () => {
   const { courseId, sectionId, subSectionId } = useParams()
   const navigate = useNavigate()
-  const location = useLocation()
   const playerRef = useRef(null)
   const dispatch = useDispatch()
   const { token } = useSelector((state) => state.auth)
   const { courseSectionData, courseEntireData, completedLectures } =
     useSelector((state) => state.viewCourse)
 
-  const [videoData, setVideoData] = useState([])
-  const [previewSource, setPreviewSource] = useState("")
-  const [videoEnded, setVideoEnded] = useState(false)
+  const [endedVideoId, setEndedVideoId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [playback, setPlayback] = useState(null)
+  const [playbackError, setPlaybackError] = useState("")
+  const [playbackLoading, setPlaybackLoading] = useState(false)
+  const [playbackRefresh, setPlaybackRefresh] = useState(0)
+  const retriedLessonRef = useRef(null)
+  const resumeAtRef = useRef(0)
+
+  const currentSectionIndex = courseSectionData.findIndex(
+    (section) => section?._id === sectionId
+  )
+  const currentSection = courseSectionData[currentSectionIndex]
+  const currentSubSectionIndex = currentSection?.subSection?.findIndex(
+    (subSection) => subSection?._id === subSectionId
+  )
+  const videoData =
+    currentSubSectionIndex >= 0
+      ? currentSection?.subSection?.[currentSubSectionIndex]
+      : null
+  const videoEnded = endedVideoId === subSectionId
 
   useEffect(() => {
-    ;(async () => {
-      if (!courseSectionData.length) return
-      if (!courseId && !sectionId && !subSectionId) {
-        navigate(`/dashboard/enrolled-courses`)
-      } else {
-        // console.log("courseSectionData", courseSectionData)
-        const filteredData = courseSectionData.filter(
-          (course) => course._id === sectionId
+    retriedLessonRef.current = null
+    resumeAtRef.current = 0
+  }, [courseId, subSectionId])
+
+  useEffect(() => {
+    if (!courseId || !subSectionId || !videoData) return undefined
+
+    let active = true
+
+    const loadPlayback = async () => {
+      setPlaybackLoading(true)
+      setPlaybackError("")
+
+      try {
+        const freshPlayback = await getLessonPlaybackUrl(
+          courseId,
+          subSectionId
         )
-        // console.log("filteredData", filteredData)
-        const filteredVideoData = filteredData?.[0]?.subSection.filter(
-          (data) => data._id === subSectionId
-        )
-        // console.log("filteredVideoData", filteredVideoData)
-        setVideoData(filteredVideoData[0])
-        setPreviewSource(courseEntireData.thumbnail)
-        setVideoEnded(false)
+        if (active) setPlayback({ ...freshPlayback, subSectionId })
+      } catch (error) {
+        if (active) {
+          setPlayback(null)
+          setPlaybackError(error.message)
+        }
+      } finally {
+        if (active) setPlaybackLoading(false)
       }
-    })()
-  }, [courseSectionData, courseEntireData, location.pathname])
+    }
+
+    void loadPlayback()
+
+    return () => {
+      active = false
+    }
+  }, [courseId, playbackRefresh, subSectionId, videoData])
+
+  const refreshPlayback = ({ automatic = false } = {}) => {
+    const lessonKey = `${courseId}:${subSectionId}`
+    if (automatic && retriedLessonRef.current === lessonKey) {
+      setPlaybackError(
+        "The secure video session could not be renewed. Please try again."
+      )
+      return
+    }
+
+    if (automatic) retriedLessonRef.current = lessonKey
+    else retriedLessonRef.current = null
+    resumeAtRef.current = playerRef.current?.currentTime || 0
+    setPlayback(null)
+    setPlaybackError("")
+    setPlaybackRefresh((value) => value + 1)
+  }
+
+  const handlePlaybackError = () => refreshPlayback({ automatic: true })
+
+  const restorePlaybackPosition = () => {
+    if (!playerRef.current || resumeAtRef.current <= 0) return
+    playerRef.current.currentTime = resumeAtRef.current
+    resumeAtRef.current = 0
+    playerRef.current.play().catch(() => undefined)
+  }
 
   // check if the lecture is the first video of the course
-  const isFirstVideo = () => {
-    const currentSectionIndx = courseSectionData.findIndex(
-      (data) => data._id === sectionId
-    )
-
-    const currentSubSectionIndx = courseSectionData[
-      currentSectionIndx
-    ].subSection.findIndex((data) => data._id === subSectionId)
-
-    if (currentSectionIndx === 0 && currentSubSectionIndx === 0) {
-      return true
-    } else {
-      return false
-    }
-  }
+  const isFirstVideo =
+    currentSectionIndex === 0 && currentSubSectionIndex === 0
 
   // go to the next video
   const goToNextVideo = () => {
     // console.log(courseSectionData)
 
-    const currentSectionIndx = courseSectionData.findIndex(
-      (data) => data._id === sectionId
-    )
+    if (!currentSection || currentSubSectionIndex < 0) return
 
-    const noOfSubsections =
-      courseSectionData[currentSectionIndx].subSection.length
-
-    const currentSubSectionIndx = courseSectionData[
-      currentSectionIndx
-    ].subSection.findIndex((data) => data._id === subSectionId)
-
-    // console.log("no of subsections", noOfSubsections)
-
-    if (currentSubSectionIndx !== noOfSubsections - 1) {
-      const nextSubSectionId =
-        courseSectionData[currentSectionIndx].subSection[
-          currentSubSectionIndx + 1
-        ]._id
+    if (currentSubSectionIndex < currentSection.subSection.length - 1) {
+      const nextSubSectionId = currentSection.subSection[
+        currentSubSectionIndex + 1
+      ]?._id
+      if (!nextSubSectionId) return
       navigate(
         `/view-course/${courseId}/section/${sectionId}/sub-section/${nextSubSectionId}`
       )
     } else {
-      const nextSectionId = courseSectionData[currentSectionIndx + 1]._id
-      const nextSubSectionId =
-        courseSectionData[currentSectionIndx + 1].subSection[0]._id
+      const nextSection = courseSectionData[currentSectionIndex + 1]
+      const nextSectionId = nextSection?._id
+      const nextSubSectionId = nextSection?.subSection?.[0]?._id
+      if (!nextSectionId || !nextSubSectionId) return
       navigate(
         `/view-course/${courseId}/section/${nextSectionId}/sub-section/${nextSubSectionId}`
       )
@@ -100,56 +133,30 @@ const VideoDetails = () => {
   }
 
   // check if the lecture is the last video of the course
-  const isLastVideo = () => {
-    const currentSectionIndx = courseSectionData.findIndex(
-      (data) => data._id === sectionId
-    )
-
-    const noOfSubsections =
-      courseSectionData[currentSectionIndx].subSection.length
-
-    const currentSubSectionIndx = courseSectionData[
-      currentSectionIndx
-    ].subSection.findIndex((data) => data._id === subSectionId)
-
-    if (
-      currentSectionIndx === courseSectionData.length - 1 &&
-      currentSubSectionIndx === noOfSubsections - 1
-    ) {
-      return true
-    } else {
-      return false
-    }
-  }
+  const isLastVideo =
+    currentSectionIndex === courseSectionData.length - 1 &&
+    currentSubSectionIndex === (currentSection?.subSection?.length || 0) - 1
 
   // go to the previous video
   const goToPrevVideo = () => {
     // console.log(courseSectionData)
 
-    const currentSectionIndx = courseSectionData.findIndex(
-      (data) => data._id === sectionId
-    )
+    if (!currentSection || currentSubSectionIndex < 0) return
 
-    const currentSubSectionIndx = courseSectionData[
-      currentSectionIndx
-    ].subSection.findIndex((data) => data._id === subSectionId)
-
-    if (currentSubSectionIndx !== 0) {
-      const prevSubSectionId =
-        courseSectionData[currentSectionIndx].subSection[
-          currentSubSectionIndx - 1
-        ]._id
+    if (currentSubSectionIndex > 0) {
+      const prevSubSectionId = currentSection.subSection[
+        currentSubSectionIndex - 1
+      ]?._id
+      if (!prevSubSectionId) return
       navigate(
         `/view-course/${courseId}/section/${sectionId}/sub-section/${prevSubSectionId}`
       )
     } else {
-      const prevSectionId = courseSectionData[currentSectionIndx - 1]._id
-      const prevSubSectionLength =
-        courseSectionData[currentSectionIndx - 1].subSection.length
-      const prevSubSectionId =
-        courseSectionData[currentSectionIndx - 1].subSection[
-          prevSubSectionLength - 1
-        ]._id
+      const previousSection = courseSectionData[currentSectionIndex - 1]
+      const previousSubSections = previousSection?.subSection || []
+      const prevSectionId = previousSection?._id
+      const prevSubSectionId = previousSubSections.at(-1)?._id
+      if (!prevSectionId || !prevSubSectionId) return
       navigate(
         `/view-course/${courseId}/section/${prevSectionId}/sub-section/${prevSubSectionId}`
       )
@@ -158,33 +165,78 @@ const VideoDetails = () => {
 
   const handleLectureCompletion = async () => {
     setLoading(true)
-    const res = await markLectureAsComplete(
-      { courseId: courseId, subsectionId: subSectionId },
-      token
-    )
-    if (res) {
-      dispatch(updateCompletedLectures(subSectionId))
+    try {
+      const completed = await markLectureAsComplete(
+        { courseId, subsectionId: subSectionId },
+        token
+      )
+      if (completed && !completedLectures.includes(subSectionId)) {
+        dispatch(updateCompletedLectures(subSectionId))
+      }
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
+
+  const activePlayback =
+    String(playback?.subSectionId || "") === String(subSectionId || "")
+      ? playback
+      : null
 
   return (
     <div className="flex flex-col gap-5 text-white">
       {!videoData ? (
         <img
-          src={previewSource}
+          src={courseEntireData?.thumbnail}
           alt="Preview"
           className="h-full w-full rounded-md object-cover"
         />
+      ) : playbackLoading || (!playbackError && !activePlayback) ? (
+        <div className="grid aspect-video place-items-center rounded-md bg-black">
+          <div
+            className="spinner"
+            role="status"
+            aria-label="Loading lesson video"
+          />
+        </div>
+      ) : playbackError || !activePlayback?.url ? (
+        <div className="grid aspect-video place-items-center rounded-md bg-black px-6 text-center">
+          <div>
+            <p className="text-lg font-semibold text-richblack-25">
+              This lesson video could not be loaded.
+            </p>
+            {playbackError && (
+              <p className="mt-2 text-sm text-richblack-300" role="alert">
+                {playbackError}
+              </p>
+            )}
+            <button
+              type="button"
+              className="yellowButton mt-4"
+              onClick={() => refreshPlayback()}
+            >
+              Try again
+            </button>
+          </div>
+        </div>
       ) : (
-        <Player
-          ref={playerRef}
-          aspectRatio="16:9"
-          playsInline
-          onEnded={() => setVideoEnded(true)}
-          src={videoData?.videoUrl}
-        >
-          <BigPlayButton position="center" />
+        <div className="relative aspect-video overflow-hidden rounded-md bg-black">
+          <video
+            key={`${videoData._id}:${activePlayback.url}`}
+            ref={playerRef}
+            className="h-full w-full"
+            controls
+            playsInline
+            preload="metadata"
+            poster={courseEntireData?.thumbnail}
+            onEnded={() => setEndedVideoId(subSectionId)}
+            onPlay={() => setEndedVideoId(null)}
+            onLoadedMetadata={restorePlaybackPosition}
+            onError={handlePlaybackError}
+            src={activePlayback.url}
+          >
+            Your browser does not support HTML5 video.
+          </video>
           {/* Render When Video Ends */}
           {videoEnded && (
             <div
@@ -206,16 +258,16 @@ const VideoDetails = () => {
                 disabled={loading}
                 onclick={() => {
                   if (playerRef?.current) {
-                    // set the current time of the video to 0
-                    playerRef?.current?.seek(0)
-                    setVideoEnded(false)
+                    playerRef.current.currentTime = 0
+                    playerRef.current.play().catch(() => undefined)
+                    setEndedVideoId(null)
                   }
                 }}
                 text="Rewatch"
                 customClasses="text-xl max-w-max px-4 mx-auto mt-2"
               />
               <div className="mt-10 flex min-w-[250px] justify-center gap-x-4 text-xl">
-                {!isFirstVideo() && (
+                {!isFirstVideo && (
                   <button
                     disabled={loading}
                     onClick={goToPrevVideo}
@@ -224,7 +276,7 @@ const VideoDetails = () => {
                     Prev
                   </button>
                 )}
-                {!isLastVideo() && (
+                {!isLastVideo && (
                   <button
                     disabled={loading}
                     onClick={goToNextVideo}
@@ -236,7 +288,7 @@ const VideoDetails = () => {
               </div>
             </div>
           )}
-        </Player>
+        </div>
       )}
 
       <h1 className="mt-4 text-3xl font-semibold">{videoData?.title}</h1>

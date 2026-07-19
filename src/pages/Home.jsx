@@ -78,7 +78,7 @@ function Home() {
               </div>
             }
             subheading={
-              "Our courses are designed and taught by industry experts who have years of experience in coding and are passionate about sharing their knowledge with you."
+              "Learn through structured courses from approved instructors, with practical lesson material you can revisit at your own pace."
             }
             ctabtn1={{
               btnText: "Try it Yourself",
@@ -103,11 +103,11 @@ function Home() {
             heading={
               <div className="w-[100%] text-4xl font-semibold lg:w-[50%]">
                 Start
-                <HighlightText text={"coding in seconds"} />
+                <HighlightText text={"learning today"} />
               </div>
             }
             subheading={
-              "Go ahead, give it a try. Our hands-on learning environment means you'll be writing real code from your very first lesson."
+              "Choose a published course, follow its lessons in order, and track your progress as you complete each topic."
             }
             ctabtn1={{
               btnText: "Continue Lesson",
@@ -158,9 +158,9 @@ function Home() {
             </div>
             <div className="flex flex-col items-start gap-10 lg:w-[40%]">
               <div className="text-[16px]">
-                The modern StudyNotion is the dictates its own terms. Today, to
-                be a competitive specialist requires more than professional
-                skills.
+                Build a consistent learning habit with focused courses,
+                protected lesson access, and progress that stays tied to your
+                account.
               </div>
               <CTAButton active={true} linkto={"/signup"}>
                 <div className="">Learn More</div>

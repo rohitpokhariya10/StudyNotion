@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { useSelector } from "react-redux"
@@ -21,12 +21,7 @@ export default function UpdatePassword() {
   } = useForm()
 
   const submitPasswordForm = async (data) => {
-    // console.log("password Data - ", data)
-    try {
-      await changePassword(token, data)
-    } catch (error) {
-      console.log("ERROR MESSAGE - ", error.message)
-    }
+    await changePassword(token, data)
   }
 
   return (
@@ -42,21 +37,24 @@ export default function UpdatePassword() {
               <input
                 type={showOldPassword ? "text" : "password"}
                 name="oldPassword"
+                maxLength={72}
                 id="oldPassword"
                 placeholder="Enter Current Password"
                 className="form-style"
                 {...register("oldPassword", { required: true })}
               />
-              <span
+              <button
+                type="button"
                 onClick={() => setShowOldPassword((prev) => !prev)}
                 className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+                aria-label={showOldPassword ? "Hide current password" : "Show current password"}
               >
                 {showOldPassword ? (
                   <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
                 ) : (
                   <AiOutlineEye fontSize={24} fill="#AFB2BF" />
                 )}
-              </span>
+              </button>
               {errors.oldPassword && (
                 <span className="-mt-1 text-[12px] text-yellow-100">
                   Please enter your Current Password.
@@ -70,21 +68,28 @@ export default function UpdatePassword() {
               <input
                 type={showNewPassword ? "text" : "password"}
                 name="newPassword"
+                maxLength={72}
                 id="newPassword"
                 placeholder="Enter New Password"
                 className="form-style"
-                {...register("newPassword", { required: true })}
+                {...register("newPassword", {
+                  required: true,
+                  minLength: 8,
+                  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
+                })}
               />
-              <span
+              <button
+                type="button"
                 onClick={() => setShowNewPassword((prev) => !prev)}
                 className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+                aria-label={showNewPassword ? "Hide new password" : "Show new password"}
               >
                 {showNewPassword ? (
                   <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
                 ) : (
                   <AiOutlineEye fontSize={24} fill="#AFB2BF" />
                 )}
-              </span>
+              </button>
               {errors.newPassword && (
                 <span className="-mt-1 text-[12px] text-yellow-100">
                   Please enter your New Password.
@@ -95,6 +100,7 @@ export default function UpdatePassword() {
         </div>
         <div className="flex justify-end gap-2">
           <button
+            type="button"
             onClick={() => {
               navigate("/dashboard/my-profile")
             }}

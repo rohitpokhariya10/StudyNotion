@@ -1,6 +1,7 @@
 import { toast } from "react-hot-toast"
 
 import { setUser } from "../../slices/profileSlice"
+import { getAvatarSource } from "../../utils/avatar"
 import { apiConnector } from "../apiConnector"
 import { settingsEndpoints } from "../apis"
 import { logout } from "./authAPI"
@@ -12,7 +13,18 @@ const {
   DELETE_PROFILE_API,
 } = settingsEndpoints
 
-export function updateDisplayPicture(token, formData) {
+const getErrorMessage = (error, fallback) =>
+  error?.response?.data?.message || error?.message || fallback
+
+const withFallbackImage = (user) => {
+  if (!user) return user
+  return {
+    ...user,
+    image: getAvatarSource(user),
+  }
+}
+
+export function updateDisplayPicture(_token, formData) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     try {
@@ -22,91 +34,89 @@ export function updateDisplayPicture(token, formData) {
         formData,
         {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         }
       )
-      console.log(
-        "UPDATE_DISPLAY_PICTURE_API API RESPONSE............",
-        response
-      )
 
-      if (!response.data.success) {
-        throw new Error(response.data.message)
+      if (!response?.data?.success || !response?.data?.data) {
+        throw new Error(response?.data?.message || "Invalid profile response")
       }
       toast.success("Display Picture Updated Successfully")
-      dispatch(setUser(response.data.data))
+      dispatch(setUser(withFallbackImage(response.data.data)))
+      return true
     } catch (error) {
-      console.log("UPDATE_DISPLAY_PICTURE_API API ERROR............", error)
-      toast.error("Could Not Update Display Picture")
+      toast.error(getErrorMessage(error, "Could not update display picture"))
+      return false
+    } finally {
+      toast.dismiss(toastId)
     }
-    toast.dismiss(toastId)
   }
 }
 
-export function updateProfile(token, formData) {
+export function updateProfile(_token, formData) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     try {
-      const response = await apiConnector("PUT", UPDATE_PROFILE_API, formData, {
-        Authorization: `Bearer ${token}`,
-      })
-      console.log("UPDATE_PROFILE_API API RESPONSE............", response)
+      const response = await apiConnector("PUT", UPDATE_PROFILE_API, formData)
 
-      if (!response.data.success) {
-        throw new Error(response.data.message)
+      const updatedUser = response?.data?.updatedUserDetails
+      if (!response?.data?.success || !updatedUser) {
+        throw new Error(response?.data?.message || "Invalid profile response")
       }
-      const userImage = response.data.updatedUserDetails.image
-        ? response.data.updatedUserDetails.image
-        : `https://api.dicebear.com/5.x/initials/svg?seed=${response.data.updatedUserDetails.firstName} ${response.data.updatedUserDetails.lastName}`
-      dispatch(
-        setUser({ ...response.data.updatedUserDetails, image: userImage })
-      )
+      dispatch(setUser(withFallbackImage(updatedUser)))
       toast.success("Profile Updated Successfully")
+      return true
     } catch (error) {
-      console.log("UPDATE_PROFILE_API API ERROR............", error)
-      toast.error("Could Not Update Profile")
+      toast.error(getErrorMessage(error, "Could not update profile"))
+      return false
+    } finally {
+      toast.dismiss(toastId)
     }
-    toast.dismiss(toastId)
   }
 }
 
-export async function changePassword(token, formData) {
+export async function changePassword(_token, formData) {
   const toastId = toast.loading("Loading...")
   try {
-    const response = await apiConnector("POST", CHANGE_PASSWORD_API, formData, {
-      Authorization: `Bearer ${token}`,
-    })
-    console.log("CHANGE_PASSWORD_API API RESPONSE............", response)
+    const response = await apiConnector("POST", CHANGE_PASSWORD_API, formData)
 
-    if (!response.data.success) {
-      throw new Error(response.data.message)
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Password change failed")
     }
     toast.success("Password Changed Successfully")
+    return true
   } catch (error) {
-    console.log("CHANGE_PASSWORD_API API ERROR............", error)
-    toast.error(error.response.data.message)
+    toast.error(getErrorMessage(error, "Could not change password"))
+    return false
+  } finally {
+    toast.dismiss(toastId)
   }
-  toast.dismiss(toastId)
 }
 
-export function deleteProfile(token, navigate) {
-  return async (dispatch) => {
+export function deleteProfile(_token, navigate, confirmation) {
+  return async (dispatch, getState) => {
     const toastId = toast.loading("Loading...")
     try {
-      const response = await apiConnector("DELETE", DELETE_PROFILE_API, null, {
-        Authorization: `Bearer ${token}`,
-      })
-      console.log("DELETE_PROFILE_API API RESPONSE............", response)
+      const response = await apiConnector(
+        "DELETE",
+        DELETE_PROFILE_API,
+        confirmation
+      )
 
-      if (!response.data.success) {
-        throw new Error(response.data.message)
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message || "Account deletion failed")
       }
       toast.success("Profile Deleted Successfully")
-      dispatch(logout(navigate))
+      await dispatch(logout(navigate))
+      return true
     } catch (error) {
-      console.log("DELETE_PROFILE_API API ERROR............", error)
-      toast.error("Could Not Delete Profile")
+      if (error?.response?.data?.code === "ACCOUNT_DELETION_PENDING") {
+        const user = getState().profile.user
+        if (user) dispatch(setUser({ ...user, deletionPending: true }))
+      }
+      toast.error(getErrorMessage(error, "Could not delete profile"))
+      return false
+    } finally {
+      toast.dismiss(toastId)
     }
-    toast.dismiss(toastId)
   }
 }

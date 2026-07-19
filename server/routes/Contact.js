@@ -1,7 +1,13 @@
 const express = require("express")
-const router = express.Router()
-const { contactUsController } = require("../controllers/ContactUs")
 
-router.post("/contact", contactUsController)
+const { contactUsController } = require("../controllers/ContactUs")
+const {
+  contactIdentityLimiter,
+  contactIpLimiter,
+} = require("../middleware/rateLimiters")
+
+const router = express.Router()
+
+router.post("/contact", contactIpLimiter, contactIdentityLimiter, contactUsController)
 
 module.exports = router

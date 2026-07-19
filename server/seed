@@ -1,0 +1,276 @@
+require("dotenv").config({ quiet: true })
+
+const bcrypt = require("bcryptjs")
+const mongoose = require("mongoose")
+
+const Category = require("./models/Category")
+const Course = require("./models/Course")
+const Profile = require("./models/Profile")
+const RatingAndReview = require("./models/RatingandReview")
+const Section = require("./models/Section")
+const SubSection = require("./models/Subsection")
+const User = require("./models/User")
+const {
+  createPolicyAcceptance,
+  hasCurrentPolicyAcceptance,
+} = require("./utils/policyAcceptance")
+
+const DEMO_VIDEO_URL =
+  "https://res.cloudinary.com/demo/video/upload/v1692721302/samples/sea-turtle.mp4"
+
+const makeThumbnail = (title, accent) => {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+      <rect width="1200" height="675" fill="#161D29" />
+      <circle cx="1020" cy="100" r="220" fill="${accent}" opacity="0.22" />
+      <circle cx="150" cy="620" r="250" fill="${accent}" opacity="0.14" />
+      <text x="80" y="310" fill="#F1F2FF" font-family="Arial, sans-serif" font-size="62" font-weight="700">${title}</text>
+      <text x="82" y="380" fill="${accent}" font-family="Arial, sans-serif" font-size="30">StudyNotion demo course</text>
+    </svg>`
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+}
+
+const demoCourses = [
+  {
+    category: "Web Development",
+    categoryDescription:
+      "Build accessible, responsive websites with modern web technologies.",
+    courseName: "Foundations of Web Development",
+    courseDescription:
+      "Learn HTML, CSS, JavaScript, and the foundations of modern frontend development.",
+    whatYouWillLearn:
+      "Create responsive pages, write clean JavaScript, and understand how web applications fit together.",
+    price: 1499,
+    tag: ["HTML", "CSS", "JavaScript"],
+    accent: "#FFD60A",
+  },
+  {
+    category: "Data Science",
+    categoryDescription:
+      "Use Python and data tools to turn raw information into useful insights.",
+    courseName: "Python for Data Science",
+    courseDescription:
+      "A practical introduction to Python, data analysis, and visualization.",
+    whatYouWillLearn:
+      "Work with Python data structures, analyze datasets, and communicate findings with visualizations.",
+    price: 1799,
+    tag: ["Python", "Data Analysis"],
+    accent: "#47A5C5",
+  },
+  {
+    category: "Mobile Development",
+    categoryDescription:
+      "Create cross-platform mobile experiences with JavaScript and React.",
+    courseName: "React Native Essentials",
+    courseDescription:
+      "Build your first cross-platform mobile application with React Native.",
+    whatYouWillLearn:
+      "Design mobile interfaces, manage application state, and structure a maintainable React Native project.",
+    price: 1999,
+    tag: ["React Native", "Mobile"],
+    accent: "#06D6A0",
+  },
+]
+
+const createDemoUser = async ({
+  firstName,
+  email,
+  password,
+  accountType,
+  instructorReviewedBy,
+}) => {
+  const existingUser = await User.findOne({ email }).select("+policyAcceptances")
+  const passwordHash = await bcrypt.hash(password, 10)
+  const approvalFields =
+    accountType === "Instructor"
+      ? {
+          approved: true,
+          instructorApprovalStatus: "Approved",
+          instructorReviewedAt: new Date(),
+          instructorReviewedBy,
+          instructorReviewNote: "Approved by the trusted local demo seed",
+        }
+      : {
+          approved: true,
+          instructorApprovalStatus: "NotApplicable",
+        }
+
+  if (existingUser) {
+    const update = {
+      $set: {
+        firstName,
+        lastName: "Demo",
+        password: passwordHash,
+        authProviders: ["local"],
+        accountType,
+        active: true,
+        ...approvalFields,
+      },
+    }
+    if (!hasCurrentPolicyAcceptance(existingUser)) {
+      update.$push = {
+        policyAcceptances: createPolicyAcceptance("local_seed"),
+      }
+    }
+    await User.updateOne(
+      { _id: existingUser._id },
+      update
+    )
+    return User.findById(existingUser._id)
+  }
+
+  const profile = await Profile.create({
+    about: `${accountType} demo account for local development`,
+  })
+
+  return User.create({
+    firstName,
+    lastName: "Demo",
+    email,
+    password: passwordHash,
+    authProviders: ["local"],
+    accountType,
+    active: true,
+    ...approvalFields,
+    additionalDetails: profile._id,
+    image: "",
+    courses: [],
+    policyAcceptances: [createPolicyAcceptance("local_seed")],
+  })
+}
+
+const seed = async () => {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Demo seed data is disabled in production")
+  }
+
+  const mongoUrl = process.env.MONGODB_URI || process.env.MONGODB_URL
+  if (!mongoUrl) {
+    throw new Error("MONGODB_URI is required to seed the local database")
+  }
+
+  await mongoose.connect(mongoUrl)
+
+  const admin = await createDemoUser({
+    firstName: "Admin",
+    email: "admin@studynotion.local",
+    password: "Admin@123",
+    accountType: "Admin",
+  })
+  const instructor = await createDemoUser({
+    firstName: "Instructor",
+    email: "instructor@studynotion.local",
+    password: "Instructor@123",
+    accountType: "Instructor",
+    instructorReviewedBy: admin._id,
+  })
+  const student = await createDemoUser({
+    firstName: "Student",
+    email: "student@studynotion.local",
+    password: "Student@123",
+    accountType: "Student",
+  })
+
+  const courseIds = []
+  for (const demoCourse of demoCourses) {
+    const category = await Category.findOneAndUpdate(
+      { name: demoCourse.category },
+      { $set: { description: demoCourse.categoryDescription } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+
+    const course = await Course.findOneAndUpdate(
+      { courseName: demoCourse.courseName },
+      {
+        $set: {
+          courseDescription: demoCourse.courseDescription,
+          instructor: instructor._id,
+          whatYouWillLearn: demoCourse.whatYouWillLearn,
+          price: demoCourse.price,
+          tag: demoCourse.tag,
+          category: category._id,
+          thumbnail: makeThumbnail(demoCourse.courseName, demoCourse.accent),
+          status: "Published",
+          everPublishedAt: new Date(),
+          instructions: [
+            "Self-paced lessons",
+            "Lifetime access",
+            "Practice-focused curriculum",
+          ],
+        },
+        $setOnInsert: {
+          courseContent: [],
+          ratingAndReviews: [],
+          studentsEnroled: [student._id],
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+
+    const lesson = await SubSection.findOneAndUpdate(
+      { title: `${demoCourse.courseName} Overview` },
+      {
+        $set: {
+          description: `A short orientation for ${demoCourse.courseName}.`,
+          timeDuration: "60",
+          videoDeliveryType: "upload",
+          videoUrl: DEMO_VIDEO_URL,
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+    const section = await Section.findOneAndUpdate(
+      { sectionName: `${demoCourse.courseName} — Getting Started` },
+      { $addToSet: { subSection: lesson._id } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+
+    const review = await RatingAndReview.findOneAndUpdate(
+      { user: student._id, course: course._id },
+      {
+        $set: {
+          rating: 5,
+          review: `A clear and practical introduction to ${demoCourse.category.toLowerCase()}.`,
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+
+    await Course.updateOne(
+      { _id: course._id },
+      {
+        $addToSet: {
+          courseContent: section._id,
+          ratingAndReviews: review._id,
+          studentsEnroled: student._id,
+        },
+      }
+    )
+    await Category.updateOne(
+      { _id: category._id },
+      { $addToSet: { courses: course._id } }
+    )
+    courseIds.push(course._id)
+  }
+
+  await User.updateOne(
+    { _id: instructor._id },
+    { $addToSet: { courses: { $each: courseIds } } }
+  )
+  await User.updateOne(
+    { _id: student._id },
+    { $addToSet: { courses: { $each: courseIds } } }
+  )
+
+  console.log("StudyNotion local demo data is ready")
+}
+
+seed()
+  .catch((error) => {
+    console.error("Failed to seed local data:", error)
+    process.exitCode = 1
+  })
+  .finally(async () => {
+    await mongoose.disconnect()
+  })

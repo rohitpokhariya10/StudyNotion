@@ -1,19 +1,27 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
+import { toast } from "react-hot-toast"
 import { BiInfoCircle } from "react-icons/bi"
 import { HiOutlineGlobeAlt } from "react-icons/hi"
-import { ReactMarkdown } from "react-markdown/lib/react-markdown"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 
+import CheckoutPolicyAcknowledgement from "../components/Common/CheckoutPolicyAcknowledgement"
 import ConfirmationModal from "../components/Common/ConfirmationModal"
 import Footer from "../components/Common/Footer"
 import RatingStars from "../components/Common/RatingStars"
+import SafeMarkdown from "../components/Common/SafeMarkdown"
 import CourseAccordionBar from "../components/core/Course/CourseAccordionBar"
 import CourseDetailsCard from "../components/core/Course/CourseDetailsCard"
 import { formatDate } from "../services/formatDate"
 import { fetchCourseDetails } from "../services/operations/courseDetailsAPI"
-import { BuyCourse } from "../services/operations/studentFeaturesAPI"
+import {
+  BuyCourse,
+  fetchCheckoutConfig,
+} from "../services/operations/studentFeaturesAPI"
+import { addToCart } from "../slices/cartSlice"
+import { getAvatarSource, setInitialsAvatarOnError } from "../utils/avatar"
 import GetAvgRating from "../utils/avgRating"
+import { ACCOUNT_TYPE } from "../utils/constants"
 import Error from "./Error"
 
 function CourseDetails() {
@@ -31,28 +39,62 @@ function CourseDetails() {
   // Declear a state to save the course details
   const [response, setResponse] = useState(null)
   const [confirmationModal, setConfirmationModal] = useState(null)
+  const [checkoutPolicyAccepted, setCheckoutPolicyAccepted] = useState(false)
+  const [policyConfig, setPolicyConfig] = useState(null)
+  const [policyError, setPolicyError] = useState("")
+  const [policyLoading, setPolicyLoading] = useState(true)
+  const [policyReloadKey, setPolicyReloadKey] = useState(0)
   useEffect(() => {
+    let active = true
+
     // Calling fetchCourseDetails fucntion to fetch the details
     ;(async () => {
-      try {
-        const res = await fetchCourseDetails(courseId)
-        // console.log("course details res: ", res)
-        setResponse(res)
-      } catch (error) {
-        console.log("Could not fetch Course Details")
-      }
+      const result = await fetchCourseDetails(courseId)
+      if (active) setResponse(result)
     })()
+
+    return () => {
+      active = false
+    }
   }, [courseId])
+
+  useEffect(() => {
+    let active = true
+
+    fetchCheckoutConfig()
+      .then((config) => {
+        if (active) setPolicyConfig(config)
+      })
+      .catch((error) => {
+        if (!active) return
+        setPolicyConfig(null)
+        setPolicyError(error.message)
+      })
+      .finally(() => {
+        if (active) setPolicyLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [policyReloadKey])
+
+  const reloadPolicyConfig = () => {
+    setPolicyLoading(true)
+    setPolicyError("")
+    setPolicyConfig(null)
+    setCheckoutPolicyAccepted(false)
+    setPolicyReloadKey((current) => current + 1)
+  }
 
   // console.log("response: ", response)
 
-  // Calculating Avg Review count
-  const [avgReviewCount, setAvgReviewCount] = useState(0)
-  useEffect(() => {
-    const count = GetAvgRating(response?.data?.courseDetails.ratingAndReviews)
-    setAvgReviewCount(count)
-  }, [response])
-  // console.log("avgReviewCount: ", avgReviewCount)
+  const courseDetails = response?.data?.courseDetails
+  const avgReviewCount = GetAvgRating(courseDetails?.ratingAndReviews || [])
+  const totalNoOfLectures = (courseDetails?.courseContent || []).reduce(
+    (total, section) => total + (section?.subSection?.length || 0),
+    0
+  )
 
   // // Collapse all
   // const [collapse, setCollapse] = useState("")
@@ -66,16 +108,6 @@ function CourseDetails() {
     )
   }
 
-  // Total number of lectures
-  const [totalNoOfLectures, setTotalNoOfLectures] = useState(0)
-  useEffect(() => {
-    let lectures = 0
-    response?.data?.courseDetails?.courseContent?.forEach((sec) => {
-      lectures += sec.subSection.length || 0
-    })
-    setTotalNoOfLectures(lectures)
-  }, [response])
-
   if (loading || !response) {
     return (
       <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
@@ -83,12 +115,11 @@ function CourseDetails() {
       </div>
     )
   }
-  if (!response.success) {
+  if (!response.success || !courseDetails) {
     return <Error />
   }
 
   const {
-    _id: course_id,
     courseName,
     courseDescription,
     thumbnail,
@@ -97,13 +128,24 @@ function CourseDetails() {
     courseContent,
     ratingAndReviews,
     instructor,
-    studentsEnroled,
+    totalStudentsEnrolled,
     createdAt,
-  } = response.data?.courseDetails
+  } = courseDetails
 
   const handleBuyCourse = () => {
+    if (user?.accountType === ACCOUNT_TYPE.INSTRUCTOR) {
+      toast.error("Instructor accounts cannot purchase courses.")
+      return
+    }
     if (token) {
-      BuyCourse(token, [courseId], user, navigate, dispatch)
+      if (!checkoutPolicyAccepted || !policyConfig) {
+        toast.error("Review and accept the checkout policies before payment")
+        return
+      }
+      BuyCourse(token, [courseId], user, navigate, dispatch, {
+        ...policyConfig,
+        acknowledged: checkoutPolicyAccepted,
+      })
       return
     }
     setConfirmationModal({
@@ -115,6 +157,33 @@ function CourseDetails() {
       btn2Handler: () => setConfirmationModal(null),
     })
   }
+
+  const handleAddToCart = () => {
+    if (user?.accountType === ACCOUNT_TYPE.INSTRUCTOR) {
+      toast.error("Instructor accounts cannot purchase courses.")
+      return
+    }
+    if (token) {
+      dispatch(addToCart(courseDetails))
+      return
+    }
+    setConfirmationModal({
+      text1: "You are not logged in!",
+      text2: "Please login to add this course to your cart.",
+      btn1Text: "Login",
+      btn2Text: "Cancel",
+      btn1Handler: () => navigate("/login"),
+      btn2Handler: () => setConfirmationModal(null),
+    })
+  }
+
+  const isEnrolled = Boolean(
+    courseId &&
+    user?.courses?.some(
+      (enrolledCourse) =>
+        String(enrolledCourse?._id || enrolledCourse) === String(courseId)
+    )
+  )
 
   if (paymentLoading) {
     // console.log("payment loading")
@@ -129,7 +198,7 @@ function CourseDetails() {
     <>
       <div className={`relative w-full bg-richblack-800`}>
         {/* Hero Section */}
-        <div className="mx-auto box-content px-4 lg:w-[1260px] 2xl:relative ">
+        <div className="mx-auto box-content px-4 lg:w-[1260px] 2xl:relative">
           <div className="mx-auto grid min-h-[450px] max-w-maxContentTab justify-items-center py-8 lg:mx-0 lg:justify-items-start lg:py-0 xl:max-w-[810px]">
             <div className="relative block max-h-[30rem] lg:hidden">
               <div className="absolute bottom-0 left-0 h-full w-full shadow-[#161D29_0px_-64px_36px_-28px_inset]"></div>
@@ -152,7 +221,7 @@ function CourseDetails() {
                 <span className="text-yellow-25">{avgReviewCount}</span>
                 <RatingStars Review_Count={avgReviewCount} Star_Size={24} />
                 <span>{`(${ratingAndReviews.length} reviews)`}</span>
-                <span>{`${studentsEnroled.length} students enrolled`}</span>
+                <span>{`${totalStudentsEnrolled ?? 0} students enrolled`}</span>
               </div>
               <div>
                 <p className="">
@@ -174,18 +243,66 @@ function CourseDetails() {
               <p className="space-x-3 pb-4 text-3xl font-semibold text-richblack-5">
                 Rs. {price}
               </p>
-              <button className="yellowButton" onClick={handleBuyCourse}>
-                Buy Now
+              <button
+                className="yellowButton"
+                disabled={
+                  !isEnrolled &&
+                  (!checkoutPolicyAccepted || !policyConfig || policyLoading)
+                }
+                onClick={
+                  isEnrolled
+                    ? () => navigate("/dashboard/enrolled-courses")
+                    : handleBuyCourse
+                }
+              >
+                {isEnrolled ? "Go To Course" : "Buy Now"}
               </button>
-              <button className="blackButton">Add to Cart</button>
+              {!isEnrolled && (
+                <>
+                  <CheckoutPolicyAcknowledgement
+                    checked={checkoutPolicyAccepted}
+                    disabled={policyLoading}
+                    id="mobile-checkout-policy"
+                    onChange={setCheckoutPolicyAccepted}
+                    policyConfig={policyConfig}
+                  />
+                  {policyLoading && (
+                    <p className="text-xs text-richblack-300" role="status">
+                      Loading current checkout policies…
+                    </p>
+                  )}
+                  {policyError && (
+                    <div className="text-xs text-pink-100" role="alert">
+                      <p>{policyError}</p>
+                      <button
+                        type="button"
+                        className="mt-1 font-medium text-yellow-100 underline"
+                        onClick={reloadPolicyConfig}
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  )}
+                  <button className="blackButton" onClick={handleAddToCart}>
+                    Add to Cart
+                  </button>
+                </>
+              )}
             </div>
           </div>
           {/* Courses Card */}
-          <div className="right-[1rem] top-[60px] mx-auto hidden min-h-[600px] w-1/3 max-w-[410px] translate-y-24 md:translate-y-0 lg:absolute  lg:block">
+          <div className="right-[1rem] top-[60px] mx-auto hidden min-h-[600px] w-1/3 max-w-[410px] translate-y-24 md:translate-y-0 lg:absolute lg:block">
             <CourseDetailsCard
-              course={response?.data?.courseDetails}
-              setConfirmationModal={setConfirmationModal}
+              course={courseDetails}
+              isEnrolled={isEnrolled}
               handleBuyCourse={handleBuyCourse}
+              handleAddToCart={handleAddToCart}
+              checkoutPolicyAccepted={checkoutPolicyAccepted}
+              policyConfig={policyConfig}
+              policyError={policyError}
+              policyLoading={policyLoading}
+              reloadPolicyConfig={reloadPolicyConfig}
+              setCheckoutPolicyAccepted={setCheckoutPolicyAccepted}
             />
           </div>
         </div>
@@ -196,12 +313,12 @@ function CourseDetails() {
           <div className="my-8 border border-richblack-600 p-8">
             <p className="text-3xl font-semibold">What you'll learn</p>
             <div className="mt-5">
-              <ReactMarkdown>{whatYouWillLearn}</ReactMarkdown>
+              <SafeMarkdown>{whatYouWillLearn}</SafeMarkdown>
             </div>
           </div>
 
           {/* Course Content Section */}
-          <div className="max-w-[830px] ">
+          <div className="max-w-[830px]">
             <div className="flex flex-col gap-3">
               <p className="text-[28px] font-semibold">Course Content</p>
               <div className="flex flex-wrap justify-between gap-2">
@@ -242,12 +359,11 @@ function CourseDetails() {
               <p className="text-[28px] font-semibold">Author</p>
               <div className="flex items-center gap-4 py-4">
                 <img
-                  src={
-                    instructor.image
-                      ? instructor.image
-                      : `https://api.dicebear.com/5.x/initials/svg?seed=${instructor.firstName} ${instructor.lastName}`
-                  }
+                  src={getAvatarSource(instructor)}
                   alt="Author"
+                  onError={(event) =>
+                    setInitialsAvatarOnError(event, instructor)
+                  }
                   className="h-14 w-14 rounded-full object-cover"
                 />
                 <p className="text-lg">{`${instructor.firstName} ${instructor.lastName}`}</p>

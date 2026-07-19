@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 import ProgressBar from "@ramonak/react-progress-bar"
-import { BiDotsVerticalRounded } from "react-icons/bi"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 
 import { getUserEnrolledCourses } from "../../../services/operations/profileAPI"
+import { getFirstLessonPath } from "../../../utils/courseNavigation"
 
 export default function EnrolledCourses() {
   const { token } = useSelector((state) => state.auth)
@@ -13,24 +13,24 @@ export default function EnrolledCourses() {
   const [enrolledCourses, setEnrolledCourses] = useState(null)
 
   useEffect(() => {
+    let active = true
+
     ;(async () => {
       try {
-        const res = await getUserEnrolledCourses(token) // Getting all the published and the drafted courses
+        const res = await getUserEnrolledCourses(token)
 
-        // Filtering the published course out
-        const filterPublishCourse = res.filter((ele) => ele.status !== "Draft")
-        // console.log(
-        //   "Viewing all the couse that is Published",
-        //   filterPublishCourse
-        // )
-
-        setEnrolledCourses(filterPublishCourse)
-      } catch (error) {
-        console.log("Could not fetch enrolled courses.")
+        // Enrolment is an entitlement. Keep purchased courses visible even if
+        // the instructor later archives or drafts the catalog listing.
+        if (active) setEnrolledCourses(Array.isArray(res) ? res : [])
+      } catch {
+        if (active) setEnrolledCourses([])
       }
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+
+    return () => {
+      active = false
+    }
+  }, [token])
 
   return (
     <>
@@ -42,7 +42,6 @@ export default function EnrolledCourses() {
       ) : !enrolledCourses.length ? (
         <p className="grid h-[10vh] w-full place-content-center text-richblack-5">
           You have not enrolled in any course yet.
-          {/* TODO: Modify this Empty State */}
         </p>
       ) : (
         <div className="my-8 text-richblack-5">
@@ -53,46 +52,68 @@ export default function EnrolledCourses() {
             <p className="flex-1 px-2 py-3">Progress</p>
           </div>
           {/* Course Names */}
-          {enrolledCourses.map((course, i, arr) => (
-            <div
-              className={`flex items-center border border-richblack-700 ${
-                i === arr.length - 1 ? "rounded-b-lg" : "rounded-none"
-              }`}
-              key={i}
-            >
+          {enrolledCourses.map((course, i, arr) => {
+            const lessonPath = getFirstLessonPath(course)
+            const description = String(course.courseDescription || "")
+
+            return (
               <div
-                className="flex w-[45%] cursor-pointer items-center gap-4 px-5 py-3"
-                onClick={() => {
-                  navigate(
-                    `/view-course/${course?._id}/section/${course.courseContent?.[0]?._id}/sub-section/${course.courseContent?.[0]?.subSection?.[0]?._id}`
-                  )
-                }}
+                className={`flex items-center border border-richblack-700 ${
+                  i === arr.length - 1 ? "rounded-b-lg" : "rounded-none"
+                }`}
+                key={course._id || i}
               >
-                <img
-                  src={course.thumbnail}
-                  alt="course_img"
-                  className="h-14 w-14 rounded-lg object-cover"
-                />
-                <div className="flex max-w-xs flex-col gap-2">
-                  <p className="font-semibold">{course.courseName}</p>
-                  <p className="text-xs text-richblack-300">
-                    {course.courseDescription.length > 50
-                      ? `${course.courseDescription.slice(0, 50)}...`
-                      : course.courseDescription}
-                  </p>
+                <button
+                  type="button"
+                  className="flex w-[45%] items-center gap-4 px-5 py-3 text-left enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+                  disabled={!lessonPath}
+                  onClick={() => lessonPath && navigate(lessonPath)}
+                  aria-label={
+                    lessonPath
+                      ? `Continue ${course.courseName}`
+                      : `${course.courseName} content coming soon`
+                  }
+                >
+                  <img
+                    src={course.thumbnail}
+                    alt=""
+                    className="h-14 w-14 rounded-lg object-cover"
+                  />
+                  <span className="flex max-w-xs flex-col gap-2">
+                    <span className="font-semibold">{course.courseName}</span>
+                    {course.status && course.status !== "Published" && (
+                      <span className="w-fit rounded-full bg-richblack-700 px-2 py-1 text-xs text-richblack-200">
+                        {course.status}
+                      </span>
+                    )}
+                    {description && (
+                      <span className="text-xs text-richblack-300">
+                        {description.length > 50
+                          ? `${description.slice(0, 50)}...`
+                          : description}
+                      </span>
+                    )}
+                    {!lessonPath && (
+                      <span className="w-fit rounded-full bg-richblack-700 px-2 py-1 text-xs font-medium text-yellow-50">
+                        Content coming soon
+                      </span>
+                    )}
+                  </span>
+                </button>
+                <div className="w-1/4 px-2 py-3">
+                  {course?.totalDuration || "—"}
+                </div>
+                <div className="flex w-1/5 flex-col gap-2 px-2 py-3">
+                  <p>Progress: {course.progressPercentage || 0}%</p>
+                  <ProgressBar
+                    completed={course.progressPercentage || 0}
+                    height="8px"
+                    isLabelVisible={false}
+                  />
                 </div>
               </div>
-              <div className="w-1/4 px-2 py-3">{course?.totalDuration}</div>
-              <div className="flex w-1/5 flex-col gap-2 px-2 py-3">
-                <p>Progress: {course.progressPercentage || 0}%</p>
-                <ProgressBar
-                  completed={course.progressPercentage || 0}
-                  height="8px"
-                  isLabelVisible={false}
-                />
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </>

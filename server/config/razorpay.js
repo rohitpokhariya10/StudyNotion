@@ -1,17 +1,27 @@
-const Razorpay = require("razorpay");
+const Razorpay = require("razorpay")
 
-// Add debugging
-console.log("Environment check:");
-console.log("RAZORPAY_KEY_ID:", process.env.RAZORPAY_KEY_ID ? "✓ Loaded" : "✗ Missing");
-console.log("RAZORPAY_SECRET:", process.env.RAZORPAY_SECRET ? "✓ Loaded" : "✗ Missing");
+const env = require("./env")
 
-if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
-  throw new Error("Razorpay credentials are missing. Check your .env file.");
+const hasCredentials =
+  process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_SECRET
+
+if (!hasCredentials) {
+  console.warn(
+    "Razorpay payments are disabled because credentials are not configured"
+  )
 }
 
-exports.instance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,   
-  key_secret: process.env.RAZORPAY_SECRET,
-});
+const instance = hasCredentials
+  ? new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_SECRET,
+    })
+  : null
 
-console.log("✅ Razorpay instance initialized successfully");
+// Razorpay's SDK leaves Axios at its default timeout of zero. Bound the
+// underlying transport so stalled sockets are actively aborted.
+if (instance?.api?.rq?.defaults) {
+  instance.api.rq.defaults.timeout = env.razorpayTimeoutMs
+}
+
+exports.instance = instance

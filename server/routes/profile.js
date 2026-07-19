@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Middlewares
 const { auth, isInstructor } = require("../middleware/auth");
+const { uploadMiddleware } = require("../middleware/upload");
 
 // Controllers
 const {
@@ -31,7 +32,7 @@ router.get("/getUserDetails", auth, getAllUserDetails);
 router.get("/getEnrolledCourses", auth, getEnrolledCourses);
 
 // Update Profile Picture
-router.put("/updateDisplayPicture", auth, updateDisplayPicture);
+router.put("/updateDisplayPicture", auth, uploadMiddleware, updateDisplayPicture);
 
 // Instructor Dashboard (only for Instructors)
 router.get("/instructorDashboard", auth, isInstructor, instructorDashboard);

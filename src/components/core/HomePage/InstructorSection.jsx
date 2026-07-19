@@ -1,4 +1,3 @@
-import React from 'react'
 import CTAButton from "../../../components/core/HomePage/Button";
 import { FaArrowRight } from "react-icons/fa";
 import Instructor from "../../../assets/Images/Instructor.png";
@@ -22,9 +21,8 @@ const InstructorSection = () => {
             </h1>
 
             <p className="font-medium text-[16px] text-justify w-[90%] text-richblack-300">
-              Instructors from around the world teach millions of students on
-              StudyNotion. We provide the tools and skills to teach what you
-              love.
+              Build and publish structured courses with tools for curriculum,
+              protected video lessons, learner progress, and verified payments.
             </p>
 
             <div className="w-fit">

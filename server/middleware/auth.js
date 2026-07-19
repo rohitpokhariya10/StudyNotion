@@ -1,144 +1,134 @@
-// middleware/auth.js
+const User = require("../models/User")
+const { readSessionToken, verifySessionToken } = require("../utils/auth")
+const { hasCurrentPolicyAcceptance } = require("../utils/policyAcceptance")
 
-const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
-const User = require("../models/User");
+const POLICY_PENDING_ALLOWED_PATHS = new Set([
+  "/api/v1/auth/accept-policies",
+  "/api/v1/profile/deleteProfile",
+  "/api/v1/profile/getUserDetails",
+])
 
-// Load env variables
-dotenv.config();
+const DELETION_PENDING_ALLOWED_PATHS = new Set([
+  "/api/v1/profile/deleteProfile",
+  "/api/v1/profile/getUserDetails",
+])
 
-/**
- * Authentication Middleware
- */
 exports.auth = async (req, res, next) => {
+  const token = readSessionToken(req)
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Token Missing" })
+  }
+
   try {
-    console.log(">>> [AUTH] middleware hit:", req.method, req.originalUrl);
+    const decoded = verifySessionToken(token)
 
-    // Tokens from cookie/body/header
-    const authHeader = req.header("Authorization");
-    const cookieToken = req.cookies?.token;
-    const bodyToken = req.body?.token;
-
-    let token = null;
-
-    if (cookieToken) {
-      token = cookieToken;
-    } else if (bodyToken) {
-      token = bodyToken;
-    } else if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
-      token = authHeader.slice(7).trim(); // remove "Bearer "
+    if (
+      !decoded ||
+      typeof decoded !== "object" ||
+      !decoded.id ||
+      !User.db.base.isValidObjectId(decoded.id)
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Token is invalid or expired",
+      })
     }
 
-    if (!token) {
-      console.warn(">>> [AUTH] Token missing");
-      return res.status(401).json({ success: false, message: "Token Missing" });
+    const user = await User.findById(decoded.id).select(
+      "_id email accountType active approved sessionVersion +deletionPending +policyAcceptances"
+    )
+    const tokenSessionVersion = Number.isInteger(decoded.sessionVersion)
+      ? decoded.sessionVersion
+      : 0
+    const currentSessionVersion = Number.isInteger(user?.sessionVersion)
+      ? user.sessionVersion
+      : 0
+
+    if (
+      !user ||
+      !user.active ||
+      !user.approved ||
+      tokenSessionVersion !== currentSessionVersion
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "This session is no longer authorized",
+      })
     }
 
-    // Verify token
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(">>> [AUTH] Token verified for user:", decoded?.email || decoded?.id);
-    } catch (err) {
-      console.warn(">>> [AUTH] Token verification failed:", err.message);
-      return res.status(401).json({ success: false, message: "Token is invalid or expired" });
+    const requiresPolicyAcceptance = !hasCurrentPolicyAcceptance(user)
+    req.user = {
+      id: user._id.toString(),
+      email: user.email,
+      accountType: user.accountType,
+      deletionPending: user.deletionPending === true,
+      requiresPolicyAcceptance,
     }
+    res.setHeader("Cache-Control", "private, no-store, max-age=0")
+    res.setHeader("Pragma", "no-cache")
 
-    // Attach user to req
-    req.user = decoded;
-
-    next();
+    const requestPath = String(req.originalUrl || "").split("?", 1)[0]
+    if (
+      user.deletionPending === true &&
+      !DELETION_PENDING_ALLOWED_PATHS.has(requestPath)
+    ) {
+      return res.status(423).json({
+        success: false,
+        code: "ACCOUNT_DELETION_PENDING",
+        message:
+          "Account deletion is pending; retry deletion or contact support",
+      })
+    }
+    if (
+      requiresPolicyAcceptance &&
+      !POLICY_PENDING_ALLOWED_PATHS.has(requestPath)
+    ) {
+      return res.status(428).json({
+        success: false,
+        code: "POLICY_ACCEPTANCE_REQUIRED",
+        message: "Review and accept the current Terms and Privacy Notice to continue",
+      })
+    }
+    return next()
   } catch (error) {
-    console.error(">>> [AUTH] Unexpected error:", error);
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError" ||
+      error.name === "NotBeforeError"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Token is invalid or expired",
+      })
+    }
+
+    console.error("Authentication failed:", error.message)
     return res.status(500).json({
       success: false,
-      message: "Something went wrong while validating the token",
-    });
+      message: "Something went wrong while validating the session",
+    })
   }
-};
+}
 
-/**
- * Student Role Middleware
- */
-exports.isStudent = async (req, res, next) => {
-  try {
-    if (!req.user || !req.user.email) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
-
-    const userDetails = await User.findOne({ email: req.user.email });
-    if (!userDetails) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-
-    if (userDetails.accountType !== "Student") {
-      return res.status(403).json({
-        success: false,
-        message: "This is a Protected Route for Students",
-      });
-    }
-
-    next();
-  } catch (error) {
-    console.error(">>> [isStudent] error:", error);
-    return res.status(500).json({ success: false, message: "User Role Can't be Verified" });
+const requireAccountType = (accountType, message) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: "Unauthorized" })
   }
-};
-
-/**
- * Admin Role Middleware
- */
-exports.isAdmin = async (req, res, next) => {
-  try {
-    if (!req.user || !req.user.email) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
-
-    const userDetails = await User.findOne({ email: req.user.email });
-    if (!userDetails) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-
-    if (userDetails.accountType !== "Admin") {
-      return res.status(403).json({
-        success: false,
-        message: "This is a Protected Route for Admins",
-      });
-    }
-
-    next();
-  } catch (error) {
-    console.error(">>> [isAdmin] error:", error);
-    return res.status(500).json({ success: false, message: "User Role Can't be Verified" });
+  if (req.user.accountType !== accountType) {
+    return res.status(403).json({ success: false, message })
   }
-};
+  return next()
+}
 
-/**
- * Instructor Role Middleware
- */
-exports.isInstructor = async (req, res, next) => {
-  try {
-    if (!req.user || !req.user.email) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
-
-    const userDetails = await User.findOne({ email: req.user.email });
-    if (!userDetails) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-
-    console.log(">>> [isInstructor] user:", userDetails.email, "role:", userDetails.accountType);
-
-    if (userDetails.accountType !== "Instructor") {
-      return res.status(403).json({
-        success: false,
-        message: "This is a Protected Route for Instructors",
-      });
-    }
-
-    next();
-  } catch (error) {
-    console.error(">>> [isInstructor] error:", error);
-    return res.status(500).json({ success: false, message: "User Role Can't be Verified" });
-  }
-};
+exports.isStudent = requireAccountType(
+  "Student",
+  "This is a Protected Route for Students"
+)
+exports.isInstructor = requireAccountType(
+  "Instructor",
+  "This is a Protected Route for Instructors"
+)
+exports.isAdmin = requireAccountType(
+  "Admin",
+  "This is a Protected Route for Admins"
+)

@@ -1,34 +1,41 @@
-const nodemailer = require("nodemailer");
+const crypto = require("crypto")
 
-const mailSender = async (email, title, body) => {
-  try {
-    console.log("📧 Sending mail...");
-    console.log("To:", email);
-    console.log("Using MAIL_USER:", process.env.MAIL_USER);
-
-    let transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST || "smtp.gmail.com", // fallback
-      port: 587, // Gmail ke liye recommended port
-      secure: false, // true for port 465, false for 587
-      auth: {
-        user: process.env.MAIL_USER, // Gmail address
-        pass: process.env.MAIL_PASS, // App Password
-      },
-    });
-
-    let info = await transporter.sendMail({
-      from: `"StudyNotion | CodeHelp" <${process.env.MAIL_USER}>`, // sender
-      to: email, // receiver
-      subject: title, // subject line
-      html: body, // email body in HTML
-    });
-
-    console.log("✅ Mail sent successfully:", info.response);
-    return info;
-  } catch (error) {
-    console.error("❌ Mail send failed:", error.message);
-    return error.message;
+const mailSender = async (email, title, body, options = {}) => {
+  if (!process.env.RESEND_API_KEY) {
+    if (
+      process.env.NODE_ENV !== "production" &&
+      process.env.ALLOW_DEV_OTP === "true"
+    ) {
+      return { response: "Email delivery disabled in local development" }
+    }
+    throw new Error("Transactional email is not configured")
   }
-};
 
-module.exports = mailSender;
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": crypto.randomUUID(),
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM,
+      to: [email],
+      subject: title,
+      html: body,
+      ...(options.replyTo || process.env.EMAIL_REPLY_TO
+        ? { reply_to: options.replyTo || process.env.EMAIL_REPLY_TO }
+        : {}),
+    }),
+    signal: AbortSignal.timeout(10000),
+  })
+
+  const result = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    throw new Error(result.message || "Transactional email delivery failed")
+  }
+
+  return { response: result.id }
+}
+
+module.exports = mailSender

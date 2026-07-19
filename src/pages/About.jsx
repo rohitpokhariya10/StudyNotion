@@ -1,5 +1,3 @@
-import React from "react"
-
 import FoundingStory from "../assets/Images/FoundingStory.png"
 import BannerImage1 from "../assets/Images/aboutus1.webp"
 import BannerImage2 from "../assets/Images/aboutus2.webp"
@@ -24,7 +22,8 @@ const About = () => {
               Studynotion is at the forefront of driving innovation in online
               education. We're passionate about creating a brighter future by
               offering cutting-edge courses, leveraging emerging technologies,
-              and nurturing a vibrant learning community.
+              and giving learners a clear, self-paced path through practical
+              course material.
             </p>
           </header>
           <div className="sm:h-[70px] lg:h-[150px]"></div>
@@ -95,7 +94,9 @@ const About = () => {
                 Our Mission
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
-                Our mission goes beyond just delivering courses online. We wanted to create a vibrant community of learners, where individuals can connect, collaborate, and learn from one another. We believe that knowledge thrives in an environment of sharing and dialogue, and we foster this spirit of collaboration through forums, live sessions, and networking opportunities.
+                Our mission goes beyond hosting videos. We give learners a
+                structured curriculum, secure access to purchased lessons,
+                progress tracking, and a way to share verified course feedback.
               </p>
             </div>
           </div>

@@ -3,9 +3,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     fontFamily: {
-      inter: ["Inter", "sans-serif"],
-      "edu-sa": ["Edu SA Beginner", "cursive"],
-      mono: ["Roboto Mono", "monospace"],
+      inter: ["ui-sans-serif", "system-ui", "sans-serif"],
+      "edu-sa": ["Georgia", "ui-serif", "serif"],
+      mono: ["ui-monospace", "SFMono-Regular", "monospace"],
     },
     colors: {
       white: "#fff",

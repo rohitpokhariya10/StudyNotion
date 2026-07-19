@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">StudyNotion</title>
+  <rect width="512" height="512" rx="112" fill="#FFD60A"/>
+  <circle cx="256" cy="256" r="152" fill="#000814"/>
+  <text x="256" y="276" fill="#FFD60A" font-family="Arial, sans-serif" font-size="184" font-weight="700" text-anchor="middle" dominant-baseline="middle">S</text>
+</svg>

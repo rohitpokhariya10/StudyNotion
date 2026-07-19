@@ -4,21 +4,27 @@ import { Pie } from "react-chartjs-2"
 
 Chart.register(...registerables)
 
+const CHART_COLORS = [
+  "#facc15",
+  "#06b6d4",
+  "#8b5cf6",
+  "#22c55e",
+  "#f97316",
+  "#ec4899",
+  "#3b82f6",
+  "#ef4444",
+]
+
+const getChartColors = (count) =>
+  Array.from({ length: count }, (_, index) =>
+    CHART_COLORS[index % CHART_COLORS.length]
+  )
+
 export default function InstructorChart({ courses }) {
   // State to keep track of the currently selected chart
   const [currChart, setCurrChart] = useState("students")
 
-  // Function to generate random colors for the chart
-  const generateRandomColors = (numColors) => {
-    const colors = []
-    for (let i = 0; i < numColors; i++) {
-      const color = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(
-        Math.random() * 256
-      )}, ${Math.floor(Math.random() * 256)})`
-      colors.push(color)
-    }
-    return colors
-  }
+  const chartColors = getChartColors(courses.length)
 
   // Data for the chart displaying student information
   const chartDataStudents = {
@@ -26,7 +32,7 @@ export default function InstructorChart({ courses }) {
     datasets: [
       {
         data: courses.map((course) => course.totalStudentsEnrolled),
-        backgroundColor: generateRandomColors(courses.length),
+        backgroundColor: chartColors,
       },
     ],
   }
@@ -37,7 +43,7 @@ export default function InstructorChart({ courses }) {
     datasets: [
       {
         data: courses.map((course) => course.totalAmountGenerated),
-        backgroundColor: generateRandomColors(courses.length),
+        backgroundColor: chartColors,
       },
     ],
   }

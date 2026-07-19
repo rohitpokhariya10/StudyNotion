@@ -13,18 +13,15 @@ export default function ChipInput({
   register,
   errors,
   setValue,
-  getValues,
 }) {
   const { editCourse, course } = useSelector((state) => state.course)
 
   // Setting up state for managing chips array
-  const [chips, setChips] = useState([])
+  const [chips, setChips] = useState(() =>
+    editCourse && Array.isArray(course?.tag) ? course.tag : []
+  )
 
   useEffect(() => {
-    if (editCourse) {
-      // console.log(course)
-      setChips(course?.tag)
-    }
     register(name, { required: true, validate: (value) => value.length > 0 })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

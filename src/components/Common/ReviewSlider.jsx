@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from "react"
-import ReactStars from "react-rating-stars-component"
+import { useEffect, useState } from "react"
 // Swiper
 import { Swiper, SwiperSlide } from "swiper/react"
 import "swiper/css"
 import "swiper/css/free-mode"
 import "swiper/css/pagination"
 import "../../App.css"
-// Icons
-import { FaStar } from "react-icons/fa"
 // Swiper modules
-import { Autoplay, FreeMode, Pagination } from "swiper"
+import { Autoplay, FreeMode, Pagination } from "swiper/modules"
 // API
 import { apiConnector } from "../../services/apiConnector"
 import { ratingsEndpoints } from "../../services/apis"
+import {
+  getAvatarSource,
+  setInitialsAvatarOnError,
+} from "../../utils/avatar"
+import RatingStars from "./RatingStars"
 
 function ReviewSlider() {
   const [reviews, setReviews] = useState([])
@@ -30,8 +32,7 @@ function ReviewSlider() {
         } else {
           setReviews([])
         }
-      } catch (err) {
-        console.error("Failed to fetch reviews:", err)
+      } catch {
         setReviews([])
       }
     })()
@@ -78,11 +79,7 @@ function ReviewSlider() {
               const user = review?.user || {}
               const course = review?.course || {}
               const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Anonymous"
-              const imgSrc =
-                user.image ||
-                `https://api.dicebear.com/5.x/initials/svg?seed=${encodeURIComponent(
-                  (user.firstName || "A") + " " + (user.lastName || "")
-                )}`
+              const imgSrc = getAvatarSource(user)
 
               return (
                 <SwiperSlide key={review?._id || i}>
@@ -91,13 +88,9 @@ function ReviewSlider() {
                       <img
                         src={imgSrc}
                         alt={name}
-                        onError={(e) => {
-                          // fallback to initials avatar if image fails
-                          e.currentTarget.onerror = null
-                          e.currentTarget.src = `https://api.dicebear.com/5.x/initials/svg?seed=${encodeURIComponent(
-                            name || "User"
-                          )}`
-                        }}
+                        onError={(event) =>
+                          setInitialsAvatarOnError(event, user)
+                        }
                         className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
                       />
                       <div className="flex flex-col">
@@ -117,16 +110,9 @@ function ReviewSlider() {
                         {typeof review?.rating === "number" ? review.rating.toFixed(1) : "0.0"}
                       </h4>
 
-                      <ReactStars
-                        count={5}
-                        value={Number(review?.rating) || 0}
-                        size={20}
-                        edit={false}
-                        activeColor="#ffd700"
-                        emptyIcon={<FaStar />}
-                        fullIcon={<FaStar />}
-                        isHalf={true}
-                        aria-label={`Rating: ${review?.rating || 0} out of 5`}
+                      <RatingStars
+                        Review_Count={Number(review?.rating) || 0}
+                        Star_Size={20}
                       />
                     </div>
                   </div>

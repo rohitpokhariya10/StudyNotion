@@ -1,4 +1,3 @@
-import React from 'react'
 import HighlightText from './HighlightText'
 import CTAButton from "../../../components/core/HomePage/Button";
 import Know_your_progress from "../../../assets/Images/Know_your_progress.png";

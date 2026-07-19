@@ -1,9 +1,22 @@
 import { useEffect, useRef, useState } from "react"
 import { FiUpload } from "react-icons/fi"
+import { toast } from "react-hot-toast"
 import { useDispatch, useSelector } from "react-redux"
 
 import { updateDisplayPicture } from "../../../../services/operations/SettingsAPI"
+import {
+  getAvatarSource,
+  setInitialsAvatarOnError,
+} from "../../../../utils/avatar"
 import IconBtn from "../../../Common/IconBtn"
+
+const ALLOWED_PROFILE_IMAGE_TYPES = new Set([
+  "image/avif",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+])
+const MAX_PROFILE_IMAGE_BYTES = 5 * 1024 * 1024
 
 export default function ChangeProfilePicture() {
   const { token } = useSelector((state) => state.auth)
@@ -22,10 +35,18 @@ export default function ChangeProfilePicture() {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
-    // console.log(file)
     if (file) {
+      if (!ALLOWED_PROFILE_IMAGE_TYPES.has(file.type)) {
+        toast.error("Choose a JPEG, PNG, WebP, or AVIF image")
+        e.target.value = ""
+        return
+      }
+      if (file.size > MAX_PROFILE_IMAGE_BYTES) {
+        toast.error("Profile images must be 5 MB or smaller")
+        e.target.value = ""
+        return
+      }
       setImageFile(file)
-      previewFile(file)
     }
   }
 
@@ -37,18 +58,15 @@ export default function ChangeProfilePicture() {
     }
   }
 
-  const handleFileUpload = () => {
+  const handleFileUpload = async () => {
+    if (!imageFile || loading) return
+    setLoading(true)
     try {
-      console.log("uploading...")
-      setLoading(true)
       const formData = new FormData()
       formData.append("displayPicture", imageFile)
-      // console.log("formdata", formData)
-      dispatch(updateDisplayPicture(token, formData)).then(() => {
-        setLoading(false)
-      })
-    } catch (error) {
-      console.log("ERROR MESSAGE - ", error.message)
+      await dispatch(updateDisplayPicture(token, formData))
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -62,9 +80,10 @@ export default function ChangeProfilePicture() {
       <div className="flex items-center justify-between rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-8 px-12 text-richblack-5">
         <div className="flex items-center gap-x-4">
           <img
-            src={previewSource || user?.image}
+            src={previewSource || getAvatarSource(user)}
             alt={`profile-${user?.firstName}`}
             className="aspect-square w-[78px] rounded-full object-cover"
+            onError={(event) => setInitialsAvatarOnError(event, user)}
           />
           <div className="space-y-2">
             <p>Change Profile Picture</p>
@@ -74,7 +93,7 @@ export default function ChangeProfilePicture() {
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 className="hidden"
-                accept="image/png, image/gif, image/jpeg"
+                accept="image/avif,image/jpeg,image/png,image/webp"
               />
               <button
                 onClick={handleClick}
@@ -86,6 +105,7 @@ export default function ChangeProfilePicture() {
               <IconBtn
                 text={loading ? "Uploading..." : "Upload"}
                 onclick={handleFileUpload}
+                disabled={!imageFile || loading}
               >
                 {!loading && (
                   <FiUpload className="text-lg text-richblack-900" />

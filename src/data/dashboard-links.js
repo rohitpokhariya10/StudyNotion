@@ -42,4 +42,25 @@ export const sidebarLinks = [
     type: ACCOUNT_TYPE.STUDENT,
     icon: "VscArchive",
   },
+  {
+    id: 6,
+    name: "Purchases & Refunds",
+    path: "/dashboard/purchases",
+    type: ACCOUNT_TYPE.STUDENT,
+    icon: "VscHistory",
+  },
+  {
+    id: 8,
+    name: "Instructor Approvals",
+    path: "/dashboard/instructor-approvals",
+    type: ACCOUNT_TYPE.ADMIN,
+    icon: "VscVerified",
+  },
+  {
+    id: 9,
+    name: "Payment Reconciliation",
+    path: "/dashboard/payment-reconciliation",
+    type: ACCOUNT_TYPE.ADMIN,
+    icon: "VscCreditCard",
+  },
 ]

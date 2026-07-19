@@ -1,53 +1,56 @@
-import React from "react"
-import * as Icon1 from "react-icons/bi"
-import * as Icon3 from "react-icons/hi2"
-import * as Icon2 from "react-icons/io5"
+import { BiWorld } from "react-icons/bi"
+import { HiChatBubbleLeftRight } from "react-icons/hi2"
+
+const configuredSupportEmail = import.meta.env.VITE_SUPPORT_EMAIL?.trim()
+const supportEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+  configuredSupportEmail || ""
+)
+  ? configuredSupportEmail
+  : "support@studynotion.local"
+const legalAddress =
+  import.meta.env.VITE_LEGAL_ADDRESS || "Not configured for local development"
 
 const contactDetails = [
   {
-    icon: "HiChatBubbleLeftRight",
-    heading: "Chat on us",
-    description: "Our friendly team is here to help.",
-    details: "rohi.pokhariya123@gmail.com",
+    icon: HiChatBubbleLeftRight,
+    heading: "Email support",
+    description: "Account, enrollment, payment, and course help.",
+    details: supportEmail,
+    href: `mailto:${supportEmail}`,
   },
   {
-    icon: "BiWorld",
-    heading: "Visit us",
-    description: "Come and say hello at our office HQ.",
-    details:
-      "Doiwal Dehradun 248140 Near Uco Bank",
-  },
-  {
-    icon: "IoCall",
-    heading: "Call us",
-    description: "Mon - Fri From 8am to 5pm",
-    details: "+91 9012464329",
+    icon: BiWorld,
+    heading: "Registered office",
+    description: "Business and legal correspondence address.",
+    details: legalAddress,
   },
 ]
 
-const ContactDetails = () => {
-  return (
-    <div className="flex flex-col gap-6 rounded-xl bg-richblack-800 p-4 lg:p-6">
-      {contactDetails.map((ele, i) => {
-        let Icon = Icon1[ele.icon] || Icon2[ele.icon] || Icon3[ele.icon]
-        return (
-          <div
-            className="flex flex-col gap-[2px] p-3 text-sm text-richblack-200"
-            key={i}
+const ContactDetails = () => (
+  <div className="flex flex-col gap-6 rounded-xl bg-richblack-800 p-4 lg:p-6">
+    {contactDetails.map(({ description, details, heading, href, icon: Icon }) => (
+      <div
+        className="flex flex-col gap-1 p-3 text-sm text-richblack-200"
+        key={heading}
+      >
+        <div className="flex flex-row items-center gap-3">
+          <Icon size={25} aria-hidden="true" />
+          <h2 className="text-lg font-semibold text-richblack-5">{heading}</h2>
+        </div>
+        <p className="font-medium">{description}</p>
+        {href ? (
+          <a
+            className="break-all font-semibold text-yellow-50 hover:text-yellow-100"
+            href={href}
           >
-            <div className="flex flex-row items-center gap-3">
-              <Icon size={25} />
-              <h1 className="text-lg font-semibold text-richblack-5">
-                {ele?.heading}
-              </h1>
-            </div>
-            <p className="font-medium">{ele?.description}</p>
-            <p className="font-semibold">{ele?.details}</p>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
+            {details}
+          </a>
+        ) : (
+          <p className="font-semibold">{details}</p>
+        )}
+      </div>
+    ))}
+  </div>
+)
 
 export default ContactDetails

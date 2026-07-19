@@ -1,16 +1,53 @@
 import { createSlice } from "@reduxjs/toolkit"
 import { toast } from "react-hot-toast"
 
+const getStorage = () => {
+  if (typeof window === "undefined") return null
+
+  try {
+    return window.localStorage || null
+  } catch {
+    return null
+  }
+}
+
+const readCart = () => {
+  try {
+    const value = getStorage()?.getItem("cart")
+    const parsed = value ? JSON.parse(value) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+const persistCart = (cart) => {
+  const storage = getStorage()
+  if (!storage) return
+
+  const total = cart.reduce(
+    (sum, course) => sum + (Number(course?.price) || 0),
+    0
+  )
+
+  try {
+    storage.setItem("cart", JSON.stringify(cart))
+    storage.setItem("total", JSON.stringify(total))
+    storage.setItem("totalItems", JSON.stringify(cart.length))
+  } catch {
+    // A full or disabled browser storage must not break the cart UI.
+  }
+}
+
+const storedCart = readCart()
+
 const initialState = {
-  cart: localStorage.getItem("cart")
-    ? JSON.parse(localStorage.getItem("cart"))
-    : [],
-  total: localStorage.getItem("total")
-    ? JSON.parse(localStorage.getItem("total"))
-    : 0,
-  totalItems: localStorage.getItem("totalItems")
-    ? JSON.parse(localStorage.getItem("totalItems"))
-    : 0,
+  cart: storedCart,
+  total: storedCart.reduce(
+    (sum, course) => sum + (Number(course?.price) || 0),
+    0
+  ),
+  totalItems: storedCart.length,
 }
 
 const cartSlice = createSlice({
@@ -30,11 +67,9 @@ const cartSlice = createSlice({
       state.cart.push(course)
       // Update the total quantity and price
       state.totalItems++
-      state.total += course.price
+      state.total += Number(course.price) || 0
       // Update to localstorage
-      localStorage.setItem("cart", JSON.stringify(state.cart))
-      localStorage.setItem("total", JSON.stringify(state.total))
-      localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
+      persistCart(state.cart)
       // show toast
       toast.success("Course added to cart")
     },
@@ -45,12 +80,10 @@ const cartSlice = createSlice({
       if (index >= 0) {
         // If the course is found in the cart, remove it
         state.totalItems--
-        state.total -= state.cart[index].price
+        state.total -= Number(state.cart[index].price) || 0
         state.cart.splice(index, 1)
         // Update to localstorage
-        localStorage.setItem("cart", JSON.stringify(state.cart))
-        localStorage.setItem("total", JSON.stringify(state.total))
-        localStorage.setItem("totalItems", JSON.stringify(state.totalItems))
+        persistCart(state.cart)
         // show toast
         toast.success("Course removed from cart")
       }
@@ -60,9 +93,14 @@ const cartSlice = createSlice({
       state.total = 0
       state.totalItems = 0
       // Update to localstorage
-      localStorage.removeItem("cart")
-      localStorage.removeItem("total")
-      localStorage.removeItem("totalItems")
+      const storage = getStorage()
+      try {
+        storage?.removeItem("cart")
+        storage?.removeItem("total")
+        storage?.removeItem("totalItems")
+      } catch {
+        // Local state is authoritative when browser storage is unavailable.
+      }
     },
   },
 })

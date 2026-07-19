@@ -27,7 +27,7 @@ function ForgotPassword() {
           </h1>
           <p className="my-4 text-[1.125rem] leading-[1.625rem] text-richblack-100">
             {!emailSent
-              ? "Have no fear. We'll email you instructions to reset your password. If you dont have access to your email we can try account recovery"
+              ? "Enter your account email and we'll send a secure, time-limited reset link. If you no longer have access to that inbox, contact support."
               : `We have sent the reset email to ${email}`}
           </p>
           <form onSubmit={handleOnSubmit}>
@@ -51,7 +51,7 @@ function ForgotPassword() {
               type="submit"
               className="mt-6 w-full rounded-[8px] bg-yellow-50 py-[12px] px-[12px] font-medium text-richblack-900"
             >
-              {!emailSent ? "Sumbit" : "Resend Email"}
+              {!emailSent ? "Send reset link" : "Resend email"}
             </button>
           </form>
           <div className="mt-6 flex items-center justify-between">

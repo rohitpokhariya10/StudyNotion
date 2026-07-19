@@ -1,48 +1,42 @@
-// Import the required modules
 const express = require("express")
+
+const {
+  acceptPolicies,
+  changePassword,
+  googleLogin,
+  login,
+  logout,
+  sendotp,
+  signup,
+} = require("../controllers/Auth")
+const { resetPassword, resetPasswordToken } = require("../controllers/resetPassword")
+const { auth } = require("../middleware/auth")
+const {
+  loginIdentityLimiter,
+  loginIpLimiter,
+  otpIdentityLimiter,
+  otpIpLimiter,
+  passwordResetIdentityLimiter,
+  passwordResetIpLimiter,
+  signupIdentityLimiter,
+  signupIpLimiter,
+} = require("../middleware/rateLimiters")
+
 const router = express.Router()
 
-// Import the required controllers and middleware functions
-const {
-  login,
-  signup,
-  sendotp,
-  changePassword,
-} = require("../controllers/Auth")
-const {
-  resetPasswordToken,
-  resetPassword,
-} = require("../controllers/resetPassword")
+router.post("/login", loginIpLimiter, loginIdentityLimiter, login)
+router.post("/google", loginIpLimiter, googleLogin)
+router.post("/logout", logout)
+router.post("/accept-policies", auth, acceptPolicies)
+router.post("/signup", signupIpLimiter, signupIdentityLimiter, signup)
+router.post("/sendotp", otpIpLimiter, otpIdentityLimiter, sendotp)
+router.post("/changepassword", passwordResetIpLimiter, auth, changePassword)
+router.post(
+  "/reset-password-token",
+  passwordResetIpLimiter,
+  passwordResetIdentityLimiter,
+  resetPasswordToken
+)
+router.post("/reset-password", passwordResetIpLimiter, resetPassword)
 
-const { auth } = require("../middleware/auth")
-
-// Routes for Login, Signup, and Authentication
-
-// ********************************************************************************************************
-//                                      Authentication routes
-// ********************************************************************************************************
-
-// Route for user login
-router.post("/login", login)
-
-// Route for user signup
-router.post("/signup", signup)
-
-// Route for sending OTP to the user's email
-router.post("/sendotp", sendotp)
-
-// Route for Changing the password
-router.post("/changepassword", auth, changePassword)
-
-// ********************************************************************************************************
-//                                      Reset Password
-// ********************************************************************************************************
-
-// Route for generating a reset password token
-router.post("/reset-password-token", resetPasswordToken)
-
-// Route for resetting user's password after verification
-router.post("/reset-password", resetPassword)
-
-// Export the router for use in the main application
 module.exports = router

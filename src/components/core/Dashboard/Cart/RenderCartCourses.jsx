@@ -1,17 +1,20 @@
-import { FaStar } from "react-icons/fa"
 import { RiDeleteBin6Line } from "react-icons/ri"
-import ReactStars from "react-rating-stars-component"
 import { useDispatch, useSelector } from "react-redux"
 
 import { removeFromCart } from "../../../../slices/cartSlice"
+import GetAvgRating from "../../../../utils/avgRating"
+import RatingStars from "../../../Common/RatingStars"
 
 export default function RenderCartCourses() {
   const { cart } = useSelector((state) => state.cart)
   const dispatch = useDispatch()
   return (
     <div className="flex flex-1 flex-col">
-      {cart.map((course, indx) => (
-        <div
+      {cart.map((course, indx) => {
+        const averageRating = GetAvgRating(course?.ratingAndReviews || [])
+
+        return (
+          <div
           key={course._id}
           className={`flex w-full flex-wrap items-start justify-between gap-6 ${
             indx !== cart.length - 1 && "border-b border-b-richblack-400 pb-6"
@@ -31,16 +34,10 @@ export default function RenderCartCourses() {
                 {course?.category?.name}
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-yellow-5">4.5</span>
-                <ReactStars
-                  count={5}
-                  value={course?.ratingAndReviews?.length}
-                  size={20}
-                  edit={false}
-                  activeColor="#ffd700"
-                  emptyIcon={<FaStar />}
-                  fullIcon={<FaStar />}
-                />
+                <span className="text-yellow-5">
+                  {averageRating.toFixed(1)}
+                </span>
+                <RatingStars Review_Count={averageRating} Star_Size={20} />
                 <span className="text-richblack-400">
                   {course?.ratingAndReviews?.length} Ratings
                 </span>
@@ -59,8 +56,9 @@ export default function RenderCartCourses() {
               ₹ {course?.price}
             </p>
           </div>
-        </div>
-      ))}
+          </div>
+        )
+      })}
     </div>
   )
 }

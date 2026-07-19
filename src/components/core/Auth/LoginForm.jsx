@@ -40,8 +40,9 @@ function LoginForm() {
         </p>
         <input
           required
-          type="text"
+          type="email"
           name="email"
+          autoComplete="email"
           value={email}
           onChange={handleOnChange}
           placeholder="Enter email address"
@@ -56,30 +57,35 @@ function LoginForm() {
           required
           type={showPassword ? "text" : "password"}
           name="password"
+          maxLength={72}
+          autoComplete="current-password"
           value={password}
           onChange={handleOnChange}
           placeholder="Enter Password"
           className="form-style w-full !pr-10"
         />
-        <span
+        <button
+          type="button"
           onClick={() => setShowPassword((prev) => !prev)}
           className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+          aria-label={showPassword ? "Hide password" : "Show password"}
+          aria-pressed={showPassword}
         >
           {showPassword ? (
             <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
           ) : (
             <AiOutlineEye fontSize={24} fill="#AFB2BF" />
           )}
-        </span>
+        </button>
         <Link to="/forgot-password">
-          <p className="mt-1 ml-auto max-w-max text-xs text-blue-100">
+          <p className="ml-auto mt-1 max-w-max text-xs text-blue-100">
             Forgot Password
           </p>
         </Link>
       </label>
       <button
         type="submit"
-        className="mt-6 rounded-[8px] bg-yellow-50 py-[8px] px-[12px] font-medium text-richblack-900"
+        className="mt-6 rounded-[8px] bg-yellow-50 px-[12px] py-[8px] font-medium text-richblack-900"
       >
         Sign In
       </button>

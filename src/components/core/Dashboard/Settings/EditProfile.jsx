@@ -19,14 +19,7 @@ export default function EditProfile() {
     formState: { errors },
   } = useForm()
 
-  const submitProfileForm = async (data) => {
-    // console.log("Form Data - ", data)
-    try {
-      dispatch(updateProfile(token, data))
-    } catch (error) {
-      console.log("ERROR MESSAGE - ", error.message)
-    }
-  }
+  const submitProfileForm = (data) => dispatch(updateProfile(token, data))
   return (
     <>
       <form onSubmit={handleSubmit(submitProfileForm)}>

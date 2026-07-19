@@ -1,0 +1,55 @@
+name: ci
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run lint
+      - run: npm test -- --run
+      - run: npm run build
+        env:
+          VITE_API_BASE_URL: https://api.example.test/api/v1
+          VITE_GOOGLE_CLIENT_ID: ci-test.apps.googleusercontent.com
+          VITE_RAZORPAY_KEY_ID: rzp_live_CIBUILD123
+          VITE_SUPPORT_EMAIL: support@studynotion.test
+          VITE_LEGAL_ENTITY_NAME: StudyNotion CI
+          VITE_LEGAL_ADDRESS: CI test environment
+          VITE_LEGAL_JURISDICTION: India
+          VITE_REFUND_WINDOW_DAYS: 7
+
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm test

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "react-hot-toast"
 
 import CountryCode from "../../../data/countrycode.json"
 import { apiConnector } from "../../../services/apiConnector"
@@ -11,37 +12,32 @@ const ContactUsForm = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors },
   } = useForm()
 
   const submitContactForm = async (data) => {
-    // console.log("Form Data - ", data)
+    setLoading(true)
     try {
-      setLoading(true)
-      const res = await apiConnector(
+      const response = await apiConnector(
         "POST",
         contactusEndpoint.CONTACT_US_API,
         data
       )
-      // console.log("Email Res - ", res)
-      setLoading(false)
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message || "Message delivery failed")
+      }
+      toast.success(response.data.message || "Message sent successfully")
+      reset()
     } catch (error) {
-      console.log("ERROR MESSAGE - ", error.message)
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Your message could not be sent"
+      )
+    } finally {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset({
-        email: "",
-        firstname: "",
-        lastname: "",
-        message: "",
-        phoneNo: "",
-      })
-    }
-  }, [reset, isSubmitSuccessful])
 
   return (
     <form
@@ -109,10 +105,8 @@ const ContactUsForm = () => {
         <div className="flex gap-5">
           <div className="flex w-[81px] flex-col gap-2">
             <select
-              type="text"
-              name="firstname"
-              id="firstname"
-              placeholder="Enter first name"
+              id="countrycode"
+              aria-label="Country calling code"
               className="form-style"
               {...register("countrycode", { required: true })}
             >
@@ -127,7 +121,8 @@ const ContactUsForm = () => {
           </div>
           <div className="flex w-[calc(100%-90px)] flex-col gap-2">
             <input
-              type="number"
+              type="tel"
+              inputMode="numeric"
               name="phonenumber"
               id="phonenumber"
               placeholder="12345 67890"
@@ -139,6 +134,10 @@ const ContactUsForm = () => {
                 },
                 maxLength: { value: 12, message: "Invalid Phone Number" },
                 minLength: { value: 10, message: "Invalid Phone Number" },
+                pattern: {
+                  value: /^\d+$/,
+                  message: "Use digits only",
+                },
               })}
             />
           </div>
@@ -179,7 +178,7 @@ const ContactUsForm = () => {
            "transition-all duration-200 hover:scale-95 hover:shadow-none"
          }  disabled:bg-richblack-500 sm:text-[16px] `}
       >
-        Send Message
+        {loading ? "Sending..." : "Send Message"}
       </button>
     </form>
   )

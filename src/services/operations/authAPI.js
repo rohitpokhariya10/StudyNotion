@@ -1,18 +1,92 @@
 import { toast } from "react-hot-toast"
 
-import { setLoading, setToken } from "../../slices/authSlice"
+import {
+  setAuthChecking,
+  setLoading,
+  setPolicyAcceptanceRequired,
+  setSession,
+  setSignupData,
+} from "../../slices/authSlice"
 import { resetCart } from "../../slices/cartSlice"
 import { setUser } from "../../slices/profileSlice"
+import { getAvatarSource } from "../../utils/avatar"
 import { apiConnector } from "../apiConnector"
-import { endpoints } from "../apis"
+import { endpoints, profileEndpoints } from "../apis"
 
 const {
   SENDOTP_API,
   SIGNUP_API,
   LOGIN_API,
+  GOOGLE_LOGIN_API,
+  LOGOUT_API,
+  ACCEPT_POLICIES_API,
   RESETPASSTOKEN_API,
   RESETPASSWORD_API,
 } = endpoints
+
+const getErrorMessage = (error, fallback) =>
+  error?.response?.data?.message || error?.message || fallback
+
+const clearLegacyAuthStorage = () => {
+  // Remove credentials written by older releases. Session credentials now
+  // remain inaccessible to JavaScript in the server-issued HttpOnly cookie.
+  if (typeof window === "undefined") return
+  window.localStorage.removeItem("token")
+  window.localStorage.removeItem("user")
+}
+
+const withFallbackImage = (user) => {
+  if (!user) return null
+  return {
+    ...user,
+    image: getAvatarSource(user),
+  }
+}
+
+const readUser = (response) =>
+  response?.data?.user || response?.data?.data || null
+
+const commitSession = (dispatch, response) => {
+  const user = withFallbackImage(readUser(response))
+  if (!response?.data?.success || !user) {
+    throw new Error(response?.data?.message || "Invalid session response")
+  }
+
+  dispatch(setUser(user))
+  dispatch(setSession(true))
+  dispatch(
+    setPolicyAcceptanceRequired(Boolean(response?.data?.requiresPolicyAcceptance))
+  )
+  clearLegacyAuthStorage()
+  return user
+}
+
+export function restoreSession() {
+  return async (dispatch) => {
+    dispatch(setAuthChecking())
+    clearLegacyAuthStorage()
+
+    try {
+      const response = await apiConnector(
+        "GET",
+        profileEndpoints.GET_USER_DETAILS_API
+      )
+      commitSession(dispatch, response)
+      return true
+    } catch (error) {
+      dispatch(setUser(null))
+      dispatch(setSession(false))
+      dispatch(setPolicyAcceptanceRequired(false))
+
+      // An absent/expired cookie is an expected anonymous state. Transient
+      // failures are left to observability rather than shown as a login error.
+      if (![401, 403].includes(error?.response?.status)) {
+        console.error("Session restoration failed")
+      }
+      return false
+    }
+  }
+}
 
 export function sendOtp(email, navigate) {
   return async (dispatch) => {
@@ -20,66 +94,58 @@ export function sendOtp(email, navigate) {
     dispatch(setLoading(true))
     try {
       const response = await apiConnector("POST", SENDOTP_API, {
-        email,
+        email: email?.trim().toLowerCase(),
         checkUserPresent: true,
       })
-      console.log("SENDOTP API RESPONSE............", response)
 
-      console.log(response.data.success)
-
-      if (!response.data.success) {
-        throw new Error(response.data.message)
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message)
       }
 
+      if (response.data.otp && import.meta.env.DEV) {
+        toast.success(`Development OTP: ${response.data.otp}`, {
+          duration: 10000,
+        })
+      }
       toast.success("OTP Sent Successfully")
-      navigate("/verify-email")
+      navigate?.("/verify-email")
+      return true
     } catch (error) {
-      console.log("SENDOTP API ERROR............", error)
-      toast.error("Could Not Send OTP")
+      toast.error(getErrorMessage(error, "Could Not Send OTP"))
+      return false
+    } finally {
+      dispatch(setLoading(false))
+      toast.dismiss(toastId)
     }
-    dispatch(setLoading(false))
-    toast.dismiss(toastId)
   }
 }
 
-export function signUp(
-  accountType,
-  firstName,
-  lastName,
-  email,
-  password,
-  confirmPassword,
-  otp,
-  navigate
-) {
+export function signUp(signupData, otp, navigate) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
     try {
       const response = await apiConnector("POST", SIGNUP_API, {
-        accountType,
-        firstName,
-        lastName,
-        email,
-        password,
-        confirmPassword,
+        ...signupData,
+        email: signupData?.email?.trim().toLowerCase(),
         otp,
       })
 
-      console.log("SIGNUP API RESPONSE............", response)
-
-      if (!response.data.success) {
-        throw new Error(response.data.message)
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message)
       }
-      toast.success("Signup Successful")
-      navigate("/login")
+
+      dispatch(setSignupData(null))
+      toast.success(response.data.message || "Signup Successful")
+      navigate("/login", { replace: true })
+      return true
     } catch (error) {
-      console.log("SIGNUP API ERROR............", error)
-      toast.error("Signup Failed")
-      navigate("/signup")
+      toast.error(getErrorMessage(error, "Signup Failed"))
+      return false
+    } finally {
+      dispatch(setLoading(false))
+      toast.dismiss(toastId)
     }
-    dispatch(setLoading(false))
-    toast.dismiss(toastId)
   }
 }
 
@@ -89,30 +155,86 @@ export function login(email, password, navigate) {
     dispatch(setLoading(true))
     try {
       const response = await apiConnector("POST", LOGIN_API, {
-        email,
+        email: email?.trim().toLowerCase(),
         password,
       })
 
-      console.log("LOGIN API RESPONSE............", response)
-
-      if (!response.data.success) {
-        throw new Error(response.data.message)
-      }
-
-      toast.success("Login Successful")
-      dispatch(setToken(response.data.token))
-      const userImage = response.data?.user?.image
-        ? response.data.user.image
-        : `https://api.dicebear.com/5.x/initials/svg?seed=${response.data.user.firstName} ${response.data.user.lastName}`
-      dispatch(setUser({ ...response.data.user, image: userImage }))
-      localStorage.setItem("token", JSON.stringify(response.data.token))
-      navigate("/dashboard/my-profile")
+      commitSession(dispatch, response)
+      toast.success(response.data.message || "Login Successful")
+      navigate(
+        response.data.requiresPolicyAcceptance
+          ? "/accept-terms"
+          : "/dashboard/my-profile",
+        { replace: true }
+      )
+      return true
     } catch (error) {
-      console.log("LOGIN API ERROR............", error)
-      toast.error("Login Failed")
+      dispatch(setUser(null))
+      dispatch(setSession(false))
+      toast.error(getErrorMessage(error, "Login Failed"))
+      return false
+    } finally {
+      dispatch(setLoading(false))
+      toast.dismiss(toastId)
     }
-    dispatch(setLoading(false))
-    toast.dismiss(toastId)
+  }
+}
+
+export function googleLogin(credential, navigate, policyAcknowledgement = {}) {
+  return async (dispatch) => {
+    const toastId = toast.loading("Signing in with Google...")
+    dispatch(setLoading(true))
+    try {
+      const response = await apiConnector("POST", GOOGLE_LOGIN_API, {
+        credential,
+        ...policyAcknowledgement,
+      })
+
+      commitSession(dispatch, response)
+      toast.success(response.data.message || "Google sign-in successful")
+      navigate(
+        response.data.requiresPolicyAcceptance
+          ? "/accept-terms"
+          : "/dashboard/my-profile",
+        { replace: true }
+      )
+      return true
+    } catch (error) {
+      dispatch(setUser(null))
+      dispatch(setSession(false))
+      toast.error(getErrorMessage(error, "Google sign-in failed"))
+      return false
+    } finally {
+      dispatch(setLoading(false))
+      toast.dismiss(toastId)
+    }
+  }
+}
+
+export function acceptCurrentPolicies(policyAcknowledgement, navigate) {
+  return async (dispatch) => {
+    const toastId = toast.loading("Saving your agreement...")
+    dispatch(setLoading(true))
+    try {
+      const response = await apiConnector(
+        "POST",
+        ACCEPT_POLICIES_API,
+        policyAcknowledgement
+      )
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message || "Agreement could not be saved")
+      }
+      dispatch(setPolicyAcceptanceRequired(false))
+      toast.success("Agreement saved")
+      navigate("/dashboard/my-profile", { replace: true })
+      return true
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Agreement could not be saved"))
+      return false
+    } finally {
+      dispatch(setLoading(false))
+      toast.dismiss(toastId)
+    }
   }
 }
 
@@ -122,23 +244,21 @@ export function getPasswordResetToken(email, setEmailSent) {
     dispatch(setLoading(true))
     try {
       const response = await apiConnector("POST", RESETPASSTOKEN_API, {
-        email,
+        email: email?.trim().toLowerCase(),
       })
 
-      console.log("RESETPASSTOKEN RESPONSE............", response)
-
-      if (!response.data.success) {
-        throw new Error(response.data.message)
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message)
       }
 
       toast.success("Reset Email Sent")
       setEmailSent(true)
     } catch (error) {
-      console.log("RESETPASSTOKEN ERROR............", error)
-      toast.error("Failed To Send Reset Email")
+      toast.error(getErrorMessage(error, "Failed To Send Reset Email"))
+    } finally {
+      toast.dismiss(toastId)
+      dispatch(setLoading(false))
     }
-    toast.dismiss(toastId)
-    dispatch(setLoading(false))
   }
 }
 
@@ -153,31 +273,44 @@ export function resetPassword(password, confirmPassword, token, navigate) {
         token,
       })
 
-      console.log("RESETPASSWORD RESPONSE............", response)
-
-      if (!response.data.success) {
-        throw new Error(response.data.message)
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message)
       }
 
       toast.success("Password Reset Successfully")
-      navigate("/login")
+      navigate("/login", { replace: true })
     } catch (error) {
-      console.log("RESETPASSWORD ERROR............", error)
-      toast.error("Failed To Reset Password")
+      toast.error(getErrorMessage(error, "Failed To Reset Password"))
+    } finally {
+      toast.dismiss(toastId)
+      dispatch(setLoading(false))
     }
-    toast.dismiss(toastId)
-    dispatch(setLoading(false))
   }
 }
 
 export function logout(navigate) {
-  return (dispatch) => {
-    dispatch(setToken(null))
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector("POST", LOGOUT_API)
+      if (!response?.data?.success) {
+        throw new Error(response?.data?.message || "Logout failed")
+      }
+    } catch (error) {
+      if (error?.response?.status !== 401) {
+        toast.error(
+          getErrorMessage(error, "Logout could not be completed. Please retry.")
+        )
+        return false
+      }
+    }
+
+    dispatch(setSession(false))
+    dispatch(setPolicyAcceptanceRequired(false))
     dispatch(setUser(null))
     dispatch(resetCart())
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
+    clearLegacyAuthStorage()
     toast.success("Logged Out")
-    navigate("/")
+    navigate?.("/", { replace: true })
+    return true
   }
 }

@@ -1,291 +1,528 @@
-const bcrypt = require("bcrypt")
-const User = require("../models/User")
-const OTP = require("../models/OTP")
-const jwt = require("jsonwebtoken")
-const otpGenerator = require("otp-generator")
-const mailSender = require("../utils/mailSender")
-const { passwordUpdated } = require("../mail/templates/passwordUpdate")
-const Profile = require("../models/Profile")
-require("dotenv").config()
+const bcrypt = require("bcryptjs")
+const crypto = require("crypto")
 
-// Signup Controller for Registering USers
+const emailTemplate = require("../mail/templates/emailVerificationTemplate")
+const { passwordUpdated } = require("../mail/templates/passwordUpdate")
+const OTP = require("../models/OTP")
+const Profile = require("../models/Profile")
+const User = require("../models/User")
+const env = require("../config/env")
+const {
+  clearSession,
+  issueSession,
+  readSessionToken,
+  verifySessionToken,
+} = require("../utils/auth")
+const mailSender = require("../utils/mailSender")
+const { verifyGoogleIdToken } = require("../utils/googleIdentity")
+const {
+  createPolicyAcceptance,
+  hasAffirmativePolicyAcceptance,
+  hasCurrentPolicyAcceptance,
+} = require("../utils/policyAcceptance")
+const {
+  isPasswordWithinBcryptLimit,
+  isStrongPassword,
+  isValidEmail,
+  normalizeEmail,
+  normalizePersonName,
+} = require("../utils/validation")
+
+const ALLOWED_PUBLIC_ACCOUNT_TYPES = new Set(["Student", "Instructor"])
+const OTP_TTL_MS = 10 * 60 * 1000
+const OTP_MAX_ATTEMPTS = 5
+const DUMMY_PASSWORD_HASH =
+  "$2b$12$3xycSovjh4A7o6onY/0TKu4/ST8GDvYslYIHvsdHPfJyQ3Ri7I7JK"
+
+const hashOtp = (email, otp) =>
+  crypto
+    .createHmac("sha256", process.env.OTP_SECRET)
+    .update(`${email}:${otp}`)
+    .digest("hex")
+
+const otpMatches = (storedHash, candidateHash) => {
+  const stored = Buffer.from(storedHash, "hex")
+  const candidate = Buffer.from(candidateHash, "hex")
+  return stored.length === candidate.length && crypto.timingSafeEqual(stored, candidate)
+}
+
+const setPrivateNoStore = (res) => {
+  res.setHeader("Cache-Control", "private, no-store, max-age=0")
+  res.setHeader("Pragma", "no-cache")
+}
+
+const sendAuthenticatedResponse = async (res, user, message) => {
+  setPrivateNoStore(res)
+  const safeUser = await User.findById(user._id)
+    .select("+policyAcceptances")
+    .populate("additionalDetails")
+  if (!safeUser) throw new Error("Authenticated user disappeared before response")
+  issueSession(res, user)
+  return res.status(200).json({
+    success: true,
+    authenticated: true,
+    requiresPolicyAcceptance: !hasCurrentPolicyAcceptance(safeUser),
+    user: safeUser,
+    message,
+  })
+}
 
 exports.signup = async (req, res) => {
   try {
-    // Destructure fields from the request body
     const {
       firstName,
       lastName,
-      email,
       password,
       confirmPassword,
       accountType,
       contactNumber,
       otp,
-    } = req.body
-    // Check if All Details are there or not
+    } = req.body || {}
+    const email = normalizeEmail(req.body?.email)
+    const normalizedFirstName = normalizePersonName(firstName)
+    const normalizedLastName = normalizePersonName(lastName)
+
     if (
-      !firstName ||
-      !lastName ||
-      !email ||
+      !normalizedFirstName ||
+      !normalizedLastName ||
+      !isValidEmail(email) ||
       !password ||
       !confirmPassword ||
       !otp
     ) {
-      return res.status(403).send({
+      return res.status(400).json({
         success: false,
-        message: "All Fields are required",
+        message: "Please provide all required signup fields",
       })
     }
-    // Check if password and confirm password match
-    if (password !== confirmPassword) {
+
+    if (!ALLOWED_PUBLIC_ACCOUNT_TYPES.has(accountType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid account type",
+      })
+    }
+
+    if (!hasAffirmativePolicyAcceptance(req.body)) {
       return res.status(400).json({
         success: false,
         message:
-          "Password and Confirm Password do not match. Please try again.",
+          "You must accept the Terms, acknowledge the Privacy Notice, and confirm age or guardian eligibility",
       })
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email })
-    if (existingUser) {
+    if (password !== confirmPassword || !isStrongPassword(password)) {
       return res.status(400).json({
         success: false,
-        message: "User already exists. Please sign in to continue.",
+        message:
+          "Password must match, stay within 72 bytes, and include at least 8 characters, uppercase, lowercase, and a number",
       })
     }
 
-    // Find the most recent OTP for the email
-    const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1)
-    console.log(response)
-    if (response.length === 0) {
-      // OTP not found for the email
-      return res.status(400).json({
+    if (await User.exists({ email })) {
+      return res.status(409).json({
         success: false,
-        message: "The OTP is not valid",
-      })
-    } else if (otp !== response[0].otp) {
-      // Invalid OTP
-      return res.status(400).json({
-        success: false,
-        message: "The OTP is not valid",
+        message: "An account already exists for this email",
       })
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const challenge = await OTP.findOne({ email }).select("+otpHash")
+    if (
+      !challenge ||
+      challenge.expiresAt <= new Date() ||
+      challenge.attempts >= OTP_MAX_ATTEMPTS
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "The verification code is invalid or expired",
+      })
+    }
 
-    // Create the user
-    let approved = ""
-    approved === "Instructor" ? (approved = false) : (approved = true)
+    if (!otpMatches(challenge.otpHash, hashOtp(email, String(otp)))) {
+      await OTP.updateOne({ _id: challenge._id }, { $inc: { attempts: 1 } })
+      return res.status(400).json({
+        success: false,
+        message: "The verification code is invalid or expired",
+      })
+    }
 
-    // Create the Additional Profile For User
-    const profileDetails = await Profile.create({
-      gender: null,
-      dateOfBirth: null,
+    const profile = await Profile.create({
       about: null,
-      contactNumber: null,
+      contactNumber: contactNumber || null,
+      dateOfBirth: null,
+      gender: null,
     })
-    const user = await User.create({
-      firstName,
-      lastName,
-      email,
-      contactNumber,
-      password: hashedPassword,
-      accountType: accountType,
-      approved: approved,
-      additionalDetails: profileDetails._id,
-      image: "",
+
+    let user
+    try {
+      user = await User.create({
+        firstName: normalizedFirstName,
+        lastName: normalizedLastName,
+        email,
+        password: await bcrypt.hash(password, 12),
+        authProviders: ["local"],
+        accountType,
+        approved: accountType === "Student",
+        instructorApprovalStatus:
+          accountType === "Instructor" ? "Pending" : "NotApplicable",
+        additionalDetails: profile._id,
+        image: "",
+        policyAcceptances: [createPolicyAcceptance("email_signup")],
+      })
+    } catch (error) {
+      await Profile.findByIdAndDelete(profile._id)
+      throw error
+    }
+
+    await OTP.deleteOne({ _id: challenge._id })
+
+    setPrivateNoStore(res)
+    return res.status(201).json({
+      success: true,
+      user,
+      message:
+        accountType === "Instructor"
+          ? "Instructor account created and awaiting approval"
+          : "User registered successfully",
     })
+  } catch (error) {
+    console.error("Signup failed:", error.message)
+    return res.status(500).json({
+      success: false,
+      message: "User registration failed",
+    })
+  }
+}
+
+exports.login = async (req, res) => {
+  try {
+    const email = normalizeEmail(req.body?.email)
+    const { password } = req.body || {}
+
+    if (!isValidEmail(email) || !isPasswordWithinBcryptLimit(password)) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      })
+    }
+
+    const user = await User.findOne({ email })
+      .select("+password")
+      .populate("additionalDetails")
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user?.password || DUMMY_PASSWORD_HASH
+    )
+
+    if (!user || !passwordMatches) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      })
+    }
+
+    if (!user.active || !user.approved) {
+      return res.status(403).json({
+        success: false,
+        message: "This account is inactive or awaiting approval",
+      })
+    }
+
+    return await sendAuthenticatedResponse(res, user, "Login successful")
+  } catch (error) {
+    console.error("Login failed:", error.message)
+    return res.status(500).json({ success: false, message: "Login failed" })
+  }
+}
+
+exports.googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body || {}
+    if (!credential || !process.env.GOOGLE_CLIENT_ID) {
+      return res.status(400).json({
+        success: false,
+        message: "Google sign-in is not configured or the credential is missing",
+      })
+    }
+
+    let ticket
+    try {
+      ticket = await verifyGoogleIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      })
+    } catch {
+      return res.status(401).json({
+        success: false,
+        message: "Google sign-in could not be verified",
+      })
+    }
+    const payload = ticket.getPayload()
+
+    if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+      return res.status(401).json({
+        success: false,
+        message: "Google could not verify this account",
+      })
+    }
+
+    const email = normalizeEmail(payload.email)
+    if (!isValidEmail(email)) {
+      return res.status(401).json({
+        success: false,
+        message: "Google returned an invalid email address",
+      })
+    }
+    let user = await User.findOne({
+      $or: [{ googleId: payload.sub }, { email }],
+    }).select("+googleId +policyAcceptances")
+
+    if (user?.googleId && user.googleId !== payload.sub) {
+      return res.status(409).json({
+        success: false,
+        message: "This email is linked to a different Google identity",
+      })
+    }
+
+    if (!user) {
+      if (!hasAffirmativePolicyAcceptance(req.body)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Accept the Terms, acknowledge the Privacy Notice, and confirm age or guardian eligibility before creating an account",
+        })
+      }
+
+      const profile = await Profile.create({
+        about: null,
+        dateOfBirth: null,
+        gender: null,
+      })
+      try {
+        const firstName =
+          normalizePersonName(payload.given_name, { allowEmpty: true }) ||
+          normalizePersonName(payload.name, { allowEmpty: true }) ||
+          "Learner"
+        const lastName =
+          normalizePersonName(payload.family_name, { allowEmpty: true }) || ""
+        user = await User.create({
+          firstName,
+          lastName,
+          email,
+          authProviders: ["google"],
+          googleId: payload.sub,
+          accountType: "Student",
+          approved: true,
+          instructorApprovalStatus: "NotApplicable",
+          additionalDetails: profile._id,
+          image: typeof payload.picture === "string" ? payload.picture : "",
+          policyAcceptances: [createPolicyAcceptance("google_signup")],
+        })
+      } catch (error) {
+        await Profile.findByIdAndDelete(profile._id)
+        throw error
+      }
+    } else if (!user.googleId) {
+      await User.updateOne(
+        { _id: user._id },
+        {
+          $set: { googleId: payload.sub },
+          $addToSet: { authProviders: "google" },
+        }
+      )
+      user = await User.findById(user._id)
+    }
+
+    if (!user.active || !user.approved) {
+      return res.status(403).json({
+        success: false,
+        message: "This account is inactive or awaiting approval",
+      })
+    }
+
+    return await sendAuthenticatedResponse(res, user, "Google sign-in successful")
+  } catch (error) {
+    console.error("Google sign-in failed:", error.message)
+    return res.status(500).json({
+      success: false,
+      message: "Google sign-in is temporarily unavailable",
+    })
+  }
+}
+
+exports.sendotp = async (req, res) => {
+  const email = normalizeEmail(req.body?.email)
+  try {
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid email address is required",
+      })
+    }
+
+    if (await User.exists({ email })) {
+      return res.status(409).json({
+        success: false,
+        message: "An account already exists for this email",
+      })
+    }
+
+    const otp = crypto.randomInt(100000, 1000000).toString()
+    await OTP.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          otpHash: hashOtp(email, otp),
+          attempts: 0,
+          expiresAt: new Date(Date.now() + OTP_TTL_MS),
+          createdAt: new Date(),
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+
+    try {
+      await mailSender(email, "Your StudyNotion verification code", emailTemplate(otp))
+    } catch (error) {
+      await OTP.deleteOne({ email })
+      throw error
+    }
+
+    setPrivateNoStore(res)
+    return res.status(200).json({
+      success: true,
+      message: "Verification code sent",
+      ...(env.allowDevOtp ? { otp } : {}),
+    })
+  } catch (error) {
+    console.error("OTP delivery failed:", error.message)
+    return res.status(502).json({
+      success: false,
+      message: "Verification code could not be delivered",
+    })
+  }
+}
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body || {}
+    if (
+      !isPasswordWithinBcryptLimit(oldPassword) ||
+      !isStrongPassword(newPassword)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid old password and strong new password are required",
+      })
+    }
+
+    const user = await User.findById(req.user.id).select("+password")
+    if (!user?.password || !(await bcrypt.compare(oldPassword, user.password))) {
+      return res.status(401).json({
+        success: false,
+        message: "The current password is incorrect",
+      })
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12)
+    if (!user.authProviders.includes("local")) user.authProviders.push("local")
+    user.sessionVersion = (user.sessionVersion || 0) + 1
+    await user.save()
+    issueSession(res, user)
+
+    mailSender(
+      user.email,
+      "Your StudyNotion password was updated",
+      passwordUpdated(
+        user.email,
+        `Password updated successfully for ${user.firstName} ${user.lastName}`
+      )
+    ).catch((error) => console.error("Password email failed:", error.message))
 
     return res.status(200).json({
       success: true,
-      user,
-      message: "User registered successfully",
+      message: "Password updated successfully",
     })
   } catch (error) {
-    console.error(error)
+    console.error("Password update failed:", error.message)
     return res.status(500).json({
       success: false,
-      message: "User cannot be registered. Please try again.",
+      message: "Password update failed",
     })
   }
 }
 
-// Login controller for authenticating users
-exports.login = async (req, res) => {
+exports.acceptPolicies = async (req, res) => {
   try {
-    // Get email and password from request body
-    const { email, password } = req.body
-
-    // Check if email or password is missing
-    if (!email || !password) {
-      // Return 400 Bad Request status code with error message
+    if (!hasAffirmativePolicyAcceptance(req.body)) {
       return res.status(400).json({
         success: false,
-        message: `Please Fill up All the Required Fields`,
+        message:
+          "Accept the Terms, acknowledge the Privacy Notice, and confirm age or guardian eligibility",
       })
     }
 
-    // Find user with provided email
-    const user = await User.findOne({ email }).populate("additionalDetails")
-
-    // If user not found with provided email
+    const user = await User.findById(req.user.id).select("+policyAcceptances")
     if (!user) {
-      // Return 401 Unauthorized status code with error message
-      return res.status(401).json({
-        success: false,
-        message: `User is not Registered with Us Please SignUp to Continue`,
-      })
+      return res.status(404).json({ success: false, message: "User not found" })
     }
 
-    // Generate JWT token and Compare Password
-    if (await bcrypt.compare(password, user.password)) {
-      const token = jwt.sign(
-        { email: user.email, id: user._id, role: user.role },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "24h",
-        }
-      )
-
-      // Save token to user document in database
-      user.token = token
-      user.password = undefined
-      // Set cookie for token and return success response
-      const options = {
-        expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-      }
-      res.cookie("token", token, options).status(200).json({
-        success: true,
-        token,
-        user,
-        message: `User Login Success`,
-      })
-    } else {
-      return res.status(401).json({
-        success: false,
-        message: `Password is incorrect`,
-      })
-    }
-  } catch (error) {
-    console.error(error)
-    // Return 500 Internal Server Error status code with error message
-    return res.status(500).json({
-      success: false,
-      message: `Login Failure Please Try Again`,
-    })
-  }
-}
-// Send OTP For Email Verification
-exports.sendotp = async (req, res) => {
-  try {
-    const { email } = req.body
-
-    // Check if user is already present
-    // Find user with provided email
-    const checkUserPresent = await User.findOne({ email })
-    // to be used in case of signup
-
-    // If user found with provided email
-    if (checkUserPresent) {
-      // Return 401 Unauthorized status code with error message
-      return res.status(401).json({
-        success: false,
-        message: `User is Already Registered`,
-      })
+    if (!hasCurrentPolicyAcceptance(user)) {
+      user.policyAcceptances.push(createPolicyAcceptance("account_update"))
+      await user.save()
     }
 
-    var otp = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-      lowerCaseAlphabets: false,
-      specialChars: false,
-    })
-    const result = await OTP.findOne({ otp: otp })
-    console.log("Result is Generate OTP Func")
-    console.log("OTP", otp)
-    console.log("Result", result)
-    while (result) {
-      otp = otpGenerator.generate(6, {
-        upperCaseAlphabets: false,
-      })
-    }
-    const otpPayload = { email, otp }
-    const otpBody = await OTP.create(otpPayload)
-    console.log("OTP Body", otpBody)
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: `OTP Sent Successfully`,
-      otp,
+      requiresPolicyAcceptance: false,
+      message: "Policy acceptance recorded",
     })
   } catch (error) {
-    console.log(error.message)
-    return res.status(500).json({ success: false, error: error.message })
+    console.error("Policy acceptance failed:", error.message)
+    return res.status(500).json({
+      success: false,
+      message: "Policy acceptance could not be recorded",
+    })
   }
 }
 
-// Controller for Changing Password
-exports.changePassword = async (req, res) => {
+exports.logout = async (req, res) => {
+  const token = readSessionToken(req)
+  if (!token) {
+    clearSession(res)
+    return res.status(200).json({ success: true, message: "Logged out" })
+  }
+
   try {
-    // Get user data from req.user
-    const userDetails = await User.findById(req.user.id)
-
-    // Get old password, new password, and confirm new password from req.body
-    const { oldPassword, newPassword } = req.body
-
-    // Validate old password
-    const isPasswordMatch = await bcrypt.compare(
-      oldPassword,
-      userDetails.password
-    )
-    if (!isPasswordMatch) {
-      // If old password does not match, return a 401 (Unauthorized) error
-      return res
-        .status(401)
-        .json({ success: false, message: "The password is incorrect" })
-    }
-
-    // Update password
-    const encryptedPassword = await bcrypt.hash(newPassword, 10)
-    const updatedUserDetails = await User.findByIdAndUpdate(
-      req.user.id,
-      { password: encryptedPassword },
-      { new: true }
-    )
-
-    // Send notification email
-    try {
-      const emailResponse = await mailSender(
-        updatedUserDetails.email,
-        "Password for your account has been updated",
-        passwordUpdated(
-          updatedUserDetails.email,
-          `Password updated successfully for ${updatedUserDetails.firstName} ${updatedUserDetails.lastName}`
-        )
+    const decoded = verifySessionToken(token)
+    if (decoded?.id && User.db.base.isValidObjectId(decoded.id)) {
+      await User.updateOne(
+        {
+          _id: decoded.id,
+          sessionVersion: Number.isInteger(decoded.sessionVersion)
+            ? decoded.sessionVersion
+            : 0,
+        },
+        { $inc: { sessionVersion: 1 } }
       )
-      console.log("Email sent successfully:", emailResponse.response)
-    } catch (error) {
-      // If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
-      console.error("Error occurred while sending email:", error)
-      return res.status(500).json({
+    }
+  } catch (error) {
+    // Invalid or expired cookies cannot be retried and should be removed. A
+    // database failure leaves a valid token usable, so preserve the cookie and
+    // let the caller retry revocation.
+    if (
+      !["JsonWebTokenError", "TokenExpiredError", "NotBeforeError"].includes(
+        error.name
+      )
+    ) {
+      console.error("Session revocation failed:", error.message)
+      return res.status(503).json({
         success: false,
-        message: "Error occurred while sending email",
-        error: error.message,
+        message: "Session could not be revoked; retry logout",
       })
     }
-
-    // Return success response
-    return res
-      .status(200)
-      .json({ success: true, message: "Password updated successfully" })
-  } catch (error) {
-    // If there's an error updating the password, log the error and return a 500 (Internal Server Error) error
-    console.error("Error occurred while updating password:", error)
-    return res.status(500).json({
-      success: false,
-      message: "Error occurred while updating password",
-      error: error.message,
-    })
   }
+
+  clearSession(res)
+  return res.status(200).json({ success: true, message: "Logged out" })
 }

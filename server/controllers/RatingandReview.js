@@ -8,6 +8,23 @@ exports.createRating = async (req, res) => {
     const userId = req.user.id
     const { rating, review, courseId } = req.body
 
+    const normalizedRating = Number(rating)
+    const normalizedReview = String(review || "").trim()
+
+    if (
+      !mongoose.isValidObjectId(courseId) ||
+      !Number.isInteger(normalizedRating) ||
+      normalizedRating < 1 ||
+      normalizedRating > 5 ||
+      !normalizedReview ||
+      normalizedReview.length > 2000
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide a rating from 1 to 5 and a valid review",
+      })
+    }
+
     // Check if the user is enrolled in the course
 
     const courseDetails = await Course.findOne({
@@ -22,34 +39,20 @@ exports.createRating = async (req, res) => {
       })
     }
 
-    // Check if the user has already reviewed the course
-    const alreadyReviewed = await RatingAndReview.findOne({
-      user: userId,
-      course: courseId,
-    })
-
-    if (alreadyReviewed) {
-      return res.status(403).json({
-        success: false,
-        message: "Course already reviewed by user",
-      })
-    }
-
     // Create a new rating and review
     const ratingReview = await RatingAndReview.create({
-      rating,
-      review,
+      rating: normalizedRating,
+      review: normalizedReview,
       course: courseId,
       user: userId,
     })
 
     // Add the rating and review to the course
     await Course.findByIdAndUpdate(courseId, {
-      $push: {
-        ratingAndReviews: ratingReview,
+      $addToSet: {
+        ratingAndReviews: ratingReview._id,
       },
     })
-    await courseDetails.save()
 
     return res.status(201).json({
       success: true,
@@ -57,11 +60,16 @@ exports.createRating = async (req, res) => {
       ratingReview,
     })
   } catch (error) {
-    console.error(error)
+    console.error("Rating creation failed:", error.message)
+    if (error?.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Course already reviewed by user",
+      })
+    }
     return res.status(500).json({
       success: false,
       message: "Internal server error",
-      error: error.message,
     })
   }
 }
@@ -69,7 +77,14 @@ exports.createRating = async (req, res) => {
 // Get the average rating for a course
 exports.getAverageRating = async (req, res) => {
   try {
-    const courseId = req.body.courseId
+    const courseId = req.query?.courseId || req.body?.courseId
+
+    if (!mongoose.isValidObjectId(courseId)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid course is required",
+      })
+    }
 
     // Calculate the average rating using the MongoDB aggregation pipeline
     const result = await RatingAndReview.aggregate([
@@ -96,11 +111,10 @@ exports.getAverageRating = async (req, res) => {
     // If no ratings are found, return 0 as the default rating
     return res.status(200).json({ success: true, averageRating: 0 })
   } catch (error) {
-    console.error(error)
+    console.error("Average rating lookup failed:", error.message)
     return res.status(500).json({
       success: false,
       message: "Failed to retrieve the rating for the course",
-      error: error.message,
     })
   }
 }
@@ -108,11 +122,16 @@ exports.getAverageRating = async (req, res) => {
 // Get all rating and reviews
 exports.getAllRatingReview = async (req, res) => {
   try {
+    const requestedLimit = Number(req.query?.limit || 20)
+    const limit = Number.isInteger(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 50)
+      : 20
     const allReviews = await RatingAndReview.find({})
-      .sort({ rating: "desc" })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(limit)
       .populate({
         path: "user",
-        select: "firstName lastName email image", // Specify the fields you want to populate from the "Profile" model
+        select: "firstName lastName image",
       })
       .populate({
         path: "course",
@@ -120,16 +139,38 @@ exports.getAllRatingReview = async (req, res) => {
       })
       .exec()
 
+    const reviews = allReviews.map((document) => {
+      const item =
+        typeof document?.toObject === "function"
+          ? document.toObject()
+          : { ...document }
+      return {
+        createdAt: item.createdAt,
+        course: item.course
+          ? { courseName: item.course.courseName }
+          : undefined,
+        rating: item.rating,
+        review: item.review,
+        user: item.user
+          ? {
+              firstName: item.user.firstName,
+              image: item.user.image,
+              lastName: item.user.lastName,
+            }
+          : undefined,
+      }
+    })
+
     res.status(200).json({
       success: true,
-      data: allReviews,
+      data: reviews,
+      pagination: { limit },
     })
   } catch (error) {
-    console.error(error)
+    console.error("Review feed lookup failed:", error.message)
     return res.status(500).json({
       success: false,
       message: "Failed to retrieve the rating and review for the course",
-      error: error.message,
     })
   }
 }
