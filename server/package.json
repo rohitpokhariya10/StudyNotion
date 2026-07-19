@@ -41,6 +41,6 @@
 		"redis": "^6.1.0"
 	},
 	"optionalDependencies": {
-		"gcp-metadata": "^5.3.0"
+		"gcp-metadata": "^8.1.3"
 	}
 }
