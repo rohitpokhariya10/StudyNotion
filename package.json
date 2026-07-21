@@ -28,7 +28,7 @@
     "react-markdown": "^10.1.0",
     "react-otp-input": "^3.0.0",
     "react-redux": "^9.3.0",
-    "react-router-dom": "^6.30.4",
+    "react-router-dom": "^7.18.1",
     "react-super-responsive-table": "^5.2.1",
     "react-type-animation": "^3.0.1",
     "swiper": "^14.0.5"
