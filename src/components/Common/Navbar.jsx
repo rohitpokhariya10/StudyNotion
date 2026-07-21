@@ -6,23 +6,14 @@ import {
 } from "react-icons/ai"
 import { BsChevronDown } from "react-icons/bs"
 import { useDispatch, useSelector } from "react-redux"
-import {
-  Link,
-  matchPath,
-  useLocation,
-  useNavigate,
-} from "react-router-dom"
+import { Link, matchPath, useLocation, useNavigate } from "react-router-dom"
 
 import logo from "../../assets/Logo/Logo-Full-Light.png"
 import { NavbarLinks } from "../../data/navbar-links"
 import useOnClickOutside from "../../hooks/useOnClickOutside"
-import { apiConnector } from "../../services/apiConnector"
-import { categories } from "../../services/apis"
+import { useGetCatalogCategoriesQuery } from "../../services/catalogApi"
 import { logout } from "../../services/operations/authAPI"
-import {
-  getAvatarSource,
-  setInitialsAvatarOnError,
-} from "../../utils/avatar"
+import { getAvatarSource, setInitialsAvatarOnError } from "../../utils/avatar"
 import { ACCOUNT_TYPE } from "../../utils/constants"
 import ProfileDropdown from "../core/Auth/ProfileDropdown"
 
@@ -34,8 +25,8 @@ function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const [subLinks, setSubLinks] = useState([])
-  const [loading, setLoading] = useState(false)
+  const { data: subLinks = [], isLoading: catalogLinksLoading } =
+    useGetCatalogCategoriesQuery()
   const [mobileMenuLocationKey, setMobileMenuLocationKey] = useState(null)
   const [mobileCatalogOpen, setMobileCatalogOpen] = useState(false)
   const mobileMenuRef = useRef(null)
@@ -57,29 +48,6 @@ function Navbar() {
     const timeoutId = window.setTimeout(closeMobileMenu, 0)
     return () => window.clearTimeout(timeoutId)
   }, [closeMobileMenu, location.key])
-
-  useEffect(() => {
-    let active = true
-
-    ;(async () => {
-      setLoading(true)
-      try {
-        const res = await apiConnector("GET", categories.CATEGORIES_API)
-        const categoryData = res?.data?.data
-        if (active) {
-          setSubLinks(Array.isArray(categoryData) ? categoryData : [])
-        }
-      } catch {
-        if (active) setSubLinks([])
-      } finally {
-        if (active) setLoading(false)
-      }
-    })()
-
-    return () => {
-      active = false
-    }
-  }, [])
 
   useEffect(() => {
     if (!mobileOpen) return undefined
@@ -143,15 +111,15 @@ function Navbar() {
                       <BsChevronDown aria-hidden="true" />
                     </button>
                     <div className="invisible absolute left-1/2 top-1/2 z-[1000] flex w-[200px] -translate-x-1/2 translate-y-[3em] flex-col rounded-lg bg-richblack-5 p-4 text-richblack-900 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:translate-y-[1.65em] group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-[1.65em] group-hover:opacity-100 lg:w-[300px]">
-                      <div className="absolute left-1/2 top-0 -z-10 h-6 w-6 translate-x-[80%] -translate-y-[40%] rotate-45 select-none rounded bg-richblack-5" />
-                      {loading ? (
+                      <div className="absolute left-1/2 top-0 -z-10 h-6 w-6 -translate-y-[40%] translate-x-[80%] rotate-45 select-none rounded bg-richblack-5" />
+                      {catalogLinksLoading ? (
                         <p className="text-center">Loading...</p>
                       ) : catalogLinks.length ? (
                         catalogLinks.map((subLink) => (
                           <Link
                             to={catalogPath(subLink.name)}
                             className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50 focus-visible:bg-richblack-50 focus-visible:outline-none"
-                            key={subLink._id || subLink.name}
+                            key={subLink.id || subLink.name}
                           >
                             {subLink.name}
                           </Link>
@@ -179,23 +147,22 @@ function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-x-4 md:flex">
-          {isAuthenticated &&
-            user?.accountType === ACCOUNT_TYPE.STUDENT && (
-              <Link
-                to="/dashboard/cart"
-                className="relative"
-                aria-label={`Shopping cart with ${totalItems} item${
-                  totalItems === 1 ? "" : "s"
-                }`}
-              >
-                <AiOutlineShoppingCart className="text-2xl text-richblack-100" />
-                {totalItems > 0 && (
-                  <span className="absolute -bottom-2 -right-2 grid h-5 w-5 place-items-center overflow-hidden rounded-full bg-richblack-600 text-center text-xs font-bold text-yellow-100">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
-            )}
+          {isAuthenticated && user?.accountType === ACCOUNT_TYPE.STUDENT && (
+            <Link
+              to="/dashboard/cart"
+              className="relative"
+              aria-label={`Shopping cart with ${totalItems} item${
+                totalItems === 1 ? "" : "s"
+              }`}
+            >
+              <AiOutlineShoppingCart className="text-2xl text-richblack-100" />
+              {totalItems > 0 && (
+                <span className="absolute -bottom-2 -right-2 grid h-5 w-5 place-items-center overflow-hidden rounded-full bg-richblack-600 text-center text-xs font-bold text-yellow-100">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
+          )}
           {status !== "checking" && !isAuthenticated && (
             <Link
               to="/login"
@@ -279,14 +246,14 @@ function Navbar() {
                               id="mobile-catalog-links"
                               className="ml-3 border-l border-richblack-600 pl-3"
                             >
-                              {loading ? (
+                              {catalogLinksLoading ? (
                                 <p className="px-3 py-3 text-richblack-300">
                                   Loading catalog...
                                 </p>
                               ) : catalogLinks.length ? (
                                 catalogLinks.map((subLink) => (
                                   <Link
-                                    key={subLink._id || subLink.name}
+                                    key={subLink.id || subLink.name}
                                     to={catalogPath(subLink.name)}
                                     onClick={closeMobileMenu}
                                     className="block rounded-md px-3 py-3 hover:bg-richblack-700"
@@ -321,7 +288,10 @@ function Navbar() {
 
                 <div className="mt-4 border-t border-richblack-700 pt-4">
                   {status === "checking" ? (
-                    <p className="px-3 py-2 text-sm text-richblack-300" role="status">
+                    <p
+                      className="px-3 py-2 text-sm text-richblack-300"
+                      role="status"
+                    >
                       Checking your session...
                     </p>
                   ) : isAuthenticated && user ? (

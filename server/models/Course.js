@@ -40,6 +40,17 @@ const courseSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
+    level: {
+      type: String,
+      enum: ["beginner", "intermediate", "advanced"],
+    },
+    language: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      maxlength: 35,
+      match: /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/,
+    },
     studentsEnroled: [
       { type: mongoose.Schema.Types.ObjectId, required: true, ref: "user" },
     ],
@@ -68,5 +79,28 @@ const courseSchema = new mongoose.Schema(
 
 courseSchema.index({ status: 1, category: 1 })
 courseSchema.index({ instructor: 1, createdAt: -1 })
+courseSchema.index(
+  { status: 1, createdAt: -1, _id: -1 },
+  { name: "catalog_published_newest" }
+)
+courseSchema.index(
+  { status: 1, category: 1, createdAt: -1, _id: -1 },
+  { name: "catalog_category_newest" }
+)
+courseSchema.index(
+  { status: 1, price: 1, _id: 1 },
+  { name: "catalog_published_price" }
+)
+courseSchema.index(
+  { status: 1, category: 1, price: 1, _id: 1 },
+  { name: "catalog_category_price" }
+)
+courseSchema.index(
+  { status: 1, courseName: "text", tag: "text", courseDescription: "text" },
+  {
+    name: "catalog_published_text",
+    weights: { courseName: 10, tag: 5, courseDescription: 1 },
+  }
+)
 
 module.exports = mongoose.model("Course", courseSchema)

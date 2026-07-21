@@ -1,24 +1,28 @@
 import { configureStore } from "@reduxjs/toolkit"
-import { render, screen, waitFor, within } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Provider } from "react-redux"
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import rootReducer from "../../reducer"
-import { apiConnector } from "../../services/apiConnector"
 import { setSession } from "../../slices/authSlice"
 import Navbar from "./Navbar"
 
-vi.mock("../../services/apiConnector", () => ({
-  apiConnector: vi.fn(),
+const catalogMocks = vi.hoisted(() => ({ categories: vi.fn() }))
+
+vi.mock("../../services/catalogApi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useGetCatalogCategoriesQuery: catalogMocks.categories,
 }))
 
 describe("Navbar", () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    catalogMocks.categories.mockReturnValue({ data: [], isLoading: false })
+  })
 
   it("renders an empty catalog state when the API response has no data array", async () => {
-    apiConnector.mockResolvedValue({ data: { success: false } })
     const store = configureStore({ reducer: rootReducer })
 
     render(
@@ -29,21 +33,19 @@ describe("Navbar", () => {
       </Provider>
     )
 
-    await waitFor(() => expect(apiConnector).toHaveBeenCalledTimes(1))
     expect(await screen.findByText("No Courses Found")).toBeTruthy()
   })
 
   it("provides keyboard-accessible mobile navigation and anonymous actions", async () => {
-    apiConnector.mockResolvedValue({
-      data: {
-        data: [
-          {
-            _id: "category-1",
-            name: "Web Development",
-            publishedCourseCount: 1,
-          },
-        ],
-      },
+    catalogMocks.categories.mockReturnValue({
+      data: [
+        {
+          id: "category-1",
+          name: "Web Development",
+          publishedCourseCount: 1,
+        },
+      ],
+      isLoading: false,
     })
     const store = configureStore({ reducer: rootReducer })
     store.dispatch(setSession(false))
@@ -57,15 +59,19 @@ describe("Navbar", () => {
       </Provider>
     )
 
-    await user.click(
-      screen.getByRole("button", { name: "Open navigation" })
-    )
+    await user.click(screen.getByRole("button", { name: "Open navigation" }))
     const mobileNavigation = screen.getByRole("navigation", {
       name: "Mobile navigation",
     })
-    expect(within(mobileNavigation).getByRole("link", { name: "Home" })).toBeVisible()
-    expect(within(mobileNavigation).getByRole("link", { name: "Log in" })).toBeVisible()
-    expect(within(mobileNavigation).getByRole("link", { name: "Sign up" })).toBeVisible()
+    expect(
+      within(mobileNavigation).getByRole("link", { name: "Home" })
+    ).toBeVisible()
+    expect(
+      within(mobileNavigation).getByRole("link", { name: "Log in" })
+    ).toBeVisible()
+    expect(
+      within(mobileNavigation).getByRole("link", { name: "Sign up" })
+    ).toBeVisible()
 
     await user.click(
       within(mobileNavigation).getByRole("button", { name: "Catalog" })

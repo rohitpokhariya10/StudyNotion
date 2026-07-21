@@ -18,10 +18,14 @@ Install and configure:
 ```bash
 nvm use
 npm ci
-cd server && npm ci && cd ..
 cp .env.example .env
 cp server/.env.example server/.env
 ```
+
+The repository is an npm workspace. The root lockfile installs the React app,
+the API workspace, and `@studynotion/contracts`; its install lifecycle also
+builds the shared TypeScript contracts. Do not create or maintain a separate
+`server/package-lock.json`.
 
 Replace `JWT_SECRET` and `OTP_SECRET` in `server/.env` with two different
 random values of at least 32 characters. For example, run `openssl rand -hex
@@ -31,12 +35,13 @@ OTP to the local frontend instead of requiring an email provider.
 Seed useful local data and run both applications:
 
 ```bash
-cd server && npm run seed && cd ..
+npm --workspace studynotion-backend run seed
 npm run dev
 ```
 
 - Client: `http://localhost:3000`
 - API: `http://localhost:4000/api/v1`
+- Public catalog API: `http://localhost:4000/api/v2/courses`
 - Liveness: `http://localhost:4000/health/live`
 - Readiness: `http://localhost:4000/health/ready`
 
@@ -49,13 +54,25 @@ Seeded local accounts:
 ## Verification
 
 ```bash
-npm run lint
-npm test
-npm run build:local
-cd server && npm test
+npm run verify
+npm run test:e2e
 ```
 
-CI runs the same checks from committed lockfiles on Node.js 24.
+The real MongoDB/Redis catalog check is intentionally separate from the unit
+suite:
+
+```bash
+docker compose -f compose.integration.yml up -d --wait
+CATALOG_TEST_MONGODB_URI=mongodb://127.0.0.1:27018/studynotion_catalog_test_local \
+CATALOG_TEST_REDIS_URL=redis://127.0.0.1:6380/14 \
+npm run test:integration
+docker compose -f compose.integration.yml down
+```
+
+The integration test refuses production-looking targets and cleans only its
+guarded disposable database and Redis database. CI runs these checks from the
+committed root lockfile on Node.js 24. A local Node 26 result is compatibility
+evidence only; Node 24 remains the supported runtime.
 
 ## Production providers
 
@@ -88,10 +105,22 @@ checks in `server/README.md` with test accounts before launch.
 Build the production frontend with `npm run build` and deploy `dist/` as
 immutable static assets. This command validates every public provider, support,
 and legal value and refuses placeholder, HTTP, or test payment configuration.
-Use `npm run build:local` only for local artifact verification. Deploy `server/`
-separately using its Dockerfile or `npm start`. The API
-must run behind HTTPS, use the configured trusted proxy count, and pass
-`/health/ready` before receiving traffic.
+Use `npm run build:local` only for local artifact verification. Deploy the API
+from the repository-root context with `server/Dockerfile`; an isolated
+`server/` install is not supported because the API consumes the shared contract
+workspace. The API must run behind HTTPS, use the configured trusted proxy
+count, and pass `/health/ready` before receiving traffic.
+
+For a non-container API host, install from the repository root with development
+dependencies, build the contracts, prune without rerunning lifecycle scripts,
+and start the backend workspace:
+
+```bash
+npm ci --include=dev
+npm run contracts:build
+npm prune --omit=dev --ignore-scripts
+npm --workspace studynotion-backend start
+```
 
 ```bash
 docker build -t studynotion-web \
@@ -103,10 +132,12 @@ docker build -t studynotion-web \
   --build-arg VITE_LEGAL_ADDRESS=REPLACE_WITH_REGISTERED_ADDRESS \
   --build-arg VITE_LEGAL_JURISDICTION=India \
   .
-docker build -t studynotion-api server
+docker build -f server/Dockerfile -t studynotion-api .
 ```
 
-Both Docker contexts exclude local environment files and host dependencies.
+Both images use the repository root as their Docker context so the shared
+contract workspace is available. The context excludes local environment files
+and host dependencies.
 The web image intentionally fails its build when any required public argument is
 missing, uses HTTP, or does not look like the corresponding production key. The
 web image also renders the exact API origin into its restrictive Content Security

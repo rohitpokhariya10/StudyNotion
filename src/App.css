@@ -2,6 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+.catalog-theme {
+  --catalog-canvas: 247 243 234;
+  --catalog-surface: 255 252 247;
+  --catalog-surface-muted: 239 234 223;
+  --catalog-text: 24 32 44;
+  --catalog-muted: 93 102 116;
+  --catalog-border: 217 210 197;
+  --catalog-action: 27 39 56;
+  --catalog-brand: 180 83 9;
+  --catalog-brand-soft: 254 243 199;
+  --catalog-info: 7 89 133;
+  --catalog-danger: 180 35 24;
+  --catalog-focus: 14 116 144;
+  --catalog-radius: 0.625rem;
+  --catalog-radius-lg: 0.75rem;
+  --catalog-shadow: 0 12px 32px rgb(24 32 44 / 0.08);
+  color-scheme: light;
+}
+
+.catalog-theme :where(a, button, input, select):focus-visible {
+  outline: 3px solid rgb(var(--catalog-focus));
+  outline-offset: 3px;
+}
+
+.catalog-course-card:focus-within {
+  border-color: rgb(var(--catalog-focus));
+  box-shadow:
+    0 0 0 3px rgb(var(--catalog-canvas)),
+    0 0 0 6px rgb(var(--catalog-focus));
+}
+
+.catalog-course-card > a:focus-visible {
+  outline: none;
+}
+
+.catalog-line-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.catalog-skeleton {
+  animation: catalog-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes catalog-pulse {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-theme *,
+  .catalog-theme *::before,
+  .catalog-theme *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
 html,
 body {
   overflow-x: hidden;
@@ -49,7 +116,8 @@ details > summary::-webkit-details-marker {
   height: 56px;
   border-radius: 50%;
   border: 9px solid #f1f2ff;
-  animation: spinner-bulqg1 0.8s infinite linear alternate,
+  animation:
+    spinner-bulqg1 0.8s infinite linear alternate,
     spinner-oaa3wk 1.6s infinite linear;
 }
 

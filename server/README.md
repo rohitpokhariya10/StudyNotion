@@ -4,9 +4,14 @@
 
 1. Ensure MongoDB is running locally on `127.0.0.1:27017`.
 2. Copy `.env.example` to `.env` if `.env` is missing.
-3. Install locked dependencies with `npm ci`.
-4. Add demo categories, courses, and users with `npm run seed`.
-5. Start the API with `npm start`.
+3. From the repository root, install every workspace with `npm ci`.
+4. Add demo categories, courses, and users with
+   `npm --workspace studynotion-backend run seed`.
+5. Start the API with `npm --workspace studynotion-backend start`.
+
+The root `package-lock.json` is the only dependency lockfile. It installs this
+API together with `@studynotion/contracts`, whose compiled output is required by
+the v2 catalog route.
 
 The API runs at `http://localhost:4000` and the frontend uses
 `http://localhost:4000/api/v1`.
@@ -187,12 +192,55 @@ refund requires the separate audited action
 `{ "action": "retry_refund", "confirmation": "RETRY FAILED REFUND" }`; prior
 failed refund IDs remain attached to the Purchase.
 
+## Public catalog v2
+
+`GET /api/v2/courses` is an additive, unauthenticated published-course listing.
+It accepts validated search, category, level, language, price, rating, duration,
+sort, page-size, and opaque-cursor parameters. See
+`packages/contracts/openapi.json` for the machine-readable schema and
+`docs/architecture/0002-catalog-v2-vertical-slice.md` for the compatibility and
+cache decisions.
+
+Only stable public fields are returned. Draft courses, learner identities,
+review bodies, curriculum and protected lesson/video URLs, provider IDs, and
+entitlement state are not part of the DTO. Public thumbnail and instructor image
+URLs remain part of the card DTO. Both success and error bodies carry the
+request ID exposed in `X-Request-Id`. All v2 responses are `private, no-store`;
+frontend RTK Query owns the short-lived in-memory cache so an intermediary
+cannot replay a stale trace ID.
+
+`level` and `language` are optional additions. A legacy course missing either
+field remains visible without that filter, returns `null` metadata, and does not
+match an explicit filter. This release does not backfill historical courses.
+
+Run the real MongoDB/Redis verification from the repository root:
+
+```bash
+docker compose -f compose.integration.yml up -d --wait
+CATALOG_TEST_MONGODB_URI=mongodb://127.0.0.1:27018/studynotion_catalog_test_local \
+CATALOG_TEST_REDIS_URL=redis://127.0.0.1:6380/14 \
+npm run test:integration
+docker compose -f compose.integration.yml down
+```
+
+The target guards reject production-looking stores. Query-plan evidence is
+recorded in `docs/audits/catalog-query-plan-2026-07.md`.
+
+Build the API image from the repository root so Docker can include the shared
+contract workspace:
+
+```bash
+docker build -f server/Dockerfile -t studynotion-api .
+```
+
 ## Contract verification
 
-Run `npm test` in this directory. The suite mocks MongoDB and external providers
-for OTP, local login, Google token exchange, session revocation, purchase
-pricing, verification, and webhook idempotency. HTTP boundary tests bind only a
-temporary loopback port and never contact an external service.
+Run `npm --workspace studynotion-backend test` from the repository root. The
+suite mocks MongoDB and external providers for OTP, local login, Google token
+exchange, session revocation, purchase pricing, verification, webhook
+idempotency, and the catalog contract. HTTP boundary tests bind only a temporary
+loopback port and never contact an external service. Node.js 24 is the supported
+runtime; local Node 26 results do not change that production target.
 
 ## Database indexes
 
@@ -201,12 +249,21 @@ backup and resolving any duplicate email, review, progress, receipt, order, or
 payment values, create the declared indexes during a maintenance window:
 
 ```bash
-MIGRATION_CONFIRM=create-indexes npm run db:indexes
+MIGRATION_CONFIRM=create-indexes \
+npm --workspace studynotion-backend run db:indexes
 ```
 
 The command only creates declared indexes; it does not drop existing indexes.
 The preflight checks case-normalized identities plus Category, OTP, Google ID,
 and every compound Purchase uniqueness constraint before this command runs.
+
+For the catalog slice this command adds the named
+`catalog_published_newest`, `catalog_category_newest`,
+`catalog_published_price`, `catalog_category_price`, and
+`catalog_published_text` indexes. No data backfill or destructive migration is
+required. Rolling the application back does not require dropping them; remove
+them only through a separate backup-first database change after confirming the
+previous application does not use them.
 
 ## Upgrading legacy production data
 
@@ -217,7 +274,8 @@ It also records `everPublishedAt` for currently Published legacy courses so
 content already offered to learners becomes archive-only:
 
 ```bash
-BACKFILL_CONFIRM=backfill-security-fields npm run db:backfill-security
+BACKFILL_CONFIRM=backfill-security-fields \
+npm --workspace studynotion-backend run db:backfill-security
 ```
 
 It intentionally does not guess how to repair duplicate identities, reviews,
@@ -230,8 +288,9 @@ those cases manually, re-upload every legacy lesson as authenticated Cloudinary
 media, then run:
 
 ```bash
-npm run preflight:production
-MIGRATION_CONFIRM=create-indexes npm run db:indexes
+npm --workspace studynotion-backend run preflight:production
+MIGRATION_CONFIRM=create-indexes \
+npm --workspace studynotion-backend run db:indexes
 ```
 
 `preflight:production` exits non-zero for insecure or malformed media in both
@@ -256,7 +315,7 @@ ADMIN_EMAIL=owner@example.com \
 ADMIN_PASSWORD='replace-with-a-unique-strong-password' \
 ADMIN_FIRST_NAME=Platform \
 ADMIN_LAST_NAME=Owner \
-npm run admin:provision
+npm --workspace studynotion-backend run admin:provision
 ```
 
 The command refuses to run when an active Admin already exists and never prints

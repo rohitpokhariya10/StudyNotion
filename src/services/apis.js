@@ -9,6 +9,19 @@ const BASE_URL = (configuredBaseUrl || "http://localhost:4000/api/v1").replace(
   ""
 )
 
+export const API_V1_BASE_URL = BASE_URL
+
+export const deriveApiVersionBaseUrl = (baseUrl, version) => {
+  const normalizedBaseUrl = String(baseUrl || "").replace(/\/$/, "")
+  if (!/^v\d+$/.test(version) || !normalizedBaseUrl.endsWith("/api/v1")) {
+    throw new Error("The API base URL must end in /api/v1")
+  }
+
+  return `${normalizedBaseUrl.slice(0, -"v1".length)}${version}`
+}
+
+export const API_V2_BASE_URL = deriveApiVersionBaseUrl(BASE_URL, "v2")
+
 // ---------------- AUTH ENDPOINTS ----------------
 export const endpoints = {
   SENDOTP_API: BASE_URL + "/auth/sendotp",
@@ -90,6 +103,12 @@ export const categories = {
 // ---------------- CATALOG PAGE DATA ----------------
 export const catalogData = {
   CATALOGPAGEDATA_API: BASE_URL + "/course/getCategoryPageDetails",
+}
+
+// ---------------- V2 CATALOG API ----------------
+export const catalogEndpoints = {
+  CATEGORIES_API: categories.CATEGORIES_API,
+  COURSES_API: API_V2_BASE_URL + "/courses",
 }
 
 // ---------------- CONTACT-US API ----------------

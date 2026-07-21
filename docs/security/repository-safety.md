@@ -60,11 +60,10 @@ entered Git history.
 
 ```bash
 npm ci
-npm --prefix server ci
 npm run lint
 npm test
 npm run build:local
-npm --prefix server test
+npm --workspace studynotion-backend test
 ```
 
 CI runs the public production configuration validator through `npm run build`.
@@ -73,10 +72,10 @@ Do not place backend secrets in `VITE_*` values or in a frontend bundle.
 The following scripts can change database or account state and are not part of a
 repository safety check:
 
-- `npm --prefix server run seed`
-- `npm --prefix server run db:backfill-security`
-- `npm --prefix server run db:indexes`
-- `npm --prefix server run admin:provision`
+- `npm --workspace studynotion-backend run seed`
+- `npm --workspace studynotion-backend run db:backfill-security`
+- `npm --workspace studynotion-backend run db:indexes`
+- `npm --workspace studynotion-backend run admin:provision`
 
 ## 5. Use disposable integration dependencies
 

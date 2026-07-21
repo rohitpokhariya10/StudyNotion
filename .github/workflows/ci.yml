@@ -14,6 +14,7 @@ on:
 
 jobs:
   client:
+    name: Contracts and web
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -24,6 +25,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
+      - run: npm run typecheck
+      - run: npm run contracts:openapi:check
+      - run: npm run contracts:generate
+      - run: git diff --exit-code -- packages/contracts/openapi.json
       - run: npm run lint
       - run: npm test -- --run
       - run: npm run build
@@ -35,21 +40,88 @@ jobs:
           VITE_LEGAL_ENTITY_NAME: StudyNotion CI
           VITE_LEGAL_ADDRESS: CI test environment
           VITE_LEGAL_JURISDICTION: India
-          VITE_REFUND_WINDOW_DAYS: 7
 
   server:
+    name: API unit and contract tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: server
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: server/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci
-      - run: npm audit --omit=dev --audit-level=high
-      - run: npm test
+      - run: npm --workspace studynotion-backend test
+
+  catalog-integration:
+    name: Catalog MongoDB and Redis integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mongo:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run test:integration
+        env:
+          CATALOG_TEST_MONGODB_URI: mongodb://127.0.0.1:27017/studynotion_catalog_test_ci
+          CATALOG_TEST_REDIS_URL: redis://127.0.0.1:6379/14
+
+  catalog-e2e:
+    name: Catalog Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          VITE_API_BASE_URL: http://127.0.0.1:4000/api/v1
+
+  containers:
+    name: Container smoke builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - run: >-
+          docker build
+          --build-arg VITE_API_BASE_URL=https://api.example.test/api/v1
+          --build-arg VITE_GOOGLE_CLIENT_ID=ci-test.apps.googleusercontent.com
+          --build-arg VITE_RAZORPAY_KEY_ID=rzp_live_CIBUILD123
+          --build-arg VITE_SUPPORT_EMAIL=support@studynotion.test
+          --build-arg VITE_LEGAL_ENTITY_NAME="StudyNotion CI"
+          --build-arg VITE_LEGAL_ADDRESS="CI test environment"
+          --build-arg VITE_LEGAL_JURISDICTION=India
+          -t studynotion-web:ci .
+      - run: docker build -f server/Dockerfile -t studynotion-api:ci .

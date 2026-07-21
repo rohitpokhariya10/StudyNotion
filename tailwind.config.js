@@ -109,6 +109,20 @@ module.exports = {
         800: "#3D2A01",
         900: "#251400",
       },
+      catalog: {
+        canvas: "rgb(var(--catalog-canvas) / <alpha-value>)",
+        surface: "rgb(var(--catalog-surface) / <alpha-value>)",
+        "surface-muted": "rgb(var(--catalog-surface-muted) / <alpha-value>)",
+        text: "rgb(var(--catalog-text) / <alpha-value>)",
+        muted: "rgb(var(--catalog-muted) / <alpha-value>)",
+        border: "rgb(var(--catalog-border) / <alpha-value>)",
+        action: "rgb(var(--catalog-action) / <alpha-value>)",
+        brand: "rgb(var(--catalog-brand) / <alpha-value>)",
+        "brand-soft": "rgb(var(--catalog-brand-soft) / <alpha-value>)",
+        info: "rgb(var(--catalog-info) / <alpha-value>)",
+        danger: "rgb(var(--catalog-danger) / <alpha-value>)",
+        focus: "rgb(var(--catalog-focus) / <alpha-value>)",
+      },
       "pure-greys": {
         5: "#F9F9F9",
         25: "#E2E2E2",
@@ -127,9 +141,16 @@ module.exports = {
     extend: {
       maxWidth: {
         maxContent: "1260px",
-        maxContentTab: "650px"
+        maxContentTab: "650px",
+      },
+      borderRadius: {
+        product: "var(--catalog-radius)",
+        "product-lg": "var(--catalog-radius-lg)",
+      },
+      boxShadow: {
+        product: "var(--catalog-shadow)",
       },
     },
   },
   plugins: [],
-};
+}

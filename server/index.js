@@ -16,7 +16,13 @@ const {
   requireTrustedBrowserOrigin,
 } = require("./middleware/trustedOrigin")
 const { razorpayWebhook } = require("./controllers/payments")
+const {
+  isV2Request,
+  normalizeV2ErrorEnvelope,
+  sendV2Error,
+} = require("./domains/catalog/catalogErrors")
 const adminRoutes = require("./routes/Admin")
+const catalogV2Routes = require("./routes/CatalogV2")
 const contactUsRoutes = require("./routes/Contact")
 const courseRoutes = require("./routes/Course")
 const paymentRoutes = require("./routes/Payments")
@@ -113,6 +119,7 @@ app.post(
 )
 
 app.use("/api/v1", apiLimiter)
+app.use("/api/v2", normalizeV2ErrorEnvelope, apiLimiter)
 
 app.use(express.json({ limit: env.jsonBodyLimit, strict: true }))
 app.use(
@@ -120,7 +127,9 @@ app.use(
 )
 app.use(cookieParser())
 app.use("/api/v1", requireTrustedBrowserOrigin)
+app.use("/api/v2", requireTrustedBrowserOrigin)
 
+app.use("/api/v2", catalogV2Routes)
 app.use("/api/v1/auth", userRoutes)
 app.use("/api/v1/admin", adminRoutes)
 app.use("/api/v1/profile", profileRoutes)
@@ -128,14 +137,28 @@ app.use("/api/v1/course", courseRoutes)
 app.use("/api/v1/payment", paymentRoutes)
 app.use("/api/v1/reach", contactUsRoutes)
 
-app.use((_req, res) =>
-  res.status(404).json({ success: false, message: "Route not found" })
-)
+app.use((req, res) => {
+  if (isV2Request(req)) {
+    return sendV2Error(req, res, {
+      code: "ROUTE_NOT_FOUND",
+      message: "Route not found",
+      statusCode: 404,
+    })
+  }
+  return res.status(404).json({ success: false, message: "Route not found" })
+})
 
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error)
 
   if (error.code === "CORS_NOT_ALLOWED") {
+    if (isV2Request(req)) {
+      return sendV2Error(req, res, {
+        code: "CORS_NOT_ALLOWED",
+        message: "Origin is not allowed",
+        statusCode: 403,
+      })
+    }
     return res.status(403).json({ success: false, message: "Origin is not allowed" })
   }
   if (error.type === "entity.too.large" || error.status === 413) {
