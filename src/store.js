@@ -3,6 +3,7 @@ import { setupListeners } from "@reduxjs/toolkit/query"
 
 import rootReducer from "./reducer"
 import { catalogApi } from "./services/catalogApi"
+import { installSessionResponseIntegration } from "./services/sessionResponseIntegration"
 
 export const store = configureStore({
   reducer: rootReducer,
@@ -11,4 +12,5 @@ export const store = configureStore({
   devTools: import.meta.env.DEV,
 })
 
+installSessionResponseIntegration(store)
 setupListeners(store.dispatch)
