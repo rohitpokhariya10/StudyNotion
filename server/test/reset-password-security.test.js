@@ -10,6 +10,8 @@ process.env.OTP_SECRET = "reset-test-otp-secret-123456789012345678"
 
 const updates = []
 const deliveries = []
+let resetState = null
+let sessionVersion = 3
 
 const queryFor = (value) => ({
   select: async () => value,
@@ -24,7 +26,28 @@ const User = {
     ),
   updateOne: async (filter, update) => {
     updates.push({ filter, update })
+    if (update.$set?.resetPasswordTokenHash) {
+      resetState = {
+        expiresAt: update.$set.resetPasswordExpires,
+        tokenHash: update.$set.resetPasswordTokenHash,
+      }
+    }
     return { acknowledged: true }
+  },
+  findOneAndUpdate: async (filter, update) => {
+    const validReset =
+      resetState &&
+      filter.resetPasswordTokenHash === resetState.tokenHash &&
+      resetState.expiresAt > filter.resetPasswordExpires.$gt
+    if (!validReset) return null
+
+    resetState = null
+    sessionVersion += update.$inc.sessionVersion
+    return {
+      _id: "64b000000000000000000001",
+      authProviders: ["local"],
+      sessionVersion,
+    }
   },
 }
 
@@ -46,7 +69,7 @@ installMock("../utils/mailSender", async (...args) => {
 
 const controllerPath = require.resolve("../controllers/resetPassword")
 delete require.cache[controllerPath]
-const { resetPasswordToken } = require(controllerPath)
+const { resetPassword, resetPasswordToken } = require(controllerPath)
 
 const createResponse = () => ({
   statusCode: 200,
@@ -104,4 +127,95 @@ test("unknown reset emails receive the same generic success response", async () 
   assert.equal(response.body.success, true)
   assert.match(response.body.message, /If an account exists/)
   assert.equal(deliveries.length, 1)
+})
+
+test("a reset token is consumed atomically and cannot be replayed", async () => {
+  const token = crypto.randomBytes(32).toString("hex")
+  resetState = {
+    tokenHash: crypto.createHash("sha256").update(token).digest("hex"),
+    expiresAt: new Date(Date.now() + 60_000),
+  }
+  const initialSessionVersion = sessionVersion
+
+  const accepted = createResponse()
+  await resetPassword(
+    {
+      body: {
+        confirmPassword: "NewPassword1",
+        password: "NewPassword1",
+        token,
+      },
+    },
+    accepted
+  )
+
+  assert.equal(accepted.statusCode, 200)
+  assert.equal(accepted.body.success, true)
+  assert.equal(resetState, null)
+  assert.equal(sessionVersion, initialSessionVersion + 1)
+
+  const replayed = createResponse()
+  await resetPassword(
+    {
+      body: {
+        confirmPassword: "AnotherPassword1",
+        password: "AnotherPassword1",
+        token,
+      },
+    },
+    replayed
+  )
+
+  assert.equal(replayed.statusCode, 400)
+  assert.equal(replayed.body.message, "Token is invalid or expired")
+  assert.equal(sessionVersion, initialSessionVersion + 1)
+})
+
+test("expired reset tokens fail without changing the session version", async () => {
+  const token = crypto.randomBytes(32).toString("hex")
+  resetState = {
+    tokenHash: crypto.createHash("sha256").update(token).digest("hex"),
+    expiresAt: new Date(Date.now() - 1),
+  }
+  const initialSessionVersion = sessionVersion
+  const response = createResponse()
+
+  await resetPassword(
+    {
+      body: {
+        confirmPassword: "NewPassword1",
+        password: "NewPassword1",
+        token,
+      },
+    },
+    response
+  )
+
+  assert.equal(response.statusCode, 400)
+  assert.equal(response.body.message, "Token is invalid or expired")
+  assert.equal(sessionVersion, initialSessionVersion)
+})
+
+test("password validation runs before consuming a reset token", async () => {
+  const token = crypto.randomBytes(32).toString("hex")
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
+  resetState = {
+    tokenHash,
+    expiresAt: new Date(Date.now() + 60_000),
+  }
+  const response = createResponse()
+
+  await resetPassword(
+    {
+      body: {
+        confirmPassword: "different",
+        password: "weak",
+        token,
+      },
+    },
+    response
+  )
+
+  assert.equal(response.statusCode, 400)
+  assert.equal(resetState.tokenHash, tokenHash)
 })

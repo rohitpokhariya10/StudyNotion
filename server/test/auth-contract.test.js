@@ -20,7 +20,7 @@ let failSessionRevocation = false
 const objectId = () => String(nextId++).padStart(24, "0")
 const safeUser = (user) => {
   if (!user) return null
-  const { googleId, password, ...safe } = user
+  const { googleId: _googleId, password: _password, ...safe } = user
   return safe
 }
 const queryFor = (value) => ({
@@ -97,7 +97,9 @@ const User = {
     }
     if (user && update.$set?.googleId) user.googleId = update.$set.googleId
     if (user && update.$addToSet?.authProviders) {
-      user.authProviders = [...new Set([...user.authProviders, update.$addToSet.authProviders])]
+      user.authProviders = [
+        ...new Set([...user.authProviders, update.$addToSet.authProviders]),
+      ]
     }
     return {
       acknowledged: true,
@@ -243,6 +245,7 @@ test("OTP, signup, and local login preserve the frontend contract", async () => 
   assert.equal(loginResponse.statusCode, 200)
   assert.equal(loginResponse.body.success, true)
   assert.equal(loginResponse.body.authenticated, true)
+  assert.equal(loginResponse.body.deletionPending, false)
   assert.equal(loginResponse.body.requiresPolicyAcceptance, false)
   assert.equal(loginResponse.body.user.email, "learner@example.com")
   assert.equal(loginResponse.body.user.password, undefined)
@@ -280,6 +283,25 @@ test("OTP, signup, and local login preserve the frontend contract", async () => 
   )
   assert.equal(staleLogoutResponse.statusCode, 200)
   assert.equal(users.get("learner@example.com").sessionVersion, 1)
+})
+
+test("authenticated responses expose deletion recovery state outside the user DTO", async () => {
+  const learner = users.get("learner@example.com")
+  learner.deletionPending = true
+  const response = createResponse()
+
+  try {
+    await login(
+      { body: { email: learner.email, password: "Password1" } },
+      response
+    )
+  } finally {
+    learner.deletionPending = false
+  }
+
+  assert.equal(response.statusCode, 200)
+  assert.equal(response.body.deletionPending, true)
+  assert.equal(response.body.user.deletionPending, undefined)
 })
 
 test("first-time Google signup requires affirmative policy acknowledgement", async () => {
@@ -407,4 +429,70 @@ test("public signup cannot provision an Admin account", async () => {
     message: "Invalid account type",
   })
   assert.equal(users.has("untrusted-admin@example.com"), false)
+})
+
+test("OTP attempts are bounded and the challenge stays non-replayable", async () => {
+  const otpResponse = createResponse()
+  await sendotp({ body: { email: "bounded@example.com" } }, otpResponse)
+  const validOtp = otpResponse.body.otp
+
+  const signupBody = {
+    accountType: "Student",
+    firstName: "Bounded",
+    lastName: "Attempts",
+    email: "bounded@example.com",
+    password: "Password1",
+    confirmPassword: "Password1",
+    acceptTerms: true,
+    acknowledgePrivacy: true,
+    confirmEligibility: true,
+  }
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const response = createResponse()
+    await signup({ body: { ...signupBody, otp: "000000" } }, response)
+    assert.equal(response.statusCode, 400)
+    assert.equal(
+      response.body.message,
+      "The verification code is invalid or expired"
+    )
+  }
+
+  assert.equal(challenge.attempts, 5)
+  const locked = createResponse()
+  await signup({ body: { ...signupBody, otp: validOtp } }, locked)
+  assert.equal(locked.statusCode, 400)
+  assert.equal(users.has("bounded@example.com"), false)
+})
+
+test("expired OTP challenges cannot create an account", async () => {
+  const otpResponse = createResponse()
+  await sendotp({ body: { email: "expired@example.com" } }, otpResponse)
+  challenge.expiresAt = new Date(Date.now() - 1)
+
+  const response = createResponse()
+  await signup(
+    {
+      body: {
+        accountType: "Student",
+        firstName: "Expired",
+        lastName: "Challenge",
+        email: "expired@example.com",
+        password: "Password1",
+        confirmPassword: "Password1",
+        otp: otpResponse.body.otp,
+        acceptTerms: true,
+        acknowledgePrivacy: true,
+        confirmEligibility: true,
+      },
+    },
+    response
+  )
+
+  assert.equal(response.statusCode, 400)
+  assert.equal(
+    response.body.message,
+    "The verification code is invalid or expired"
+  )
+  assert.equal(users.has("expired@example.com"), false)
 })

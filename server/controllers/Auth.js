@@ -55,18 +55,38 @@ const setPrivateNoStore = (res) => {
   res.setHeader("Pragma", "no-cache")
 }
 
+const toPublicAuthenticatedUser = (user) => {
+  const publicUser = {
+    ...(typeof user.toJSON === "function" ? user.toJSON() : user),
+  }
+  for (const field of [
+    "deletionPending",
+    "deletionStartedAt",
+    "deletionLockId",
+    "deletionLockUntil",
+    "paymentOperationLockId",
+    "paymentOperationLockUntil",
+    "policyAcceptances",
+  ]) {
+    delete publicUser[field]
+  }
+  return publicUser
+}
+
 const sendAuthenticatedResponse = async (res, user, message) => {
   setPrivateNoStore(res)
   const safeUser = await User.findById(user._id)
-    .select("+policyAcceptances")
+    .select("+deletionPending +policyAcceptances")
     .populate("additionalDetails")
-  if (!safeUser) throw new Error("Authenticated user disappeared before response")
+  if (!safeUser)
+    throw new Error("Authenticated user disappeared before response")
   issueSession(res, user)
   return res.status(200).json({
     success: true,
     authenticated: true,
+    deletionPending: safeUser.deletionPending === true,
     requiresPolicyAcceptance: !hasCurrentPolicyAcceptance(safeUser),
-    user: safeUser,
+    user: toPublicAuthenticatedUser(safeUser),
     message,
   })
 }
