@@ -1,0 +1,116 @@
+name: studynotion-local
+
+x-api-environment: &api-environment
+  NODE_ENV: development
+  PORT: "4000"
+  FRONTEND_ORIGINS: http://127.0.0.1:${STUDYNOTION_WEB_PORT:-3000}
+  APP_URL: http://127.0.0.1:${STUDYNOTION_WEB_PORT:-3000}
+  BRAND_NAME: StudyNotion local container evaluation
+  BRAND_LOGO_URL: http://127.0.0.1:${STUDYNOTION_WEB_PORT:-3000}/logo.png
+  SUPPORT_EMAIL: support@studynotion.local
+  MONGODB_URI: mongodb://mongo:27017/studynotion_seed_disposable_local
+  REDIS_URL: redis://redis:6379/0
+  JWT_SECRET: ${STUDYNOTION_LOCAL_JWT_SECRET:?Set STUDYNOTION_LOCAL_JWT_SECRET in the compose env file}
+  OTP_SECRET: ${STUDYNOTION_LOCAL_OTP_SECRET:?Set STUDYNOTION_LOCAL_OTP_SECRET in the compose env file}
+  ALLOW_DEV_OTP: "true"
+  TRUST_PROXY: "false"
+  COOKIE_SAME_SITE: lax
+  COOKIE_SECURE: "false"
+  MONGODB_AUTO_INDEX: "true"
+  STUDYNOTION_DISPOSABLE_SEED_CONFIRM: seed-disposable-database
+
+services:
+  mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: studynotion_seed_disposable_local
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - "quit(db.adminCommand('ping').ok ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  api:
+    image: studynotion-api:local
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    init: true
+    environment: *api-environment
+    ports:
+      - "127.0.0.1:${STUDYNOTION_API_PORT:-4000}:4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    stop_grace_period: 15s
+
+  web:
+    image: studynotion-web:local
+    build:
+      context: .
+      args:
+        STUDYNOTION_WEB_BUILD: local
+        VITE_API_BASE_URL: http://127.0.0.1:${STUDYNOTION_API_PORT:-4000}/api/v1
+        VITE_GOOGLE_CLIENT_ID: ""
+        VITE_RAZORPAY_KEY_ID: ""
+        VITE_SUPPORT_EMAIL: support@studynotion.local
+        VITE_LEGAL_ENTITY_NAME: StudyNotion local container evaluation
+        VITE_LEGAL_ADDRESS: Local container environment
+        VITE_LEGAL_JURISDICTION: India
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:${STUDYNOTION_WEB_PORT:-3000}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  seed:
+    image: studynotion-api:local
+    profiles: ["seed"]
+    init: true
+    environment: *api-environment
+    command: ["node", "seed"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  mongo-data:

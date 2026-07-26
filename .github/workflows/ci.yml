@@ -109,11 +109,17 @@ jobs:
           VITE_API_BASE_URL: http://127.0.0.1:4000/api/v1
 
   containers:
-    name: Container smoke builds
+    name: Container builds and runtime smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Validate local Compose configuration
+        run: >-
+          docker compose
+          --env-file compose.local.env.example
+          -f compose.local.yml
+          config --quiet
       - run: >-
           docker build
           --build-arg VITE_API_BASE_URL=https://api.example.test/api/v1
@@ -125,3 +131,44 @@ jobs:
           --build-arg VITE_LEGAL_JURISDICTION=India
           -t studynotion-web:ci .
       - run: docker build -f server/Dockerfile -t studynotion-api:ci .
+      - name: Verify container users and web runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(docker image inspect studynotion-web:ci --format '{{.Config.User}}')" = "nginx"
+          test "$(docker image inspect studynotion-api:ci --format '{{.Config.User}}')" = "node"
+
+          container_id="$(docker run --detach --publish 127.0.0.1:18080:8080 studynotion-web:ci)"
+          trap 'docker rm --force "$container_id" >/dev/null' EXIT
+
+          for attempt in {1..30}; do
+            if [ "$(docker inspect --format '{{.State.Health.Status}}' "$container_id")" = "healthy" ]; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              docker logs "$container_id"
+              exit 1
+            fi
+            sleep 2
+          done
+
+          test "$(docker exec "$container_id" id -u)" -ne 0
+          curl --fail --silent --show-error http://127.0.0.1:18080/health >/dev/null
+          headers="$(curl --fail --silent --show-error --head http://127.0.0.1:18080/)"
+          grep -qi '^X-Content-Type-Options: nosniff' <<<"$headers"
+          grep -qi '^X-Frame-Options: DENY' <<<"$headers"
+          grep -qi '^Content-Security-Policy:' <<<"$headers"
+      - name: Verify API container readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker tag studynotion-api:ci studynotion-api:local
+          trap 'docker compose --env-file compose.local.env.example -f compose.local.yml down --volumes >/dev/null' EXIT
+
+          docker compose \
+            --env-file compose.local.env.example \
+            -f compose.local.yml \
+            up --detach --no-build --wait mongo redis api
+
+          test "$(docker compose --env-file compose.local.env.example -f compose.local.yml exec -T api id -u)" -ne 0
+          curl --fail --silent --show-error http://127.0.0.1:4000/health/ready >/dev/null
