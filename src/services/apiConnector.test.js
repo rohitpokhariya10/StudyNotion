@@ -124,6 +124,8 @@ describe("API connector session security", () => {
     [409, { code: "ACCOUNT_DELETION_PENDING" }],
     [423, { code: "POLICY_ACCEPTANCE_REQUIRED" }],
     [428, { code: "ACCOUNT_DELETION_PENDING" }],
+    [423, { error: { code: "ACCOUNT_DELETION_PENDING" } }],
+    [428, { error: { code: "POLICY_ACCEPTANCE_REQUIRED" } }],
   ])("ignores unrelated response %s", async (status, payload) => {
     const handler = vi.fn()
     unregisterSessionResponseHandler = registerSessionResponseHandler(handler)

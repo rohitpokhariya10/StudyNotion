@@ -179,5 +179,14 @@ describe("catalog response boundaries", () => {
       message: "We could not load the catalog. Please try again.",
       requestId: null,
     })
+    expect(
+      getCatalogErrorPresentation({
+        status: 500,
+        data: { message: "top-level response detail" },
+      })
+    ).toEqual({
+      message: "We could not load the catalog. Please try again.",
+      requestId: null,
+    })
   })
 })
