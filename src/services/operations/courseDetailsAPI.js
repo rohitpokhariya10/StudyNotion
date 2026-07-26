@@ -6,7 +6,6 @@ import { courseEndpoints } from "../apis"
 const {
   COURSE_DETAILS_API,
   COURSE_CATEGORIES_API,
-  GET_ALL_COURSE_API,
   CREATE_COURSE_API,
   EDIT_COURSE_API,
   CREATE_SECTION_API,
@@ -28,11 +27,10 @@ const getErrorMessage = (error, fallback) =>
 
 export const getLessonPlaybackUrl = async (courseId, subSectionId) => {
   try {
-    const response = await apiConnector(
-      "POST",
-      GET_LESSON_PLAYBACK_URL_API,
-      { courseId, subSectionId }
-    )
+    const response = await apiConnector("POST", GET_LESSON_PLAYBACK_URL_API, {
+      courseId,
+      subSectionId,
+    })
     const playback = response?.data?.data
     if (!response?.data?.success || typeof playback?.url !== "string") {
       throw new Error(
@@ -49,22 +47,6 @@ export const getLessonPlaybackUrl = async (courseId, subSectionId) => {
   }
 }
 
-export const getAllCourses = async () => {
-  const toastId = toast.loading("Loading...")
-  let result = []
-  try {
-    const response = await apiConnector("GET", GET_ALL_COURSE_API)
-    if (!response?.data?.success) {
-      throw new Error("Could Not Fetch Course Categories")
-    }
-    result = response?.data?.data
-  } catch (error) {
-    toast.error(getErrorMessage(error, "Could not fetch courses"))
-  }
-  toast.dismiss(toastId)
-  return result
-}
-
 export const fetchCourseDetails = async (courseId) => {
   const toastId = toast.loading("Loading...")
   //   dispatch(setLoading(true));
@@ -78,11 +60,10 @@ export const fetchCourseDetails = async (courseId) => {
     }
     result = response.data
   } catch (error) {
-    result =
-      error?.response?.data || {
-        success: false,
-        message: error?.message || "Could not load course",
-      }
+    result = error?.response?.data || {
+      success: false,
+      message: error?.message || "Could not load course",
+    }
   }
   toast.dismiss(toastId)
   //   dispatch(setLoading(false));
@@ -335,7 +316,9 @@ export const getFullDetailsOfCourse = async (courseId, token) => {
     result = response?.data?.data
   } catch (error) {
     toast.error(
-      error?.response?.data?.message || error?.message || "Could not load course"
+      error?.response?.data?.message ||
+        error?.message ||
+        "Could not load course"
     )
   }
   toast.dismiss(toastId)

@@ -49,9 +49,9 @@ describe("lesson playback URL requests", () => {
       data: { success: false, message: "Enrollment required" },
     })
 
-    await expect(
-      getLessonPlaybackUrl("course-1", "lesson-1")
-    ).rejects.toThrow("Enrollment required")
+    await expect(getLessonPlaybackUrl("course-1", "lesson-1")).rejects.toThrow(
+      "Enrollment required"
+    )
   })
 })
 
