@@ -1,5 +1,5 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const CONTROL_CHARACTERS = /[\u0000-\u001F\u007F]/
+const CONTROL_CHARACTERS = /\p{Cc}/u
 const BCRYPT_MAX_BYTES = 72
 
 const normalizeEmail = (value) =>
@@ -13,7 +13,11 @@ const isValidEmail = (value) => {
 const normalizePersonName = (value, { allowEmpty = false } = {}) => {
   if (typeof value !== "string") return null
   const name = value.trim()
-  if ((!allowEmpty && !name) || name.length > 80 || CONTROL_CHARACTERS.test(name)) {
+  if (
+    (!allowEmpty && !name) ||
+    name.length > 80 ||
+    CONTROL_CHARACTERS.test(name)
+  ) {
     return null
   }
   return name

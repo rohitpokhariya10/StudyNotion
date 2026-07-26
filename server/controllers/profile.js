@@ -33,11 +33,12 @@ const ALLOWED_GENDERS = new Set([
   "Other",
   "Prefer not to say",
 ])
-const CONTROL_CHARACTERS = /[\u0000-\u001F\u007F]/
+const CONTROL_CHARACTERS = /\p{Cc}/u
 
 class ProfileValidationError extends Error {}
 
-const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key)
+const hasOwn = (object, key) =>
+  Object.prototype.hasOwnProperty.call(object, key)
 
 const readString = (value, field, { allowEmpty = false, maxLength }) => {
   if (typeof value !== "string") {

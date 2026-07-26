@@ -18,7 +18,9 @@ if (missing.length) {
 
 const placeholderPattern =
   /(?:replace|change[-_ ]?me|example\.com|your-domain|studynotion\.local|not configured)/i
-const placeholders = required.filter((name) => placeholderPattern.test(env[name]))
+const placeholders = required.filter((name) =>
+  placeholderPattern.test(env[name])
+)
 if (placeholders.length) {
   throw new Error(
     `Production public variables still contain placeholders: ${placeholders.join(
@@ -66,7 +68,7 @@ for (const name of [
   "VITE_LEGAL_JURISDICTION",
 ]) {
   const value = env[name].trim()
-  if (value.length < 2 || value.length > 300 || /[\u0000-\u001F\u007F]/.test(value)) {
+  if (value.length < 2 || value.length > 300 || /\p{Cc}/u.test(value)) {
     throw new Error(`${name} is invalid`)
   }
 }

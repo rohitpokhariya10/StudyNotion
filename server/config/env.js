@@ -130,7 +130,7 @@ if (isProduction) {
   if (
     process.env.BRAND_NAME &&
     (process.env.BRAND_NAME.trim().length > 80 ||
-      /[\u0000-\u001F\u007F]/.test(process.env.BRAND_NAME))
+      /\p{Cc}/u.test(process.env.BRAND_NAME))
   ) {
     throw new Error("BRAND_NAME is invalid")
   }
