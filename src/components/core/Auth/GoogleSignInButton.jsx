@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useDispatch } from "react-redux"
-import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
+import { useDispatch } from "react-redux"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import { googleLogin } from "../../../services/operations/authAPI"
 import { loadGoogleIdentityServices } from "../../../utils/googleIdentity"
+import { sanitizeInternalRedirect } from "../../../utils/internalRedirect"
 import { hasCompletePolicyAcknowledgement } from "../../../utils/policyAcknowledgement"
 
 export default function GoogleSignInButton({
@@ -13,10 +14,12 @@ export default function GoogleSignInButton({
 }) {
   const buttonRef = useRef(null)
   const dispatch = useDispatch()
+  const location = useLocation()
   const navigate = useNavigate()
   const [loadError, setLoadError] = useState(false)
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
   const isConfigured = Boolean(clientId && !clientId.includes("replace-with"))
+  const postLoginPath = sanitizeInternalRedirect(location.state?.from)
 
   const handleCredential = useCallback(
     ({ credential }) => {
@@ -28,15 +31,20 @@ export default function GoogleSignInButton({
         requirePolicyAcknowledgement &&
         !hasCompletePolicyAcknowledgement(policyAcknowledgement)
       ) {
-        toast.error("Complete the account agreement before continuing with Google")
+        toast.error(
+          "Complete the account agreement before continuing with Google"
+        )
         return
       }
-      dispatch(googleLogin(credential, navigate, policyAcknowledgement))
+      dispatch(
+        googleLogin(credential, navigate, policyAcknowledgement, postLoginPath)
+      )
     },
     [
       dispatch,
       navigate,
       policyAcknowledgement,
+      postLoginPath,
       requirePolicyAcknowledgement,
     ]
   )

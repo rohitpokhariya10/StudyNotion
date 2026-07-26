@@ -36,7 +36,7 @@ function PrivateRoute({ allowPendingPolicies = false, children }) {
     return children
   }
   if (requiresPolicyAcceptance && !allowPendingPolicies) {
-    return <Navigate to="/accept-terms" replace />
+    return <Navigate to="/accept-terms" replace state={{ from: location }} />
   }
   if (!requiresPolicyAcceptance && allowPendingPolicies) {
     return <Navigate to="/dashboard/my-profile" replace />

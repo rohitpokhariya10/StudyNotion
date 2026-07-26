@@ -10,6 +10,7 @@ import {
 import { resetCart } from "../../slices/cartSlice"
 import { setUser } from "../../slices/profileSlice"
 import { getAvatarSource } from "../../utils/avatar"
+import { sanitizeInternalRedirect } from "../../utils/internalRedirect"
 import { apiConnector } from "../apiConnector"
 import { endpoints, profileEndpoints } from "../apis"
 
@@ -47,7 +48,15 @@ const readUser = (response) =>
   response?.data?.user || response?.data?.data || null
 
 const commitSession = (dispatch, response) => {
-  const user = withFallbackImage(readUser(response))
+  const responseUser = withFallbackImage(readUser(response))
+  const user = responseUser
+    ? {
+        ...responseUser,
+        deletionPending:
+          response?.data?.deletionPending === true ||
+          responseUser.deletionPending === true,
+      }
+    : null
   if (!response?.data?.success || !user) {
     throw new Error(response?.data?.message || "Invalid session response")
   }
@@ -55,10 +64,33 @@ const commitSession = (dispatch, response) => {
   dispatch(setUser(user))
   dispatch(setSession(true))
   dispatch(
-    setPolicyAcceptanceRequired(Boolean(response?.data?.requiresPolicyAcceptance))
+    setPolicyAcceptanceRequired(
+      Boolean(response?.data?.requiresPolicyAcceptance)
+    )
   )
   clearLegacyAuthStorage()
   return user
+}
+
+const navigateAfterLogin = (
+  navigate,
+  { deletionPending, requiresPolicyAcceptance, redirectTo }
+) => {
+  if (deletionPending) {
+    navigate("/dashboard/settings", { replace: true })
+    return
+  }
+
+  const destination = sanitizeInternalRedirect(redirectTo)
+  if (requiresPolicyAcceptance) {
+    navigate("/accept-terms", {
+      replace: true,
+      state: { from: destination },
+    })
+    return
+  }
+
+  navigate(destination, { replace: true })
 }
 
 export function restoreSession() {
@@ -149,7 +181,7 @@ export function signUp(signupData, otp, navigate) {
   }
 }
 
-export function login(email, password, navigate) {
+export function login(email, password, navigate, redirectTo) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...")
     dispatch(setLoading(true))
@@ -159,14 +191,15 @@ export function login(email, password, navigate) {
         password,
       })
 
-      commitSession(dispatch, response)
+      const user = commitSession(dispatch, response)
       toast.success(response.data.message || "Login Successful")
-      navigate(
-        response.data.requiresPolicyAcceptance
-          ? "/accept-terms"
-          : "/dashboard/my-profile",
-        { replace: true }
-      )
+      navigateAfterLogin(navigate, {
+        deletionPending: user.deletionPending === true,
+        requiresPolicyAcceptance: Boolean(
+          response.data.requiresPolicyAcceptance
+        ),
+        redirectTo,
+      })
       return true
     } catch (error) {
       dispatch(setUser(null))
@@ -180,7 +213,12 @@ export function login(email, password, navigate) {
   }
 }
 
-export function googleLogin(credential, navigate, policyAcknowledgement = {}) {
+export function googleLogin(
+  credential,
+  navigate,
+  policyAcknowledgement = {},
+  redirectTo
+) {
   return async (dispatch) => {
     const toastId = toast.loading("Signing in with Google...")
     dispatch(setLoading(true))
@@ -190,14 +228,15 @@ export function googleLogin(credential, navigate, policyAcknowledgement = {}) {
         ...policyAcknowledgement,
       })
 
-      commitSession(dispatch, response)
+      const user = commitSession(dispatch, response)
       toast.success(response.data.message || "Google sign-in successful")
-      navigate(
-        response.data.requiresPolicyAcceptance
-          ? "/accept-terms"
-          : "/dashboard/my-profile",
-        { replace: true }
-      )
+      navigateAfterLogin(navigate, {
+        deletionPending: user.deletionPending === true,
+        requiresPolicyAcceptance: Boolean(
+          response.data.requiresPolicyAcceptance
+        ),
+        redirectTo,
+      })
       return true
     } catch (error) {
       dispatch(setUser(null))
@@ -211,8 +250,12 @@ export function googleLogin(credential, navigate, policyAcknowledgement = {}) {
   }
 }
 
-export function acceptCurrentPolicies(policyAcknowledgement, navigate) {
-  return async (dispatch) => {
+export function acceptCurrentPolicies(
+  policyAcknowledgement,
+  navigate,
+  redirectTo
+) {
+  return async (dispatch, getState) => {
     const toastId = toast.loading("Saving your agreement...")
     dispatch(setLoading(true))
     try {
@@ -222,11 +265,20 @@ export function acceptCurrentPolicies(policyAcknowledgement, navigate) {
         policyAcknowledgement
       )
       if (!response?.data?.success) {
-        throw new Error(response?.data?.message || "Agreement could not be saved")
+        throw new Error(
+          response?.data?.message || "Agreement could not be saved"
+        )
       }
       dispatch(setPolicyAcceptanceRequired(false))
       toast.success("Agreement saved")
-      navigate("/dashboard/my-profile", { replace: true })
+      const deletionPending =
+        getState?.().profile?.user?.deletionPending === true
+      navigate(
+        deletionPending
+          ? "/dashboard/settings"
+          : sanitizeInternalRedirect(redirectTo),
+        { replace: true }
+      )
       return true
     } catch (error) {
       toast.error(getErrorMessage(error, "Agreement could not be saved"))

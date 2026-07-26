@@ -1,13 +1,15 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import PolicyAcknowledgement from "../components/core/Auth/PolicyAcknowledgement"
 import { acceptCurrentPolicies } from "../services/operations/authAPI"
+import { sanitizeInternalRedirect } from "../utils/internalRedirect"
 import { emptyPolicyAcknowledgement } from "../utils/policyAcknowledgement"
 
 export default function PolicyAcceptance() {
   const dispatch = useDispatch()
+  const location = useLocation()
   const navigate = useNavigate()
   const { loading } = useSelector((state) => state.auth)
   const [acknowledgement, setAcknowledgement] = useState(
@@ -16,7 +18,10 @@ export default function PolicyAcceptance() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    dispatch(acceptCurrentPolicies(acknowledgement, navigate))
+    const postAcceptancePath = sanitizeInternalRedirect(location.state?.from)
+    dispatch(
+      acceptCurrentPolicies(acknowledgement, navigate, postAcceptancePath)
+    )
   }
 
   return (
@@ -27,8 +32,9 @@ export default function PolicyAcceptance() {
       >
         <h1 className="text-3xl font-semibold">Review the current policies</h1>
         <p className="mb-6 mt-3 leading-6 text-richblack-200">
-          We updated the account agreement. Your learning data remains available,
-          but you need to review these items before using authenticated features.
+          We updated the account agreement. Your learning data remains
+          available, but you need to review these items before using
+          authenticated features.
         </p>
         <PolicyAcknowledgement
           idPrefix="existing-account-policy"

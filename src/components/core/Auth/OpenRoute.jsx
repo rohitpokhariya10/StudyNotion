@@ -1,11 +1,14 @@
 // This will prevent authenticated users from accessing this route
 import { useSelector } from "react-redux"
-import { Navigate } from "react-router-dom"
+import { Navigate, useLocation } from "react-router-dom"
+
+import { sanitizeInternalRedirect } from "../../../utils/internalRedirect"
 
 function OpenRoute({ children }) {
   const { isAuthenticated, requiresPolicyAcceptance, status } = useSelector(
     (state) => state.auth
   )
+  const location = useLocation()
 
   if (status === "checking") {
     return (
@@ -19,13 +22,13 @@ function OpenRoute({ children }) {
     )
   }
 
-  return isAuthenticated ? (
-    <Navigate
-      to={requiresPolicyAcceptance ? "/accept-terms" : "/dashboard/my-profile"}
-      replace
-    />
+  if (!isAuthenticated) return children
+
+  const destination = sanitizeInternalRedirect(location.state?.from)
+  return requiresPolicyAcceptance ? (
+    <Navigate to="/accept-terms" replace state={{ from: destination }} />
   ) : (
-    children
+    <Navigate to={destination} replace />
   )
 }
 

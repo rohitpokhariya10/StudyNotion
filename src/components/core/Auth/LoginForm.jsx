@@ -1,12 +1,14 @@
 import { useState } from "react"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { useDispatch } from "react-redux"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import { login } from "../../../services/operations/authAPI"
+import { sanitizeInternalRedirect } from "../../../utils/internalRedirect"
 
 function LoginForm() {
   const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useDispatch()
   const [formData, setFormData] = useState({
     email: "",
@@ -26,7 +28,8 @@ function LoginForm() {
 
   const handleOnSubmit = (e) => {
     e.preventDefault()
-    dispatch(login(email, password, navigate))
+    const postLoginPath = sanitizeInternalRedirect(location.state?.from)
+    dispatch(login(email, password, navigate, postLoginPath))
   }
 
   return (
