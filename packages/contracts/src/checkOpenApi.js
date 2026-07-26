@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs"
-import { resolve } from "node:path"
+const { readFileSync } = require("node:fs")
+const { resolve } = require("node:path")
 
-import { serializeOpenApiDocument } from "./openapi"
+const { serializeOpenApiDocument } = require("./openapi")
 
 const path = resolve(__dirname, "../openapi.json")
 const committed = readFileSync(path, "utf8")

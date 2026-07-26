@@ -1,12 +1,8 @@
-import { z } from "zod"
+const { z } = require("zod")
 
-export const catalogLevelSchema = z.enum([
-  "beginner",
-  "intermediate",
-  "advanced",
-])
+const catalogLevelSchema = z.enum(["beginner", "intermediate", "advanced"])
 
-export const catalogSortSchema = z.enum([
+const catalogSortSchema = z.enum([
   "relevance",
   "newest",
   "price_asc",
@@ -18,7 +14,7 @@ export const catalogSortSchema = z.enum([
 const languageCodePattern = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/
 const canonicalLanguageCodePattern = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/
 
-export const objectIdSchema = z.string().regex(/^[A-Fa-f\d]{24}$/, "Invalid ID")
+const objectIdSchema = z.string().regex(/^[A-Fa-f\d]{24}$/, "Invalid ID")
 
 const catalogCursorSchema = z
   .string()
@@ -26,7 +22,7 @@ const catalogCursorSchema = z
   .max(2048)
   .regex(/^[A-Za-z0-9_-]+$/, "Invalid cursor")
 
-const blankAsUndefined = (value: unknown) =>
+const blankAsUndefined = (value) =>
   typeof value === "string" && value.trim() === "" ? undefined : value
 
 const optionalSearchText = z.preprocess(
@@ -40,7 +36,7 @@ const optionalSearchText = z.preprocess(
     .optional()
 )
 
-const optionalQueryNumber = <T extends z.ZodNumber>(schema: T) =>
+const optionalQueryNumber = (schema) =>
   z.preprocess((value) => {
     if (value === undefined) return undefined
     if (typeof value !== "string" || !value.trim()) return value
@@ -74,7 +70,7 @@ const catalogQueryBaseSchema = z.strictObject({
   cursor: z.preprocess(blankAsUndefined, catalogCursorSchema.optional()),
 })
 
-export const catalogCourseListQuerySchema = catalogQueryBaseSchema
+const catalogCourseListQuerySchema = catalogQueryBaseSchema
   .superRefine((value, context) => {
     if (
       value.minPrice !== undefined &&
@@ -109,11 +105,10 @@ export const catalogCourseListQuerySchema = catalogQueryBaseSchema
   .transform((value) => ({
     ...value,
     limit: value.limit ?? 12,
-    sort:
-      value.sort ?? (value.q ? ("relevance" as const) : ("newest" as const)),
+    sort: value.sort ?? (value.q ? "relevance" : "newest"),
   }))
 
-export const catalogQueryOpenApiSchema = z.strictObject({
+const catalogQueryOpenApiSchema = z.strictObject({
   q: z.string().trim().min(1).max(120).optional(),
   categoryId: objectIdSchema.optional(),
   level: catalogLevelSchema.optional(),
@@ -130,7 +125,7 @@ export const catalogQueryOpenApiSchema = z.strictObject({
 
 const nullableImageSchema = z.string().min(1).max(4096).nullable()
 
-export const catalogCourseSchema = z.strictObject({
+const catalogCourseSchema = z.strictObject({
   id: objectIdSchema,
   name: z.string().min(1).max(200),
   description: z.string().min(1).max(10_000),
@@ -166,7 +161,7 @@ export const catalogCourseSchema = z.strictObject({
   createdAt: z.iso.datetime(),
 })
 
-export const catalogCourseListResponseSchema = z.strictObject({
+const catalogCourseListResponseSchema = z.strictObject({
   success: z.literal(true),
   requestId: z.string().min(1).max(100),
   data: z.strictObject({
@@ -178,10 +173,12 @@ export const catalogCourseListResponseSchema = z.strictObject({
   }),
 })
 
-export type CatalogCourseListQuery = z.output<
-  typeof catalogCourseListQuerySchema
->
-export type CatalogCourse = z.infer<typeof catalogCourseSchema>
-export type CatalogCourseListResponse = z.infer<
-  typeof catalogCourseListResponseSchema
->
+module.exports = {
+  catalogCourseListQuerySchema,
+  catalogCourseListResponseSchema,
+  catalogCourseSchema,
+  catalogLevelSchema,
+  catalogQueryOpenApiSchema,
+  catalogSortSchema,
+  objectIdSchema,
+}

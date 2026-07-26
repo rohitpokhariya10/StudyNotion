@@ -1,14 +1,14 @@
-import { z } from "zod"
+const { z } = require("zod")
 
-import {
+const {
   catalogCourseListResponseSchema,
   catalogQueryOpenApiSchema,
-} from "./catalog"
-import { apiErrorResponseSchema } from "./errors"
+} = require("./catalog")
+const { apiErrorResponseSchema } = require("./errors")
 
-export const createOpenApiDocument = () => {
+const createOpenApiDocument = () => {
   const queryShape = catalogQueryOpenApiSchema.shape
-  const descriptions: Record<keyof typeof queryShape, string> = {
+  const descriptions = {
     q: "Full-text course search. Defaults sorting to relevance.",
     categoryId: "Exact category ObjectId.",
     level: "Canonical lowercase course level.",
@@ -27,7 +27,7 @@ export const createOpenApiDocument = () => {
     name,
     in: "query",
     required: false,
-    description: descriptions[name as keyof typeof queryShape],
+    description: descriptions[name],
     schema: z.toJSONSchema(schema, { target: "draft-2020-12" }),
   }))
 
@@ -45,7 +45,7 @@ export const createOpenApiDocument = () => {
           security: [],
           parameters,
           responses: {
-            "200": {
+            200: {
               description: "A cursor-paginated published course page.",
               content: {
                 "application/json": {
@@ -55,7 +55,7 @@ export const createOpenApiDocument = () => {
                 },
               },
             },
-            "400": {
+            400: {
               description: "The query or cursor is invalid.",
               content: {
                 "application/json": {
@@ -65,7 +65,7 @@ export const createOpenApiDocument = () => {
                 },
               },
             },
-            "403": {
+            403: {
               description: "The browser origin is not trusted.",
               content: {
                 "application/json": {
@@ -75,7 +75,7 @@ export const createOpenApiDocument = () => {
                 },
               },
             },
-            "404": {
+            404: {
               description: "The v2 route does not exist.",
               content: {
                 "application/json": {
@@ -85,7 +85,7 @@ export const createOpenApiDocument = () => {
                 },
               },
             },
-            "413": {
+            413: {
               description: "The request payload is too large.",
               content: {
                 "application/json": {
@@ -95,7 +95,7 @@ export const createOpenApiDocument = () => {
                 },
               },
             },
-            "429": {
+            429: {
               description: "The global API rate limit was exceeded.",
               content: {
                 "application/json": {
@@ -105,7 +105,7 @@ export const createOpenApiDocument = () => {
                 },
               },
             },
-            "500": {
+            500: {
               description: "The catalog could not be read.",
               content: {
                 "application/json": {
@@ -119,8 +119,10 @@ export const createOpenApiDocument = () => {
         },
       },
     },
-  } as const
+  }
 }
 
-export const serializeOpenApiDocument = () =>
+const serializeOpenApiDocument = () =>
   `${JSON.stringify(createOpenApiDocument(), null, 2)}\n`
+
+module.exports = { createOpenApiDocument, serializeOpenApiDocument }

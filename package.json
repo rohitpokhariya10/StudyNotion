@@ -34,10 +34,6 @@
     "swiper": "^14.0.5"
   },
   "scripts": {
-    "postinstall": "npm run contracts:build",
-    "pretest": "npm run contracts:build",
-    "prebuild": "npm run contracts:build",
-    "prebuild:local": "npm run contracts:build",
     "start": "vite",
     "client": "vite",
     "build": "node scripts/validate-public-env.mjs && vite build",
@@ -48,12 +44,10 @@
     "test:e2e": "playwright test",
     "test:integration": "npm run test:integration --workspace studynotion-backend",
     "test:watch": "vitest",
-    "contracts:build": "npm run build --workspace @studynotion/contracts",
     "contracts:generate": "npm run openapi:generate --workspace @studynotion/contracts",
     "contracts:openapi:check": "npm run openapi:check --workspace @studynotion/contracts",
-    "typecheck": "npm run typecheck --workspace @studynotion/contracts",
     "lint": "eslint src",
-    "verify": "npm run typecheck && npm run contracts:openapi:check && npm run lint && npm test && npm run build:local && npm --workspace studynotion-backend test",
+    "verify": "npm run contracts:openapi:check && npm run lint && npm test && npm run build:local && npm --workspace studynotion-backend test",
     "server": "cd server && npm run dev",
     "dev": "concurrently -n \"client,server\" -c \"bgBlue,bgYellow\" \"npm run client\" \"npm run server\""
   },
@@ -61,7 +55,6 @@
     "@axe-core/playwright": "^4.11.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@playwright/test": "^1.58.2",
-    "@types/node": "^24.10.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -77,7 +70,6 @@
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^3.4.19",
-    "typescript": "^5.9.3",
     "vite": "^8.1.5",
     "vitest": "^4.1.10"
   }

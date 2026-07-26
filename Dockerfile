@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
 
-COPY package.json package-lock.json tsconfig.base.json ./
+COPY package.json package-lock.json ./
 COPY packages/contracts/package.json packages/contracts/package.json
 COPY server/package.json server/package.json
 RUN npm ci --ignore-scripts

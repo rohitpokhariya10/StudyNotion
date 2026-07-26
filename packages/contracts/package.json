@@ -4,25 +4,21 @@
   "private": true,
   "description": "Runtime-validated StudyNotion API contracts",
   "type": "commonjs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "require": "./src/index.js",
+      "default": "./src/index.js"
     },
     "./openapi.json": "./openapi.json"
   },
   "files": [
-    "dist",
+    "src",
     "openapi.json"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "openapi:generate": "npm run build && node dist/generateOpenApi.js",
-    "openapi:check": "tsc -p tsconfig.json && node dist/checkOpenApi.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "openapi:generate": "node src/generateOpenApi.js",
+    "openapi:check": "node src/checkOpenApi.js"
   },
   "dependencies": {
     "zod": "^4.4.3"
