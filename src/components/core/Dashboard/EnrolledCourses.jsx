@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
 import ProgressBar from "@ramonak/react-progress-bar"
+import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 
@@ -34,7 +34,7 @@ export default function EnrolledCourses() {
 
   return (
     <>
-      <div className="text-3xl text-richblack-50">Enrolled Courses</div>
+      <h1 className="text-3xl text-richblack-50">Enrolled Courses</h1>
       {!enrolledCourses ? (
         <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
           <div className="spinner"></div>
@@ -46,7 +46,7 @@ export default function EnrolledCourses() {
       ) : (
         <div className="my-8 text-richblack-5">
           {/* Headings */}
-          <div className="flex rounded-t-lg bg-richblack-500 ">
+          <div className="hidden rounded-t-lg bg-richblack-500 sm:flex">
             <p className="w-[45%] px-5 py-3">Course Name</p>
             <p className="w-1/4 px-2 py-3">Duration</p>
             <p className="flex-1 px-2 py-3">Progress</p>
@@ -58,14 +58,14 @@ export default function EnrolledCourses() {
 
             return (
               <div
-                className={`flex items-center border border-richblack-700 ${
+                className={`flex flex-col border border-richblack-700 sm:flex-row sm:items-center ${
                   i === arr.length - 1 ? "rounded-b-lg" : "rounded-none"
                 }`}
                 key={course._id || i}
               >
                 <button
                   type="button"
-                  className="flex w-[45%] items-center gap-4 px-5 py-3 text-left enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex w-full items-center gap-4 px-5 py-4 text-left enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 sm:w-[45%] sm:py-3"
                   disabled={!lessonPath}
                   onClick={() => lessonPath && navigate(lessonPath)}
                   aria-label={
@@ -100,16 +100,21 @@ export default function EnrolledCourses() {
                     )}
                   </span>
                 </button>
-                <div className="w-1/4 px-2 py-3">
-                  {course?.totalDuration || "—"}
-                </div>
-                <div className="flex w-1/5 flex-col gap-2 px-2 py-3">
-                  <p>Progress: {course.progressPercentage || 0}%</p>
-                  <ProgressBar
-                    completed={course.progressPercentage || 0}
-                    height="8px"
-                    isLabelVisible={false}
-                  />
+                <div className="grid w-full grid-cols-2 gap-5 border-t border-richblack-700 px-5 py-4 sm:contents">
+                  <div className="w-auto sm:w-1/4 sm:px-2 sm:py-3">
+                    <span className="mb-1 block text-xs uppercase tracking-wide text-richblack-300 sm:hidden">
+                      Duration
+                    </span>
+                    {course?.totalDuration || "—"}
+                  </div>
+                  <div className="flex w-auto flex-col gap-2 sm:w-1/5 sm:px-2 sm:py-3">
+                    <p>Progress: {course.progressPercentage || 0}%</p>
+                    <ProgressBar
+                      completed={course.progressPercentage || 0}
+                      height="8px"
+                      isLabelVisible={false}
+                    />
+                  </div>
                 </div>
               </div>
             )
