@@ -26,6 +26,7 @@ jobs:
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run contracts:openapi:check
+      - run: npm run contracts:test
       - run: npm run contracts:generate
       - run: git diff --exit-code -- packages/contracts/openapi.json
       - run: npm run format:check

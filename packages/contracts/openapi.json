@@ -12,6 +12,9 @@
         "security": [],
         "parameters": [
           {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
             "name": "q",
             "in": "query",
             "required": false,
@@ -182,8 +185,7 @@
                     },
                     "requestId": {
                       "type": "string",
-                      "minLength": 1,
-                      "maxLength": 100
+                      "pattern": "^[A-Za-z0-9._:-]{1,100}$"
                     },
                     "data": {
                       "type": "object",
@@ -215,7 +217,8 @@
                               "price": {
                                 "type": "number",
                                 "minimum": 0.01,
-                                "maximum": 10000000
+                                "maximum": 10000000,
+                                "description": "Compatibility price in INR major units; new commerce contracts use integer minor units."
                               },
                               "currency": {
                                 "type": "string",
@@ -393,7 +396,8 @@
                             "endCursor",
                             "hasNextPage"
                           ],
-                          "additionalProperties": false
+                          "additionalProperties": false,
+                          "description": "Cursor metadata with a required end cursor when a next page exists."
                         }
                       },
                       "required": [
@@ -411,6 +415,11 @@
                   "additionalProperties": false
                 }
               }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
+              }
             }
           },
           "400": {
@@ -426,8 +435,7 @@
                       "properties": {
                         "code": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
                         },
                         "message": {
                           "type": "string",
@@ -436,15 +444,46 @@
                         },
                         "requestId": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
                         },
                         "details": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
+                          "properties": {
+                            "fields": {
+                              "minItems": 1,
+                              "maxItems": 100,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "message": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "message",
+                                  "path"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
                           },
-                          "additionalProperties": {}
+                          "required": [
+                            "fields"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -460,6 +499,11 @@
                   ],
                   "additionalProperties": false
                 }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
               }
             }
           },
@@ -476,8 +520,7 @@
                       "properties": {
                         "code": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
                         },
                         "message": {
                           "type": "string",
@@ -486,15 +529,46 @@
                         },
                         "requestId": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
                         },
                         "details": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
+                          "properties": {
+                            "fields": {
+                              "minItems": 1,
+                              "maxItems": 100,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "message": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "message",
+                                  "path"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
                           },
-                          "additionalProperties": {}
+                          "required": [
+                            "fields"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -510,6 +584,11 @@
                   ],
                   "additionalProperties": false
                 }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
               }
             }
           },
@@ -526,8 +605,7 @@
                       "properties": {
                         "code": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
                         },
                         "message": {
                           "type": "string",
@@ -536,15 +614,46 @@
                         },
                         "requestId": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
                         },
                         "details": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
+                          "properties": {
+                            "fields": {
+                              "minItems": 1,
+                              "maxItems": 100,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "message": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "message",
+                                  "path"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
                           },
-                          "additionalProperties": {}
+                          "required": [
+                            "fields"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -560,6 +669,11 @@
                   ],
                   "additionalProperties": false
                 }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
               }
             }
           },
@@ -576,8 +690,7 @@
                       "properties": {
                         "code": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
                         },
                         "message": {
                           "type": "string",
@@ -586,15 +699,46 @@
                         },
                         "requestId": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
                         },
                         "details": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
+                          "properties": {
+                            "fields": {
+                              "minItems": 1,
+                              "maxItems": 100,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "message": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "message",
+                                  "path"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
                           },
-                          "additionalProperties": {}
+                          "required": [
+                            "fields"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -610,6 +754,96 @@
                   ],
                   "additionalProperties": false
                 }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            }
+          },
+          "415": {
+            "description": "The request media type is not supported.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
+                        },
+                        "message": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "fields": {
+                              "minItems": 1,
+                              "maxItems": 100,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "message": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "message",
+                                  "path"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "fields"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
               }
             }
           },
@@ -626,8 +860,7 @@
                       "properties": {
                         "code": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
                         },
                         "message": {
                           "type": "string",
@@ -636,15 +869,46 @@
                         },
                         "requestId": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
                         },
                         "details": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
+                          "properties": {
+                            "fields": {
+                              "minItems": 1,
+                              "maxItems": 100,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "message": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "message",
+                                  "path"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
                           },
-                          "additionalProperties": {}
+                          "required": [
+                            "fields"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -660,6 +924,11 @@
                   ],
                   "additionalProperties": false
                 }
+              }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
               }
             }
           },
@@ -676,8 +945,7 @@
                       "properties": {
                         "code": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
                         },
                         "message": {
                           "type": "string",
@@ -686,15 +954,46 @@
                         },
                         "requestId": {
                           "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
+                          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
                         },
                         "details": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
+                          "properties": {
+                            "fields": {
+                              "minItems": 1,
+                              "maxItems": 100,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                  },
+                                  "message": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "maxLength": 500
+                                  }
+                                },
+                                "required": [
+                                  "code",
+                                  "message",
+                                  "path"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
                           },
-                          "additionalProperties": {}
+                          "required": [
+                            "fields"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -711,9 +1010,3802 @@
                   "additionalProperties": false
                 }
               }
+            },
+            "headers": {
+              "x-request-id": {
+                "$ref": "#/components/headers/RequestId"
+              }
             }
           }
         }
+      }
+    }
+  },
+  "components": {
+    "headers": {
+      "RequestId": {
+        "description": "Correlation ID for this response.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+        }
+      }
+    },
+    "parameters": {
+      "RequestId": {
+        "name": "x-request-id",
+        "in": "header",
+        "required": false,
+        "description": "Optional caller correlation ID. Invalid values are replaced.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+        }
+      }
+    },
+    "schemas": {
+      "RequestId": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+      },
+      "ObjectId": {
+        "type": "string",
+        "pattern": "^[A-Fa-f\\d]{24}$"
+      },
+      "IsoDate": {
+        "type": "string",
+        "format": "date",
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+      },
+      "IsoDateTime": {
+        "type": "string",
+        "format": "date-time",
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+      },
+      "Currency": {
+        "type": "string",
+        "const": "INR"
+      },
+      "AmountMinor": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      "PositiveAmountMinor": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      },
+      "MinorMoney": {
+        "type": "object",
+        "properties": {
+          "amountMinor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "type": "string",
+            "const": "INR"
+          }
+        },
+        "required": [
+          "amountMinor",
+          "currency"
+        ],
+        "additionalProperties": false
+      },
+      "PositiveMinorMoney": {
+        "type": "object",
+        "properties": {
+          "amountMinor": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "type": "string",
+            "const": "INR"
+          }
+        },
+        "required": [
+          "amountMinor",
+          "currency"
+        ],
+        "additionalProperties": false,
+        "description": "A positive monetary amount in integer INR minor units."
+      },
+      "IdempotencyKey": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9._:-]{8,100}$"
+      },
+      "HttpUrl": {
+        "type": "string",
+        "maxLength": 4096,
+        "format": "uri",
+        "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+      },
+      "Percentage": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "PolicyVersion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 40
+      },
+      "OpaqueCursor": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048,
+        "pattern": "^[A-Za-z0-9_-]+$"
+      },
+      "CursorPageInfo": {
+        "type": "object",
+        "properties": {
+          "endCursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "pattern": "^[A-Za-z0-9_-]+$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "endCursor",
+          "hasNextPage"
+        ],
+        "additionalProperties": false,
+        "description": "Cursor metadata with a required end cursor when a next page exists."
+      },
+      "OffsetPageInfo": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "page",
+          "limit",
+          "total",
+          "pages"
+        ],
+        "additionalProperties": false
+      },
+      "CursorPaginationQuery": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          },
+          "limit": {
+            "default": 20,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": false
+      },
+      "OffsetPaginationQuery": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          },
+          "limit": {
+            "default": 20,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResourceIdParams": {
+        "type": "object",
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          }
+        },
+        "required": [
+          "resourceId"
+        ],
+        "additionalProperties": false
+      },
+      "ApiErrorDetails": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "fields"
+        ],
+        "additionalProperties": false
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "requestId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "minItems": 1,
+                "maxItems": 100,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "path": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "fields"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "requestId"
+        ],
+        "additionalProperties": false
+      },
+      "ApiErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9_]{0,99}$"
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "requestId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+              },
+              "details": {
+                "type": "object",
+                "properties": {
+                  "fields": {
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "message": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "path": {
+                          "type": "string",
+                          "maxLength": 500
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "path"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "fields"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "requestId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "ValidationIssue": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "ValidationErrorDetails": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "code",
+                "message",
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "fields"
+        ],
+        "additionalProperties": false
+      },
+      "LoginPassword": {
+        "type": "string",
+        "maxLength": 128,
+        "description": "Login password with a maximum UTF-8 encoded length of 72 bytes."
+      },
+      "LocalLoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Login password with a maximum UTF-8 encoded length of 72 bytes."
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "AuthenticatedSession": {
+        "type": "object",
+        "properties": {
+          "authenticated": {
+            "type": "boolean",
+            "const": true
+          },
+          "deletionPending": {
+            "type": "boolean"
+          },
+          "requiresPolicyAcceptance": {
+            "type": "boolean"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Fa-f\\d]{24}$"
+              },
+              "firstName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "lastName": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "email": {
+                "type": "string",
+                "maxLength": 254,
+                "format": "email",
+                "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              },
+              "accountType": {
+                "type": "string",
+                "enum": [
+                  "Admin",
+                  "Student",
+                  "Instructor"
+                ]
+              },
+              "imageUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri",
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "authProviders": {
+                "minItems": 1,
+                "maxItems": 2,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "local",
+                    "google"
+                  ]
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "id",
+              "firstName",
+              "lastName",
+              "email",
+              "accountType",
+              "imageUrl",
+              "authProviders"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "authenticated",
+          "deletionPending",
+          "requiresPolicyAcceptance",
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "SignedOutSession": {
+        "type": "object",
+        "properties": {
+          "authenticated": {
+            "type": "boolean",
+            "const": false
+          },
+          "deletionPending": {
+            "type": "boolean",
+            "const": false
+          },
+          "requiresPolicyAcceptance": {
+            "type": "boolean",
+            "const": false
+          },
+          "user": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "authenticated",
+          "deletionPending",
+          "requiresPolicyAcceptance",
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "AuthSession": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "authenticated": {
+                "type": "boolean",
+                "const": true
+              },
+              "deletionPending": {
+                "type": "boolean"
+              },
+              "requiresPolicyAcceptance": {
+                "type": "boolean"
+              },
+              "user": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Fa-f\\d]{24}$"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "accountType": {
+                    "type": "string",
+                    "enum": [
+                      "Admin",
+                      "Student",
+                      "Instructor"
+                    ]
+                  },
+                  "imageUrl": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 4096,
+                        "format": "uri",
+                        "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "authProviders": {
+                    "minItems": 1,
+                    "maxItems": 2,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "local",
+                        "google"
+                      ]
+                    },
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "id",
+                  "firstName",
+                  "lastName",
+                  "email",
+                  "accountType",
+                  "imageUrl",
+                  "authProviders"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "authenticated",
+              "deletionPending",
+              "requiresPolicyAcceptance",
+              "user"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "authenticated": {
+                "type": "boolean",
+                "const": false
+              },
+              "deletionPending": {
+                "type": "boolean",
+                "const": false
+              },
+              "requiresPolicyAcceptance": {
+                "type": "boolean",
+                "const": false
+              },
+              "user": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "authenticated",
+              "deletionPending",
+              "requiresPolicyAcceptance",
+              "user"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "A session whose authenticated state, user presence, and protected account gates are internally consistent."
+      },
+      "AuthSessionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "requestId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "authenticated": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "deletionPending": {
+                    "type": "boolean"
+                  },
+                  "requiresPolicyAcceptance": {
+                    "type": "boolean"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Fa-f\\d]{24}$"
+                      },
+                      "firstName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "lastName": {
+                        "type": "string",
+                        "maxLength": 80
+                      },
+                      "email": {
+                        "type": "string",
+                        "maxLength": 254,
+                        "format": "email",
+                        "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                      },
+                      "accountType": {
+                        "type": "string",
+                        "enum": [
+                          "Admin",
+                          "Student",
+                          "Instructor"
+                        ]
+                      },
+                      "imageUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 4096,
+                            "format": "uri",
+                            "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "authProviders": {
+                        "minItems": 1,
+                        "maxItems": 2,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "local",
+                            "google"
+                          ]
+                        },
+                        "uniqueItems": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "firstName",
+                      "lastName",
+                      "email",
+                      "accountType",
+                      "imageUrl",
+                      "authProviders"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "authenticated",
+                  "deletionPending",
+                  "requiresPolicyAcceptance",
+                  "user"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "authenticated": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "deletionPending": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "requiresPolicyAcceptance": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "user": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "authenticated",
+                  "deletionPending",
+                  "requiresPolicyAcceptance",
+                  "user"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "A session whose authenticated state, user presence, and protected account gates are internally consistent."
+          }
+        },
+        "required": [
+          "success",
+          "requestId",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "AccountType": {
+        "type": "string",
+        "enum": [
+          "Admin",
+          "Student",
+          "Instructor"
+        ]
+      },
+      "AuthProvider": {
+        "type": "string",
+        "enum": [
+          "local",
+          "google"
+        ]
+      },
+      "AuthProviders": {
+        "minItems": 1,
+        "maxItems": 2,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "local",
+            "google"
+          ]
+        },
+        "uniqueItems": true
+      },
+      "Gender": {
+        "type": "string",
+        "enum": [
+          "Female",
+          "Male",
+          "Non-Binary",
+          "Other",
+          "Prefer not to say"
+        ]
+      },
+      "InstructorApprovalStatus": {
+        "type": "string",
+        "enum": [
+          "NotApplicable",
+          "Pending",
+          "Approved",
+          "Rejected"
+        ]
+      },
+      "UserIdentity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "accountType": {
+            "type": "string",
+            "enum": [
+              "Admin",
+              "Student",
+              "Instructor"
+            ]
+          },
+          "imageUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "format": "uri",
+                "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "authProviders": {
+            "minItems": 1,
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "local",
+                "google"
+              ]
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "accountType",
+          "imageUrl",
+          "authProviders"
+        ],
+        "additionalProperties": false
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "accountType": {
+            "type": "string",
+            "enum": [
+              "Admin",
+              "Student",
+              "Instructor"
+            ]
+          },
+          "imageUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "format": "uri",
+                "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "authProviders": {
+            "minItems": 1,
+            "maxItems": 2,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "local",
+                "google"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "instructorApprovalStatus": {
+            "type": "string",
+            "enum": [
+              "NotApplicable",
+              "Pending",
+              "Approved",
+              "Rejected"
+            ]
+          },
+          "profile": {
+            "type": "object",
+            "properties": {
+              "about": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contactNumber": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\+?[1-9]\\d{7,14}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "dateOfBirth": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "gender": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "Female",
+                      "Male",
+                      "Non-Binary",
+                      "Other",
+                      "Prefer not to say"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "about",
+              "contactNumber",
+              "dateOfBirth",
+              "gender"
+            ],
+            "additionalProperties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "accountType",
+          "imageUrl",
+          "authProviders",
+          "active",
+          "approved",
+          "instructorApprovalStatus",
+          "profile",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ProfileDetails": {
+        "type": "object",
+        "properties": {
+          "about": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "contactNumber": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\+?[1-9]\\d{7,14}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dateOfBirth": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Female",
+                  "Male",
+                  "Non-Binary",
+                  "Other",
+                  "Prefer not to say"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "about",
+          "contactNumber",
+          "dateOfBirth",
+          "gender"
+        ],
+        "additionalProperties": false
+      },
+      "PublicInstructor": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 161
+          },
+          "imageUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "format": "uri",
+                "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "imageUrl",
+          "about"
+        ],
+        "additionalProperties": false
+      },
+      "CourseIdParams": {
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          }
+        },
+        "required": [
+          "courseId"
+        ],
+        "additionalProperties": false
+      },
+      "CanonicalLanguageCode": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 35,
+        "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+      },
+      "CourseLevel": {
+        "type": "string",
+        "enum": [
+          "beginner",
+          "intermediate",
+          "advanced"
+        ]
+      },
+      "CourseLifecycleStatus": {
+        "type": "string",
+        "enum": [
+          "Archived",
+          "Draft",
+          "Published"
+        ]
+      },
+      "CourseCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "CourseRatingSummary": {
+        "type": "object",
+        "properties": {
+          "average": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "average",
+          "count"
+        ],
+        "additionalProperties": false
+      },
+      "LessonPreview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 31536000
+          },
+          "previewAvailable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "durationSeconds",
+          "previewAvailable"
+        ],
+        "additionalProperties": false
+      },
+      "CurriculumSection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "lessons": {
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Fa-f\\d]{24}$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 10000
+                },
+                "durationSeconds": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 31536000
+                },
+                "previewAvailable": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "description",
+                "durationSeconds",
+                "previewAvailable"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "lessons"
+        ],
+        "additionalProperties": false
+      },
+      "CourseDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "whatYouWillLearn": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "maxLength": 4096,
+            "format": "uri",
+            "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+          },
+          "price": {
+            "type": "object",
+            "properties": {
+              "amountMinor": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "currency": {
+                "type": "string",
+                "const": "INR"
+              }
+            },
+            "required": [
+              "amountMinor",
+              "currency"
+            ],
+            "additionalProperties": false,
+            "description": "A positive monetary amount in integer INR minor units."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Archived",
+              "Draft",
+              "Published"
+            ]
+          },
+          "tags": {
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "instructions": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "beginner",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 35,
+                "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "category": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Fa-f\\d]{24}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "instructor": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Fa-f\\d]{24}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 161
+              },
+              "imageUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri",
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "about": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "imageUrl",
+              "about"
+            ],
+            "additionalProperties": false
+          },
+          "rating": {
+            "type": "object",
+            "properties": {
+              "average": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "average",
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "enrollmentCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "curriculum": {
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Fa-f\\d]{24}$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "lessons": {
+                  "maxItems": 500,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Fa-f\\d]{24}$"
+                      },
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "description": {
+                        "type": "string",
+                        "maxLength": 10000
+                      },
+                      "durationSeconds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 31536000
+                      },
+                      "previewAvailable": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title",
+                      "description",
+                      "durationSeconds",
+                      "previewAvailable"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "lessons"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "whatYouWillLearn",
+          "thumbnailUrl",
+          "price",
+          "status",
+          "tags",
+          "instructions",
+          "level",
+          "language",
+          "category",
+          "instructor",
+          "rating",
+          "enrollmentCount",
+          "curriculum",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "CatalogLevel": {
+        "type": "string",
+        "enum": [
+          "beginner",
+          "intermediate",
+          "advanced"
+        ]
+      },
+      "CatalogSort": {
+        "type": "string",
+        "enum": [
+          "relevance",
+          "newest",
+          "price_asc",
+          "price_desc",
+          "rating_desc",
+          "popular"
+        ]
+      },
+      "CatalogCourseListQuery": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "categoryId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 35,
+            "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+          },
+          "minPrice": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "maxPrice": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "minRating": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "minDurationSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 31536000
+          },
+          "maxDurationSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 31536000
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "relevance",
+              "newest",
+              "price_asc",
+              "price_desc",
+              "rating_desc",
+              "popular"
+            ]
+          },
+          "limit": {
+            "default": 12,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CatalogPriceMajor": {
+        "type": "number",
+        "minimum": 0.01,
+        "maximum": 10000000,
+        "description": "Compatibility price in INR major units; new commerce contracts use integer minor units."
+      },
+      "CatalogCourse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 10000000,
+            "description": "Compatibility price in INR major units; new commerce contracts use integer minor units."
+          },
+          "currency": {
+            "type": "string",
+            "const": "INR"
+          },
+          "instructor": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Fa-f\\d]{24}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 161
+                  },
+                  "imageUrl": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "imageUrl"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Fa-f\\d]{24}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rating": {
+            "type": "object",
+            "properties": {
+              "average": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "average",
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "beginner",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 35,
+                "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enrollmentCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "thumbnailUrl",
+          "price",
+          "currency",
+          "instructor",
+          "category",
+          "rating",
+          "durationSeconds",
+          "level",
+          "language",
+          "enrollmentCount",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "CatalogCourseListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "requestId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Fa-f\\d]{24}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 10000
+                    },
+                    "thumbnailUrl": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "price": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 10000000,
+                      "description": "Compatibility price in INR major units; new commerce contracts use integer minor units."
+                    },
+                    "currency": {
+                      "type": "string",
+                      "const": "INR"
+                    },
+                    "instructor": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[A-Fa-f\\d]{24}$"
+                            },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 161
+                            },
+                            "imageUrl": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 4096
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "imageUrl"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "category": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[A-Fa-f\\d]{24}$"
+                            },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "rating": {
+                      "type": "object",
+                      "properties": {
+                        "average": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 5
+                        },
+                        "count": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "average",
+                        "count"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "durationSeconds": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "level": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "beginner",
+                            "intermediate",
+                            "advanced"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "language": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 35,
+                          "pattern": "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "enrollmentCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "thumbnailUrl",
+                    "price",
+                    "currency",
+                    "instructor",
+                    "category",
+                    "rating",
+                    "durationSeconds",
+                    "level",
+                    "language",
+                    "enrollmentCount",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "pageInfo": {
+                "type": "object",
+                "properties": {
+                  "endCursor": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2048,
+                        "pattern": "^[A-Za-z0-9_-]+$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "endCursor",
+                  "hasNextPage"
+                ],
+                "additionalProperties": false,
+                "description": "Cursor metadata with a required end cursor when a next page exists."
+              }
+            },
+            "required": [
+              "items",
+              "pageInfo"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "success",
+          "requestId",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "ProgressUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "completed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "lessonId",
+          "completed"
+        ],
+        "additionalProperties": false
+      },
+      "CourseProgress": {
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "completedLessonIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Fa-f\\d]{24}$"
+            },
+            "uniqueItems": true
+          },
+          "completedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "totalLessons": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "progressPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "courseId",
+          "completedLessonIds",
+          "completedCount",
+          "totalLessons",
+          "progressPercent",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "description": "Course progress with unique lesson IDs and internally consistent counts and percentage."
+      },
+      "LessonPlayback": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 4096,
+            "format": "uri",
+            "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+          },
+          "expiresAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "url",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreateReviewRequest": {
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "review": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "courseId",
+          "rating",
+          "review"
+        ],
+        "additionalProperties": false
+      },
+      "PublicReview": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "course": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "review": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "reviewer": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "imageUrl": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 4096,
+                        "format": "uri",
+                        "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "firstName",
+                  "lastName",
+                  "imageUrl"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "createdAt",
+          "course",
+          "rating",
+          "review",
+          "reviewer"
+        ],
+        "additionalProperties": false
+      },
+      "CheckoutPolicy": {
+        "type": "object",
+        "properties": {
+          "termsVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "refundPolicyVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "refundWindowDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "termsVersion",
+          "refundPolicyVersion",
+          "refundWindowDays"
+        ],
+        "additionalProperties": false
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "properties": {
+          "courses": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Fa-f\\d]{24}$"
+            },
+            "uniqueItems": true
+          },
+          "acknowledgeCheckoutPolicies": {
+            "type": "boolean",
+            "const": true
+          },
+          "termsVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "refundPolicyVersion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "refundWindowDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "courses",
+          "acknowledgeCheckoutPolicies",
+          "termsVersion",
+          "refundPolicyVersion",
+          "refundWindowDays"
+        ],
+        "additionalProperties": false,
+        "description": "A checkout request containing unique course IDs and an exact policy acknowledgement."
+      },
+      "CheckoutOrder": {
+        "type": "object",
+        "properties": {
+          "purchaseId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "providerOrderId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "amount": {
+            "type": "object",
+            "properties": {
+              "amountMinor": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "currency": {
+                "type": "string",
+                "const": "INR"
+              }
+            },
+            "required": [
+              "amountMinor",
+              "currency"
+            ],
+            "additionalProperties": false,
+            "description": "A positive monetary amount in integer INR minor units."
+          },
+          "reused": {
+            "type": "boolean"
+          },
+          "checkoutExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "purchaseId",
+          "providerOrderId",
+          "amount",
+          "reused",
+          "checkoutExpiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "CheckoutOrderResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "requestId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "purchaseId": {
+                "type": "string",
+                "pattern": "^[A-Fa-f\\d]{24}$"
+              },
+              "providerOrderId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "amount": {
+                "type": "object",
+                "properties": {
+                  "amountMinor": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "currency": {
+                    "type": "string",
+                    "const": "INR"
+                  }
+                },
+                "required": [
+                  "amountMinor",
+                  "currency"
+                ],
+                "additionalProperties": false,
+                "description": "A positive monetary amount in integer INR minor units."
+              },
+              "reused": {
+                "type": "boolean"
+              },
+              "checkoutExpiresAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              }
+            },
+            "required": [
+              "purchaseId",
+              "providerOrderId",
+              "amount",
+              "reused",
+              "checkoutExpiresAt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "success",
+          "requestId",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "PurchaseLineItem": {
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "courseName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "amount": {
+            "type": "object",
+            "properties": {
+              "amountMinor": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "currency": {
+                "type": "string",
+                "const": "INR"
+              }
+            },
+            "required": [
+              "amountMinor",
+              "currency"
+            ],
+            "additionalProperties": false,
+            "description": "A positive monetary amount in integer INR minor units."
+          }
+        },
+        "required": [
+          "courseId",
+          "courseName",
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "PurchaseFinancials": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "object",
+            "properties": {
+              "amountMinor": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "currency": {
+                "type": "string",
+                "const": "INR"
+              }
+            },
+            "required": [
+              "amountMinor",
+              "currency"
+            ],
+            "additionalProperties": false,
+            "description": "A positive monetary amount in integer INR minor units."
+          },
+          "lineItems": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "courseId": {
+                  "type": "string",
+                  "pattern": "^[A-Fa-f\\d]{24}$"
+                },
+                "courseName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "amount": {
+                  "type": "object",
+                  "properties": {
+                    "amountMinor": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "currency": {
+                      "type": "string",
+                      "const": "INR"
+                    }
+                  },
+                  "required": [
+                    "amountMinor",
+                    "currency"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A positive monetary amount in integer INR minor units."
+                }
+              },
+              "required": [
+                "courseId",
+                "courseName",
+                "amount"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One immutable price snapshot per unique course ID."
+          }
+        },
+        "required": [
+          "amount",
+          "lineItems"
+        ],
+        "additionalProperties": false,
+        "description": "Positive INR purchase totals whose amount equals the sum of all line items."
+      },
+      "PurchaseStatus": {
+        "type": "string",
+        "enum": [
+          "created",
+          "order_created",
+          "paid",
+          "fulfilled",
+          "failed",
+          "expired",
+          "payment_review",
+          "refund_pending",
+          "refund_requested",
+          "refunded"
+        ]
+      },
+      "RefundProviderStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "processed",
+          "failed"
+        ]
+      },
+      "ReconciliationResolution": {
+        "type": "string",
+        "enum": [
+          "fulfilled",
+          "refunded",
+          "refund_rejected"
+        ]
+      },
+      "LearnerPurchase": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "object",
+            "properties": {
+              "amountMinor": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "currency": {
+                "type": "string",
+                "const": "INR"
+              }
+            },
+            "required": [
+              "amountMinor",
+              "currency"
+            ],
+            "additionalProperties": false,
+            "description": "A positive monetary amount in integer INR minor units."
+          },
+          "lineItems": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "courseId": {
+                  "type": "string",
+                  "pattern": "^[A-Fa-f\\d]{24}$"
+                },
+                "courseName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "amount": {
+                  "type": "object",
+                  "properties": {
+                    "amountMinor": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "currency": {
+                      "type": "string",
+                      "const": "INR"
+                    }
+                  },
+                  "required": [
+                    "amountMinor",
+                    "currency"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A positive monetary amount in integer INR minor units."
+                }
+              },
+              "required": [
+                "courseId",
+                "courseName",
+                "amount"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One immutable price snapshot per unique course ID."
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "order_created",
+              "paid",
+              "fulfilled",
+              "failed",
+              "expired",
+              "payment_review",
+              "refund_pending",
+              "refund_requested",
+              "refunded"
+            ]
+          },
+          "policy": {
+            "type": "object",
+            "properties": {
+              "termsVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "refundPolicyVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "refundWindowDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30
+              }
+            },
+            "required": [
+              "termsVersion",
+              "refundPolicyVersion",
+              "refundWindowDays"
+            ],
+            "additionalProperties": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "paidAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fulfilledAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refundRequestedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refundedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refundEligible": {
+            "type": "boolean"
+          },
+          "refundEligibleUntil": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refundProviderStatus": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "processed",
+                  "failed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "lineItems",
+          "id",
+          "status",
+          "policy",
+          "createdAt",
+          "paidAt",
+          "fulfilledAt",
+          "refundRequestedAt",
+          "refundedAt",
+          "refundEligible",
+          "refundEligibleUntil",
+          "refundProviderStatus"
+        ],
+        "additionalProperties": false
+      },
+      "RefundRequest": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "const": "REQUEST REFUND"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "confirmation",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "Rating": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5
+      },
+      "AdminLearnerSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "accountType": {
+            "type": "string",
+            "const": "Student"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "approved": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "accountType",
+          "active",
+          "approved"
+        ],
+        "additionalProperties": false
+      },
+      "ReconciliationQueueStatus": {
+        "type": "string",
+        "enum": [
+          "payment_review",
+          "refund_pending",
+          "refund_requested"
+        ]
+      },
+      "InstructorApprovalQueueItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "imageUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "format": "uri",
+                "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "contactNumber": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\+?[1-9]\\d{7,14}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "const": "Pending"
+          },
+          "active": {
+            "type": "boolean",
+            "const": true
+          },
+          "approved": {
+            "type": "boolean",
+            "const": false
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "reviewedAt": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "imageUrl",
+          "about",
+          "contactNumber",
+          "status",
+          "active",
+          "approved",
+          "submittedAt",
+          "reviewedAt"
+        ],
+        "additionalProperties": false
+      },
+      "InstructorApprovalQueueResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "requestId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Fa-f\\d]{24}$"
+                    },
+                    "firstName": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    },
+                    "lastName": {
+                      "type": "string",
+                      "maxLength": 80
+                    },
+                    "email": {
+                      "type": "string",
+                      "maxLength": 254,
+                      "format": "email",
+                      "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                    },
+                    "imageUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 4096,
+                          "format": "uri",
+                          "pattern": "^[Hh][Tt][Tt][Pp][Ss]?:\\/\\/"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "about": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "contactNumber": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^\\+?[1-9]\\d{7,14}$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "const": "Pending"
+                    },
+                    "active": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "approved": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "submittedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "reviewedAt": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "email",
+                    "imageUrl",
+                    "about",
+                    "contactNumber",
+                    "status",
+                    "active",
+                    "approved",
+                    "submittedAt",
+                    "reviewedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "pageInfo": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "total": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "pages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "page",
+                  "limit",
+                  "total",
+                  "pages"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "items",
+              "pageInfo"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "success",
+          "requestId",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "ReconciliationQueueItem": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "object",
+            "properties": {
+              "amountMinor": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "currency": {
+                "type": "string",
+                "const": "INR"
+              }
+            },
+            "required": [
+              "amountMinor",
+              "currency"
+            ],
+            "additionalProperties": false,
+            "description": "A positive monetary amount in integer INR minor units."
+          },
+          "lineItems": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "courseId": {
+                  "type": "string",
+                  "pattern": "^[A-Fa-f\\d]{24}$"
+                },
+                "courseName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "amount": {
+                  "type": "object",
+                  "properties": {
+                    "amountMinor": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    "currency": {
+                      "type": "string",
+                      "const": "INR"
+                    }
+                  },
+                  "required": [
+                    "amountMinor",
+                    "currency"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A positive monetary amount in integer INR minor units."
+                }
+              },
+              "required": [
+                "courseId",
+                "courseName",
+                "amount"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One immutable price snapshot per unique course ID."
+          },
+          "purchaseId": {
+            "type": "string",
+            "pattern": "^[A-Fa-f\\d]{24}$"
+          },
+          "learner": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Fa-f\\d]{24}$"
+              },
+              "firstName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "lastName": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "email": {
+                "type": "string",
+                "maxLength": 254,
+                "format": "email",
+                "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              },
+              "accountType": {
+                "type": "string",
+                "const": "Student"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "approved": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "firstName",
+              "lastName",
+              "email",
+              "accountType",
+              "active",
+              "approved"
+            ],
+            "additionalProperties": false
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "payment_review",
+              "refund_pending",
+              "refund_requested"
+            ]
+          },
+          "policy": {
+            "type": "object",
+            "properties": {
+              "termsVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "refundPolicyVersion": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "refundWindowDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30
+              }
+            },
+            "required": [
+              "termsVersion",
+              "refundPolicyVersion",
+              "refundWindowDays"
+            ],
+            "additionalProperties": false
+          },
+          "queuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "refundRequestedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refundProviderStatus": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "processed",
+                  "failed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "lineItems",
+          "purchaseId",
+          "learner",
+          "status",
+          "policy",
+          "queuedAt",
+          "refundRequestedAt",
+          "refundProviderStatus"
+        ],
+        "additionalProperties": false
+      },
+      "ReconciliationQueueResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "requestId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,100}$"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "object",
+                      "properties": {
+                        "amountMinor": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "currency": {
+                          "type": "string",
+                          "const": "INR"
+                        }
+                      },
+                      "required": [
+                        "amountMinor",
+                        "currency"
+                      ],
+                      "additionalProperties": false,
+                      "description": "A positive monetary amount in integer INR minor units."
+                    },
+                    "lineItems": {
+                      "minItems": 1,
+                      "maxItems": 20,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "courseId": {
+                            "type": "string",
+                            "pattern": "^[A-Fa-f\\d]{24}$"
+                          },
+                          "courseName": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "amount": {
+                            "type": "object",
+                            "properties": {
+                              "amountMinor": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "currency": {
+                                "type": "string",
+                                "const": "INR"
+                              }
+                            },
+                            "required": [
+                              "amountMinor",
+                              "currency"
+                            ],
+                            "additionalProperties": false,
+                            "description": "A positive monetary amount in integer INR minor units."
+                          }
+                        },
+                        "required": [
+                          "courseId",
+                          "courseName",
+                          "amount"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "One immutable price snapshot per unique course ID."
+                    },
+                    "purchaseId": {
+                      "type": "string",
+                      "pattern": "^[A-Fa-f\\d]{24}$"
+                    },
+                    "learner": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Fa-f\\d]{24}$"
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 80
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "maxLength": 80
+                        },
+                        "email": {
+                          "type": "string",
+                          "maxLength": 254,
+                          "format": "email",
+                          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                        },
+                        "accountType": {
+                          "type": "string",
+                          "const": "Student"
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "approved": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "firstName",
+                        "lastName",
+                        "email",
+                        "accountType",
+                        "active",
+                        "approved"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "payment_review",
+                        "refund_pending",
+                        "refund_requested"
+                      ]
+                    },
+                    "policy": {
+                      "type": "object",
+                      "properties": {
+                        "termsVersion": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 40
+                        },
+                        "refundPolicyVersion": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 40
+                        },
+                        "refundWindowDays": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 30
+                        }
+                      },
+                      "required": [
+                        "termsVersion",
+                        "refundPolicyVersion",
+                        "refundWindowDays"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "queuedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    },
+                    "refundRequestedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "refundProviderStatus": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "processed",
+                            "failed"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "lineItems",
+                    "purchaseId",
+                    "learner",
+                    "status",
+                    "policy",
+                    "queuedAt",
+                    "refundRequestedAt",
+                    "refundProviderStatus"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "pageInfo": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "total": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "pages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "page",
+                  "limit",
+                  "total",
+                  "pages"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "items",
+              "pageInfo"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "success",
+          "requestId",
+          "data"
+        ],
+        "additionalProperties": false
       }
     }
   }

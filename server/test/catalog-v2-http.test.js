@@ -1,6 +1,8 @@
 const assert = require("node:assert/strict")
 const { after, before, test } = require("node:test")
 
+const { apiErrorResponseSchema } = require("@studynotion/contracts")
+
 process.env.NODE_ENV = "test"
 process.env.FRONTEND_URL = "http://localhost:3000"
 process.env.MONGODB_URL = "mongodb://127.0.0.1:27017/studynotion-catalog-http"
@@ -179,6 +181,16 @@ test("v2 parser, CORS, and origin failures retain the standard envelope", async 
   assert.equal(disallowedCors.response.status, 403)
   assert.equal(disallowedCors.body.error.code, "CORS_NOT_ALLOWED")
 
+  const caseInsensitiveV2Cors = await requestJson("/API/V2/courses", {
+    headers: { origin: "https://attacker.example" },
+  })
+  assert.equal(caseInsensitiveV2Cors.response.status, 403)
+  assert.equal(caseInsensitiveV2Cors.body.error.code, "CORS_NOT_ALLOWED")
+  assert.equal(
+    apiErrorResponseSchema.safeParse(caseInsensitiveV2Cors.body).success,
+    true
+  )
+
   const crossSite = await requestJson("/api/v2/not-a-route", {
     headers: { "sec-fetch-site": "cross-site" },
     method: "POST",
@@ -192,6 +204,37 @@ test("v1 not-found response remains byte-compatible", async (t) => {
   const result = await requestJson("/api/v1/not-a-route")
   assert.equal(result.response.status, 404)
   assert.deepEqual(result.body, { success: false, message: "Route not found" })
+})
+
+test("v2 unsupported charsets fail with a stable envelope", async (t) => {
+  if (!requireListener(t)) return
+
+  const unsupportedCharset = await requestJson("/api/v2/not-a-route", {
+    body: "{}",
+    headers: { "content-type": "application/json; charset=shift_jis" },
+    method: "POST",
+  })
+  assert.equal(unsupportedCharset.response.status, 415)
+  assert.equal(unsupportedCharset.body.error.code, "UNSUPPORTED_MEDIA_TYPE")
+  assert.equal(
+    apiErrorResponseSchema.safeParse(unsupportedCharset.body).success,
+    true
+  )
+})
+
+test("invalid incoming request IDs are replaced before v2 envelopes are emitted", async (t) => {
+  if (!requireListener(t)) return
+  const result = await requestJson("/api/v2/not-a-route", {
+    headers: { "x-request-id": "invalid request id" },
+  })
+
+  assert.equal(result.response.status, 404)
+  assert.notEqual(result.body.error.requestId, "invalid request id")
+  assert.match(result.body.error.requestId, /^[A-Za-z0-9._:-]{1,100}$/)
+  assert.equal(
+    result.response.headers.get("x-request-id"),
+    result.body.error.requestId
+  )
 })
 
 test("v2 rate-limit failures retain the standard envelope", async (t) => {

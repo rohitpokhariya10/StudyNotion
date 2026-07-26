@@ -1,6 +1,10 @@
 const { z } = require("zod")
 
-const catalogLevelSchema = z.enum(["beginner", "intermediate", "advanced"])
+const { createSuccessResponseSchema, objectIdSchema } = require("./common")
+const { canonicalLanguageCodeSchema, courseLevelSchema } = require("./courses")
+const { cursorPageInfoSchema, opaqueCursorSchema } = require("./pagination")
+
+const catalogLevelSchema = courseLevelSchema
 
 const catalogSortSchema = z.enum([
   "relevance",
@@ -12,15 +16,16 @@ const catalogSortSchema = z.enum([
 ])
 
 const languageCodePattern = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/
-const canonicalLanguageCodePattern = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/
-
-const objectIdSchema = z.string().regex(/^[A-Fa-f\d]{24}$/, "Invalid ID")
-
-const catalogCursorSchema = z
-  .string()
-  .min(1)
-  .max(2048)
-  .regex(/^[A-Za-z0-9_-]+$/, "Invalid cursor")
+const catalogCursorSchema = opaqueCursorSchema
+const catalogPriceMajorSchema = z
+  .number()
+  .finite()
+  .min(0.01)
+  .max(10_000_000)
+  .describe(
+    "Compatibility price in INR major units; new commerce contracts use integer minor units."
+  )
+const nullableCatalogImageSchema = z.string().min(1).max(4096).nullable()
 
 const blankAsUndefined = (value) =>
   typeof value === "string" && value.trim() === "" ? undefined : value
@@ -43,13 +48,16 @@ const optionalQueryNumber = (schema) =>
     return Number(value)
   }, schema.optional())
 
-const languageCodeSchema = z
+const languageCodeWireSchema = z
   .string()
   .trim()
   .min(2)
   .max(35)
   .regex(languageCodePattern, "Invalid language code")
-  .transform((value) => value.toLowerCase())
+
+const languageCodeSchema = languageCodeWireSchema.transform((value) =>
+  value.toLowerCase()
+)
 
 const catalogQueryBaseSchema = z.strictObject({
   q: optionalSearchText,
@@ -112,31 +120,33 @@ const catalogQueryOpenApiSchema = z.strictObject({
   q: z.string().trim().min(1).max(120).optional(),
   categoryId: objectIdSchema.optional(),
   level: catalogLevelSchema.optional(),
-  language: z.string().min(2).max(35).regex(languageCodePattern).optional(),
+  language: languageCodeWireSchema.optional(),
   minPrice: z.number().min(0).max(10_000_000).optional(),
   maxPrice: z.number().min(0).max(10_000_000).optional(),
   minRating: z.number().min(0).max(5).optional(),
   minDurationSeconds: z.number().int().min(0).max(31_536_000).optional(),
   maxDurationSeconds: z.number().int().min(0).max(31_536_000).optional(),
   sort: catalogSortSchema.optional(),
-  limit: z.number().int().min(1).max(50).default(12),
+  limit: z.number().int().min(1).max(50).optional().meta({ default: 12 }),
   cursor: catalogCursorSchema.optional(),
 })
-
-const nullableImageSchema = z.string().min(1).max(4096).nullable()
 
 const catalogCourseSchema = z.strictObject({
   id: objectIdSchema,
   name: z.string().min(1).max(200),
   description: z.string().min(1).max(10_000),
   thumbnailUrl: z.string().min(1).max(4096),
-  price: z.number().finite().min(0.01).max(10_000_000),
+  // Catalog v2 shipped before the common minor-unit money contract. Keep this
+  // major-unit field stable until a separately versioned catalog migration.
+  price: catalogPriceMajorSchema,
   currency: z.literal("INR"),
   instructor: z
     .strictObject({
       id: objectIdSchema,
       name: z.string().min(1).max(161),
-      imageUrl: nullableImageSchema,
+      // Preserve the already-shipped catalog contract, which allows legacy
+      // relative/provider image strings as well as absolute URLs.
+      imageUrl: nullableCatalogImageSchema,
     })
     .nullable(),
   category: z
@@ -151,33 +161,24 @@ const catalogCourseSchema = z.strictObject({
   }),
   durationSeconds: z.number().int().min(0),
   level: catalogLevelSchema.nullable(),
-  language: z
-    .string()
-    .min(2)
-    .max(35)
-    .regex(canonicalLanguageCodePattern)
-    .nullable(),
+  language: canonicalLanguageCodeSchema.nullable(),
   enrollmentCount: z.number().int().min(0),
   createdAt: z.iso.datetime(),
 })
 
-const catalogCourseListResponseSchema = z.strictObject({
-  success: z.literal(true),
-  requestId: z.string().min(1).max(100),
-  data: z.strictObject({
+const catalogCourseListResponseSchema = createSuccessResponseSchema(
+  z.strictObject({
     items: z.array(catalogCourseSchema),
-    pageInfo: z.strictObject({
-      endCursor: catalogCursorSchema.nullable(),
-      hasNextPage: z.boolean(),
-    }),
-  }),
-})
+    pageInfo: cursorPageInfoSchema,
+  })
+)
 
 module.exports = {
   catalogCourseListQuerySchema,
   catalogCourseListResponseSchema,
   catalogCourseSchema,
   catalogLevelSchema,
+  catalogPriceMajorSchema,
   catalogQueryOpenApiSchema,
   catalogSortSchema,
   objectIdSchema,

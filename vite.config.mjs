@@ -4,7 +4,7 @@ import { defineConfig } from "vite"
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: ["@studynotion/contracts"],
+    include: ["@studynotion/contracts/catalog"],
   },
   server: {
     host: "127.0.0.1",

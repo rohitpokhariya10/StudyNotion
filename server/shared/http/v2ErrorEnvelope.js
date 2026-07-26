@@ -1,21 +1,44 @@
+const {
+  apiErrorResponseSchema,
+  requestIdSchema,
+} = require("@studynotion/contracts")
+
 const statusCodeToErrorCode = (statusCode) => {
   if (statusCode === 400) return "INVALID_REQUEST"
   if (statusCode === 401) return "UNAUTHORIZED"
   if (statusCode === 403) return "FORBIDDEN"
   if (statusCode === 404) return "ROUTE_NOT_FOUND"
+  if (statusCode === 409) return "CONFLICT"
   if (statusCode === 413) return "PAYLOAD_TOO_LARGE"
+  if (statusCode === 415) return "UNSUPPORTED_MEDIA_TYPE"
+  if (statusCode === 422) return "UNPROCESSABLE_CONTENT"
+  if (statusCode === 423) return "ACCOUNT_LOCKED"
+  if (statusCode === 428) return "PRECONDITION_REQUIRED"
   if (statusCode === 429) return "RATE_LIMITED"
   return "INTERNAL_ERROR"
 }
 
-const createV2ErrorEnvelope = (req, code, message, details) => ({
-  error: {
-    code,
-    message,
-    requestId: req.requestId || "unknown",
-    ...(details === undefined ? {} : { details }),
-  },
-})
+const createV2ErrorEnvelope = (req, code, message, details) => {
+  const parsedRequestId = requestIdSchema.safeParse(req?.requestId)
+  const requestId = parsedRequestId.success ? parsedRequestId.data : "unknown"
+  const candidate = apiErrorResponseSchema.safeParse({
+    error: {
+      code,
+      message,
+      requestId,
+      ...(details === undefined ? {} : { details }),
+    },
+  })
+  if (candidate.success) return candidate.data
+
+  return {
+    error: {
+      code: "INTERNAL_ERROR",
+      message: "Internal server error",
+      requestId,
+    },
+  }
+}
 
 const sendV2Error = (req, res, { code, message, statusCode, details }) => {
   res.setHeader("Cache-Control", "private, no-store")
@@ -30,9 +53,15 @@ const sendV2Error = (req, res, { code, message, statusCode, details }) => {
 const normalizeV2ErrorEnvelope = (req, res, next) => {
   const originalJson = res.json.bind(res)
   res.json = (body) => {
+    const parsedEnvelope = apiErrorResponseSchema.safeParse(body)
+    const parsedRequestId = requestIdSchema.safeParse(req?.requestId)
+    const expectedRequestId = parsedRequestId.success
+      ? parsedRequestId.data
+      : "unknown"
     if (
       res.statusCode >= 400 &&
-      (!body || typeof body !== "object" || !body.error)
+      (!parsedEnvelope.success ||
+        parsedEnvelope.data.error.requestId !== expectedRequestId)
     ) {
       res.setHeader("Cache-Control", "private, no-store")
       const message =
@@ -52,8 +81,10 @@ const normalizeV2ErrorEnvelope = (req, res, next) => {
   next()
 }
 
-const isV2Request = (req) =>
-  req.path === "/api/v2" || req.path.startsWith("/api/v2/")
+const isV2Request = (req) => {
+  const requestPath = typeof req.path === "string" ? req.path.toLowerCase() : ""
+  return requestPath === "/api/v2" || requestPath.startsWith("/api/v2/")
+}
 
 module.exports = {
   createV2ErrorEnvelope,

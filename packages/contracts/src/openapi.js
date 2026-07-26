@@ -4,7 +4,24 @@ const {
   catalogCourseListResponseSchema,
   catalogQueryOpenApiSchema,
 } = require("./catalog")
+const { requestIdSchema } = require("./common")
 const { apiErrorResponseSchema } = require("./errors")
+const { contractSchemas } = require("./registry")
+
+const toJsonSchema = (schema) =>
+  z.toJSONSchema(schema, { target: "draft-2020-12" })
+
+const toComponentSchema = (schema) => {
+  const { $schema: _jsonSchemaDialect, ...component } = toJsonSchema(schema)
+  return component
+}
+
+const withRequestIdResponseHeader = (response) => ({
+  ...response,
+  headers: {
+    "x-request-id": { $ref: "#/components/headers/RequestId" },
+  },
+})
 
 const createOpenApiDocument = () => {
   const queryShape = catalogQueryOpenApiSchema.shape
@@ -23,13 +40,16 @@ const createOpenApiDocument = () => {
     cursor: "Opaque cursor returned by the previous page.",
   }
 
-  const parameters = Object.entries(queryShape).map(([name, schema]) => ({
-    name,
-    in: "query",
-    required: false,
-    description: descriptions[name],
-    schema: z.toJSONSchema(schema, { target: "draft-2020-12" }),
-  }))
+  const parameters = [
+    { $ref: "#/components/parameters/RequestId" },
+    ...Object.entries(queryShape).map(([name, schema]) => ({
+      name,
+      in: "query",
+      required: false,
+      description: descriptions[name],
+      schema: toJsonSchema(schema),
+    })),
+  ]
 
   return {
     openapi: "3.1.0",
@@ -45,79 +65,98 @@ const createOpenApiDocument = () => {
           security: [],
           parameters,
           responses: {
-            200: {
+            200: withRequestIdResponseHeader({
               description: "A cursor-paginated published course page.",
               content: {
                 "application/json": {
-                  schema: z.toJSONSchema(catalogCourseListResponseSchema, {
-                    target: "draft-2020-12",
-                  }),
+                  schema: toJsonSchema(catalogCourseListResponseSchema),
                 },
               },
-            },
-            400: {
+            }),
+            400: withRequestIdResponseHeader({
               description: "The query or cursor is invalid.",
               content: {
                 "application/json": {
-                  schema: z.toJSONSchema(apiErrorResponseSchema, {
-                    target: "draft-2020-12",
-                  }),
+                  schema: toJsonSchema(apiErrorResponseSchema),
                 },
               },
-            },
-            403: {
+            }),
+            403: withRequestIdResponseHeader({
               description: "The browser origin is not trusted.",
               content: {
                 "application/json": {
-                  schema: z.toJSONSchema(apiErrorResponseSchema, {
-                    target: "draft-2020-12",
-                  }),
+                  schema: toJsonSchema(apiErrorResponseSchema),
                 },
               },
-            },
-            404: {
+            }),
+            404: withRequestIdResponseHeader({
               description: "The v2 route does not exist.",
               content: {
                 "application/json": {
-                  schema: z.toJSONSchema(apiErrorResponseSchema, {
-                    target: "draft-2020-12",
-                  }),
+                  schema: toJsonSchema(apiErrorResponseSchema),
                 },
               },
-            },
-            413: {
+            }),
+            413: withRequestIdResponseHeader({
               description: "The request payload is too large.",
               content: {
                 "application/json": {
-                  schema: z.toJSONSchema(apiErrorResponseSchema, {
-                    target: "draft-2020-12",
-                  }),
+                  schema: toJsonSchema(apiErrorResponseSchema),
                 },
               },
-            },
-            429: {
+            }),
+            415: withRequestIdResponseHeader({
+              description: "The request media type is not supported.",
+              content: {
+                "application/json": {
+                  schema: toJsonSchema(apiErrorResponseSchema),
+                },
+              },
+            }),
+            429: withRequestIdResponseHeader({
               description: "The global API rate limit was exceeded.",
               content: {
                 "application/json": {
-                  schema: z.toJSONSchema(apiErrorResponseSchema, {
-                    target: "draft-2020-12",
-                  }),
+                  schema: toJsonSchema(apiErrorResponseSchema),
                 },
               },
-            },
-            500: {
+            }),
+            500: withRequestIdResponseHeader({
               description: "The catalog could not be read.",
               content: {
                 "application/json": {
-                  schema: z.toJSONSchema(apiErrorResponseSchema, {
-                    target: "draft-2020-12",
-                  }),
+                  schema: toJsonSchema(apiErrorResponseSchema),
                 },
               },
-            },
+            }),
           },
         },
       },
+    },
+    components: {
+      headers: {
+        RequestId: {
+          description: "Correlation ID for this response.",
+          required: true,
+          schema: toComponentSchema(requestIdSchema),
+        },
+      },
+      parameters: {
+        RequestId: {
+          name: "x-request-id",
+          in: "header",
+          required: false,
+          description:
+            "Optional caller correlation ID. Invalid values are replaced.",
+          schema: toComponentSchema(requestIdSchema),
+        },
+      },
+      schemas: Object.fromEntries(
+        Object.entries(contractSchemas).map(([name, schema]) => [
+          name,
+          toComponentSchema(schema),
+        ])
+      ),
     },
   }
 }

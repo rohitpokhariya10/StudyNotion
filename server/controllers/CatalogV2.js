@@ -1,5 +1,3 @@
-const { catalogCourseListQuerySchema } = require("@studynotion/contracts")
-
 const {
   CatalogApiError,
   sendV2Error,
@@ -9,29 +7,11 @@ const logger = require("../utils/logger")
 
 const CATALOG_SLOW_REQUEST_MS = 1_000
 
-const validationDetails = (issues) => ({
-  fields: issues.map((issue) => ({
-    code: issue.code,
-    message: issue.message,
-    path: issue.path.join("."),
-  })),
-})
-
 exports.listCatalogCourses = async (req, res) => {
-  const parsedQuery = catalogCourseListQuerySchema.safeParse(req.query)
-  if (!parsedQuery.success) {
-    return sendV2Error(req, res, {
-      code: "INVALID_QUERY",
-      message: "The catalog query is invalid",
-      statusCode: 400,
-      details: validationDetails(parsedQuery.error.issues),
-    })
-  }
-
   try {
     const startedAt = performance.now()
     const response = await listCatalogCourses(
-      parsedQuery.data,
+      res.locals.v2Input.query,
       req.requestId || "unknown"
     )
     const durationMs = Math.round(performance.now() - startedAt)

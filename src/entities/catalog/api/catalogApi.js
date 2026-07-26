@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { catalogCourseListResponseSchema } from "@studynotion/contracts"
+import { catalogCourseListResponseSchema } from "@studynotion/contracts/catalog"
 
 import { getSafeApiErrorEnvelopePresentation } from "../../../shared/api/apiErrorModel"
 import { catalogEndpoints } from "../../../shared/api/endpoints"

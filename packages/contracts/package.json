@@ -10,6 +10,17 @@
       "require": "./src/index.js",
       "default": "./src/index.js"
     },
+    "./admin": "./src/admin.js",
+    "./auth": "./src/auth.js",
+    "./catalog": "./src/catalog.js",
+    "./commerce": "./src/commerce.js",
+    "./common": "./src/common.js",
+    "./courses": "./src/courses.js",
+    "./errors": "./src/errors.js",
+    "./learning": "./src/learning.js",
+    "./pagination": "./src/pagination.js",
+    "./reviews": "./src/reviews.js",
+    "./users": "./src/users.js",
     "./openapi.json": "./openapi.json"
   },
   "files": [
@@ -18,7 +29,8 @@
   ],
   "scripts": {
     "openapi:generate": "node src/generateOpenApi.js",
-    "openapi:check": "node src/checkOpenApi.js"
+    "openapi:check": "node src/checkOpenApi.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "zod": "^4.4.3"

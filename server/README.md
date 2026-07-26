@@ -205,6 +205,12 @@ sort, page-size, and opaque-cursor parameters. See
 `docs/architecture/0002-catalog-v2-vertical-slice.md` for the compatibility and
 cache decisions.
 
+Reusable strict schemas for later v2 slices are emitted under
+`components.schemas`; their presence does not mean a protected route has already
+been migrated. See
+`docs/architecture/0003-validated-v2-contract-foundation.md` for validation,
+DTO-exposure, request-ID, and minor-unit money rules.
+
 Only stable public fields are returned. Draft courses, learner identities,
 review bodies, curriculum and protected lesson/video URLs, provider IDs, and
 entitlement state are not part of the DTO. Public thumbnail and instructor image
