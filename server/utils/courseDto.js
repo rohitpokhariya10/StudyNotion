@@ -1,5 +1,7 @@
 const asPlainObject = (document) =>
-  typeof document?.toObject === "function" ? document.toObject() : { ...document }
+  typeof document?.toObject === "function"
+    ? document.toObject()
+    : { ...document }
 
 const sanitizeInstructorCourse = (document) => {
   const course = asPlainObject(document)

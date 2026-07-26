@@ -9,7 +9,10 @@ const {
   sendotp,
   signup,
 } = require("../controllers/Auth")
-const { resetPassword, resetPasswordToken } = require("../controllers/resetPassword")
+const {
+  resetPassword,
+  resetPasswordToken,
+} = require("../controllers/resetPassword")
 const { auth } = require("../middleware/auth")
 const {
   loginIdentityLimiter,

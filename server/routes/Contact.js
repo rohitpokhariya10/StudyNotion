@@ -8,6 +8,11 @@ const {
 
 const router = express.Router()
 
-router.post("/contact", contactIpLimiter, contactIdentityLimiter, contactUsController)
+router.post(
+  "/contact",
+  contactIpLimiter,
+  contactIdentityLimiter,
+  contactUsController
+)
 
 module.exports = router

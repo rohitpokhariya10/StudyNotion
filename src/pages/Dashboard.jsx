@@ -54,9 +54,7 @@ function Dashboard() {
             type="button"
             className="mb-6 flex items-center gap-2 rounded-md border border-richblack-600 bg-richblack-800 px-3 py-2 text-sm font-medium text-richblack-50 md:hidden"
             onClick={() =>
-              sidebarOpen
-                ? closeSidebar()
-                : setSidebarLocationKey(location.key)
+              sidebarOpen ? closeSidebar() : setSidebarLocationKey(location.key)
             }
             aria-controls="dashboard-mobile-navigation"
             aria-expanded={sidebarOpen}

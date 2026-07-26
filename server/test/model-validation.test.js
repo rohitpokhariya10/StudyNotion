@@ -14,7 +14,10 @@ test("course and lesson schemas enforce bounded production inputs", async () => 
   await assert.rejects(course.validate(), /less than minimum allowed value/)
 
   const section = new Section({ sectionName: "s".repeat(201) })
-  await assert.rejects(section.validate(), /longer than the maximum allowed length/)
+  await assert.rejects(
+    section.validate(),
+    /longer than the maximum allowed length/
+  )
 
   const subSection = new SubSection({ description: "d".repeat(5001) })
   await assert.rejects(

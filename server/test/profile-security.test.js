@@ -47,7 +47,8 @@ const User = {
 const Course = {
   exists: async () => instructorHasCourses,
   find: () => ({ lean: async () => dashboardCourses }),
-  updateMany: async (query, update) => calls.push(["course-update", query, update]),
+  updateMany: async (query, update) =>
+    calls.push(["course-update", query, update]),
 }
 const CourseProgress = {
   deleteMany: async (query) => {
@@ -59,7 +60,8 @@ const OTP = {
   deleteMany: async (query) => calls.push(["otp-delete", query]),
 }
 const Profile = {
-  findByIdAndUpdate: async (_id, update) => calls.push(["profile-update", update]),
+  findByIdAndUpdate: async (_id, update) =>
+    calls.push(["profile-update", update]),
 }
 const RatingAndReview = {
   deleteMany: async (query) => calls.push(["review-delete", query]),
@@ -96,7 +98,8 @@ installMock("../utils/auth", {
 })
 installMock("../utils/imageUploader", {
   MediaUploadError,
-  deleteAssetFromCloudinary: async (...args) => calls.push(["media-delete", args]),
+  deleteAssetFromCloudinary: async (...args) =>
+    calls.push(["media-delete", args]),
   uploadImageToCloudinary: async () => ({}),
 })
 delete require.cache[require.resolve("../controllers/profile")]
@@ -129,11 +132,15 @@ test("profile input is normalized and rejects invalid dates and enum values", ()
   assert.equal(updates.profile.dateOfBirth, "2000-02-29")
 
   assert.throws(
-    () => profileController._test.buildProfileUpdates({ dateOfBirth: "2024-02-30" }),
+    () =>
+      profileController._test.buildProfileUpdates({
+        dateOfBirth: "2024-02-30",
+      }),
     /Date of birth is invalid/
   )
   assert.throws(
-    () => profileController._test.buildProfileUpdates({ gender: "Administrator" }),
+    () =>
+      profileController._test.buildProfileUpdates({ gender: "Administrator" }),
     /Gender is invalid/
   )
 })
@@ -215,7 +222,10 @@ test("account deletion requires the current local password", async () => {
   )
 
   assert.equal(response.statusCode, 401)
-  assert.equal(calls.some(([event]) => event === "user-update"), false)
+  assert.equal(
+    calls.some(([event]) => event === "user-update"),
+    false
+  )
 })
 
 test("account deletion is blocked while a payment is active", async () => {
@@ -235,7 +245,10 @@ test("account deletion is blocked while a payment is active", async () => {
   )
 
   assert.equal(response.statusCode, 409)
-  assert.equal(calls.some(([event]) => event === "user-update"), false)
+  assert.equal(
+    calls.some(([event]) => event === "user-update"),
+    false
+  )
   activePurchase = false
 })
 
@@ -377,7 +390,10 @@ test("instructor revenue comes from fulfilled purchase line items", async () => 
     },
   ]
   const response = createResponse()
-  await profileController.instructorDashboard({ user: { id: userId } }, response)
+  await profileController.instructorDashboard(
+    { user: { id: userId } },
+    response
+  )
 
   assert.equal(response.statusCode, 200)
   assert.equal(response.body.courses[0].totalAmountGenerated, 125)

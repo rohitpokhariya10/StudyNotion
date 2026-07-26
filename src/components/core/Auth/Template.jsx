@@ -2,9 +2,9 @@ import { useState } from "react"
 import { useSelector } from "react-redux"
 
 import frameImg from "../../../assets/Images/frame.png"
+import { emptyPolicyAcknowledgement } from "../../../utils/policyAcknowledgement"
 import GoogleSignInButton from "./GoogleSignInButton"
 import LoginForm from "./LoginForm"
-import { emptyPolicyAcknowledgement } from "../../../utils/policyAcknowledgement"
 import SignupForm from "./SignupForm"
 
 function Template({ title, description1, description2, image, formType }) {

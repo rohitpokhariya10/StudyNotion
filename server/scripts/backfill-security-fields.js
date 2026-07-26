@@ -104,10 +104,9 @@ const run = async () => {
             { additionalDetails: null },
           ],
         }
-    const result = await users.updateOne(
-      profileFilter,
-      { $set: { additionalDetails: profile._id } }
-    )
+    const result = await users.updateOne(profileFilter, {
+      $set: { additionalDetails: profile._id },
+    })
     if (result.modifiedCount) repairedProfiles += 1
     else await Profile.findByIdAndDelete(profile._id)
   }

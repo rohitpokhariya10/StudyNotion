@@ -45,10 +45,7 @@ const {
   getAverageRating,
   getAllRatingReview,
 } = require("../controllers/RatingandReview")
-const {
-  updateCourseProgress,
-  getProgressPercentage,
-} = require("../controllers/courseProgress")
+const { updateCourseProgress } = require("../controllers/courseProgress")
 // Importing Middlewares
 const { auth, isInstructor, isStudent, isAdmin } = require("../middleware/auth")
 const { uploadMiddleware } = require("../middleware/upload")
@@ -78,7 +75,13 @@ router.post(
 // Delete Sub Section
 router.post("/deleteSubSection", auth, isInstructor, deleteSubSection)
 // Add a Sub Section to a Section
-router.post("/addSubSection", auth, isInstructor, uploadMiddleware, createSubSection)
+router.post(
+  "/addSubSection",
+  auth,
+  isInstructor,
+  uploadMiddleware,
+  createSubSection
+)
 // Get all Courses Under a Specific Instructor
 router.get("/getInstructorCourses", auth, isInstructor, getInstructorCourses)
 // Get all Registered Courses

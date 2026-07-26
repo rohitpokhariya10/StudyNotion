@@ -72,12 +72,16 @@ const run = async () => {
     ).values(),
   ]
   const existingCategoryIds = publishedCategoryIds.length
-    ? await Category.find({ _id: { $in: publishedCategoryIds } }).distinct("_id")
+    ? await Category.find({ _id: { $in: publishedCategoryIds } }).distinct(
+        "_id"
+      )
     : []
   const existingCategoryIdSet = new Set(existingCategoryIds.map(String))
 
   const paidCourseIds = await Purchase.distinct("courses", {
-    status: { $in: ["paid", "fulfilled", "refund_pending", "refund_requested"] },
+    status: {
+      $in: ["paid", "fulfilled", "refund_pending", "refund_requested"],
+    },
   })
   const entitledCourses = await Course.find({
     $or: [
@@ -107,7 +111,9 @@ const run = async () => {
     : []
   const uniqueEntitledSectionIds = new Set(entitledSectionIds.map(String))
   const uniqueEntitledLessonIds = new Set(entitledLessonIds.map(String))
-  const entitledCourseIdSet = new Set(entitledCourses.map((course) => String(course._id)))
+  const entitledCourseIdSet = new Set(
+    entitledCourses.map((course) => String(course._id))
+  )
   const [unledgeredEnrollmentResult] = await Course.aggregate([
     { $match: { "studentsEnroled.0": { $exists: true } } },
     { $unwind: "$studentsEnroled" },
@@ -181,120 +187,122 @@ const run = async () => {
   ])
   const userEntitlementsWithoutPurchaseLedger =
     unledgeredUserEntitlementResult?.count || 0
-  const [userCourseMirrorResult, courseStudentMirrorResult] = await Promise.all([
-    User.aggregate([
-      {
-        $match: {
-          accountType: "Student",
-          "courses.0": { $exists: true },
+  const [userCourseMirrorResult, courseStudentMirrorResult] = await Promise.all(
+    [
+      User.aggregate([
+        {
+          $match: {
+            accountType: "Student",
+            "courses.0": { $exists: true },
+          },
         },
-      },
-      { $unwind: "$courses" },
-      {
-        $lookup: {
-          from: Course.collection.name,
-          localField: "courses",
-          foreignField: "_id",
-          as: "courseMirror",
+        { $unwind: "$courses" },
+        {
+          $lookup: {
+            from: Course.collection.name,
+            localField: "courses",
+            foreignField: "_id",
+            as: "courseMirror",
+          },
         },
-      },
-      {
-        $facet: {
-          danglingCourseReferences: [
-            { $match: { courseMirror: { $size: 0 } } },
-            { $count: "count" },
-          ],
-          missingCourseEnrollmentMirror: [
-            { $match: { "courseMirror.0": { $exists: true } } },
-            {
-              $match: {
-                $expr: {
-                  $eq: [
-                    {
-                      $in: [
-                        "$_id",
-                        {
-                          $ifNull: [
-                            {
-                              $arrayElemAt: [
-                                "$courseMirror.studentsEnroled",
-                                0,
-                              ],
-                            },
-                            [],
-                          ],
-                        },
-                      ],
-                    },
-                    false,
-                  ],
+        {
+          $facet: {
+            danglingCourseReferences: [
+              { $match: { courseMirror: { $size: 0 } } },
+              { $count: "count" },
+            ],
+            missingCourseEnrollmentMirror: [
+              { $match: { "courseMirror.0": { $exists: true } } },
+              {
+                $match: {
+                  $expr: {
+                    $eq: [
+                      {
+                        $in: [
+                          "$_id",
+                          {
+                            $ifNull: [
+                              {
+                                $arrayElemAt: [
+                                  "$courseMirror.studentsEnroled",
+                                  0,
+                                ],
+                              },
+                              [],
+                            ],
+                          },
+                        ],
+                      },
+                      false,
+                    ],
+                  },
                 },
               },
-            },
-            { $count: "count" },
-          ],
+              { $count: "count" },
+            ],
+          },
         },
-      },
-    ]),
-    Course.aggregate([
-      { $match: { "studentsEnroled.0": { $exists: true } } },
-      { $unwind: "$studentsEnroled" },
-      {
-        $lookup: {
-          from: User.collection.name,
-          localField: "studentsEnroled",
-          foreignField: "_id",
-          as: "userMirror",
+      ]),
+      Course.aggregate([
+        { $match: { "studentsEnroled.0": { $exists: true } } },
+        { $unwind: "$studentsEnroled" },
+        {
+          $lookup: {
+            from: User.collection.name,
+            localField: "studentsEnroled",
+            foreignField: "_id",
+            as: "userMirror",
+          },
         },
-      },
-      {
-        $facet: {
-          danglingStudentReferences: [
-            { $match: { userMirror: { $size: 0 } } },
-            { $count: "count" },
-          ],
-          missingUserCourseMirror: [
-            { $match: { "userMirror.0": { $exists: true } } },
-            {
-              $match: {
-                $expr: {
-                  $eq: [
-                    {
-                      $in: [
-                        "$_id",
-                        {
-                          $ifNull: [
-                            { $arrayElemAt: ["$userMirror.courses", 0] },
-                            [],
-                          ],
-                        },
-                      ],
-                    },
-                    false,
-                  ],
+        {
+          $facet: {
+            danglingStudentReferences: [
+              { $match: { userMirror: { $size: 0 } } },
+              { $count: "count" },
+            ],
+            missingUserCourseMirror: [
+              { $match: { "userMirror.0": { $exists: true } } },
+              {
+                $match: {
+                  $expr: {
+                    $eq: [
+                      {
+                        $in: [
+                          "$_id",
+                          {
+                            $ifNull: [
+                              { $arrayElemAt: ["$userMirror.courses", 0] },
+                              [],
+                            ],
+                          },
+                        ],
+                      },
+                      false,
+                    ],
+                  },
                 },
               },
-            },
-            { $count: "count" },
-          ],
-          invalidStudentAccountTypes: [
-            { $match: { "userMirror.0": { $exists: true } } },
-            {
-              $match: {
-                $expr: {
-                  $ne: [
-                    { $arrayElemAt: ["$userMirror.accountType", 0] },
-                    "Student",
-                  ],
+              { $count: "count" },
+            ],
+            invalidStudentAccountTypes: [
+              { $match: { "userMirror.0": { $exists: true } } },
+              {
+                $match: {
+                  $expr: {
+                    $ne: [
+                      { $arrayElemAt: ["$userMirror.accountType", 0] },
+                      "Student",
+                    ],
+                  },
                 },
               },
-            },
-            { $count: "count" },
-          ],
+              { $count: "count" },
+            ],
+          },
         },
-      },
-    ]),
-  ])
+      ]),
+    ]
+  )
   const countFacet = (result, key) => result?.[0]?.[key]?.[0]?.count || 0
   const danglingUserCourseReferences = countFacet(
     userCourseMirrorResult,
@@ -328,7 +336,9 @@ const run = async () => {
         : [],
       User.find({
         _id: {
-          $in: publishedCourses.map((course) => course.instructor).filter(Boolean),
+          $in: publishedCourses
+            .map((course) => course.instructor)
+            .filter(Boolean),
         },
       })
         .select("_id accountType active approved")
@@ -346,7 +356,9 @@ const run = async () => {
       )
       .map((user) => String(user._id))
   )
-  const coursesById = new Map(allCourses.map((course) => [String(course._id), course]))
+  const coursesById = new Map(
+    allCourses.map((course) => [String(course._id), course])
+  )
   const categoriesById = new Map(
     allCategories.map((category) => [String(category._id), category])
   )
@@ -412,9 +424,13 @@ const run = async () => {
         $ne: ["$email", { $toLower: { $trim: { input: "$email" } } }],
       },
     }),
-    duplicateGroupCount(User, { $toLower: "$email" }, {
-      email: { $type: "string" },
-    }),
+    duplicateGroupCount(
+      User,
+      { $toLower: "$email" },
+      {
+        email: { $type: "string" },
+      }
+    ),
     duplicateGroupCount(CourseProgress, {
       userId: "$userId",
       courseID: "$courseID",
@@ -432,9 +448,13 @@ const run = async () => {
     }),
     duplicateGroupCount(Category, "$name", { name: { $type: "string" } }),
     duplicateGroupCount(User, "$googleId", { googleId: { $type: "string" } }),
-    duplicateGroupCount(OTP, { $toLower: "$email" }, {
-      email: { $type: "string" },
-    }),
+    duplicateGroupCount(
+      OTP,
+      { $toLower: "$email" },
+      {
+        email: { $type: "string" },
+      }
+    ),
     OTP.collection.countDocuments({
       email: { $type: "string" },
       $expr: {
@@ -597,7 +617,9 @@ const run = async () => {
     duplicateIdempotencyKeys,
   }
 
-  console.log(JSON.stringify({ database: mongoose.connection.name, findings }, null, 2))
+  console.log(
+    JSON.stringify({ database: mongoose.connection.name, findings }, null, 2)
+  )
 
   if (Object.values(findings).some((count) => count > 0)) {
     throw new Error(

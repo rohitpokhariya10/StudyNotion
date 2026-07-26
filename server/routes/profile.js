@@ -1,9 +1,9 @@
-const express = require("express");
-const router = express.Router();
+const express = require("express")
+const router = express.Router()
 
 // Middlewares
-const { auth, isInstructor } = require("../middleware/auth");
-const { uploadMiddleware } = require("../middleware/upload");
+const { auth, isInstructor } = require("../middleware/auth")
+const { uploadMiddleware } = require("../middleware/upload")
 
 // Controllers
 const {
@@ -13,28 +13,33 @@ const {
   updateDisplayPicture,
   getEnrolledCourses,
   instructorDashboard,
-} = require("../controllers/profile");
+} = require("../controllers/profile")
 
 // ********************************************************************************************************
 //                                      Profile Routes
 // ********************************************************************************************************
 
 // Delete User Account
-router.delete("/deleteProfile", auth, deleteAccount);
+router.delete("/deleteProfile", auth, deleteAccount)
 
 // Update User Profile
-router.put("/updateProfile", auth, updateProfile);
+router.put("/updateProfile", auth, updateProfile)
 
 // Get All User Details
-router.get("/getUserDetails", auth, getAllUserDetails);
+router.get("/getUserDetails", auth, getAllUserDetails)
 
 // Get Enrolled Courses
-router.get("/getEnrolledCourses", auth, getEnrolledCourses);
+router.get("/getEnrolledCourses", auth, getEnrolledCourses)
 
 // Update Profile Picture
-router.put("/updateDisplayPicture", auth, uploadMiddleware, updateDisplayPicture);
+router.put(
+  "/updateDisplayPicture",
+  auth,
+  uploadMiddleware,
+  updateDisplayPicture
+)
 
 // Instructor Dashboard (only for Instructors)
-router.get("/instructorDashboard", auth, isInstructor, instructorDashboard);
+router.get("/instructorDashboard", auth, isInstructor, instructorDashboard)
 
-module.exports = router;
+module.exports = router

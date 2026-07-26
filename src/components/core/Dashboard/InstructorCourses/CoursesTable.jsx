@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import { Table, Tbody, Td, Th, Thead, Tr } from "react-super-responsive-table"
 
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css"
+
 import { formatDate } from "../../../../services/formatDate"
 import {
   deleteCourse,
@@ -118,7 +119,8 @@ export default function CoursesTable({ courses, setCourses }) {
   }
 
   const handleCourseDelete = async () => {
-    if (!courseToDelete || confirmationName !== courseToDelete.courseName) return
+    if (!courseToDelete || confirmationName !== courseToDelete.courseName)
+      return
 
     setLoading(true)
     const result = await deleteCourse(
@@ -225,7 +227,9 @@ export default function CoursesTable({ courses, setCourses }) {
                         navigate(`/dashboard/edit-course/${course._id}`)
                       }
                       title={
-                        isArchived ? "Archived courses cannot be edited" : "Edit"
+                        isArchived
+                          ? "Archived courses cannot be edited"
+                          : "Edit"
                       }
                       aria-label={`Edit ${course.courseName}`}
                       className="px-2 transition-all duration-200 enabled:hover:scale-110 enabled:hover:text-caribbeangreen-300 disabled:cursor-not-allowed disabled:opacity-40"

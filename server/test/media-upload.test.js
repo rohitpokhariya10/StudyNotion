@@ -20,7 +20,9 @@ const {
 const { cleanupUploadedTempFiles } = require("../middleware/upload")
 
 const withFixture = async (contents, callback) => {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "studynotion-media-"))
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), "studynotion-media-")
+  )
   const filePath = path.join(directory, "upload.bin")
   try {
     await fs.writeFile(filePath, contents)
@@ -55,9 +57,7 @@ test("completed uploads remove their temporary file", async () => {
   })
 
   try {
-    const png = Buffer.from([
-      137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0,
-    ])
+    const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0])
     await withFixture(png, async (tempFilePath) => {
       const result = await uploadImageToCloudinary(
         { mimetype: "image/png", tempFilePath },

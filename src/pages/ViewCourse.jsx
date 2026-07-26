@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AiOutlineUnorderedList } from "react-icons/ai"
 import { useDispatch, useSelector } from "react-redux"
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom"
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 
 import CourseReviewModal from "../components/core/ViewCourse/CourseReviewModal"
 import VideoDetailsSidebar from "../components/core/ViewCourse/VideoDetailsSidebar"
@@ -106,11 +101,15 @@ export default function ViewCourse() {
     return (
       <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center px-4 text-center text-richblack-5">
         <div>
-          <p className="text-xl font-semibold">This course could not be loaded.</p>
+          <p className="text-xl font-semibold">
+            This course could not be loaded.
+          </p>
           <button
             type="button"
             className="yellowButton mt-4"
-            onClick={() => navigate("/dashboard/enrolled-courses", { replace: true })}
+            onClick={() =>
+              navigate("/dashboard/enrolled-courses", { replace: true })
+            }
           >
             Back to enrolled courses
           </button>

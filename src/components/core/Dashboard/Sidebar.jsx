@@ -24,7 +24,11 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
     if (profileLoading || authLoading) {
       return (
         <div className="grid flex-1 place-items-center">
-          <div className="spinner" role="status" aria-label="Loading navigation" />
+          <div
+            className="spinner"
+            role="status"
+            aria-label="Loading navigation"
+          />
         </div>
       )
     }

@@ -18,6 +18,9 @@ router.get("/instructors/pending", listPendingInstructors)
 router.patch("/instructors/:instructorId/approve", approveInstructor)
 router.patch("/instructors/:instructorId/reject", rejectInstructor)
 router.get("/payments/reconciliation", listPaymentReviews)
-router.post("/payments/reconciliation/:purchaseId/resolve", resolvePaymentReview)
+router.post(
+  "/payments/reconciliation/:purchaseId/resolve",
+  resolvePaymentReview
+)
 
 module.exports = router

@@ -36,10 +36,9 @@ describe("PolicyAcknowledgement", () => {
       "href",
       "/terms"
     )
-    expect(screen.getByRole("link", { name: "Privacy Notice" })).toHaveAttribute(
-      "href",
-      "/privacy-policy"
-    )
+    expect(
+      screen.getByRole("link", { name: "Privacy Notice" })
+    ).toHaveAttribute("href", "/privacy-policy")
 
     await user.click(terms)
     await user.click(privacy)

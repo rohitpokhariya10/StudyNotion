@@ -40,7 +40,7 @@ jobs:
           fail-on-severity: high
 
   codeql:
-    name: CodeQL (JavaScript/TypeScript)
+    name: CodeQL (JavaScript)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:

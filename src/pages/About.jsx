@@ -1,7 +1,7 @@
-import FoundingStory from "../assets/Images/FoundingStory.png"
 import BannerImage1 from "../assets/Images/aboutus1.webp"
 import BannerImage2 from "../assets/Images/aboutus2.webp"
 import BannerImage3 from "../assets/Images/aboutus3.webp"
+import FoundingStory from "../assets/Images/FoundingStory.png"
 import Footer from "../components/Common/Footer"
 import ReviewSlider from "../components/Common/ReviewSlider"
 import ContactFormSection from "../components/core/AboutPage/ContactFormSection"
@@ -37,16 +37,16 @@ const About = () => {
 
       <section className="border-b border-richblack-700">
         <div className="mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-richblack-500">
-          <div className="h-[100px] "></div>
+          <div className="h-[100px]"></div>
           <Quote />
         </div>
       </section>
 
       <section>
         <div className="mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-richblack-500">
-          <div className="flex flex-col items-center gap-10 lg:flex-row justify-between">
-            <div className="my-24 flex lg:w-[50%] flex-col gap-10">
-              <h1 className="bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCB045] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%] ">
+          <div className="flex flex-col items-center justify-between gap-10 lg:flex-row">
+            <div className="my-24 flex flex-col gap-10 lg:w-[50%]">
+              <h1 className="bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCB045] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
                 Our Founding Story
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
@@ -75,9 +75,9 @@ const About = () => {
               />
             </div>
           </div>
-          <div className="flex flex-col items-center lg:gap-10 lg:flex-row justify-between">
-            <div className="my-24 flex lg:w-[40%] flex-col gap-10">
-              <h1 className="bg-gradient-to-b from-[#FF512F] to-[#F09819] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%] ">
+          <div className="flex flex-col items-center justify-between lg:flex-row lg:gap-10">
+            <div className="my-24 flex flex-col gap-10 lg:w-[40%]">
+              <h1 className="bg-gradient-to-b from-[#FF512F] to-[#F09819] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
                 Our Vision
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
@@ -89,8 +89,8 @@ const About = () => {
                 dynamic and interactive learning experience.
               </p>
             </div>
-            <div className="my-24 flex lg:w-[40%] flex-col gap-10">
-              <h1 className="bg-gradient-to-b from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] text-transparent bg-clip-text text-4xl font-semibold lg:w-[70%] ">
+            <div className="my-24 flex flex-col gap-10 lg:w-[40%]">
+              <h1 className="bg-gradient-to-b from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
                 Our Mission
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
@@ -111,7 +111,7 @@ const About = () => {
 
       <div className="relative mx-auto my-20 flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 bg-richblack-900 text-white">
         {/* Reviews from Other Learners */}
-        <h1 className="text-center text-4xl font-semibold mt-8">
+        <h1 className="mt-8 text-center text-4xl font-semibold">
           Reviews from other learners
         </h1>
         <div className="mt-8 w-full">

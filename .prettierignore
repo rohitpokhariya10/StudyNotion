@@ -4,6 +4,7 @@ node_modules
 build
 .contentlayer
 package-lock.json
+packages/contracts/openapi.json
 yarn.lock
 pnpm-lock.yaml
 .env

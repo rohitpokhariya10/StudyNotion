@@ -46,7 +46,11 @@ require.cache[userPath] = {
 }
 
 const { auth } = require("../middleware/auth")
-const { clearSession, issueSession, verifySessionToken } = require("../utils/auth")
+const {
+  clearSession,
+  issueSession,
+  verifySessionToken,
+} = require("../utils/auth")
 
 const createResponse = () => ({
   statusCode: 200,
@@ -105,7 +109,10 @@ test("auth accepts the current session version and rejects it after revocation",
   })
   assert.equal(nextCalled, true)
   assert.equal(req.user.id, "64b000000000000000000003")
-  assert.equal(accepted.headers["cache-control"], "private, no-store, max-age=0")
+  assert.equal(
+    accepted.headers["cache-control"],
+    "private, no-store, max-age=0"
+  )
 
   currentUser.sessionVersion += 1
   const rejected = createResponse()

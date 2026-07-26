@@ -12,9 +12,7 @@ describe("enrolled course navigation", () => {
           { _id: "section-2", subSection: [{ _id: "lesson-1" }] },
         ],
       })
-    ).toBe(
-      "/view-course/course-1/section/section-2/sub-section/lesson-1"
-    )
+    ).toBe("/view-course/course-1/section/section-2/sub-section/lesson-1")
   })
 
   it("returns null instead of constructing a route with undefined IDs", () => {

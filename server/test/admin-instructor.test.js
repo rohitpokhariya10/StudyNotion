@@ -87,11 +87,9 @@ require.cache[userPath] = {
 
 const controllerPath = require.resolve("../controllers/Admin")
 delete require.cache[controllerPath]
-const {
-  approveInstructor,
-  listPendingInstructors,
-  rejectInstructor,
-} = require(controllerPath)
+const { approveInstructor, listPendingInstructors, rejectInstructor } = require(
+  controllerPath
+)
 
 beforeEach(() => {
   records = [
@@ -189,7 +187,10 @@ test("approval records the admin audit and is idempotent", async () => {
 
   assert.equal(response.statusCode, 200)
   assert.equal(response.body.success, true)
-  assert.equal(response.body.data.instructor.instructorApprovalStatus, "Approved")
+  assert.equal(
+    response.body.data.instructor.instructorApprovalStatus,
+    "Approved"
+  )
   assert.equal(response.body.data.instructor.approved, true)
   assert.equal(response.body.data.instructor.active, true)
   assert.equal(response.body.data.instructor.instructorReviewedBy, adminId)
@@ -229,7 +230,10 @@ test("rejection requires a reason, writes audit fields, and cannot reverse appro
     rejected
   )
   assert.equal(rejected.statusCode, 200)
-  assert.equal(rejected.body.data.instructor.instructorApprovalStatus, "Rejected")
+  assert.equal(
+    rejected.body.data.instructor.instructorApprovalStatus,
+    "Rejected"
+  )
   assert.equal(rejected.body.data.instructor.active, false)
   assert.equal(rejected.body.data.instructor.approved, false)
   assert.equal(rejected.body.data.instructor.instructorReviewedBy, adminId)

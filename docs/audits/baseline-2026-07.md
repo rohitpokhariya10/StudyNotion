@@ -40,16 +40,16 @@ declared supported until that migration is reviewed separately.
 
 ## Baseline verification
 
-| Check | Command | Result |
-|---|---|---|
-| Frontend locked install | `npm ci` | Passed |
-| Backend locked install | `npm --prefix server ci` | Passed |
-| Frontend lint | `npm run lint` | Passed |
-| Frontend tests | `npm test` | Passed: 46 tests |
-| Local production bundle | `npm run build:local` | Passed |
-| Backend tests | `npm --prefix server test` | Passed: 106/106 after loopback binding was allowed |
-| Environment ignore check | `git check-ignore -v .env server/.env` | Passed: both real files are ignored |
-| Heuristic secret scan | `node scripts/scan-secrets.mjs` | Passed; output is limited to file, line, and rule identifiers |
+| Check                    | Command                                | Result                                                        |
+| ------------------------ | -------------------------------------- | ------------------------------------------------------------- |
+| Frontend locked install  | `npm ci`                               | Passed                                                        |
+| Backend locked install   | `npm --prefix server ci`               | Passed                                                        |
+| Frontend lint            | `npm run lint`                         | Passed                                                        |
+| Frontend tests           | `npm test`                             | Passed: 46 tests                                              |
+| Local production bundle  | `npm run build:local`                  | Passed                                                        |
+| Backend tests            | `npm --prefix server test`             | Passed: 106/106 after loopback binding was allowed            |
+| Environment ignore check | `git check-ignore -v .env server/.env` | Passed: both real files are ignored                           |
+| Heuristic secret scan    | `node scripts/scan-secrets.mjs`        | Passed; output is limited to file, line, and rule identifiers |
 
 The existing CI additionally runs the public production-environment validator
 through `npm run build` with non-secret CI values.
@@ -60,7 +60,7 @@ through `npm run build` with non-secret CI values.
 - Weekly Dependabot checks for root npm, server npm, and GitHub Actions.
 - A deterministic redacted repository secret scan on pushes and pull requests.
 - Dependency review for pull requests, failing on high-severity findings.
-- CodeQL analysis for JavaScript and TypeScript.
+- CodeQL analysis for JavaScript.
 - Disposable MongoDB and Redis integration services with health checks and no
   host data volumes.
 

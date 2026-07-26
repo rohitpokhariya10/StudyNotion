@@ -47,7 +47,11 @@ export default function UpdatePassword() {
                 type="button"
                 onClick={() => setShowOldPassword((prev) => !prev)}
                 className="absolute right-3 top-[38px] z-[10] cursor-pointer"
-                aria-label={showOldPassword ? "Hide current password" : "Show current password"}
+                aria-label={
+                  showOldPassword
+                    ? "Hide current password"
+                    : "Show current password"
+                }
               >
                 {showOldPassword ? (
                   <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
@@ -82,7 +86,9 @@ export default function UpdatePassword() {
                 type="button"
                 onClick={() => setShowNewPassword((prev) => !prev)}
                 className="absolute right-3 top-[38px] z-[10] cursor-pointer"
-                aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+                aria-label={
+                  showNewPassword ? "Hide new password" : "Show new password"
+                }
               >
                 {showNewPassword ? (
                   <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
@@ -104,7 +110,7 @@ export default function UpdatePassword() {
             onClick={() => {
               navigate("/dashboard/my-profile")
             }}
-            className="cursor-pointer rounded-md bg-richblack-700 py-2 px-5 font-semibold text-richblack-50"
+            className="cursor-pointer rounded-md bg-richblack-700 px-5 py-2 font-semibold text-richblack-50"
           >
             Cancel
           </button>

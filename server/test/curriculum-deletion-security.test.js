@@ -23,7 +23,10 @@ const Course = {
   findByIdAndUpdate: async () => ({}),
   findOneAndUpdate: (query, update) => {
     operations.push(["course-relation-update", query, update])
-    const result = { ...ownedCourse, status: update.$set?.status || ownedCourse.status }
+    const result = {
+      ...ownedCourse,
+      status: update.$set?.status || ownedCourse.status,
+    }
     const chainedQuery = {
       exec: async () => result,
       populate: () => chainedQuery,
@@ -131,7 +134,9 @@ test("adding an empty section atomically moves a Published course to Draft", asy
   )
 
   assert.equal(res.statusCode, 200)
-  const operation = operations.find(([name]) => name === "course-relation-update")
+  const operation = operations.find(
+    ([name]) => name === "course-relation-update"
+  )
   assert.equal(operation[1].status.$ne, "Archived")
   assert.equal(operation[2].$set.status, "Draft")
   assert.equal(operation[2].$set.everPublishedAt instanceof Date, true)

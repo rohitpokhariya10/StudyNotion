@@ -8,9 +8,7 @@ process.env.JWT_SECRET = "limit-test-jwt-secret-123456789012345678"
 process.env.OTP_SECRET = "limit-test-otp-secret-123456789012345678"
 delete process.env.REDIS_URL
 
-const {
-  hashRateLimitIdentity,
-} = require("../middleware/rateLimiters")
+const { hashRateLimitIdentity } = require("../middleware/rateLimiters")
 
 test("rate-limit keys never expose email, user, or IP identities", () => {
   const identity = "private.learner@example.com"

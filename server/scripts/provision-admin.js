@@ -28,7 +28,9 @@ const run = async () => {
   const mongoUrl = process.env.MONGODB_URI || process.env.MONGODB_URL
   const email = normalizeEmail(process.env.ADMIN_EMAIL)
   const password = process.env.ADMIN_PASSWORD
-  const firstName = normalizePersonName(process.env.ADMIN_FIRST_NAME || "Platform")
+  const firstName = normalizePersonName(
+    process.env.ADMIN_FIRST_NAME || "Platform"
+  )
   const lastName = normalizePersonName(
     process.env.ADMIN_LAST_NAME || "Administrator"
   )

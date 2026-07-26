@@ -245,7 +245,10 @@ test("deleting a Published course atomically archives it", async () => {
   assert.equal(res.body.archived, true)
   const archive = modelOperations.find(([name]) => name === "course-update")
   assert.equal(archive[2].$set.status, "Archived")
-  assert.equal(modelOperations.some(([name]) => name === "course-delete"), false)
+  assert.equal(
+    modelOperations.some(([name]) => name === "course-delete"),
+    false
+  )
 })
 
 test("a previously Published Draft is archive-only", async () => {
@@ -263,7 +266,10 @@ test("a previously Published Draft is archive-only", async () => {
 
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.archived, true)
-  assert.equal(modelOperations.some(([name]) => name === "course-delete"), false)
+  assert.equal(
+    modelOperations.some(([name]) => name === "course-delete"),
+    false
+  )
 })
 
 test("demoting a legacy Published course records its permanent lifecycle marker", async () => {

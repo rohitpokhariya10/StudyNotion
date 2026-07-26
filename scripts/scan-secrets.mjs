@@ -6,8 +6,7 @@ const MAX_BUFFER_BYTES = 16 * 1024 * 1024
 const rules = [
   {
     id: "private-key",
-    expression:
-      /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/g,
+    expression: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/g,
     neverAllow: true,
   },
   {
@@ -84,11 +83,7 @@ const listCandidateFiles = () => {
     }
   )
 
-  return output
-    .toString("utf8")
-    .split("\0")
-    .filter(Boolean)
-    .sort(compareText)
+  return output.toString("utf8").split("\0").filter(Boolean).sort(compareText)
 }
 
 const isBinary = (buffer) => {
@@ -111,7 +106,8 @@ const isAllowedFixture = (file, candidate) => {
   const value = candidate.trim()
   if (!value || dynamicReferencePattern.test(value)) return true
   if (/^<[^>]+>$/.test(value)) return true
-  if (sourceFilePattern.test(file) && codeReferencePattern.test(value)) return true
+  if (sourceFilePattern.test(file) && codeReferencePattern.test(value))
+    return true
   if (databaseUriPattern.test(value) && !credentialedUriPattern.test(value)) {
     return true
   }
@@ -119,7 +115,9 @@ const isAllowedFixture = (file, candidate) => {
 
   return (
     fixturePathPattern.test(file) &&
-    /(?:0{4,}|1{4,}|123456|abcdef|contract|dummy|example|fake|fixture|local|mock|secret|test)/i.test(value)
+    /(?:0{4,}|1{4,}|123456|abcdef|contract|dummy|example|fake|fixture|local|mock|secret|test)/i.test(
+      value
+    )
   )
 }
 

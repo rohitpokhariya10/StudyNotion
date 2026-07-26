@@ -20,8 +20,7 @@ export default function DeleteAccount({ recoveryMode = false }) {
     ? user.authProviders
     : ["local"]
   const usesLocalPassword = providers.includes("local")
-  const usesGoogleOnly =
-    !usesLocalPassword && providers.includes("google")
+  const usesGoogleOnly = !usesLocalPassword && providers.includes("google")
   const normalizedEmail = confirmationEmail.trim().toLowerCase()
   const emailMatches = normalizedEmail === user?.email?.trim().toLowerCase()
 
@@ -133,8 +132,8 @@ export default function DeleteAccount({ recoveryMode = false }) {
                 </div>
               ) : (
                 <p className="text-sm text-pink-100" role="alert">
-                  This account has no supported re-authentication method. Contact
-                  support; no account changes have been made.
+                  This account has no supported re-authentication method.
+                  Contact support; no account changes have been made.
                 </p>
               )}
 

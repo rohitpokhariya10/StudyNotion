@@ -8,14 +8,12 @@ const randomKey = () => {
   const bytes = new Uint8Array(16)
   if (typeof globalThis.crypto?.getRandomValues === "function") {
     globalThis.crypto.getRandomValues(bytes)
-    return Array.from(bytes, (byte) =>
-      byte.toString(16).padStart(2, "0")
-    ).join("")
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+      ""
+    )
   }
 
-  return `${Date.now().toString(36)}-${Math.random()
-    .toString(36)
-    .slice(2)}`
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
 }
 
 const checkoutStorageKey = (userId, courses) => {

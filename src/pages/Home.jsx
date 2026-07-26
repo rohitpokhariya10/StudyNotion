@@ -149,10 +149,10 @@ function Home() {
           </div>
         </div>
 
-        <div className="mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 ">
+        <div className="mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8">
           {/* Job that is in Demand - Section 1 */}
           <div className="mb-10 mt-[-100px] flex flex-col justify-between gap-7 lg:mt-20 lg:flex-row lg:gap-0">
-            <div className="text-4xl font-semibold lg:w-[45%] ">
+            <div className="text-4xl font-semibold lg:w-[45%]">
               Get the skills you need for a{" "}
               <HighlightText text={"job that is in demand."} />
             </div>
@@ -182,7 +182,7 @@ function Home() {
         <InstructorSection />
 
         {/* Reviews from Other Learners */}
-        <h1 className="text-center text-4xl font-semibold mt-8">
+        <h1 className="mt-8 text-center text-4xl font-semibold">
           Reviews from other learners
         </h1>
 

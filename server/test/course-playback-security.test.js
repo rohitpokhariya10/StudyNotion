@@ -33,7 +33,11 @@ const Course = {
 }
 const User = {
   findById: () => ({
-    select: async () => ({ accountType: "Student", active: true, approved: true }),
+    select: async () => ({
+      accountType: "Student",
+      active: true,
+      approved: true,
+    }),
   }),
 }
 const Section = { exists: async () => lessonBelongs }
@@ -54,7 +58,9 @@ installMock("../models/RatingandReview", {})
 installMock("../models/Section", Section)
 installMock("../models/Subsection", SubSection)
 installMock("../models/User", User)
-installMock("../utils/courseLifecycle", { isCoursePublishReady: async () => true })
+installMock("../utils/courseLifecycle", {
+  isCoursePublishReady: async () => true,
+})
 installMock("../utils/imageUploader", {
   MediaUploadError,
   createPrivateMediaUrl: () => "https://signed.example.test/private-lesson",
@@ -97,7 +103,10 @@ test("an enrolled learner receives a fresh minimal signed playback response", as
   await controller.getLessonPlaybackUrl(request(), response)
 
   assert.equal(response.statusCode, 200)
-  assert.equal(response.body.data.url, "https://signed.example.test/private-lesson")
+  assert.equal(
+    response.body.data.url,
+    "https://signed.example.test/private-lesson"
+  )
   assert.equal(typeof response.body.data.expiresAt, "string")
   assert.deepEqual(Object.keys(response.body.data).sort(), [
     "expiresAt",
@@ -131,7 +140,10 @@ test("production playback never returns a legacy public media URL", async () => 
   await controller.getLessonPlaybackUrl(request(), response)
 
   assert.equal(response.statusCode, 409)
-  assert.equal(JSON.stringify(response.body).includes("public.example.test"), false)
+  assert.equal(
+    JSON.stringify(response.body).includes("public.example.test"),
+    false
+  )
 })
 
 test("entitled course DTOs expose enrollment counts but no learner IDs", () => {

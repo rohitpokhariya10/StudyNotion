@@ -13,7 +13,9 @@ const escapeHtml = (value = "") =>
 const safeHttpUrl = (value, fallback) => {
   try {
     const url = new URL(value || fallback)
-    return ["http:", "https:"].includes(url.protocol) ? url.toString() : fallback
+    return ["http:", "https:"].includes(url.protocol)
+      ? url.toString()
+      : fallback
   } catch {
     return fallback
   }

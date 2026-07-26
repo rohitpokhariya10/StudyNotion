@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react"
 // Swiper
 import { Swiper, SwiperSlide } from "swiper/react"
+
 import "swiper/css"
 import "swiper/css/free-mode"
 import "swiper/css/pagination"
 import "../../App.css"
+
 // Swiper modules
 import { Autoplay, FreeMode, Pagination } from "swiper/modules"
+
 // API
 import { apiConnector } from "../../services/apiConnector"
 import { ratingsEndpoints } from "../../services/apis"
-import {
-  getAvatarSource,
-  setInitialsAvatarOnError,
-} from "../../utils/avatar"
+import { getAvatarSource, setInitialsAvatarOnError } from "../../utils/avatar"
 import RatingStars from "./RatingStars"
 
 function ReviewSlider() {
@@ -47,7 +47,7 @@ function ReviewSlider() {
   return (
     <div className="text-white">
       {/* Outer spacing */}
-      <div className="my-12 max-w-[1200px] mx-auto px-4">
+      <div className="mx-auto my-12 max-w-[1200px] px-4">
         <Swiper
           slidesPerView={4}
           spaceBetween={20}
@@ -70,7 +70,7 @@ function ReviewSlider() {
         >
           {reviews.length === 0 ? (
             <SwiperSlide>
-              <div className="flex items-center justify-center h-40 bg-richblack-800 rounded-md p-4 text-richblack-400">
+              <div className="flex h-40 items-center justify-center rounded-md bg-richblack-800 p-4 text-richblack-400">
                 No reviews yet
               </div>
             </SwiperSlide>
@@ -78,12 +78,14 @@ function ReviewSlider() {
             reviews.map((review, i) => {
               const user = review?.user || {}
               const course = review?.course || {}
-              const name = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Anonymous"
+              const name =
+                `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+                "Anonymous"
               const imgSrc = getAvatarSource(user)
 
               return (
                 <SwiperSlide key={review?._id || i}>
-                  <div className="flex h-full flex-col gap-3 bg-richblack-800 p-4 rounded-xl text-[14px] text-richblack-25 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div className="flex h-full flex-col gap-3 rounded-xl bg-richblack-800 p-4 text-[14px] text-richblack-25 shadow-sm transition-shadow duration-200 hover:shadow-md">
                     <div className="flex items-center gap-4">
                       <img
                         src={imgSrc}
@@ -94,20 +96,24 @@ function ReviewSlider() {
                         className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
                       />
                       <div className="flex flex-col">
-                        <h3 className="font-semibold text-richblack-5 text-sm">{name}</h3>
+                        <h3 className="text-sm font-semibold text-richblack-5">
+                          {name}
+                        </h3>
                         <span className="text-[12px] font-medium text-richblack-500">
                           {course.courseName || "Course"}
                         </span>
                       </div>
                     </div>
 
-                    <p className="font-medium text-richblack-25 text-sm">
+                    <p className="text-sm font-medium text-richblack-25">
                       {safeTruncate(review?.review, truncateWords)}
                     </p>
 
                     <div className="mt-auto flex items-center gap-2">
                       <h4 className="font-semibold text-yellow-100">
-                        {typeof review?.rating === "number" ? review.rating.toFixed(1) : "0.0"}
+                        {typeof review?.rating === "number"
+                          ? review.rating.toFixed(1)
+                          : "0.0"}
                       </h4>
 
                       <RatingStars

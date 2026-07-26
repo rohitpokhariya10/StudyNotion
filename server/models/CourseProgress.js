@@ -19,7 +19,7 @@ const courseProgress = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true },
+  { timestamps: true }
 )
 
 courseProgress.index({ userId: 1, courseID: 1 }, { unique: true })

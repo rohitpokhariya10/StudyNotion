@@ -58,16 +58,10 @@ test("every referenced section and lesson must exist before publishing", async (
     { _id: "section-2", subSection: ["lesson-2"] },
   ]
   subsections = [lesson("lesson-1"), lesson("lesson-2")]
-  assert.equal(
-    await isCoursePublishReady(["section-1", "section-2"]),
-    true
-  )
+  assert.equal(await isCoursePublishReady(["section-1", "section-2"]), true)
 
   subsections = [lesson("lesson-1")]
-  assert.equal(
-    await isCoursePublishReady(["section-1", "section-2"]),
-    false
-  )
+  assert.equal(await isCoursePublishReady(["section-1", "section-2"]), false)
 })
 
 test("publish readiness rejects insecure or invalid lesson metadata", async () => {

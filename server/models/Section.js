@@ -4,7 +4,11 @@ const sectionSchema = new mongoose.Schema(
   {
     sectionName: { type: String, trim: true, maxlength: 200 },
     subSection: [
-      { type: mongoose.Schema.Types.ObjectId, required: true, ref: "SubSection" },
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "SubSection",
+      },
     ],
   },
   { timestamps: true }

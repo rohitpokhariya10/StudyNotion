@@ -25,7 +25,12 @@ export default function PolicyAcknowledgement({
         />
         <span>
           I agree to the{" "}
-          <Link className={linkClass} to="/terms" target="_blank" rel="noreferrer">
+          <Link
+            className={linkClass}
+            to="/terms"
+            target="_blank"
+            rel="noreferrer"
+          >
             Terms of Use
           </Link>
           .
@@ -38,7 +43,9 @@ export default function PolicyAcknowledgement({
           type="checkbox"
           required
           checked={Boolean(value?.acknowledgePrivacy)}
-          onChange={(event) => update("acknowledgePrivacy", event.target.checked)}
+          onChange={(event) =>
+            update("acknowledgePrivacy", event.target.checked)
+          }
           className="mt-1 h-4 w-4 accent-yellow-50"
         />
         <span>
@@ -51,22 +58,28 @@ export default function PolicyAcknowledgement({
           >
             Privacy Notice
           </Link>
-          . This acknowledges the notice; it is not consent to unrelated data use.
+          . This acknowledges the notice; it is not consent to unrelated data
+          use.
         </span>
       </label>
 
-      <label className="flex items-start gap-3" htmlFor={`${idPrefix}-eligibility`}>
+      <label
+        className="flex items-start gap-3"
+        htmlFor={`${idPrefix}-eligibility`}
+      >
         <input
           id={`${idPrefix}-eligibility`}
           type="checkbox"
           required
           checked={Boolean(value?.confirmEligibility)}
-          onChange={(event) => update("confirmEligibility", event.target.checked)}
+          onChange={(event) =>
+            update("confirmEligibility", event.target.checked)
+          }
           className="mt-1 h-4 w-4 accent-yellow-50"
         />
         <span>
-          I can lawfully use this service in my location, or my parent or guardian
-          has authorized me to create this account.
+          I can lawfully use this service in my location, or my parent or
+          guardian has authorized me to create this account.
         </span>
       </label>
     </fieldset>

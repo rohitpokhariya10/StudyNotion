@@ -7,7 +7,9 @@ describe("SafeMarkdown", () => {
   it("does not render instructor-controlled remote images or unsafe links", () => {
     const { container } = render(
       <SafeMarkdown>
-        {"![tracker](https://tracker.example/pixel.gif) [safe](https://docs.example/lesson) [unsafe](javascript:alert(1))"}
+        {
+          "![tracker](https://tracker.example/pixel.gif) [safe](https://docs.example/lesson) [unsafe](javascript:alert(1))"
+        }
       </SafeMarkdown>
     )
 

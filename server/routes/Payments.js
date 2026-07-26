@@ -10,7 +10,7 @@ const {
   verifyPayment,
   sendPaymentSuccessEmail,
 } = require("../controllers/payments")
-const { auth, isInstructor, isStudent, isAdmin } = require("../middleware/auth")
+const { auth, isStudent } = require("../middleware/auth")
 const { paymentLimiter } = require("../middleware/rateLimiters")
 router.get("/config", getCheckoutConfig)
 router.post("/capturePayment", auth, isStudent, paymentLimiter, capturePayment)

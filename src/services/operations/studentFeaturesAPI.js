@@ -47,10 +47,7 @@ function loadScript(src) {
 
     const handleLoad = () => finish(Boolean(window.Razorpay))
     const handleError = () => finish(false)
-    const timeout = setTimeout(
-      () => finish(false),
-      RAZORPAY_SCRIPT_TIMEOUT_MS
-    )
+    const timeout = setTimeout(() => finish(false), RAZORPAY_SCRIPT_TIMEOUT_MS)
 
     script.addEventListener("load", handleLoad)
     script.addEventListener("error", handleError)

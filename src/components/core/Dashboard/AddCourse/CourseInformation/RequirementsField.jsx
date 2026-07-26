@@ -65,7 +65,7 @@ export default function RequirementsField({
               <span>{requirement}</span>
               <button
                 type="button"
-                className="ml-2 text-xs text-pure-greys-300 "
+                className="ml-2 text-xs text-pure-greys-300"
                 onClick={() => handleRemoveRequirement(index)}
               >
                 clear

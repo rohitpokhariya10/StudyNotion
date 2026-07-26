@@ -49,7 +49,7 @@ function ForgotPassword() {
             )}
             <button
               type="submit"
-              className="mt-6 w-full rounded-[8px] bg-yellow-50 py-[12px] px-[12px] font-medium text-richblack-900"
+              className="mt-6 w-full rounded-[8px] bg-yellow-50 px-[12px] py-[12px] font-medium text-richblack-900"
             >
               {!emailSent ? "Send reset link" : "Resend email"}
             </button>

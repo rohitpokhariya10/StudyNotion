@@ -28,28 +28,32 @@ const contactDetails = [
 
 const ContactDetails = () => (
   <div className="flex flex-col gap-6 rounded-xl bg-richblack-800 p-4 lg:p-6">
-    {contactDetails.map(({ description, details, heading, href, icon: Icon }) => (
-      <div
-        className="flex flex-col gap-1 p-3 text-sm text-richblack-200"
-        key={heading}
-      >
-        <div className="flex flex-row items-center gap-3">
-          <Icon size={25} aria-hidden="true" />
-          <h2 className="text-lg font-semibold text-richblack-5">{heading}</h2>
+    {contactDetails.map(
+      ({ description, details, heading, href, icon: Icon }) => (
+        <div
+          className="flex flex-col gap-1 p-3 text-sm text-richblack-200"
+          key={heading}
+        >
+          <div className="flex flex-row items-center gap-3">
+            <Icon size={25} aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-richblack-5">
+              {heading}
+            </h2>
+          </div>
+          <p className="font-medium">{description}</p>
+          {href ? (
+            <a
+              className="break-all font-semibold text-yellow-50 hover:text-yellow-100"
+              href={href}
+            >
+              {details}
+            </a>
+          ) : (
+            <p className="font-semibold">{details}</p>
+          )}
         </div>
-        <p className="font-medium">{description}</p>
-        {href ? (
-          <a
-            className="break-all font-semibold text-yellow-50 hover:text-yellow-100"
-            href={href}
-          >
-            {details}
-          </a>
-        ) : (
-          <p className="font-semibold">{details}</p>
-        )}
-      </div>
-    ))}
+      )
+    )}
   </div>
 )
 

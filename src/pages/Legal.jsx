@@ -8,8 +8,7 @@ const supportEmail =
 const legalEntity =
   import.meta.env.VITE_LEGAL_ENTITY_NAME || "StudyNotion (local development)"
 const legalAddress = import.meta.env.VITE_LEGAL_ADDRESS || "Not configured"
-const legalJurisdiction =
-  import.meta.env.VITE_LEGAL_JURISDICTION || "India"
+const legalJurisdiction = import.meta.env.VITE_LEGAL_JURISDICTION || "India"
 const effectiveDate = "18 July 2026"
 
 const documents = {
@@ -213,8 +212,8 @@ export default function Legal({ document }) {
               Contact
             </h2>
             <p className="mt-4 leading-7">
-              StudyNotion is operated by {legalEntity}, {legalAddress}. Questions
-              or rights requests can be sent to{" "}
+              StudyNotion is operated by {legalEntity}, {legalAddress}.
+              Questions or rights requests can be sent to{" "}
               <a
                 className="text-yellow-100 underline-offset-4 hover:underline"
                 href={`mailto:${supportEmail}`}

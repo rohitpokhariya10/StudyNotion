@@ -2,8 +2,9 @@ const Course = require("../models/Course")
 const Section = require("../models/Section")
 const SubSection = require("../models/Subsection")
 
-const normalizeIds = (values = []) =>
-  [...new Set(values.filter(Boolean).map((value) => value.toString()))]
+const normalizeIds = (values = []) => [
+  ...new Set(values.filter(Boolean).map((value) => value.toString())),
+]
 
 const validRequiredText = (value, maxLength) =>
   typeof value === "string" &&
@@ -39,7 +40,8 @@ const isCoursePublishReady = async (courseContent = []) => {
     sections.flatMap((section) => section.subSection || [])
   )
   if (!subsectionIds.length) return false
-  if (sections.some((section) => !(section.subSection || []).length)) return false
+  if (sections.some((section) => !(section.subSection || []).length))
+    return false
 
   const realSubsections = await SubSection.find({
     _id: { $in: subsectionIds },

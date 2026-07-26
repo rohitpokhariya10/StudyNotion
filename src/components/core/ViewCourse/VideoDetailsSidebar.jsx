@@ -62,13 +62,17 @@ export default function VideoDetailsSidebar({
           const contentId = `${instance}-section-${section._id}`
 
           return (
-            <section className="mt-2 text-sm text-richblack-5" key={section._id}>
+            <section
+              className="mt-2 text-sm text-richblack-5"
+              key={section._id}
+            >
               <button
                 type="button"
                 className="flex w-full flex-row justify-between bg-richblack-600 px-5 py-4 text-left"
                 onClick={() =>
                   setExpandedSectionId((current) =>
-                    (current === undefined ? sectionId : current) === section._id
+                    (current === undefined ? sectionId : current) ===
+                    section._id
                       ? ""
                       : section._id
                   )

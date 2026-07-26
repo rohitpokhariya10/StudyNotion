@@ -55,9 +55,7 @@ const courseSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, required: true, ref: "user" },
     ],
     instructions: {
-      type: [
-        { type: String, required: true, trim: true, maxlength: 1000 },
-      ],
+      type: [{ type: String, required: true, trim: true, maxlength: 1000 }],
       required: true,
       validate: {
         validator: (instructions) =>

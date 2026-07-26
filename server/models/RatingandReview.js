@@ -27,7 +27,7 @@ const ratingAndReviewSchema = new mongoose.Schema(
       index: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 )
 
 ratingAndReviewSchema.index({ user: 1, course: 1 }, { unique: true })

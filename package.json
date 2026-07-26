@@ -1,6 +1,6 @@
 {
   "name": "studynotion-client",
-  "description": "This is the client side of the StudyNotion App",
+  "description": "StudyNotion full-stack MERN learning platform",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -46,8 +46,10 @@
     "test:watch": "vitest",
     "contracts:generate": "npm run openapi:generate --workspace @studynotion/contracts",
     "contracts:openapi:check": "npm run openapi:check --workspace @studynotion/contracts",
-    "lint": "eslint src",
-    "verify": "npm run contracts:openapi:check && npm run lint && npm test && npm run build:local && npm --workspace studynotion-backend test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "verify": "npm run contracts:openapi:check && npm run format:check && npm run lint && npm test && npm run build:local && npm --workspace studynotion-backend test",
     "server": "cd server && npm run dev",
     "dev": "concurrently -n \"client,server\" -c \"bgBlue,bgYellow\" \"npm run client\" \"npm run server\""
   },

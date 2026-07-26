@@ -109,7 +109,11 @@ export default function InstructorApprovals() {
 
       {loading ? (
         <div className="grid min-h-64 place-items-center">
-          <div className="spinner" role="status" aria-label="Loading applications" />
+          <div
+            className="spinner"
+            role="status"
+            aria-label="Loading applications"
+          />
         </div>
       ) : loadError ? (
         <div className="rounded-lg border border-pink-700 bg-richblack-800 p-6">
@@ -153,9 +157,7 @@ export default function InstructorApprovals() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex min-w-0 items-center gap-4">
                     <img
-                      src={
-                        getAvatarSource(instructor)
-                      }
+                      src={getAvatarSource(instructor)}
                       alt=""
                       onError={(event) =>
                         setInitialsAvatarOnError(event, instructor)
@@ -183,7 +185,8 @@ export default function InstructorApprovals() {
                   </p>
                   <p>
                     <span className="text-richblack-400">Contact: </span>
-                    {instructor.additionalDetails?.contactNumber || "Not provided"}
+                    {instructor.additionalDetails?.contactNumber ||
+                      "Not provided"}
                   </p>
                 </div>
 

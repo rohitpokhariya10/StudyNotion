@@ -65,7 +65,9 @@ export const getAvatarSource = (person) => {
 
   try {
     const baseUrl =
-      typeof window === "undefined" ? "http://localhost" : window.location.origin
+      typeof window === "undefined"
+        ? "http://localhost"
+        : window.location.origin
     const hostname = new URL(image, baseUrl).hostname.toLowerCase()
     if (hostname === "api.dicebear.com") return getInitialsAvatar(person)
   } catch {

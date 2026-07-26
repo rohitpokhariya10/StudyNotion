@@ -16,7 +16,7 @@ export default function RatingInput({ value, onChange, disabled = false }) {
           return (
             <label
               key={rating}
-              className="cursor-pointer rounded-sm p-1 text-yellow-100 transition-transform hover:scale-110 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-yellow-50 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
+              className="cursor-pointer rounded-sm p-1 text-yellow-100 transition-transform hover:scale-110 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-yellow-50"
             >
               <input
                 className="sr-only"

@@ -9,7 +9,9 @@ describe("RatingInput", () => {
 
     render(<RatingInput value={3} onChange={onChange} />)
 
-    expect(screen.getByRole("radio", { name: "3 out of 5 stars" })).toBeChecked()
+    expect(
+      screen.getByRole("radio", { name: "3 out of 5 stars" })
+    ).toBeChecked()
 
     fireEvent.click(screen.getByRole("radio", { name: "4 out of 5 stars" }))
 

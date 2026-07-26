@@ -28,10 +28,7 @@ const Footer = () => {
           </p>
         </div>
 
-        <nav
-          className="grid grid-cols-2 gap-8"
-          aria-label="Footer navigation"
-        >
+        <nav className="grid grid-cols-2 gap-8" aria-label="Footer navigation">
           {FooterLink2.map((section) => (
             <div key={section.title}>
               <h2 className="mb-3 text-base font-semibold text-richblack-50">
