@@ -2,17 +2,15 @@ const fs = require("node:fs/promises")
 
 const cloudinary = require("cloudinary").v2
 
+const logger = require("./logger")
+
 const IMAGE_MIME_TYPES = new Set([
   "image/avif",
   "image/jpeg",
   "image/png",
   "image/webp",
 ])
-const VIDEO_MIME_TYPES = new Set([
-  "video/mp4",
-  "video/quicktime",
-  "video/webm",
-])
+const VIDEO_MIME_TYPES = new Set(["video/mp4", "video/quicktime", "video/webm"])
 
 class MediaUploadError extends Error {
   constructor(message, statusCode = 400) {
@@ -90,29 +88,40 @@ const validateMediaFile = async (file, resourceType) => {
     throw new MediaUploadError("A valid uploaded file is required")
   }
   if (file.truncated) {
-    throw new MediaUploadError("The uploaded file exceeds the permitted size", 413)
+    throw new MediaUploadError(
+      "The uploaded file exceeds the permitted size",
+      413
+    )
   }
 
   const declaredMimeType = normalizeMimeType(file.mimetype)
-  const allowedMimeTypes = resourceType === "video" ? VIDEO_MIME_TYPES : IMAGE_MIME_TYPES
+  const allowedMimeTypes =
+    resourceType === "video" ? VIDEO_MIME_TYPES : IMAGE_MIME_TYPES
   if (!allowedMimeTypes.has(declaredMimeType)) {
     throw new MediaUploadError(`Unsupported ${resourceType} file type`, 415)
   }
 
   let detectedMimeType
   try {
-    detectedMimeType = detectMimeType(await readFileSignature(file.tempFilePath))
+    detectedMimeType = detectMimeType(
+      await readFileSignature(file.tempFilePath)
+    )
   } catch {
     throw new MediaUploadError("The uploaded file could not be read")
   }
 
   if (!detectedMimeType || detectedMimeType !== declaredMimeType) {
-    throw new MediaUploadError("The uploaded file content does not match its file type", 415)
+    throw new MediaUploadError(
+      "The uploaded file content does not match its file type",
+      415
+    )
   }
 }
 
 const normalizeFolder = (folder) => {
-  const value = String(folder || "studynotion").trim().replace(/^\/+|\/+$/g, "")
+  const value = String(folder || "studynotion")
+    .trim()
+    .replace(/^\/+|\/+$/g, "")
   if (!value || value.length > 120 || !/^[A-Za-z0-9/_-]+$/.test(value)) {
     throw new MediaUploadError("The media folder configuration is invalid", 500)
   }
@@ -122,8 +131,8 @@ const normalizeFolder = (folder) => {
 const hasCloudinaryCredentials = () =>
   Boolean(
     process.env.CLOUD_NAME &&
-      process.env.CLOUD_API_KEY &&
-      process.env.CLOUD_API_SECRET
+    process.env.CLOUD_API_KEY &&
+    process.env.CLOUD_API_SECRET
   )
 
 const uploadImageToCloudinary = async (file, folder, options = {}) => {
@@ -163,7 +172,8 @@ const uploadImageToCloudinary = async (file, folder, options = {}) => {
       if (Number.isFinite(height) && height > 0) {
         uploadOptions.height = Math.min(height, 4096)
       }
-      if (uploadOptions.width || uploadOptions.height) uploadOptions.crop = "limit"
+      if (uploadOptions.width || uploadOptions.height)
+        uploadOptions.crop = "limit"
       uploadOptions.quality = normalizedOptions.quality || "auto:good"
     }
 
@@ -180,7 +190,9 @@ const uploadImageToCloudinary = async (file, folder, options = {}) => {
     // useTempFiles is enabled. Always remove ours after validation/upload.
     await fs.unlink(file.tempFilePath).catch((error) => {
       if (error?.code !== "ENOENT") {
-        console.error("Temporary upload cleanup failed")
+        logger.error("media.temporary_upload_cleanup_failed", {
+          error: logger.errorMetadata(error),
+        })
       }
     })
   }

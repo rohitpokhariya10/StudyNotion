@@ -10,6 +10,7 @@ const {
   uploadImageToCloudinary,
 } = require("../utils/imageUploader")
 const { unpublishIfIncomplete } = require("../utils/courseLifecycle")
+const logger = require("../utils/logger")
 
 const courseVideoFolder = () =>
   `${process.env.FOLDER_NAME || "studynotion"}/course-videos`
@@ -44,7 +45,12 @@ exports.createSubSection = async (req, res) => {
     const description = readText(req.body.description, 5000)
     const video = req.files?.video
 
-    if (!mongoose.isValidObjectId(sectionId) || !title || !description || !video) {
+    if (
+      !mongoose.isValidObjectId(sectionId) ||
+      !title ||
+      !description ||
+      !video
+    ) {
       return res.status(400).json({
         success: false,
         message: "Section, title, description, and video are required",
@@ -91,7 +97,9 @@ exports.createSubSection = async (req, res) => {
   } catch (error) {
     if (!relationSaved) {
       if (createdSubSection?._id) {
-        await SubSection.findByIdAndDelete(createdSubSection._id).catch(() => false)
+        await SubSection.findByIdAndDelete(createdSubSection._id).catch(
+          () => false
+        )
       }
       if (uploadDetails?.public_id) {
         await deleteAssetFromCloudinary(
@@ -107,7 +115,10 @@ exports.createSubSection = async (req, res) => {
         message: error.message,
       })
     }
-    console.error("Subsection creation failed:", error.message)
+    logger.error("course.subsection_creation_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "The lesson could not be created",
@@ -171,7 +182,9 @@ exports.updateSubSection = async (req, res) => {
       "+videoDeliveryType +videoFormat +videoPublicId"
     )
     if (!subSection) {
-      return res.status(404).json({ success: false, message: "Lesson not found" })
+      return res
+        .status(404)
+        .json({ success: false, message: "Lesson not found" })
     }
 
     if (hasTitle) subSection.title = title
@@ -181,10 +194,14 @@ exports.updateSubSection = async (req, res) => {
         deliveryType: subSection.videoDeliveryType || "upload",
         publicId: subSection.videoPublicId,
       }
-      replacementVideo = await uploadImageToCloudinary(video, courseVideoFolder(), {
-        deliveryType: "authenticated",
-        resourceType: "video",
-      })
+      replacementVideo = await uploadImageToCloudinary(
+        video,
+        courseVideoFolder(),
+        {
+          deliveryType: "authenticated",
+          resourceType: "video",
+        }
+      )
       subSection.videoDeliveryType = "authenticated"
       subSection.videoFormat = replacementVideo.format
       subSection.videoPublicId = replacementVideo.public_id
@@ -201,11 +218,15 @@ exports.updateSubSection = async (req, res) => {
         "video",
         previousVideo.deliveryType
       ).catch((error) =>
-        console.error("Previous course video cleanup failed:", error.message)
+        logger.error("course.previous_video_cleanup_failed", {
+          requestId: req.requestId || "unknown",
+          error: logger.errorMetadata(error),
+        })
       )
     }
 
-    const updatedSection = await Section.findById(sectionId).populate("subSection")
+    const updatedSection =
+      await Section.findById(sectionId).populate("subSection")
     return res.status(200).json({
       success: true,
       message: "Lesson updated successfully",
@@ -225,7 +246,10 @@ exports.updateSubSection = async (req, res) => {
         message: error.message,
       })
     }
-    console.error("Subsection update failed:", error.message)
+    logger.error("course.subsection_update_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "The lesson could not be updated",
@@ -285,11 +309,15 @@ exports.deleteSubSection = async (req, res) => {
       "+videoDeliveryType +videoPublicId"
     )
     if (!subSection) {
-      return res.status(404).json({ success: false, message: "Lesson not found" })
+      return res
+        .status(404)
+        .json({ success: false, message: "Lesson not found" })
     }
 
     await Promise.all([
-      Section.findByIdAndUpdate(sectionId, { $pull: { subSection: subSectionId } }),
+      Section.findByIdAndUpdate(sectionId, {
+        $pull: { subSection: subSectionId },
+      }),
       SubSection.findByIdAndDelete(subSectionId),
       CourseProgress.updateMany(
         { completedVideos: subSectionId },
@@ -303,18 +331,25 @@ exports.deleteSubSection = async (req, res) => {
         "video",
         subSection.videoDeliveryType || "upload"
       ).catch((error) =>
-        console.error("Course video cleanup failed:", error.message)
+        logger.error("course.video_cleanup_failed", {
+          requestId: req.requestId || "unknown",
+          error: logger.errorMetadata(error),
+        })
       )
     }
 
-    const updatedSection = await Section.findById(sectionId).populate("subSection")
+    const updatedSection =
+      await Section.findById(sectionId).populate("subSection")
     return res.status(200).json({
       success: true,
       message: "Lesson deleted successfully",
       data: updatedSection,
     })
   } catch (error) {
-    console.error("Subsection deletion failed:", error.message)
+    logger.error("course.subsection_deletion_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "The lesson could not be deleted",

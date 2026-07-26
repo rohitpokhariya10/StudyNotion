@@ -1,15 +1,12 @@
 const Razorpay = require("razorpay")
 
 const env = require("./env")
+const logger = require("../utils/logger")
 
 const hasCredentials =
   process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_SECRET
 
-if (!hasCredentials) {
-  console.warn(
-    "Razorpay payments are disabled because credentials are not configured"
-  )
-}
+if (!hasCredentials) logger.warn("razorpay.disabled_missing_credentials")
 
 const instance = hasCredentials
   ? new Razorpay({

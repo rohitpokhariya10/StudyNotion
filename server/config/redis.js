@@ -1,6 +1,7 @@
 const { createClient } = require("redis")
 
 const env = require("./env")
+const logger = require("../utils/logger")
 
 let client
 
@@ -21,7 +22,7 @@ const getClient = () => {
     },
   })
   client.on("error", (error) => {
-    console.error("Redis client error:", error.message)
+    logger.error("redis.client_error", { error })
   })
   return client
 }
@@ -31,7 +32,7 @@ const connect = async () => {
   if (!redisClient) return null
   if (!redisClient.isOpen) await redisClient.connect()
   await redisClient.ping()
-  console.log("Redis connection established")
+  logger.info("redis.connected")
   return redisClient
 }
 
@@ -39,6 +40,7 @@ const disconnect = async () => {
   if (!client?.isOpen) return
   if (client.isReady) await client.quit()
   else client.destroy()
+  logger.info("redis.disconnect_completed")
 }
 
 const isReady = () => !isConfigured() || Boolean(client?.isReady)

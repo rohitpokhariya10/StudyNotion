@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 
 const User = require("../models/User")
+const logger = require("../utils/logger")
 
 const INSTRUCTOR_FIELDS = [
   "firstName",
@@ -30,7 +31,11 @@ const pendingInstructorFilter = () => ({
   ],
 })
 
-const parsePositiveInteger = (value, fallback, max = Number.MAX_SAFE_INTEGER) => {
+const parsePositiveInteger = (
+  value,
+  fallback,
+  max = Number.MAX_SAFE_INTEGER
+) => {
   if (value === undefined || value === "") return fallback
   if (!/^\d+$/.test(String(value))) return null
   const parsed = Number(value)
@@ -99,7 +104,10 @@ exports.listPendingInstructors = async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Unable to list pending instructors:", error.message)
+    logger.error("admin.pending_instructors_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Pending instructors could not be loaded",
@@ -212,7 +220,11 @@ const reviewInstructor = (decision) => async (req, res) => {
       data: { instructor: updatedInstructor },
     })
   } catch (error) {
-    console.error(`Unable to mark instructor as ${decision}:`, error.message)
+    logger.error("admin.instructor_review_failed", {
+      requestId: req.requestId || "unknown",
+      decision,
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Instructor application could not be reviewed",

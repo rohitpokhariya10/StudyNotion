@@ -15,6 +15,7 @@ const {
 } = require("../utils/auth")
 const mailSender = require("../utils/mailSender")
 const { verifyGoogleIdToken } = require("../utils/googleIdentity")
+const logger = require("../utils/logger")
 const {
   createPolicyAcceptance,
   hasAffirmativePolicyAcceptance,
@@ -43,7 +44,10 @@ const hashOtp = (email, otp) =>
 const otpMatches = (storedHash, candidateHash) => {
   const stored = Buffer.from(storedHash, "hex")
   const candidate = Buffer.from(candidateHash, "hex")
-  return stored.length === candidate.length && crypto.timingSafeEqual(stored, candidate)
+  return (
+    stored.length === candidate.length &&
+    crypto.timingSafeEqual(stored, candidate)
+  )
 }
 
 const setPrivateNoStore = (res) => {
@@ -186,7 +190,10 @@ exports.signup = async (req, res) => {
           : "User registered successfully",
     })
   } catch (error) {
-    console.error("Signup failed:", error.message)
+    logger.error("auth.signup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "User registration failed",
@@ -230,7 +237,10 @@ exports.login = async (req, res) => {
 
     return await sendAuthenticatedResponse(res, user, "Login successful")
   } catch (error) {
-    console.error("Login failed:", error.message)
+    logger.error("auth.login_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({ success: false, message: "Login failed" })
   }
 }
@@ -241,7 +251,8 @@ exports.googleLogin = async (req, res) => {
     if (!credential || !process.env.GOOGLE_CLIENT_ID) {
       return res.status(400).json({
         success: false,
-        message: "Google sign-in is not configured or the credential is missing",
+        message:
+          "Google sign-in is not configured or the credential is missing",
       })
     }
 
@@ -340,9 +351,16 @@ exports.googleLogin = async (req, res) => {
       })
     }
 
-    return await sendAuthenticatedResponse(res, user, "Google sign-in successful")
+    return await sendAuthenticatedResponse(
+      res,
+      user,
+      "Google sign-in successful"
+    )
   } catch (error) {
-    console.error("Google sign-in failed:", error.message)
+    logger.error("auth.google_sign_in_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Google sign-in is temporarily unavailable",
@@ -382,7 +400,11 @@ exports.sendotp = async (req, res) => {
     )
 
     try {
-      await mailSender(email, "Your StudyNotion verification code", emailTemplate(otp))
+      await mailSender(
+        email,
+        "Your StudyNotion verification code",
+        emailTemplate(otp)
+      )
     } catch (error) {
       await OTP.deleteOne({ email })
       throw error
@@ -395,7 +417,10 @@ exports.sendotp = async (req, res) => {
       ...(env.allowDevOtp ? { otp } : {}),
     })
   } catch (error) {
-    console.error("OTP delivery failed:", error.message)
+    logger.error("auth.otp_delivery_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(502).json({
       success: false,
       message: "Verification code could not be delivered",
@@ -417,7 +442,10 @@ exports.changePassword = async (req, res) => {
     }
 
     const user = await User.findById(req.user.id).select("+password")
-    if (!user?.password || !(await bcrypt.compare(oldPassword, user.password))) {
+    if (
+      !user?.password ||
+      !(await bcrypt.compare(oldPassword, user.password))
+    ) {
       return res.status(401).json({
         success: false,
         message: "The current password is incorrect",
@@ -437,14 +465,22 @@ exports.changePassword = async (req, res) => {
         user.email,
         `Password updated successfully for ${user.firstName} ${user.lastName}`
       )
-    ).catch((error) => console.error("Password email failed:", error.message))
+    ).catch((error) =>
+      logger.error("auth.password_update_email_failed", {
+        requestId: req.requestId || "unknown",
+        error: logger.errorMetadata(error),
+      })
+    )
 
     return res.status(200).json({
       success: true,
       message: "Password updated successfully",
     })
   } catch (error) {
-    console.error("Password update failed:", error.message)
+    logger.error("auth.password_update_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Password update failed",
@@ -478,7 +514,10 @@ exports.acceptPolicies = async (req, res) => {
       message: "Policy acceptance recorded",
     })
   } catch (error) {
-    console.error("Policy acceptance failed:", error.message)
+    logger.error("auth.policy_acceptance_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Policy acceptance could not be recorded",
@@ -515,7 +554,10 @@ exports.logout = async (req, res) => {
         error.name
       )
     ) {
-      console.error("Session revocation failed:", error.message)
+      logger.error("auth.session_revocation_failed", {
+        requestId: req.requestId || "unknown",
+        error: logger.errorMetadata(error),
+      })
       return res.status(503).json({
         success: false,
         message: "Session could not be revoked; retry logout",

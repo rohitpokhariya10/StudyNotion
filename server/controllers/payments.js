@@ -7,6 +7,7 @@ const Course = require("../models/Course")
 const CourseProgress = require("../models/CourseProgress")
 const Purchase = require("../models/Purchase")
 const User = require("../models/User")
+const logger = require("../utils/logger")
 const mailSender = require("../utils/mailSender")
 const {
   courseEnrollmentEmail,
@@ -32,7 +33,7 @@ const safeLogIdentifier = (value) => {
   return /^[A-Za-z0-9_.:/-]{1,128}$/.test(normalized) ? normalized : undefined
 }
 
-const logPaymentFailure = (message, error, metadata = {}) => {
+const logPaymentFailure = (event, error, metadata = {}) => {
   const providerRequestId =
     error?.error?.metadata?.request_id ||
     error?.headers?.["x-request-id"] ||
@@ -48,7 +49,7 @@ const logPaymentFailure = (message, error, metadata = {}) => {
     const safeValue = safeLogIdentifier(value)
     if (safeValue) details[key] = safeValue
   }
-  console.error(message, details)
+  logger.error(event, details)
 }
 
 const paymentUnavailable = (res) =>
@@ -185,10 +186,7 @@ const holdCapturedPaymentForReview = async (purchase, razorpayPaymentId) => {
       status: {
         $in: ["created", "order_created", "paid", "expired", "failed"],
       },
-      $or: [
-        { razorpayPaymentId: { $exists: false } },
-        { razorpayPaymentId },
-      ],
+      $or: [{ razorpayPaymentId: { $exists: false } }, { razorpayPaymentId }],
     },
     {
       $set: {
@@ -235,7 +233,7 @@ const recoverProviderOrder = async (purchase, requestId) => {
     purchase.status = "order_created"
     return { checked: true, order }
   } catch (error) {
-    logPaymentFailure("Could not reconcile Razorpay order by receipt", error, {
+    logPaymentFailure("payment.razorpay_order_recovery_failed", error, {
       purchaseId: purchase._id,
       requestId,
     })
@@ -305,9 +303,7 @@ const fulfillPurchase = async (
   }
 
   const now = new Date()
-  const legacyCutoff = new Date(
-    now.getTime() - env.checkoutTtlSeconds * 1000
-  )
+  const legacyCutoff = new Date(now.getTime() - env.checkoutTtlSeconds * 1000)
   const claimedPurchase = await Purchase.findOneAndUpdate(
     {
       _id: purchase._id,
@@ -356,7 +352,7 @@ const fulfillPurchase = async (
       claimedPurchase.user
     )
   } catch (error) {
-    logPaymentFailure("Captured payment requires reconciliation", error, {
+    logPaymentFailure("payment.captured_payment_requires_review", error, {
       purchaseId: claimedPurchase._id,
     })
     await holdCapturedPaymentForReview(claimedPurchase, razorpayPaymentId)
@@ -574,9 +570,7 @@ exports.capturePayment = async (req, res) => {
         activeCourses: orderedCourses.map((course) => course._id),
         checkoutKey,
         idempotencyKey: idempotency.value,
-        checkoutExpiresAt: new Date(
-          Date.now() + env.checkoutTtlSeconds * 1000
-        ),
+        checkoutExpiresAt: new Date(Date.now() + env.checkoutTtlSeconds * 1000),
         checkoutAcknowledgedAt: new Date(),
         checkoutPolicySource: "web_checkout",
         checkoutTermsVersion: CURRENT_TERMS_VERSION,
@@ -675,7 +669,12 @@ exports.capturePayment = async (req, res) => {
       }
     }
 
-    if (createdByRequest && purchase?._id && !providerOrder && providerRecovery.checked) {
+    if (
+      createdByRequest &&
+      purchase?._id &&
+      !providerOrder &&
+      providerRecovery.checked
+    ) {
       await Purchase.findByIdAndUpdate(purchase._id, {
         $set: {
           activeCourses: [],
@@ -686,7 +685,7 @@ exports.capturePayment = async (req, res) => {
       }).catch(() => undefined)
     }
 
-    logPaymentFailure("Could not initiate Razorpay order", error, {
+    logPaymentFailure("payment.razorpay_order_creation_failed", error, {
       purchaseId: purchase?._id,
       requestId: req.requestId,
     })
@@ -810,7 +809,7 @@ exports.razorpayWebhook = async (req, res) => {
       message: "Payment webhook processed",
     })
   } catch (error) {
-    logPaymentFailure("Payment webhook processing failed", error, {
+    logPaymentFailure("payment.webhook_processing_failed", error, {
       orderId: razorpayOrderId,
       requestId: req.requestId,
     })
@@ -900,7 +899,7 @@ exports.verifyPayment = async (req, res) => {
       message: "Payment Verified",
     })
   } catch (error) {
-    logPaymentFailure("Payment verification failed", error, {
+    logPaymentFailure("payment.verification_failed", error, {
       orderId: razorpayOrderId,
       requestId: req.requestId,
     })
@@ -957,7 +956,11 @@ exports.requestRefund = async (req, res) => {
         409
       )
     }
-    if (["refund_requested", "refund_pending", "refunded"].includes(purchase.status)) {
+    if (
+      ["refund_requested", "refund_pending", "refunded"].includes(
+        purchase.status
+      )
+    ) {
       return res.status(200).json({
         success: true,
         data: { purchaseId, status: purchase.status },
@@ -965,7 +968,11 @@ exports.requestRefund = async (req, res) => {
       })
     }
     if (purchase.status !== "fulfilled") {
-      return paymentFailed(res, "Only a fulfilled purchase can request a refund", 409)
+      return paymentFailed(
+        res,
+        "Only a fulfilled purchase can request a refund",
+        409
+      )
     }
     const deadline = refundDeadline(purchase)
     if (!deadline.valid || deadline.eligibleUntil < new Date()) {
@@ -989,7 +996,11 @@ exports.requestRefund = async (req, res) => {
       { new: true }
     )
     if (!requested) {
-      return paymentFailed(res, "Purchase state changed; refresh and retry", 409)
+      return paymentFailed(
+        res,
+        "Purchase state changed; refresh and retry",
+        409
+      )
     }
     return res.status(202).json({
       success: true,
@@ -997,7 +1008,7 @@ exports.requestRefund = async (req, res) => {
       message: "Refund request submitted for review",
     })
   } catch (error) {
-    logPaymentFailure("Refund request failed", error, {
+    logPaymentFailure("payment.refund_request_failed", error, {
       purchaseId,
       requestId: req.requestId,
     })
@@ -1008,7 +1019,11 @@ exports.requestRefund = async (req, res) => {
 exports.listMyPurchases = async (req, res) => {
   const pagination = parseReviewPagination(req.query)
   if (!pagination) {
-    return paymentFailed(res, "page and limit must be valid positive integers", 400)
+    return paymentFailed(
+      res,
+      "page and limit must be valid positive integers",
+      400
+    )
   }
   try {
     const filter = {
@@ -1078,7 +1093,7 @@ exports.listMyPurchases = async (req, res) => {
       },
     })
   } catch (error) {
-    logPaymentFailure("Purchase history lookup failed", error, {
+    logPaymentFailure("payment.purchase_history_lookup_failed", error, {
       requestId: req.requestId,
     })
     return paymentFailed(res, "Purchase history could not be loaded", 500)
@@ -1143,7 +1158,11 @@ const parseReviewPagination = (query = {}) => {
 exports.listPaymentReviews = async (req, res) => {
   const pagination = parseReviewPagination(req.query)
   if (!pagination) {
-    return paymentFailed(res, "page and limit must be valid positive integers", 400)
+    return paymentFailed(
+      res,
+      "page and limit must be valid positive integers",
+      400
+    )
   }
 
   try {
@@ -1178,7 +1197,7 @@ exports.listPaymentReviews = async (req, res) => {
       },
     })
   } catch (error) {
-    logPaymentFailure("Payment reconciliation list failed", error, {
+    logPaymentFailure("payment.reconciliation_list_failed", error, {
       requestId: req.requestId,
     })
     return paymentFailed(res, "Payment reviews could not be loaded", 500)
@@ -1261,16 +1280,24 @@ exports.resolvePaymentReview = async (req, res) => {
           ? "REJECT REFUND"
           : action === "retry_refund"
             ? "RETRY FAILED REFUND"
-        : null
+            : null
 
   if (!mongoose.isValidObjectId(purchaseId)) {
     return paymentFailed(res, "A valid purchaseId is required", 400)
   }
   if (!expectedConfirmation || confirmation !== expectedConfirmation) {
-    return paymentFailed(res, "The exact reconciliation confirmation is required", 400)
+    return paymentFailed(
+      res,
+      "The exact reconciliation confirmation is required",
+      400
+    )
   }
   if (note.length < 10 || note.length > 1000) {
-    return paymentFailed(res, "A reconciliation note of 10-1000 characters is required", 400)
+    return paymentFailed(
+      res,
+      "A reconciliation note of 10-1000 characters is required",
+      400
+    )
   }
   if (["refund", "retry_refund"].includes(action) && !instance) {
     return paymentUnavailable(res)
@@ -1296,13 +1323,13 @@ exports.resolvePaymentReview = async (req, res) => {
               ? "refund_requested"
               : action === "retry_refund"
                 ? "refund_pending"
-              : {
-                  $in: [
-                    "payment_review",
-                    "refund_pending",
-                    "refund_requested",
-                  ],
-                },
+                : {
+                    $in: [
+                      "payment_review",
+                      "refund_pending",
+                      "refund_requested",
+                    ],
+                  },
         $or: [
           { reconciliationLockUntil: { $exists: false } },
           { reconciliationLockUntil: { $lte: now } },
@@ -1503,10 +1530,14 @@ exports.resolvePaymentReview = async (req, res) => {
           // they never issue a second automatic refund.
           refund = await recoverPurchaseRefund(purchase).catch(() => null)
           if (!refund) {
-            logPaymentFailure("Razorpay refund outcome is pending recovery", error, {
-              purchaseId: purchase._id,
-              requestId: req.requestId,
-            })
+            logPaymentFailure(
+              "payment.refund_outcome_pending_recovery",
+              error,
+              {
+                purchaseId: purchase._id,
+                requestId: req.requestId,
+              }
+            )
             return res.status(202).json({
               success: true,
               data: { purchaseId, refundId: null, status: "refund_pending" },
@@ -1592,7 +1623,8 @@ exports.resolvePaymentReview = async (req, res) => {
         return res.status(202).json({
           success: true,
           data: { purchaseId, refundId: refund.id, status: "refund_pending" },
-          message: "Refund is pending at Razorpay and remains in reconciliation",
+          message:
+            "Refund is pending at Razorpay and remains in reconciliation",
         })
       }
 
@@ -1653,7 +1685,11 @@ exports.resolvePaymentReview = async (req, res) => {
     }
 
     if (purchase.status !== "payment_review") {
-      return paymentFailed(res, "Only a held payment can be manually fulfilled", 409)
+      return paymentFailed(
+        res,
+        "Only a held payment can be manually fulfilled",
+        409
+      )
     }
     if (!purchase.razorpayPaymentId) {
       return paymentFailed(res, "The review has no captured payment ID", 409)
@@ -1662,7 +1698,11 @@ exports.resolvePaymentReview = async (req, res) => {
       (await Course.countDocuments({ _id: { $in: purchase.courses } })) !==
       purchase.courses.length
     ) {
-      return paymentFailed(res, "Purchased course content is no longer complete", 409)
+      return paymentFailed(
+        res,
+        "Purchased course content is no longer complete",
+        409
+      )
     }
 
     const payable = await Purchase.findOneAndUpdate(
@@ -1700,11 +1740,15 @@ exports.resolvePaymentReview = async (req, res) => {
       message: "Payment manually reconciled and enrollment fulfilled",
     })
   } catch (error) {
-    logPaymentFailure("Payment reconciliation failed", error, {
+    logPaymentFailure("payment.reconciliation_failed", error, {
       purchaseId,
       requestId: req.requestId,
     })
-    return paymentFailed(res, "Payment reconciliation could not be completed", 502)
+    return paymentFailed(
+      res,
+      "Payment reconciliation could not be completed",
+      502
+    )
   } finally {
     if (purchase?._id) {
       await Purchase.updateOne(
@@ -1762,7 +1806,7 @@ exports.sendPaymentSuccessEmail = async (req, res) => {
       message: "Payment success email sent",
     })
   } catch (error) {
-    logPaymentFailure("Payment receipt email failed", error, {
+    logPaymentFailure("payment.receipt_email_failed", error, {
       orderId,
       requestId: req.requestId,
     })

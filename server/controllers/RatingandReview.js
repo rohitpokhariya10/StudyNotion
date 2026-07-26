@@ -1,6 +1,7 @@
 const RatingAndReview = require("../models/RatingandReview")
 const Course = require("../models/Course")
 const mongoose = require("mongoose")
+const logger = require("../utils/logger")
 
 // Create a new rating and review
 exports.createRating = async (req, res) => {
@@ -60,7 +61,10 @@ exports.createRating = async (req, res) => {
       ratingReview,
     })
   } catch (error) {
-    console.error("Rating creation failed:", error.message)
+    logger.error("review.creation_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     if (error?.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -111,7 +115,10 @@ exports.getAverageRating = async (req, res) => {
     // If no ratings are found, return 0 as the default rating
     return res.status(200).json({ success: true, averageRating: 0 })
   } catch (error) {
-    console.error("Average rating lookup failed:", error.message)
+    logger.error("review.average_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Failed to retrieve the rating for the course",
@@ -167,7 +174,10 @@ exports.getAllRatingReview = async (req, res) => {
       pagination: { limit },
     })
   } catch (error) {
-    console.error("Review feed lookup failed:", error.message)
+    logger.error("review.feed_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Failed to retrieve the rating and review for the course",

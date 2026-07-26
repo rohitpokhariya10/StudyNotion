@@ -2,6 +2,7 @@ const mongoose = require("mongoose")
 const Section = require("../models/Section")
 const CourseProgress = require("../models/CourseProgress")
 const Course = require("../models/Course")
+const logger = require("../utils/logger")
 
 exports.updateCourseProgress = async (req, res) => {
   const { courseId, subsectionId } = req.body
@@ -47,7 +48,7 @@ exports.updateCourseProgress = async (req, res) => {
     const courseProgress = await CourseProgress.findOneAndUpdate(
       { courseID: courseId, userId },
       { $addToSet: { completedVideos: subsectionId } },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
     )
 
     return res.status(200).json({
@@ -56,7 +57,10 @@ exports.updateCourseProgress = async (req, res) => {
       data: courseProgress,
     })
   } catch (error) {
-    console.error("Course progress update failed:", error.message)
+    logger.error("course.progress_update_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Unable to update course progress",

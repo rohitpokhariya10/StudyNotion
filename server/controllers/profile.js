@@ -10,6 +10,7 @@ const RatingAndReview = require("../models/RatingandReview")
 const User = require("../models/User")
 const { clearSession } = require("../utils/auth")
 const { verifyGoogleIdToken } = require("../utils/googleIdentity")
+const logger = require("../utils/logger")
 const {
   MediaUploadError,
   deleteAssetFromCloudinary,
@@ -128,7 +129,9 @@ const buildProfileUpdates = (body = {}) => {
   }
 
   if (!Object.keys(user).length && !Object.keys(profile).length) {
-    throw new ProfileValidationError("No supported profile fields were provided")
+    throw new ProfileValidationError(
+      "No supported profile fields were provided"
+    )
   }
   return { profile, user }
 }
@@ -153,7 +156,9 @@ const buildEnrolledCourseDto = (course, completedVideos = new Set()) => {
       }
     }),
   }))
-  const completedCount = subsectionIds.filter((id) => completedVideos.has(id)).length
+  const completedCount = subsectionIds.filter((id) =>
+    completedVideos.has(id)
+  ).length
 
   return {
     _id: course._id,
@@ -220,7 +225,10 @@ exports.updateProfile = async (req, res) => {
     if (error instanceof ProfileValidationError) {
       return res.status(400).json({ success: false, message: error.message })
     }
-    console.error("Profile update failed:", error.message)
+    logger.error("profile.update_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Profile could not be updated",
@@ -431,7 +439,9 @@ exports.deleteAccount = async (req, res) => {
       })
     }
 
-    const reviewIds = await RatingAndReview.find({ user: user._id }).distinct("_id")
+    const reviewIds = await RatingAndReview.find({ user: user._id }).distinct(
+      "_id"
+    )
     const anonymizedEmail = `deleted-${user._id.toString()}@users.invalid`
     const cleanupOperations = [
       Course.updateMany(
@@ -525,7 +535,10 @@ exports.deleteAccount = async (req, res) => {
         { $unset: { deletionLockId: 1, deletionLockUntil: 1 } }
       ).catch(() => undefined)
     }
-    console.error("Account deletion failed:", error.message)
+    logger.error("profile.account_deletion_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       code: "ACCOUNT_DELETION_PENDING",
@@ -541,9 +554,7 @@ exports.getAllUserDetails = async (req, res) => {
       ? await User.findById(req.user.id)
           .select("firstName lastName email accountType authProviders image")
           .lean()
-      : await User.findById(req.user.id)
-          .populate("additionalDetails")
-          .exec()
+      : await User.findById(req.user.id).populate("additionalDetails").exec()
     if (!userDetails) {
       return res.status(404).json({ success: false, message: "User not found" })
     }
@@ -560,7 +571,10 @@ exports.getAllUserDetails = async (req, res) => {
       requiresPolicyAcceptance: Boolean(req.user.requiresPolicyAcceptance),
     })
   } catch (error) {
-    console.error("Profile lookup failed:", error.message)
+    logger.error("profile.lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "User data could not be fetched",
@@ -608,7 +622,10 @@ exports.updateDisplayPicture = async (req, res) => {
 
     if (user.imagePublicId && user.imagePublicId !== uploadedImage.public_id) {
       deleteAssetFromCloudinary(user.imagePublicId, "image").catch((error) =>
-        console.error("Previous profile image cleanup failed:", error.message)
+        logger.error("profile.previous_image_cleanup_failed", {
+          requestId: req.requestId || "unknown",
+          error: logger.errorMetadata(error),
+        })
       )
     }
 
@@ -624,7 +641,10 @@ exports.updateDisplayPicture = async (req, res) => {
         message: error.message,
       })
     }
-    console.error("Profile picture update failed:", error.message)
+    logger.error("profile.picture_update_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(502).json({
       success: false,
       message: "Profile picture could not be updated",
@@ -677,7 +697,10 @@ exports.getEnrolledCourses = async (req, res) => {
 
     return res.status(200).json({ success: true, data: enrolledCourseDtos })
   } catch (error) {
-    console.error("Enrolled course lookup failed:", error.message)
+    logger.error("profile.enrolled_courses_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Enrolled courses could not be fetched",
@@ -698,7 +721,9 @@ exports.instructorDashboard = async (req, res) => {
           .lean()
       : []
     const revenueByCourse = new Map()
-    const ownedCourseIds = new Set(courseIds.map((courseId) => courseId.toString()))
+    const ownedCourseIds = new Set(
+      courseIds.map((courseId) => courseId.toString())
+    )
     for (const purchase of purchases) {
       for (const lineItem of purchase.lineItems || []) {
         const courseId = lineItem.course?.toString()
@@ -719,13 +744,16 @@ exports.instructorDashboard = async (req, res) => {
         courseDescription: course.courseDescription,
         totalStudentsEnrolled,
         totalAmountGenerated:
-          Math.round((revenueByCourse.get(course._id.toString()) || 0)) / 100,
+          Math.round(revenueByCourse.get(course._id.toString()) || 0) / 100,
       }
     })
 
     return res.status(200).json({ success: true, courses: courseData })
   } catch (error) {
-    console.error("Instructor dashboard lookup failed:", error.message)
+    logger.error("profile.instructor_dashboard_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({ success: false, message: "Server error" })
   }
 }

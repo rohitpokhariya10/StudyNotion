@@ -5,6 +5,7 @@ const {
   sendV2Error,
 } = require("../domains/catalog/catalogErrors")
 const { listCatalogCourses } = require("../domains/catalog/catalogService")
+const logger = require("../utils/logger")
 
 const CATALOG_SLOW_REQUEST_MS = 1_000
 
@@ -35,9 +36,10 @@ exports.listCatalogCourses = async (req, res) => {
     )
     const durationMs = Math.round(performance.now() - startedAt)
     if (durationMs >= CATALOG_SLOW_REQUEST_MS) {
-      console.warn(
-        `Slow catalog v2 lookup [${req.requestId || "unknown"}]: ${durationMs}ms`
-      )
+      logger.warn("catalog.v2.slow_lookup", {
+        requestId: req.requestId || "unknown",
+        durationMs,
+      })
     }
     // The success envelope carries a per-request trace ID. Shared HTTP caches
     // would replay that ID for later callers, so transport caching stays off;
@@ -48,10 +50,10 @@ exports.listCatalogCourses = async (req, res) => {
     if (error instanceof CatalogApiError) {
       return sendV2Error(req, res, error)
     }
-    console.error(
-      `Catalog v2 lookup failed [${req.requestId || "unknown"}]:`,
-      error?.name || "UnknownError"
-    )
+    logger.error("catalog.v2.lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return sendV2Error(req, res, {
       code: "CATALOG_UNAVAILABLE",
       message: "The catalog could not be loaded",

@@ -1,4 +1,14 @@
 const isProduction = process.env.NODE_ENV === "production"
+const logLevel = (
+  process.env.LOG_LEVEL ||
+  (process.env.NODE_ENV === "test" ? "error" : isProduction ? "info" : "debug")
+)
+  .trim()
+  .toLowerCase()
+
+if (!new Set(["debug", "info", "warn", "error"]).has(logLevel)) {
+  throw new Error("LOG_LEVEL must be debug, info, warn, or error")
+}
 
 const frontendOriginsValue =
   process.env.FRONTEND_ORIGINS || process.env.FRONTEND_URL
@@ -38,11 +48,15 @@ const missing = Object.entries(required)
   .map(([key]) => key)
 
 if (missing.length) {
-  throw new Error(`Missing required environment variables: ${missing.join(", ")}`)
+  throw new Error(
+    `Missing required environment variables: ${missing.join(", ")}`
+  )
 }
 
 if (process.env.JWT_SECRET.length < 32 || process.env.OTP_SECRET.length < 32) {
-  throw new Error("JWT_SECRET and OTP_SECRET must each contain at least 32 characters")
+  throw new Error(
+    "JWT_SECRET and OTP_SECRET must each contain at least 32 characters"
+  )
 }
 
 if (process.env.JWT_SECRET === process.env.OTP_SECRET) {
@@ -180,7 +194,8 @@ if (isProduction) {
 
 const readInteger = (name, fallback, { min = 0, max = Infinity } = {}) => {
   const rawValue = process.env[name]
-  const value = rawValue === undefined || rawValue === "" ? fallback : Number(rawValue)
+  const value =
+    rawValue === undefined || rawValue === "" ? fallback : Number(rawValue)
   if (!Number.isInteger(value) || value < min || value > max) {
     throw new Error(`${name} must be an integer between ${min} and ${max}`)
   }
@@ -204,34 +219,50 @@ const readSize = (name, fallback) => {
 }
 
 const parseOrigins = (value) =>
-  [...new Set(value.split(",").map((origin) => origin.trim()).filter(Boolean))].map(
-    (origin) => {
-      let url
-      try {
-        url = new URL(origin)
-      } catch {
-        throw new Error(`Invalid frontend origin: ${origin}`)
-      }
-
-      if (url.pathname !== "/" || url.search || url.hash || url.username || url.password) {
-        throw new Error(`Frontend origins must not contain paths or credentials: ${origin}`)
-      }
-      if (isProduction && url.protocol !== "https:") {
-        throw new Error(`Production frontend origins must use HTTPS: ${origin}`)
-      }
-      if (!isProduction && !["http:", "https:"].includes(url.protocol)) {
-        throw new Error(`Frontend origins must use HTTP or HTTPS: ${origin}`)
-      }
-      return url.origin
+  [
+    ...new Set(
+      value
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean)
+    ),
+  ].map((origin) => {
+    let url
+    try {
+      url = new URL(origin)
+    } catch {
+      throw new Error(`Invalid frontend origin: ${origin}`)
     }
-  )
+
+    if (
+      url.pathname !== "/" ||
+      url.search ||
+      url.hash ||
+      url.username ||
+      url.password
+    ) {
+      throw new Error(
+        `Frontend origins must not contain paths or credentials: ${origin}`
+      )
+    }
+    if (isProduction && url.protocol !== "https:") {
+      throw new Error(`Production frontend origins must use HTTPS: ${origin}`)
+    }
+    if (!isProduction && !["http:", "https:"].includes(url.protocol)) {
+      throw new Error(`Frontend origins must use HTTP or HTTPS: ${origin}`)
+    }
+    return url.origin
+  })
 
 const frontendOrigins = parseOrigins(frontendOriginsValue)
 if (!frontendOrigins.length) {
   throw new Error("At least one frontend origin is required")
 }
 
-if (isProduction && !frontendOrigins.includes(new URL(process.env.APP_URL).origin)) {
+if (
+  isProduction &&
+  !frontendOrigins.includes(new URL(process.env.APP_URL).origin)
+) {
   throw new Error("APP_URL must match one of FRONTEND_ORIGINS")
 }
 
@@ -263,9 +294,12 @@ const parseTrustProxy = () => {
   if (!value) return isProduction ? 1 : false
   if (value === "false" || value === "0") return false
   if (value === "true") {
-    throw new Error("TRUST_PROXY=true is unsafe; configure a proxy hop count or subnet")
+    throw new Error(
+      "TRUST_PROXY=true is unsafe; configure a proxy hop count or subnet"
+    )
   }
-  if (/^\d+$/.test(value)) return readInteger("TRUST_PROXY", 1, { min: 1, max: 10 })
+  if (/^\d+$/.test(value))
+    return readInteger("TRUST_PROXY", 1, { min: 1, max: 10 })
   return value
 }
 
@@ -283,6 +317,7 @@ if (mongoMinPoolSize > mongoMaxPoolSize) {
 
 module.exports = Object.freeze({
   isProduction,
+  logLevel,
   port: readInteger("PORT", 4000, { min: 1, max: 65535 }),
   frontendOrigins,
   frontendOrigin: frontendOrigins[0],

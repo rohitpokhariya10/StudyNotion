@@ -37,6 +37,7 @@ const installMock = (modulePath, exports) => {
 
 const loadPaymentsController = (overrides = {}) => {
   const events = []
+  const logs = []
   let purchaseCreated = false
   const purchase = {
     _id: "64b000000000000000000006",
@@ -198,6 +199,13 @@ const loadPaymentsController = (overrides = {}) => {
   installMock("../models/CourseProgress", CourseProgress)
   installMock("../models/Purchase", Purchase)
   installMock("../models/User", User)
+  installMock("../utils/logger", {
+    debug: (event, fields) => logs.push({ level: "debug", event, fields }),
+    info: (event, fields) => logs.push({ level: "info", event, fields }),
+    warn: (event, fields) => logs.push({ level: "warn", event, fields }),
+    error: (event, fields) => logs.push({ level: "error", event, fields }),
+    errorMetadata: (error) => ({ name: error?.name || "Error" }),
+  })
   installMock("../utils/mailSender", async () => ({ response: "sent" }))
 
   const controllerPath = require.resolve("../controllers/payments")
@@ -206,12 +214,13 @@ const loadPaymentsController = (overrides = {}) => {
   return {
     controller: require(controllerPath),
     events,
+    logs,
     purchase,
   }
 }
 
 test("capture persists the server-priced purchase before creating an order", async () => {
-  const { controller, events, purchase } = loadPaymentsController()
+  const { controller, events } = loadPaymentsController()
   const res = createResponse()
 
   await controller.capturePayment(
@@ -254,7 +263,10 @@ test("checkout requires affirmative purchase-policy acknowledgement", async () =
   )
 
   assert.equal(res.statusCode, 400)
-  assert.equal(events.some(([event]) => event === "purchase"), false)
+  assert.equal(
+    events.some(([event]) => event === "purchase"),
+    false
+  )
 })
 
 test("checkout rejects a policy snapshot the learner did not currently view", async () => {
@@ -274,7 +286,10 @@ test("checkout rejects a policy snapshot the learner did not currently view", as
   )
 
   assert.equal(res.statusCode, 409)
-  assert.equal(events.some(([event]) => event === "purchase"), false)
+  assert.equal(
+    events.some(([event]) => event === "purchase"),
+    false
+  )
 })
 
 test("checkout config exposes the server-owned policy contract", () => {
@@ -319,7 +334,10 @@ test("an account-deletion lock prevents checkout creation", async () => {
   )
 
   assert.equal(res.statusCode, 409)
-  assert.equal(events.some(([event]) => event === "purchase"), false)
+  assert.equal(
+    events.some(([event]) => event === "purchase"),
+    false
+  )
   assert.equal(lockQuery.active, true)
   assert.equal(lockQuery.approved, true)
   assert.deepEqual(lockQuery.deletionPending, { $ne: true })
@@ -344,7 +362,10 @@ test("checkout revalidation stops an order when a course was unpublished", async
 
   assert.equal(res.statusCode, 409)
   assert.equal(purchase.status, "failed")
-  assert.equal(events.some(([event]) => event === "razorpay-order"), false)
+  assert.equal(
+    events.some(([event]) => event === "razorpay-order"),
+    false
+  )
 })
 
 test("a concurrent created checkout reconciles by receipt and always responds", async () => {
@@ -442,9 +463,9 @@ test("a timed-out Razorpay create recovers the provider order by receipt", async
   assert.equal(Date.now() - startedAt < 500, true)
 })
 
-test("a failed provider attempt releases its idempotency key for retry", async () => {
+test("a failed provider attempt logs allowlisted metadata and releases its idempotency key", async () => {
   let providerAttempts = 0
-  const { controller, purchase } = loadPaymentsController({
+  const { controller, logs, purchase } = loadPaymentsController({
     instance: {
       orders: {
         all: async () => ({ items: [] }),
@@ -453,6 +474,10 @@ test("a failed provider attempt releases its idempotency key for retry", async (
           if (providerAttempts === 1) {
             const error = new Error("provider unavailable")
             error.code = "PROVIDER_UNAVAILABLE"
+            error.error = {
+              metadata: { request_id: "provider_req_fixture" },
+              payload: { razorpay_signature: "private-provider-signature" },
+            }
             throw error
           }
           return { id: "order_retry", ...options }
@@ -474,6 +499,22 @@ test("a failed provider attempt releases its idempotency key for retry", async (
   assert.equal(firstResponse.statusCode, 500)
   assert.equal(purchase.status, "failed")
   assert.equal(purchase.idempotencyKey, undefined)
+  assert.deepEqual(logs, [
+    {
+      level: "error",
+      event: "payment.razorpay_order_creation_failed",
+      fields: {
+        code: "PROVIDER_UNAVAILABLE",
+        requestId: "provider_req_fixture",
+        purchaseId: "64b000000000000000000006",
+      },
+    },
+  ])
+  assert.equal(
+    JSON.stringify(logs).includes("private-provider-signature"),
+    false
+  )
+  assert.equal(JSON.stringify(logs).includes("provider unavailable"), false)
 
   const retryResponse = createResponse()
   await controller.capturePayment(request, retryResponse)
@@ -489,7 +530,8 @@ test("a repeated capture reuses the active Razorpay order", async () => {
       ...acceptedCheckoutPolicies,
       courses: [trustedCourseId],
     },
-    get: (name) => (name === "idempotency-key" ? "checkout-retry-1" : undefined),
+    get: (name) =>
+      name === "idempotency-key" ? "checkout-retry-1" : undefined,
     user: { id: userId },
   }
 
@@ -623,7 +665,10 @@ test("a captured payment for an expired checkout is held without enrollment", as
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.reconciliationRequired, true)
   assert.equal(purchase.status, "payment_review")
-  assert.equal(events.some(([event]) => event === "enroll"), false)
+  assert.equal(
+    events.some(([event]) => event === "enroll"),
+    false
+  )
 })
 
 test("checkout expiry racing the payment claim is held for reconciliation", async () => {
@@ -683,7 +728,10 @@ test("checkout expiry racing the payment claim is held for reconciliation", asyn
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.reconciliationRequired, true)
   assert.equal(racePurchase.status, "payment_review")
-  assert.equal(events.some(([event]) => event === "enroll"), false)
+  assert.equal(
+    events.some(([event]) => event === "enroll"),
+    false
+  )
   assert.equal(Array.isArray(claimQuery.$and), true)
   assert.equal(
     claimQuery.$and[0].$or.some(
@@ -733,7 +781,10 @@ test("fulfillment holds payment when the Student became inactive", async () => {
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.reconciliationRequired, true)
   assert.equal(purchase.status, "payment_review")
-  assert.equal(events.some(([event]) => event === "enroll"), false)
+  assert.equal(
+    events.some(([event]) => event === "enroll"),
+    false
+  )
 })
 
 test("a captured payment for a missing course becomes payment_review", async () => {
@@ -775,7 +826,10 @@ test("a captured payment for a missing course becomes payment_review", async () 
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.reconciliationRequired, true)
   assert.equal(purchase.status, "payment_review")
-  assert.equal(events.some(([event]) => event === "enroll"), false)
+  assert.equal(
+    events.some(([event]) => event === "enroll"),
+    false
+  )
 })
 
 test("Razorpay webhook rejects a payload whose raw-body signature is invalid", async () => {
@@ -822,7 +876,10 @@ test("an admin refund resolves payment_review with an auditable provider ID", as
   assert.equal(res.body.data.refundId, "rfnd_test_1")
   assert.equal(purchase.status, "refunded")
   assert.equal(purchase.reconciliationResolution, "refunded")
-  assert.equal(events.some(([event]) => event === "unenroll"), true)
+  assert.equal(
+    events.some(([event]) => event === "unenroll"),
+    true
+  )
 })
 
 test("a learner refund request is processed and revokes its entitlements", async () => {
@@ -865,7 +922,10 @@ test("a learner refund request is processed and revokes its entitlements", async
   assert.equal(resolutionResponse.statusCode, 200)
   assert.equal(purchase.status, "refunded")
   assert.equal(purchase.refundOriginStatus, "refund_requested")
-  assert.equal(events.some(([event]) => event === "unenroll"), true)
+  assert.equal(
+    events.some(([event]) => event === "unenroll"),
+    true
+  )
 })
 
 test("a timely learner request remains valid when support processes it later", async () => {
@@ -932,7 +992,10 @@ test("an admin can reject a learner refund request without revoking access", asy
   assert.equal(purchase.status, "fulfilled")
   assert.equal(purchase.reconciliationResolution, "refund_rejected")
   assert.equal(purchase.refundRejectedAt instanceof Date, true)
-  assert.equal(events.some(([event]) => event === "unenroll"), false)
+  assert.equal(
+    events.some(([event]) => event === "unenroll"),
+    false
+  )
 
   const repeatedRequest = createResponse()
   await controller.requestRefund(
@@ -977,15 +1040,15 @@ test("purchase history exposes refund eligibility and a usable purchase ID", asy
   })
   const res = createResponse()
 
-  await controller.listMyPurchases(
-    { query: {}, user: { id: userId } },
-    res
-  )
+  await controller.listMyPurchases({ query: {}, user: { id: userId } }, res)
 
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.data.purchases[0]._id, history._id)
   assert.equal(res.body.data.purchases[0].refundEligible, true)
-  assert.equal(res.body.data.purchases[0].refundEligibleUntil instanceof Date, true)
+  assert.equal(
+    res.body.data.purchases[0].refundEligibleUntil instanceof Date,
+    true
+  )
 })
 
 test("a pending provider refund stays queued until Razorpay processes it", async () => {

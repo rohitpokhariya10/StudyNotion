@@ -4,6 +4,7 @@ const crypto = require("crypto")
 const env = require("../config/env")
 const { emailLayout } = require("../mail/templates/templateUtils")
 const User = require("../models/User")
+const logger = require("../utils/logger")
 const mailSender = require("../utils/mailSender")
 const {
   isStrongPassword,
@@ -15,7 +16,8 @@ const RESET_TOKEN_TTL_MS = 30 * 60 * 1000
 const GENERIC_RESET_MESSAGE =
   "If an account exists for this email, a password reset link has been sent"
 
-const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex")
+const hashToken = (token) =>
+  crypto.createHash("sha256").update(token).digest("hex")
 
 exports.resetPasswordToken = async (req, res) => {
   const email = normalizeEmail(req.body?.email)
@@ -29,7 +31,9 @@ exports.resetPasswordToken = async (req, res) => {
   try {
     const user = await User.findOne({ email }).select("_id email")
     if (!user) {
-      return res.status(200).json({ success: true, message: GENERIC_RESET_MESSAGE })
+      return res
+        .status(200)
+        .json({ success: true, message: GENERIC_RESET_MESSAGE })
     }
 
     const token = crypto.randomBytes(32).toString("hex")
@@ -70,9 +74,14 @@ exports.resetPasswordToken = async (req, res) => {
       throw error
     }
 
-    return res.status(200).json({ success: true, message: GENERIC_RESET_MESSAGE })
+    return res
+      .status(200)
+      .json({ success: true, message: GENERIC_RESET_MESSAGE })
   } catch (error) {
-    console.error("Password reset email failed:", error.message)
+    logger.error("auth.password_reset_email_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(502).json({
       success: false,
       message: "Password reset email could not be sent",
@@ -123,7 +132,10 @@ exports.resetPassword = async (req, res) => {
       message: "Password Reset Successful",
     })
   } catch (error) {
-    console.error("Password reset failed:", error.message)
+    logger.error("auth.password_reset_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Password could not be reset",

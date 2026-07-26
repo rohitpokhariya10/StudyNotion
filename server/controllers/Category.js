@@ -1,6 +1,7 @@
 const Category = require("../models/Category")
 const Course = require("../models/Course")
 const mongoose = require("mongoose")
+const logger = require("../utils/logger")
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max)
@@ -74,7 +75,10 @@ exports.createCategory = async (req, res) => {
         message: "A category with this name already exists",
       })
     }
-    console.error("Category creation failed:", error.message)
+    logger.error("category.creation_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Category could not be created",
@@ -105,7 +109,10 @@ exports.showAllCategories = async (req, res) => {
       data: publicCategories,
     })
   } catch (error) {
-    console.error("Category lookup failed:", error.message)
+    logger.error("category.list_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Categories could not be fetched",
@@ -194,7 +201,10 @@ exports.categoryPageDetails = async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Category page lookup failed:", error.message)
+    logger.error("category.page_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Internal server error",

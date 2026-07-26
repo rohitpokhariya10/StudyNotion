@@ -66,6 +66,12 @@ test("production Redis connections require TLS", () => {
   assert.match(result.stderr, /rediss:\/\/ TLS/)
 })
 
+test("configuration rejects unsupported structured log levels", () => {
+  const result = loadEnv({ LOG_LEVEL: "verbose" })
+  assert.notEqual(result.status, 0)
+  assert.match(result.stderr, /LOG_LEVEL must be debug, info, warn, or error/)
+})
+
 test("APP_URL remains the canonical app when multiple origins are allowed", () => {
   const result = loadEnv(
     {

@@ -1,5 +1,6 @@
 const User = require("../models/User")
 const { readSessionToken, verifySessionToken } = require("../utils/auth")
+const logger = require("../utils/logger")
 const { hasCurrentPolicyAcceptance } = require("../utils/policyAcceptance")
 
 const POLICY_PENDING_ALLOWED_PATHS = new Set([
@@ -86,7 +87,8 @@ exports.auth = async (req, res, next) => {
       return res.status(428).json({
         success: false,
         code: "POLICY_ACCEPTANCE_REQUIRED",
-        message: "Review and accept the current Terms and Privacy Notice to continue",
+        message:
+          "Review and accept the current Terms and Privacy Notice to continue",
       })
     }
     return next()
@@ -102,7 +104,10 @@ exports.auth = async (req, res, next) => {
       })
     }
 
-    console.error("Authentication failed:", error.message)
+    logger.error("auth.session_validation_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Something went wrong while validating the session",

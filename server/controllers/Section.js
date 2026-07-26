@@ -6,6 +6,7 @@ const Purchase = require("../models/Purchase")
 const { deleteAssetFromCloudinary } = require("../utils/imageUploader")
 const { unpublishIfIncomplete } = require("../utils/courseLifecycle")
 const { sanitizeInstructorCourse } = require("../utils/courseDto")
+const logger = require("../utils/logger")
 const mongoose = require("mongoose")
 // CREATE a new section
 exports.createSection = async (req, res) => {
@@ -13,7 +14,9 @@ exports.createSection = async (req, res) => {
     // Extract the required properties from the request body
     const { courseId } = req.body
     const sectionName =
-      typeof req.body.sectionName === "string" ? req.body.sectionName.trim() : ""
+      typeof req.body.sectionName === "string"
+        ? req.body.sectionName.trim()
+        : ""
 
     // Validate the input
     if (
@@ -89,7 +92,10 @@ exports.createSection = async (req, res) => {
       updatedCourse: sanitizeInstructorCourse(updatedCourse),
     })
   } catch (error) {
-    console.error("Section creation failed:", error.message)
+    logger.error("course.section_creation_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     res.status(500).json({
       success: false,
       message: "Section could not be created",
@@ -102,7 +108,9 @@ exports.updateSection = async (req, res) => {
   try {
     const { sectionId, courseId } = req.body
     const sectionName =
-      typeof req.body.sectionName === "string" ? req.body.sectionName.trim() : ""
+      typeof req.body.sectionName === "string"
+        ? req.body.sectionName.trim()
+        : ""
 
     if (
       !sectionName ||
@@ -141,7 +149,9 @@ exports.updateSection = async (req, res) => {
       { new: true, runValidators: true }
     )
     if (!section) {
-      return res.status(404).json({ success: false, message: "Section not found" })
+      return res
+        .status(404)
+        .json({ success: false, message: "Section not found" })
     }
     const course = await Course.findById(courseId)
       .populate({
@@ -157,7 +167,10 @@ exports.updateSection = async (req, res) => {
       data: sanitizeInstructorCourse(course),
     })
   } catch (error) {
-    console.error("Section update failed:", error.message)
+    logger.error("course.section_update_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     res.status(500).json({
       success: false,
       message: "Section could not be updated",
@@ -170,7 +183,10 @@ exports.deleteSection = async (req, res) => {
   try {
     const { sectionId, courseId } = req.body
 
-    if (!mongoose.isValidObjectId(sectionId) || !mongoose.isValidObjectId(courseId)) {
+    if (
+      !mongoose.isValidObjectId(sectionId) ||
+      !mongoose.isValidObjectId(courseId)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Missing required properties",
@@ -266,7 +282,10 @@ exports.deleteSection = async (req, res) => {
       data: sanitizeInstructorCourse(course),
     })
   } catch (error) {
-    console.error("Section deletion failed:", error.message)
+    logger.error("course.section_deletion_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     res.status(500).json({
       success: false,
       message: "Section could not be deleted",

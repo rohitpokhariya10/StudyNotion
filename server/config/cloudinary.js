@@ -1,18 +1,20 @@
 const cloudinary = require("cloudinary").v2
 
+const logger = require("../utils/logger")
+
 let configured = false
 
 const hasCredentials = () =>
   Boolean(
     process.env.CLOUD_NAME &&
-      process.env.CLOUD_API_KEY &&
-      process.env.CLOUD_API_SECRET
+    process.env.CLOUD_API_KEY &&
+    process.env.CLOUD_API_SECRET
   )
 
 const cloudinaryConnect = () => {
   if (!hasCredentials()) {
     configured = false
-    console.warn("Cloudinary uploads are disabled because credentials are not configured")
+    logger.warn("cloudinary.disabled_missing_credentials")
     return false
   }
 
@@ -25,7 +27,7 @@ const cloudinaryConnect = () => {
     signature_algorithm: "sha256",
   })
   configured = true
-  console.log("Cloudinary configuration loaded")
+  logger.info("cloudinary.configured")
   return true
 }
 

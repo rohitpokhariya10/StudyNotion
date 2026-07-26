@@ -17,6 +17,7 @@ const mongoose = require("mongoose")
 const env = require("../config/env")
 const { isCoursePublishReady } = require("../utils/courseLifecycle")
 const { sanitizeInstructorCourse } = require("../utils/courseDto")
+const logger = require("../utils/logger")
 const { releaseStaleCheckoutLocks } = require("../utils/purchaseLifecycle")
 
 const publicInstructorPopulate = {
@@ -27,7 +28,9 @@ const publicInstructorPopulate = {
 
 const resolveCourseAccess = async (courseId, userId) => {
   const [course, user] = await Promise.all([
-    Course.findById(courseId).select("instructor studentsEnroled courseContent"),
+    Course.findById(courseId).select(
+      "instructor studentsEnroled courseContent"
+    ),
     User.findById(userId).select("accountType active approved"),
   ])
 
@@ -35,7 +38,11 @@ const resolveCourseAccess = async (courseId, userId) => {
     return { allowed: false, message: "Course not found", statusCode: 404 }
   }
   if (!user || user.active === false || user.approved === false) {
-    return { allowed: false, message: "User is not authorized", statusCode: 401 }
+    return {
+      allowed: false,
+      message: "User is not authorized",
+      statusCode: 401,
+    }
   }
 
   const normalizedUserId = userId.toString()
@@ -107,10 +114,7 @@ const normalizeCourseMetadata = (course) => {
     course.courseDescription,
     10000
   )
-  const whatYouWillLearn = normalizeRequiredText(
-    course.whatYouWillLearn,
-    10000
-  )
+  const whatYouWillLearn = normalizeRequiredText(course.whatYouWillLearn, 10000)
   const thumbnail = normalizeRequiredText(course.thumbnail, 2048)
   const tag = normalizeRequiredList(course.tag, {
     itemMaxLength: 80,
@@ -221,7 +225,9 @@ exports.createCourse = async (req, res) => {
     }
     status = status || "Draft"
     if (!["Draft", "Published"].includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid course status" })
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid course status" })
     }
     if (status === "Published") {
       return res.status(409).json({
@@ -327,7 +333,10 @@ exports.createCourse = async (req, res) => {
         message: "Course details are invalid",
       })
     }
-    console.error("Course creation failed:", error.message)
+    logger.error("course.creation_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     res.status(500).json({
       success: false,
       message: "Failed to create course",
@@ -363,7 +372,9 @@ exports.editCourse = async (req, res) => {
     }).select("+thumbnailPublicId")
 
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found" })
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" })
     }
     if (course.status === "Archived") {
       return res.status(409).json({
@@ -375,7 +386,10 @@ exports.editCourse = async (req, res) => {
 
     originalCategoryId = course.category?.toString()
     nextCategoryId = updates.category?.toString() || originalCategoryId
-    if (updates.category && !(await Category.exists({ _id: updates.category }))) {
+    if (
+      updates.category &&
+      !(await Category.exists({ _id: updates.category }))
+    ) {
       return res.status(404).json({
         success: false,
         message: "Category Details Not Found",
@@ -409,7 +423,8 @@ exports.editCourse = async (req, res) => {
               typeof updates[key] === "string"
                 ? JSON.parse(updates[key])
                 : updates[key]
-            if (!Array.isArray(course[key])) throw new Error("Expected an array")
+            if (!Array.isArray(course[key]))
+              throw new Error("Expected an array")
           } else if (key === "price") {
             course[key] = Number(updates[key])
           } else {
@@ -432,7 +447,10 @@ exports.editCourse = async (req, res) => {
       })
     }
 
-    if (!updates.category && !(await Category.exists({ _id: course.category }))) {
+    if (
+      !updates.category &&
+      !(await Category.exists({ _id: course.category }))
+    ) {
       return res.status(404).json({
         success: false,
         message: "Category Details Not Found",
@@ -445,10 +463,14 @@ exports.editCourse = async (req, res) => {
     ) {
       return res.status(409).json({
         success: false,
-        message: "A published course needs at least one lesson in every section",
+        message:
+          "A published course needs at least one lesson in every section",
       })
     }
-    if ((wasPublished || course.status === "Published") && !course.everPublishedAt) {
+    if (
+      (wasPublished || course.status === "Published") &&
+      !course.everPublishedAt
+    ) {
       course.everPublishedAt = new Date()
     }
 
@@ -523,7 +545,10 @@ exports.editCourse = async (req, res) => {
     ) {
       deleteAssetFromCloudinary(previousThumbnailPublicId, "image").catch(
         (error) =>
-          console.error("Previous course thumbnail cleanup failed:", error.message)
+          logger.error("course.previous_thumbnail_cleanup_failed", {
+            requestId: req.requestId || "unknown",
+            error: logger.errorMetadata(error),
+          })
       )
     }
 
@@ -548,9 +573,10 @@ exports.editCourse = async (req, res) => {
     })
   } catch (error) {
     if (replacementThumbnail && !replacementSaved) {
-      await deleteAssetFromCloudinary(replacementThumbnail.public_id, "image").catch(
-        () => false
-      )
+      await deleteAssetFromCloudinary(
+        replacementThumbnail.public_id,
+        "image"
+      ).catch(() => false)
     }
     if (error instanceof MediaUploadError) {
       return res.status(error.statusCode).json({
@@ -564,7 +590,10 @@ exports.editCourse = async (req, res) => {
         message: "Course details are invalid",
       })
     }
-    console.error("Course update failed:", error.message)
+    logger.error("course.update_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -589,17 +618,22 @@ exports.getAllCourses = async (req, res) => {
       .lean()
       .exec()
 
-    const publicCourses = allCourses.map(({ studentsEnroled = [], ...course }) => ({
-      ...course,
-      totalStudentsEnrolled: studentsEnroled.length,
-    }))
+    const publicCourses = allCourses.map(
+      ({ studentsEnroled = [], ...course }) => ({
+        ...course,
+        totalStudentsEnrolled: studentsEnroled.length,
+      })
+    )
 
     return res.status(200).json({
       success: true,
       data: publicCourses,
     })
   } catch (error) {
-    console.error("Unable to fetch courses", error.message)
+    logger.error("course.list_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: `Can't Fetch Course Data`,
@@ -662,7 +696,9 @@ exports.getCourseDetails = async (req, res) => {
   try {
     const { courseId } = req.body
     if (!mongoose.isValidObjectId(courseId)) {
-      return res.status(400).json({ success: false, message: "A valid courseId is required" })
+      return res
+        .status(400)
+        .json({ success: false, message: "A valid courseId is required" })
     }
     const courseDetails = await Course.findOne({
       _id: courseId,
@@ -707,7 +743,10 @@ exports.getCourseDetails = async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Unable to fetch course details", error.message)
+    logger.error("course.details_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Unable to fetch course details",
@@ -720,7 +759,9 @@ exports.getFullCourseDetails = async (req, res) => {
     const userId = req.user.id
 
     if (!mongoose.isValidObjectId(courseId)) {
-      return res.status(400).json({ success: false, message: "A valid courseId is required" })
+      return res
+        .status(400)
+        .json({ success: false, message: "A valid courseId is required" })
     }
 
     const access = await resolveCourseAccess(courseId, userId)
@@ -775,7 +816,9 @@ exports.getFullCourseDetails = async (req, res) => {
 
     const totalDuration = convertSecondsToDuration(totalDurationInSeconds)
 
-    const entitledCourseDetails = sanitizeEntitledCourse(courseDetails.toObject())
+    const entitledCourseDetails = sanitizeEntitledCourse(
+      courseDetails.toObject()
+    )
     for (const content of entitledCourseDetails.courseContent || []) {
       for (const subSection of content.subSection || []) {
         if (
@@ -813,7 +856,10 @@ exports.getFullCourseDetails = async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Unable to fetch full course details", error.message)
+    logger.error("course.full_details_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Unable to fetch course details",
@@ -900,7 +946,10 @@ exports.getLessonPlaybackUrl = async (req, res) => {
       data: { expiresAt: expiresAt.toISOString(), subSectionId, url },
     })
   } catch (error) {
-    console.error("Lesson playback URL generation failed:", error.message)
+    logger.error("course.playback_url_generation_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "A secure playback URL could not be generated",
@@ -925,7 +974,10 @@ exports.getInstructorCourses = async (req, res) => {
       data: instructorCourses.map(sanitizeInstructorCourse),
     })
   } catch (error) {
-    console.error("Instructor course lookup failed:", error.message)
+    logger.error("course.instructor_courses_lookup_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     res.status(500).json({
       success: false,
       message: "Failed to retrieve instructor courses",
@@ -949,7 +1001,9 @@ exports.deleteCourse = async (req, res) => {
       instructor: req.user.id,
     }).select("+thumbnailPublicId")
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found" })
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" })
     }
 
     if (
@@ -1103,7 +1157,10 @@ exports.deleteCourse = async (req, res) => {
       message: "Course deleted successfully",
     })
   } catch (error) {
-    console.error("Course deletion failed:", error.message)
+    logger.error("course.deletion_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(500).json({
       success: false,
       message: "Server error",

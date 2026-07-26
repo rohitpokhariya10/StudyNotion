@@ -7,14 +7,15 @@ const cors = require("cors")
 const express = require("express")
 const helmet = require("helmet")
 
-const { cloudinaryConnect, isCloudinaryConfigured } = require("./config/cloudinary")
+const {
+  cloudinaryConnect,
+  isCloudinaryConfigured,
+} = require("./config/cloudinary")
 const database = require("./config/database")
 const redis = require("./config/redis")
 const env = require("./config/env")
 const { apiLimiter, webhookLimiter } = require("./middleware/rateLimiters")
-const {
-  requireTrustedBrowserOrigin,
-} = require("./middleware/trustedOrigin")
+const { requireTrustedBrowserOrigin } = require("./middleware/trustedOrigin")
 const { razorpayWebhook } = require("./controllers/payments")
 const {
   isV2Request,
@@ -28,6 +29,9 @@ const courseRoutes = require("./routes/Course")
 const paymentRoutes = require("./routes/Payments")
 const profileRoutes = require("./routes/profile")
 const userRoutes = require("./routes/user")
+const logger = require("./utils/logger")
+
+const { applicationMetadata, createHttpRequestLogger, getRequestRoute } = logger
 
 const app = express()
 let server
@@ -52,6 +56,12 @@ app.use((req, res, next) => {
       : crypto.randomUUID()
   res.setHeader("x-request-id", req.requestId)
   next()
+})
+app.use(createHttpRequestLogger(logger))
+
+const operationalMetadata = () => ({
+  ...applicationMetadata,
+  uptimeSeconds: Math.floor(process.uptime()),
 })
 
 const allowedOrigins = new Set(env.frontendOrigins)
@@ -82,7 +92,11 @@ app.use(
 
 app.get("/health/live", (_req, res) => {
   res.setHeader("cache-control", "no-store")
-  return res.status(200).json({ success: true, status: "ok" })
+  return res.status(200).json({
+    success: true,
+    status: "ok",
+    ...operationalMetadata(),
+  })
 })
 
 app.get("/health/ready", (_req, res) => {
@@ -97,6 +111,7 @@ app.get("/health/ready", (_req, res) => {
     success: ready,
     status: ready ? "ready" : "not_ready",
     checks,
+    ...operationalMetadata(),
   })
 })
 
@@ -123,7 +138,11 @@ app.use("/api/v2", normalizeV2ErrorEnvelope, apiLimiter)
 
 app.use(express.json({ limit: env.jsonBodyLimit, strict: true }))
 app.use(
-  express.urlencoded({ extended: false, limit: env.formBodyLimit, parameterLimit: 100 })
+  express.urlencoded({
+    extended: false,
+    limit: env.formBodyLimit,
+    parameterLimit: 100,
+  })
 )
 app.use(cookieParser())
 app.use("/api/v1", requireTrustedBrowserOrigin)
@@ -159,20 +178,31 @@ app.use((error, req, res, next) => {
         statusCode: 403,
       })
     }
-    return res.status(403).json({ success: false, message: "Origin is not allowed" })
+    return res
+      .status(403)
+      .json({ success: false, message: "Origin is not allowed" })
   }
   if (error.type === "entity.too.large" || error.status === 413) {
-    return res.status(413).json({ success: false, message: "Request payload is too large" })
+    return res
+      .status(413)
+      .json({ success: false, message: "Request payload is too large" })
   }
   if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
-    return res.status(400).json({ success: false, message: "Invalid JSON payload" })
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid JSON payload" })
   }
 
-  console.error(
-    `Unhandled request error [${req.requestId || "unknown"}] ${req.method} ${req.path}:`,
-    error.message
-  )
-  return res.status(500).json({ success: false, message: "Internal server error" })
+  logger.error("http.request.unhandled_error", {
+    requestId: req.requestId || "unknown",
+    method: req.method,
+    path: getRequestRoute(req),
+    statusCode: 500,
+    error,
+  })
+  return res
+    .status(500)
+    .json({ success: false, message: "Internal server error" })
 })
 
 const startServer = async () => {
@@ -183,7 +213,7 @@ const startServer = async () => {
   cloudinaryConnect()
 
   server = app.listen(env.port, () => {
-    console.log(`StudyNotion API listening on port ${env.port}`)
+    logger.info("api.listening", { port: env.port })
   })
   server.requestTimeout = env.requestTimeoutMs
   server.headersTimeout = Math.min(env.requestTimeoutMs, 60000)
@@ -201,10 +231,12 @@ const closeHttpServer = () =>
 const shutdown = async (reason, exitCode = 0) => {
   if (isShuttingDown) return
   isShuttingDown = true
-  console.log(`Shutting down StudyNotion API (${reason})`)
+  logger.info("api.shutdown_started", { reason, exitCode })
 
   const forceExit = setTimeout(() => {
-    console.error("Graceful shutdown timed out; closing remaining connections")
+    logger.error("api.shutdown_timeout", {
+      timeoutMs: env.shutdownTimeoutMs,
+    })
     server?.closeAllConnections?.()
     process.exit(1)
   }, env.shutdownTimeoutMs)
@@ -216,7 +248,7 @@ const shutdown = async (reason, exitCode = 0) => {
     await database.disconnect()
     process.exitCode = exitCode
   } catch (error) {
-    console.error("Graceful shutdown failed:", error.message)
+    logger.error("api.shutdown_failed", { error })
     process.exitCode = 1
   } finally {
     clearTimeout(forceExit)
@@ -225,19 +257,20 @@ const shutdown = async (reason, exitCode = 0) => {
 
 if (require.main === module) {
   startServer().catch((error) => {
-    console.error("Server startup failed:", error.message)
+    logger.error("api.startup_failed", { error })
     void shutdown("startup failure", 1)
   })
 
   process.once("SIGTERM", () => void shutdown("SIGTERM"))
   process.once("SIGINT", () => void shutdown("SIGINT"))
   process.once("uncaughtException", (error) => {
-    console.error("Uncaught exception:", error.message)
+    logger.error("process.uncaught_exception", { error })
     void shutdown("uncaughtException", 1)
   })
   process.once("unhandledRejection", (reason) => {
-    const message = reason instanceof Error ? reason.message : String(reason)
-    console.error("Unhandled rejection:", message)
+    logger.error("process.unhandled_rejection", {
+      error: logger.errorMetadata(reason),
+    })
     void shutdown("unhandledRejection", 1)
   })
 }

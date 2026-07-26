@@ -1,4 +1,5 @@
 const { contactUsEmail } = require("../mail/templates/contactFormRes")
+const logger = require("../utils/logger")
 const mailSender = require("../utils/mailSender")
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -63,7 +64,10 @@ exports.contactUsController = async (req, res) => {
       message: "Your message has been received",
     })
   } catch (error) {
-    console.error("Contact email delivery failed:", error.message)
+    logger.error("contact.email_delivery_failed", {
+      requestId: req.requestId || "unknown",
+      error: logger.errorMetadata(error),
+    })
     return res.status(502).json({
       success: false,
       message: "Your message could not be delivered. Please try again later.",

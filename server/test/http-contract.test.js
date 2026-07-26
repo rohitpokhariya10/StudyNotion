@@ -2,6 +2,8 @@ const assert = require("node:assert/strict")
 const crypto = require("node:crypto")
 const { after, before, test } = require("node:test")
 
+const { version } = require("../package.json")
+
 process.env.NODE_ENV = "test"
 process.env.FRONTEND_URL = "http://localhost:3000"
 process.env.MONGODB_URL = "mongodb://127.0.0.1:27017/studynotion-contract"
@@ -49,11 +51,32 @@ const requireListener = (t) => {
   return false
 }
 
+const assertOperationalMetadata = (body) => {
+  assert.equal(body.app, "studynotion-api")
+  assert.equal(body.version, version)
+  assert.equal(body.environment, "test")
+  assert.equal(Number.isInteger(body.uptimeSeconds), true)
+  assert.ok(body.uptimeSeconds >= 0)
+}
+
 test("health and public auth routes expose stable JSON envelopes", async (t) => {
   if (!requireListener(t)) return
   const live = await requestJson("/health/live")
   assert.equal(live.response.status, 200)
-  assert.deepEqual(live.body, { success: true, status: "ok" })
+  assert.equal(live.body.success, true)
+  assert.equal(live.body.status, "ok")
+  assertOperationalMetadata(live.body)
+
+  const ready = await requestJson("/health/ready")
+  assert.equal(ready.response.status, 503)
+  assert.equal(ready.body.success, false)
+  assert.equal(ready.body.status, "not_ready")
+  assert.deepEqual(ready.body.checks, {
+    database: false,
+    rateLimitStore: true,
+    media: true,
+  })
+  assertOperationalMetadata(ready.body)
 
   const login = await requestJson("/api/v1/auth/login", {
     method: "POST",
@@ -165,7 +188,10 @@ test("unsafe cross-site browser requests are rejected even without Origin", asyn
 
 test("the mounted Razorpay webhook verifies the untouched raw body", async (t) => {
   if (!requireListener(t)) return
-  const payload = JSON.stringify({ event: "subscription.activated", payload: {} })
+  const payload = JSON.stringify({
+    event: "subscription.activated",
+    payload: {},
+  })
   const signature = crypto
     .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
     .update(payload)

@@ -5,10 +5,13 @@ const path = require("node:path")
 const fileUpload = require("express-fileupload")
 
 const env = require("../config/env")
+const logger = require("../utils/logger")
 const temporaryDirectory = path.resolve(os.tmpdir())
 
 const uploadedFiles = (files) =>
-  Object.values(files || {}).flatMap((file) => (Array.isArray(file) ? file : [file]))
+  Object.values(files || {}).flatMap((file) =>
+    Array.isArray(file) ? file : [file]
+  )
 
 const cleanupUploadedTempFiles = async (req) => {
   await Promise.allSettled(
@@ -21,13 +24,18 @@ const cleanupUploadedTempFiles = async (req) => {
           candidatePath === temporaryDirectory ||
           !candidatePath.startsWith(`${temporaryDirectory}${path.sep}`)
         ) {
-          console.error("Refused to clean an upload outside the temp directory")
+          logger.error("upload.cleanup_outside_temp_refused", {
+            requestId: req.requestId || "unknown",
+          })
           return undefined
         }
 
         return fs.unlink(candidatePath).catch((error) => {
           if (error?.code !== "ENOENT") {
-            console.error("Temporary upload cleanup failed")
+            logger.error("upload.temporary_cleanup_failed", {
+              requestId: req.requestId || "unknown",
+              error: logger.errorMetadata(error),
+            })
           }
         })
       })
@@ -54,7 +62,9 @@ const parseSingleUpload = fileUpload({
   debug: false,
   limits: { fileSize: env.uploadMaxBytes, files: 1 },
   limitHandler: (_req, res) =>
-    res.status(413).json({ success: false, message: "Uploaded file is too large" }),
+    res
+      .status(413)
+      .json({ success: false, message: "Uploaded file is too large" }),
   parseNested: false,
   preserveExtension: true,
   safeFileNames: true,
