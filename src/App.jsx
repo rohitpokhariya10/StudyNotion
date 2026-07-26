@@ -5,10 +5,11 @@ import "./App.css"
 // Redux
 import { useDispatch } from "react-redux"
 // React Router
-import { Route, Routes } from "react-router-dom"
+import { Navigate, Route, Routes, useLocation } from "react-router-dom"
 
 // Components
 import Navbar from "./components/Common/Navbar"
+import RouteErrorBoundary from "./components/Common/RouteErrorBoundary"
 import OpenRoute from "./components/core/Auth/OpenRoute"
 import PrivateRoute from "./components/core/Auth/PrivateRoute"
 import RoleRoute from "./components/core/Auth/RoleRoute"
@@ -53,6 +54,14 @@ const VideoDetails = lazy(
 )
 const ViewCourse = lazy(() => import("./pages/ViewCourse"))
 
+function LegacySettingsRedirect() {
+  const { hash, search } = useLocation()
+
+  return (
+    <Navigate to={{ pathname: "/dashboard/settings", search, hash }} replace />
+  )
+}
+
 function App() {
   const dispatch = useDispatch()
   const hasRestoredSession = useRef(false)
@@ -66,182 +75,209 @@ function App() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-richblack-900 font-inter">
       <Navbar />
-      <Suspense
-        fallback={
-          <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
-            <div className="spinner" aria-label="Loading page" />
-          </div>
-        }
-      >
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="courses/:courseId" element={<CourseDetails />} />
-          <Route path="catalog/:catalogName" element={<Catalog />} />
-          <Route path="privacy-policy" element={<Legal document="privacy" />} />
-          <Route path="cookie-policy" element={<Legal document="cookies" />} />
-          <Route path="terms" element={<Legal document="terms" />} />
-          <Route path="refund-policy" element={<Legal document="refunds" />} />
-          {/* Open Route - for Only Non Logged in User */}
-          <Route
-            path="login"
-            element={
-              <OpenRoute>
-                <Login />
-              </OpenRoute>
-            }
-          />
-          <Route
-            path="forgot-password"
-            element={
-              <OpenRoute>
-                <ForgotPassword />
-              </OpenRoute>
-            }
-          />
-          <Route
-            path="update-password"
-            element={
-              <OpenRoute>
-                <UpdatePassword />
-              </OpenRoute>
-            }
-          />
-          <Route
-            path="signup"
-            element={
-              <OpenRoute>
-                <Signup />
-              </OpenRoute>
-            }
-          />
-          <Route
-            path="verify-email"
-            element={
-              <OpenRoute>
-                <VerifyEmail />
-              </OpenRoute>
-            }
-          />
-          <Route
-            path="accept-terms"
-            element={
-              <PrivateRoute allowPendingPolicies>
-                <PolicyAcceptance />
-              </PrivateRoute>
-            }
-          />
-          {/* Private Route - for Only Logged in User */}
-          <Route
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          >
-            {/* Route for all users */}
-            <Route path="dashboard/my-profile" element={<MyProfile />} />
-            <Route path="dashboard/Settings" element={<Settings />} />
-            {/* Routes only for Instructors */}
+      <RouteErrorBoundary>
+        <Suspense
+          fallback={
+            <div
+              className="grid min-h-[calc(100vh-3.5rem)] place-items-center"
+              role="status"
+              aria-label="Loading page"
+            >
+              <div className="spinner" />
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="courses/:courseId" element={<CourseDetails />} />
+            <Route path="catalog/:catalogName" element={<Catalog />} />
             <Route
-              path="dashboard/instructor"
+              path="privacy-policy"
+              element={<Legal document="privacy" />}
+            />
+            <Route
+              path="cookie-policy"
+              element={<Legal document="cookies" />}
+            />
+            <Route path="terms" element={<Legal document="terms" />} />
+            <Route
+              path="refund-policy"
+              element={<Legal document="refunds" />}
+            />
+            {/* Open Route - for Only Non Logged in User */}
+            <Route
+              path="login"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
-                  <Instructor />
-                </RoleRoute>
+                <OpenRoute>
+                  <Login />
+                </OpenRoute>
               }
             />
             <Route
-              path="dashboard/my-courses"
+              path="forgot-password"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
-                  <MyCourses />
-                </RoleRoute>
+                <OpenRoute>
+                  <ForgotPassword />
+                </OpenRoute>
               }
             />
             <Route
-              path="dashboard/add-course"
+              path="update-password"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
-                  <AddCourse />
-                </RoleRoute>
+                <OpenRoute>
+                  <UpdatePassword />
+                </OpenRoute>
               }
             />
             <Route
-              path="dashboard/edit-course/:courseId"
+              path="signup"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
-                  <EditCourse />
-                </RoleRoute>
-              }
-            />
-            {/* Routes only for Students */}
-            <Route
-              path="dashboard/enrolled-courses"
-              element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
-                  <EnrolledCourses />
-                </RoleRoute>
+                <OpenRoute>
+                  <Signup />
+                </OpenRoute>
               }
             />
             <Route
-              path="dashboard/cart"
+              path="verify-email"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
-                  <Cart />
-                </RoleRoute>
+                <OpenRoute>
+                  <VerifyEmail />
+                </OpenRoute>
               }
             />
             <Route
-              path="dashboard/purchases"
+              path="accept-terms"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
-                  <PurchaseHistory />
-                </RoleRoute>
+                <PrivateRoute allowPendingPolicies>
+                  <PolicyAcceptance />
+                </PrivateRoute>
               }
             />
-            <Route path="dashboard/settings" element={<Settings />} />
+            {/* Private Route - for Only Logged in User */}
             <Route
-              path="dashboard/instructor-approvals"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.ADMIN]}>
-                  <InstructorApprovals />
-                </RoleRoute>
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
               }
-            />
-            <Route
-              path="dashboard/payment-reconciliation"
-              element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.ADMIN]}>
-                  <PaymentReconciliation />
-                </RoleRoute>
-              }
-            />
-          </Route>
+            >
+              {/* Route for all users */}
+              <Route
+                path="dashboard"
+                element={<Navigate to="/dashboard/my-profile" replace />}
+              />
+              <Route path="dashboard/my-profile" element={<MyProfile />} />
+              <Route
+                caseSensitive
+                path="dashboard/Settings"
+                element={<LegacySettingsRedirect />}
+              />
+              {/* Routes only for Instructors */}
+              <Route
+                path="dashboard/instructor"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
+                    <Instructor />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="dashboard/my-courses"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
+                    <MyCourses />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="dashboard/add-course"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
+                    <AddCourse />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="dashboard/edit-course/:courseId"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.INSTRUCTOR]}>
+                    <EditCourse />
+                  </RoleRoute>
+                }
+              />
+              {/* Routes only for Students */}
+              <Route
+                path="dashboard/enrolled-courses"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
+                    <EnrolledCourses />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="dashboard/cart"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
+                    <Cart />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="dashboard/purchases"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
+                    <PurchaseHistory />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                caseSensitive
+                path="dashboard/settings"
+                element={<Settings />}
+              />
+              <Route
+                path="dashboard/instructor-approvals"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.ADMIN]}>
+                    <InstructorApprovals />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="dashboard/payment-reconciliation"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.ADMIN]}>
+                    <PaymentReconciliation />
+                  </RoleRoute>
+                }
+              />
+            </Route>
 
-          {/* For the watching course lectures */}
-          <Route
-            element={
-              <PrivateRoute>
-                <ViewCourse />
-              </PrivateRoute>
-            }
-          >
+            {/* For the watching course lectures */}
             <Route
-              path="view-course/:courseId/section/:sectionId/sub-section/:subSectionId"
               element={
-                <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
-                  <VideoDetails />
-                </RoleRoute>
+                <PrivateRoute>
+                  <ViewCourse />
+                </PrivateRoute>
               }
-            />
-          </Route>
+            >
+              <Route
+                path="view-course/:courseId/section/:sectionId/sub-section/:subSectionId"
+                element={
+                  <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>
+                    <VideoDetails />
+                  </RoleRoute>
+                }
+              />
+            </Route>
 
-          {/* 404 Page */}
-          <Route path="*" element={<Error />} />
-        </Routes>
-      </Suspense>
+            {/* 404 Page */}
+            <Route path="*" element={<Error />} />
+          </Routes>
+        </Suspense>
+      </RouteErrorBoundary>
     </div>
   )
 }

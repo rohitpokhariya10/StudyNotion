@@ -5,6 +5,7 @@ import { Provider } from "react-redux"
 import { BrowserRouter } from "react-router-dom"
 
 import App from "./App"
+import ErrorBoundary from "./components/Common/ErrorBoundary"
 import { store } from "./store"
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <BrowserRouter
         future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
       >
-        <App />
+        <ErrorBoundary scope="application">
+          <App />
+        </ErrorBoundary>
         <Toaster position="top-center" />
       </BrowserRouter>
     </Provider>
