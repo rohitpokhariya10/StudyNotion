@@ -20,7 +20,7 @@ production traffic.
    endpoint `GET /api/v2/courses` behind the existing request ID, CORS/origin,
    rate-limit, and parser middleware plus the existing production startup
    validation.
-2. Define the query, success DTO, and error envelope in the TypeScript/Zod
+2. Define the query, success DTO, and error envelope in the JavaScript/Zod
    workspace `@studynotion/contracts`. Generate and commit its OpenAPI 3.1
    document so frontend and API validation share one source of truth.
 3. Isolate catalog controller, service, repository, mapper, cursor, and error

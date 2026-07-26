@@ -10,7 +10,7 @@
 5. Start the API with `npm --workspace studynotion-backend start`.
 
 The root `package-lock.json` is the only dependency lockfile. It installs this
-API together with `@studynotion/contracts`, whose compiled output is required by
+API together with the JavaScript/Zod `@studynotion/contracts` workspace used by
 the v2 catalog route.
 
 The API runs at `http://localhost:4000` and the frontend uses
@@ -46,8 +46,12 @@ version. Repeated delivery of the same decision is idempotent, while attempts to
 reverse a completed decision return `409 Conflict`.
 
 `npm run seed` creates the local demo admin listed above and marks the demo
-instructor as approved by that admin. The seed refuses to run when
-`NODE_ENV=production`, and public signup never accepts `accountType=Admin`.
+instructor as approved by that admin. The seed accepts loopback MongoDB hosts by
+default. A non-loopback target additionally requires a database beginning with
+`studynotion_seed_disposable_` and the exact one-run confirmation
+`STUDYNOTION_DISPOSABLE_SEED_CONFIRM=seed-disposable-database`. It always refuses
+to run when `NODE_ENV=production`, and public signup never accepts
+`accountType=Admin`.
 Provision production admins only through a controlled operational process with
 database access and an audit trail—never through a public HTTP endpoint.
 
