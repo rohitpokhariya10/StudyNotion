@@ -42,6 +42,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:live": "playwright test --config playwright.live.config.mjs",
     "test:integration": "npm run test:integration --workspace studynotion-backend",
     "test:watch": "vitest",
     "contracts:generate": "npm run openapi:generate --workspace @studynotion/contracts",
