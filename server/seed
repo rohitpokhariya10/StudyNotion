@@ -14,6 +14,10 @@ const {
   createPolicyAcceptance,
   hasCurrentPolicyAcceptance,
 } = require("./utils/policyAcceptance")
+const {
+  assertSafeSeedTarget,
+  SeedSafetyError,
+} = require("./utils/seedSafety")
 
 const DEMO_VIDEO_URL =
   "https://res.cloudinary.com/demo/video/upload/v1692721302/samples/sea-turtle.mp4"
@@ -141,14 +145,12 @@ const createDemoUser = async ({
 }
 
 const seed = async () => {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Demo seed data is disabled in production")
-  }
-
-  const mongoUrl = process.env.MONGODB_URI || process.env.MONGODB_URL
-  if (!mongoUrl) {
-    throw new Error("MONGODB_URI is required to seed the local database")
-  }
+  const mongoUrl = assertSafeSeedTarget({
+    disposableConfirmation:
+      process.env.STUDYNOTION_DISPOSABLE_SEED_CONFIRM,
+    mongoUrl: process.env.MONGODB_URI || process.env.MONGODB_URL,
+    nodeEnv: process.env.NODE_ENV,
+  })
 
   await mongoose.connect(mongoUrl)
 
@@ -268,7 +270,13 @@ const seed = async () => {
 
 seed()
   .catch((error) => {
-    console.error("Failed to seed local data:", error)
+    const safeReason =
+      error instanceof SeedSafetyError
+        ? error.message
+        : /^[A-Za-z][A-Za-z0-9]*Error$/.test(error?.name || "")
+          ? error.name
+          : "Seed operation failed"
+    console.error("Failed to seed local data:", safeReason)
     process.exitCode = 1
   })
   .finally(async () => {
