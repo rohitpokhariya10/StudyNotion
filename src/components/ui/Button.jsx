@@ -16,7 +16,7 @@ function Button({
 }) {
   return (
     <button
-      type={type}
+      type={type === "submit" ? "submit" : "button"}
       className={`inline-flex min-h-11 items-center justify-center rounded-product border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${
         variants[variant] || variants.primary
       } ${className}`}

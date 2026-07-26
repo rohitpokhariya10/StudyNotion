@@ -138,8 +138,15 @@ export default function SubSectionModal({
           <p className="text-xl font-semibold text-richblack-5">
             {view && "Viewing"} {add && "Adding"} {edit && "Editing"} Lecture
           </p>
-          <button onClick={() => (!loading ? setModalData(null) : {})}>
-            <RxCross2 className="text-2xl text-richblack-5" />
+          <button
+            type="button"
+            onClick={() => (!loading ? setModalData(null) : {})}
+            aria-label="Close lecture dialog"
+          >
+            <RxCross2
+              className="text-2xl text-richblack-5"
+              aria-hidden="true"
+            />
           </button>
         </div>
         {/* Modal Form */}
@@ -198,6 +205,7 @@ export default function SubSectionModal({
           {!view && (
             <div className="flex justify-end">
               <IconBtn
+                type="submit"
                 disabled={loading}
                 text={loading ? "Loading.." : edit ? "Save Changes" : "Save"}
               />

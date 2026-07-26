@@ -4,8 +4,8 @@ export default function IconBtn({
   children,
   disabled,
   outline = false,
-  customClasses,
-  type,
+  customClasses = "",
+  type = "button",
 }) {
   return (
     <button
@@ -13,8 +13,8 @@ export default function IconBtn({
       onClick={onclick}
       className={`flex items-center ${
         outline ? "border border-yellow-50 bg-transparent" : "bg-yellow-50"
-      } cursor-pointer gap-x-2 rounded-md py-2 px-5 font-semibold text-richblack-900 ${customClasses}`}
-      type={type}
+      } cursor-pointer gap-x-2 rounded-md px-5 py-2 font-semibold text-richblack-900 ${customClasses}`}
+      type={type === "submit" ? "submit" : "button"}
     >
       {children ? (
         <>

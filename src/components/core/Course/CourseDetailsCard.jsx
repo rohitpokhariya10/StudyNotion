@@ -72,6 +72,7 @@ function CourseDetailsCard({
               </div>
             )}
             <button
+              type="button"
               className="yellowButton"
               disabled={
                 !isEnrolled &&
@@ -86,7 +87,11 @@ function CourseDetailsCard({
               {user && isEnrolled ? "Go To Course" : "Buy Now"}
             </button>
             {(!user || !isEnrolled) && (
-              <button onClick={handleAddToCart} className="blackButton">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="blackButton"
+              >
                 Add to Cart
               </button>
             )}
@@ -114,6 +119,7 @@ function CourseDetailsCard({
           </div>
           <div className="text-center">
             <button
+              type="button"
               className="mx-auto flex items-center gap-2 py-6 text-yellow-100"
               onClick={handleShare}
             >

@@ -55,10 +55,7 @@ const VideoDetails = () => {
       setPlaybackError("")
 
       try {
-        const freshPlayback = await getLessonPlaybackUrl(
-          courseId,
-          subSectionId
-        )
+        const freshPlayback = await getLessonPlaybackUrl(courseId, subSectionId)
         if (active) setPlayback({ ...freshPlayback, subSectionId })
       } catch (error) {
         if (active) {
@@ -104,8 +101,7 @@ const VideoDetails = () => {
   }
 
   // check if the lecture is the first video of the course
-  const isFirstVideo =
-    currentSectionIndex === 0 && currentSubSectionIndex === 0
+  const isFirstVideo = currentSectionIndex === 0 && currentSubSectionIndex === 0
 
   // go to the next video
   const goToNextVideo = () => {
@@ -114,9 +110,8 @@ const VideoDetails = () => {
     if (!currentSection || currentSubSectionIndex < 0) return
 
     if (currentSubSectionIndex < currentSection.subSection.length - 1) {
-      const nextSubSectionId = currentSection.subSection[
-        currentSubSectionIndex + 1
-      ]?._id
+      const nextSubSectionId =
+        currentSection.subSection[currentSubSectionIndex + 1]?._id
       if (!nextSubSectionId) return
       navigate(
         `/view-course/${courseId}/section/${sectionId}/sub-section/${nextSubSectionId}`
@@ -144,9 +139,8 @@ const VideoDetails = () => {
     if (!currentSection || currentSubSectionIndex < 0) return
 
     if (currentSubSectionIndex > 0) {
-      const prevSubSectionId = currentSection.subSection[
-        currentSubSectionIndex - 1
-      ]?._id
+      const prevSubSectionId =
+        currentSection.subSection[currentSubSectionIndex - 1]?._id
       if (!prevSubSectionId) return
       navigate(
         `/view-course/${courseId}/section/${sectionId}/sub-section/${prevSubSectionId}`
@@ -269,6 +263,7 @@ const VideoDetails = () => {
               <div className="mt-10 flex min-w-[250px] justify-center gap-x-4 text-xl">
                 {!isFirstVideo && (
                   <button
+                    type="button"
                     disabled={loading}
                     onClick={goToPrevVideo}
                     className="blackButton"
@@ -278,6 +273,7 @@ const VideoDetails = () => {
                 )}
                 {!isLastVideo && (
                   <button
+                    type="button"
                     disabled={loading}
                     onClick={goToNextVideo}
                     className="blackButton"
@@ -292,7 +288,7 @@ const VideoDetails = () => {
       )}
 
       <h1 className="mt-4 text-3xl font-semibold">{videoData?.title}</h1>
-      <p className="pt-2 pb-6">{videoData?.description}</p>
+      <p className="pb-6 pt-2">{videoData?.description}</p>
     </div>
   )
 }

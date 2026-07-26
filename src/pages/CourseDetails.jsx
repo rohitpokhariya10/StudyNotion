@@ -244,6 +244,7 @@ function CourseDetails() {
                 Rs. {price}
               </p>
               <button
+                type="button"
                 className="yellowButton"
                 disabled={
                   !isEnrolled &&
@@ -283,7 +284,11 @@ function CourseDetails() {
                       </button>
                     </div>
                   )}
-                  <button className="blackButton" onClick={handleAddToCart}>
+                  <button
+                    type="button"
+                    className="blackButton"
+                    onClick={handleAddToCart}
+                  >
                     Add to Cart
                   </button>
                 </>
@@ -333,6 +338,7 @@ function CourseDetails() {
                 </div>
                 <div>
                   <button
+                    type="button"
                     className="text-yellow-25"
                     onClick={() => setIsActive([])}
                   >

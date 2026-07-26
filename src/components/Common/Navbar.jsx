@@ -118,7 +118,7 @@ function Navbar() {
                         catalogLinks.map((subLink) => (
                           <Link
                             to={catalogPath(subLink.name)}
-                            className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50 focus-visible:bg-richblack-50 focus-visible:outline-none"
+                            className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50 focus-visible:bg-richblack-50"
                             key={subLink.id || subLink.name}
                           >
                             {subLink.name}

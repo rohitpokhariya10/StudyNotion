@@ -1,9 +1,10 @@
+import React from "react"
 import { FaCheck } from "react-icons/fa"
 import { useSelector } from "react-redux"
+
 import CourseBuilderForm from "./CourseBuilder/CourseBuilderForm"
 import CourseInformationForm from "./CourseInformation/CourseInformationForm"
 import PublishCourse from "./PublishCourse"
-import React from "react"
 
 export default function RenderSteps() {
   const { step } = useSelector((state) => state.course)
@@ -19,9 +20,10 @@ export default function RenderSteps() {
       <div className="relative mb-2 flex w-full justify-center">
         {steps.map((item) => (
           <React.Fragment key={item.id}>
-            <div className="flex flex-col items-center ">
-              <button
-                className={`grid cursor-default aspect-square w-[34px] place-items-center rounded-full border-[1px] ${
+            <div className="flex flex-col items-center">
+              <span
+                aria-current={step === item.id ? "step" : undefined}
+                className={`grid aspect-square w-[34px] cursor-default place-items-center rounded-full border-[1px] ${
                   step === item.id
                     ? "border-yellow-50 bg-yellow-900 text-yellow-50"
                     : "border-richblack-700 bg-richblack-800 text-richblack-300"
@@ -32,7 +34,7 @@ export default function RenderSteps() {
                 ) : (
                   item.id
                 )}
-              </button>
+              </span>
             </div>
 
             {item.id !== steps.length && (

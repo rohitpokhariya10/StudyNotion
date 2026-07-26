@@ -122,11 +122,11 @@ export default function CourseReviewModal({ setReviewModal }) {
               <button
                 type="button"
                 onClick={() => setReviewModal(false)}
-                className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 py-[8px] px-[20px] font-semibold text-richblack-900`}
+                className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 px-[20px] py-[8px] font-semibold text-richblack-900`}
               >
                 Cancel
               </button>
-              <IconBtn text="Save" />
+              <IconBtn type="submit" text="Save" />
             </div>
           </form>
         </div>

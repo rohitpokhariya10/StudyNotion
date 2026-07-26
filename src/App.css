@@ -26,6 +26,11 @@
   outline-offset: 3px;
 }
 
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #ffe83d;
+  outline-offset: 3px;
+}
+
 .catalog-course-card:focus-within {
   border-color: rgb(var(--catalog-focus));
   box-shadow:
@@ -59,9 +64,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .catalog-theme *,
-  .catalog-theme *::before,
-  .catalog-theme *::after {
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
@@ -307,7 +312,7 @@ details > summary::-webkit-details-marker {
   @apply text-[14px] text-richblack-5;
 }
 .form-style {
-  @apply rounded-lg bg-richblack-700 p-3 text-[16px] leading-[24px] text-richblack-5 shadow-[0_1px_0_0] shadow-white/50 placeholder:text-richblack-400 focus:outline-none;
+  @apply rounded-lg bg-richblack-700 p-3 text-[16px] leading-[24px] text-richblack-5 shadow-[0_1px_0_0] shadow-white/50 placeholder:text-richblack-400;
 }
 .section_heading {
   @apply text-2xl font-bold text-richblack-5 lg:text-4xl;

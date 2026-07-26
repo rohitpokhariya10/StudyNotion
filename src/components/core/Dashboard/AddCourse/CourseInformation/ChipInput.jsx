@@ -76,8 +76,9 @@ export default function ChipInput({
             {/* Render the button to delete the chip */}
             <button
               type="button"
-              className="ml-2 focus:outline-none"
+              className="ml-2"
               onClick={() => handleDeleteChip(index)}
+              aria-label={`Remove ${chip}`}
             >
               <MdClose className="text-sm" />
             </button>

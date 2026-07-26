@@ -89,11 +89,11 @@ export default function PublishCourse() {
             disabled={loading}
             type="button"
             onClick={goBack}
-            className="flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 py-[8px] px-[20px] font-semibold text-richblack-900"
+            className="flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 px-[20px] py-[8px] font-semibold text-richblack-900"
           >
             Back
           </button>
-          <IconBtn disabled={loading} text="Save Changes" />
+          <IconBtn type="submit" disabled={loading} text="Save Changes" />
         </div>
       </form>
     </div>

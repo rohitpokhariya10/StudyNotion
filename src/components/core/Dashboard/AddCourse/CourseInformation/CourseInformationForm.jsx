@@ -296,14 +296,16 @@ export default function CourseInformationForm() {
       <div className="flex justify-end gap-x-2">
         {editCourse && (
           <button
+            type="button"
             onClick={() => dispatch(setStep(2))}
             disabled={loading}
-            className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 py-[8px] px-[20px] font-semibold text-richblack-900`}
+            className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 px-[20px] py-[8px] font-semibold text-richblack-900`}
           >
             Continue Wihout Saving
           </button>
         )}
         <IconBtn
+          type="submit"
           disabled={loading}
           text={!editCourse ? "Next" : "Save Changes"}
         >

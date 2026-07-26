@@ -67,6 +67,8 @@ export default function NestedView({ handleChangeEditSectionName }) {
               </div>
               <div className="flex items-center gap-x-3">
                 <button
+                  type="button"
+                  aria-label={`Edit ${section.sectionName}`}
                   onClick={() =>
                     handleChangeEditSectionName(
                       section._id,
@@ -77,6 +79,8 @@ export default function NestedView({ handleChangeEditSectionName }) {
                   <MdEdit className="text-xl text-richblack-300" />
                 </button>
                 <button
+                  type="button"
+                  aria-label={`Delete ${section.sectionName}`}
                   onClick={() =>
                     setConfirmationModal({
                       text1: "Delete this Section?",
@@ -99,20 +103,23 @@ export default function NestedView({ handleChangeEditSectionName }) {
               {section.subSection.map((data) => (
                 <div
                   key={data?._id}
-                  onClick={() => setViewSubSection(data)}
-                  className="flex cursor-pointer items-center justify-between gap-x-3 border-b-2 border-b-richblack-600 py-2"
+                  className="flex items-center justify-between gap-x-3 border-b-2 border-b-richblack-600 py-2"
                 >
-                  <div className="flex items-center gap-x-3 py-2 ">
+                  <button
+                    type="button"
+                    onClick={() => setViewSubSection(data)}
+                    className="flex flex-1 items-center gap-x-3 py-2 text-left"
+                    aria-label={`View ${data.title}`}
+                  >
                     <RxDropdownMenu className="text-2xl text-richblack-50" />
                     <p className="font-semibold text-richblack-50">
                       {data.title}
                     </p>
-                  </div>
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-x-3"
-                  >
+                  </button>
+                  <div className="flex items-center gap-x-3">
                     <button
+                      type="button"
+                      aria-label={`Edit ${data.title}`}
                       onClick={() =>
                         setEditSubSection({ ...data, sectionId: section._id })
                       }
@@ -120,6 +127,8 @@ export default function NestedView({ handleChangeEditSectionName }) {
                       <MdEdit className="text-xl text-richblack-300" />
                     </button>
                     <button
+                      type="button"
+                      aria-label={`Delete ${data.title}`}
                       onClick={() =>
                         setConfirmationModal({
                           text1: "Delete this Sub-Section?",
@@ -139,6 +148,7 @@ export default function NestedView({ handleChangeEditSectionName }) {
               ))}
               {/* Add New Lecture to Section */}
               <button
+                type="button"
                 onClick={() => setAddSubsection(section._id)}
                 className="mt-3 flex items-center gap-x-1 text-yellow-50"
               >

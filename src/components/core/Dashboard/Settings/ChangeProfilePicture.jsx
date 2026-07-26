@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import { FiUpload } from "react-icons/fi"
 import { toast } from "react-hot-toast"
+import { FiUpload } from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
 
 import { updateDisplayPicture } from "../../../../services/operations/SettingsAPI"
@@ -96,9 +96,10 @@ export default function ChangeProfilePicture() {
                 accept="image/avif,image/jpeg,image/png,image/webp"
               />
               <button
+                type="button"
                 onClick={handleClick}
                 disabled={loading}
-                className="cursor-pointer rounded-md bg-richblack-700 py-2 px-5 font-semibold text-richblack-50"
+                className="cursor-pointer rounded-md bg-richblack-700 px-5 py-2 font-semibold text-richblack-50"
               >
                 Select
               </button>
