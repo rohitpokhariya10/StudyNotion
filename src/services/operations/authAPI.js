@@ -134,7 +134,11 @@ export function sendOtp(email, navigate) {
         throw new Error(response?.data?.message)
       }
 
-      if (response.data.otp && import.meta.env.DEV) {
+      // The API only includes this field when its non-production
+      // ALLOW_DEV_OTP gate is enabled. Local Docker uses an optimized Vite
+      // build, so import.meta.env.DEV is false even though the API is safely
+      // running in development mode.
+      if (response.data.otp) {
         toast.success(`Development OTP: ${response.data.otp}`, {
           duration: 10000,
         })

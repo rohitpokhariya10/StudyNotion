@@ -1,7 +1,8 @@
+import { toast } from "react-hot-toast"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { apiConnector } from "../apiConnector"
-import { acceptCurrentPolicies, googleLogin, login } from "./authAPI"
+import { acceptCurrentPolicies, googleLogin, login, sendOtp } from "./authAPI"
 
 vi.mock("../apiConnector", () => ({
   apiConnector: vi.fn(),
@@ -172,5 +173,50 @@ describe("post-login navigation", () => {
     expect(navigate).toHaveBeenLastCalledWith("/dashboard/settings", {
       replace: true,
     })
+  })
+})
+
+describe("development OTP delivery", () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it("shows an API-provided development OTP in optimized local builds", async () => {
+    apiConnector.mockResolvedValue({
+      data: {
+        success: true,
+        message: "Verification code sent",
+        otp: "654321",
+      },
+    })
+    const dispatch = vi.fn()
+    const navigate = vi.fn()
+
+    await expect(
+      sendOtp(" Learner@Example.com ", navigate)(dispatch)
+    ).resolves.toBe(true)
+
+    expect(apiConnector).toHaveBeenCalledWith("POST", expect.any(String), {
+      email: "learner@example.com",
+      checkUserPresent: true,
+    })
+    expect(toast.success).toHaveBeenCalledWith("Development OTP: 654321", {
+      duration: 10000,
+    })
+    expect(navigate).toHaveBeenCalledWith("/verify-email")
+  })
+
+  it("does not invent or display a development OTP when the API omits it", async () => {
+    apiConnector.mockResolvedValue({
+      data: {
+        success: true,
+        message: "Verification code sent",
+      },
+    })
+
+    await sendOtp("learner@example.com")(vi.fn())
+
+    expect(toast.success).not.toHaveBeenCalledWith(
+      expect.stringContaining("Development OTP:"),
+      expect.anything()
+    )
   })
 })
