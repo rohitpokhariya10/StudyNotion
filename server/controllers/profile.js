@@ -188,7 +188,7 @@ exports.updateProfile = async (req, res) => {
         ? await Profile.findByIdAndUpdate(
             user.additionalDetails,
             { $set: updates.profile },
-            { new: true, runValidators: true }
+            { returnDocument: "after", runValidators: true }
           )
         : await Profile.findById(user.additionalDetails)
     }
@@ -392,7 +392,7 @@ exports.deleteAccount = async (req, res) => {
           deletionStartedAt: user.deletionStartedAt || lockNow,
         },
       },
-      { new: true }
+      { returnDocument: "after" }
     )
     if (!deletionLock) {
       return res.status(409).json({
@@ -516,7 +516,7 @@ exports.deleteAccount = async (req, res) => {
           token: 1,
         },
       },
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     )
     if (!deactivatedUser) {
       throw new Error("Account finalization lost its deletion lock")
@@ -612,7 +612,7 @@ exports.updateDisplayPicture = async (req, res) => {
             imagePublicId: uploadedImage.public_id,
           },
         },
-        { new: true, runValidators: true }
+        { returnDocument: "after", runValidators: true }
       ).populate("additionalDetails")
     } catch (error) {
       await deleteAssetFromCloudinary(uploadedImage.public_id, "image").catch(

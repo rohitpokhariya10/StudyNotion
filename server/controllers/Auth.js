@@ -416,7 +416,7 @@ exports.sendotp = async (req, res) => {
           createdAt: new Date(),
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     )
 
     try {

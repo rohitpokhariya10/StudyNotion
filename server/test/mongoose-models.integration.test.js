@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict")
 const { performance } = require("node:perf_hooks")
+const path = require("node:path")
 const { test } = require("node:test")
 
 const enabled = process.env.STUDYNOTION_RUN_MONGOOSE_INTEGRATION === "1"
@@ -26,9 +27,10 @@ const assertDisposableMongoUri = (value) => {
   return value
 }
 
-const expectDuplicateKey = async (operation) => {
+const expectDuplicateKey = async (operation, expectedKey) => {
   await assert.rejects(operation, (error) => {
     assert.equal(error?.code, 11000)
+    if (expectedKey) assert.equal(error?.keyPattern?.[expectedKey], 1)
     return true
   })
 }
@@ -38,6 +40,14 @@ const timeOperation = async (timings, name, operation) => {
   const result = await operation()
   timings[name] = Number((performance.now() - startedAt).toFixed(3))
   return result
+}
+
+const mongodbDriverVersion = () => {
+  const mongooseDirectory = path.dirname(require.resolve("mongoose"))
+  const driverPackage = require.resolve("mongodb/package.json", {
+    paths: [mongooseDirectory],
+  })
+  return require(driverPackage).version
 }
 
 test(
@@ -139,7 +149,7 @@ test(
       const versionedLearner = await User.findOneAndUpdate(
         { _id: learner._id, sessionVersion: 0 },
         { $inc: { sessionVersion: 1 } },
-        { new: true, runValidators: true }
+        { returnDocument: "after", runValidators: true }
       )
       assert.equal(versionedLearner.sessionVersion, 1)
 
@@ -342,13 +352,34 @@ test(
       assert.deepEqual(immutablePurchase.courses, [course._id])
       assert.equal(immutablePurchase.lineItems[0].amount, 1499)
 
-      purchase.status = "refund_requested"
-      purchase.reconciliationRequiredAt = new Date()
-      purchase.refundOriginStatus = "refund_requested"
-      purchase.refundProviderStatus = "pending"
-      purchase.refundRequestNote = "Compatibility characterization"
-      purchase.refundRequestedAt = new Date()
-      await purchase.save()
+      const paidPurchase = await Purchase.findOneAndUpdate(
+        { _id: purchase._id, status: "created" },
+        { $set: { paidAt: new Date(), status: "paid" } },
+        { returnDocument: "after", runValidators: true }
+      )
+      assert.equal(paidPurchase.status, "paid")
+      const losingPaymentClaim = await Purchase.findOneAndUpdate(
+        { _id: purchase._id, status: "created" },
+        { $set: { paidAt: new Date(), status: "paid" } },
+        { returnDocument: "after", runValidators: true }
+      )
+      assert.equal(losingPaymentClaim, null)
+
+      const requestedPurchase = await Purchase.findOneAndUpdate(
+        { _id: purchase._id, status: "paid" },
+        {
+          $set: {
+            reconciliationRequiredAt: new Date(),
+            refundOriginStatus: "refund_requested",
+            refundProviderStatus: "pending",
+            refundRequestNote: "Compatibility characterization",
+            refundRequestedAt: new Date(),
+            status: "refund_requested",
+          },
+        },
+        { returnDocument: "after", runValidators: true }
+      )
+      assert.equal(requestedPurchase.status, "refund_requested")
       const refundPurchase = await timeOperation(
         timings,
         "purchaseLookupMs",
@@ -368,7 +399,8 @@ test(
             idempotencyKey: "active-course-conflict",
             receipt: "active-course-conflict",
           })
-        )
+        ),
+        "activeCourses"
       )
       await expectDuplicateKey(
         Purchase.create(
@@ -377,8 +409,62 @@ test(
             checkoutKey: "idempotency-conflict",
             receipt: "idempotency-conflict",
           })
-        )
+        ),
+        "idempotencyKey"
       )
+      await expectDuplicateKey(
+        Purchase.create(
+          purchaseInput({
+            activeCourses: undefined,
+            checkoutKey: "mongoose-checkout",
+            idempotencyKey: "checkout-key-conflict",
+            receipt: "checkout-key-conflict",
+          })
+        ),
+        "checkoutKey"
+      )
+      await expectDuplicateKey(
+        Purchase.create(
+          purchaseInput({
+            activeCourses: undefined,
+            checkoutKey: "receipt-conflict",
+            idempotencyKey: "receipt-conflict",
+            receipt: "mongoose-receipt",
+          })
+        ),
+        "receipt"
+      )
+
+      const providerPurchase = await Purchase.create(
+        purchaseInput({
+          activeCourses: undefined,
+          checkoutKey: "provider-identifiers",
+          idempotencyKey: "provider-identifiers",
+          razorpayOrderId: "order_mongoose_unique",
+          razorpayPaymentId: "payment_mongoose_unique",
+          receipt: "provider-identifiers",
+          refundId: "refund_mongoose_unique",
+        })
+      )
+      assert.equal(providerPurchase.razorpayOrderId, "order_mongoose_unique")
+      for (const [field, value] of [
+        ["razorpayOrderId", "order_mongoose_unique"],
+        ["razorpayPaymentId", "payment_mongoose_unique"],
+        ["refundId", "refund_mongoose_unique"],
+      ]) {
+        await expectDuplicateKey(
+          Purchase.create(
+            purchaseInput({
+              activeCourses: undefined,
+              checkoutKey: `duplicate-${field}`,
+              idempotencyKey: `duplicate-${field}`,
+              receipt: `duplicate-${field}`,
+              [field]: value,
+            })
+          ),
+          field
+        )
+      }
 
       const catalogResults = await timeOperation(
         timings,
@@ -436,7 +522,7 @@ test(
 
       console.log(
         JSON.stringify({
-          driver: require("mongodb/package.json").version,
+          driver: mongodbDriverVersion(),
           event: "mongoose.compatibility.performance_smoke",
           mongoose: mongoose.version,
           timings,

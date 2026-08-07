@@ -72,7 +72,7 @@ exports.createSection = async (req, res) => {
             status: "Draft",
           },
         },
-        { new: true }
+        { returnDocument: "after" }
       )
         .populate({
           path: "courseContent",
@@ -146,7 +146,7 @@ exports.updateSection = async (req, res) => {
     const section = await Section.findByIdAndUpdate(
       sectionId,
       { sectionName },
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     )
     if (!section) {
       return res

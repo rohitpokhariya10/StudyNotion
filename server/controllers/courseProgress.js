@@ -48,7 +48,7 @@ exports.updateCourseProgress = async (req, res) => {
     const courseProgress = await CourseProgress.findOneAndUpdate(
       { courseID: courseId, userId },
       { $addToSet: { completedVideos: subsectionId } },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { returnDocument: "after", upsert: true, setDefaultsOnInsert: true }
     )
 
     return res.status(200).json({

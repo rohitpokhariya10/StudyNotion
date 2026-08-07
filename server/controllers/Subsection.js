@@ -88,7 +88,7 @@ exports.createSubSection = async (req, res) => {
     const updatedSection = await Section.findByIdAndUpdate(
       sectionId,
       { $push: { subSection: createdSubSection._id } },
-      { new: true }
+      { returnDocument: "after" }
     ).populate("subSection")
     if (!updatedSection) throw new Error("The parent section no longer exists")
     relationSaved = true

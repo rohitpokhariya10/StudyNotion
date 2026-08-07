@@ -188,7 +188,7 @@ const reviewInstructor = (decision) => async (req, res) => {
         },
         $inc: { sessionVersion: 1 },
       },
-      { new: true, runValidators: true }
+      { returnDocument: "after", runValidators: true }
     )
       .select(INSTRUCTOR_FIELDS)
       .populate({

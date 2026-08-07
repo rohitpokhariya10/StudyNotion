@@ -179,7 +179,7 @@ const seed = async () => {
     const category = await Category.findOneAndUpdate(
       { name: demoCourse.category },
       { $set: { description: demoCourse.categoryDescription } },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     )
 
     const course = await Course.findOneAndUpdate(
@@ -207,7 +207,7 @@ const seed = async () => {
           studentsEnroled: [student._id],
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     )
 
     const lesson = await SubSection.findOneAndUpdate(
@@ -220,12 +220,12 @@ const seed = async () => {
           videoUrl: DEMO_VIDEO_URL,
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     )
     const section = await Section.findOneAndUpdate(
       { sectionName: `${demoCourse.courseName} — Getting Started` },
       { $addToSet: { subSection: lesson._id } },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     )
 
     const review = await RatingAndReview.findOneAndUpdate(
@@ -236,7 +236,7 @@ const seed = async () => {
           review: `A clear and practical introduction to ${demoCourse.category.toLowerCase()}.`,
         },
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     )
 
     await Course.updateOne(

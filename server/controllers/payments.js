@@ -200,7 +200,7 @@ const holdCapturedPaymentForReview = async (purchase, razorpayPaymentId) => {
       },
       $unset: { checkoutKey: 1, idempotencyKey: 1 },
     },
-    { new: true }
+    { returnDocument: "after" }
   )
   return Boolean(heldPurchase)
 }
@@ -334,7 +334,7 @@ const fulfillPurchase = async (
         paidAt: purchase.paidAt || new Date(),
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   )
 
   if (!claimedPurchase) {
@@ -372,7 +372,7 @@ const fulfillPurchase = async (
         ...(reconciliationAudit || {}),
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   )
 
   if (newlyFulfilledPurchase) {
@@ -386,7 +386,7 @@ const fulfillPurchase = async (
         reconciliationResolution: { $exists: false },
       },
       { $set: reconciliationAudit },
-      { new: true }
+      { returnDocument: "after" }
     )
     if (!auditedPurchase) {
       throw new Error("Manual fulfillment audit could not be persisted")
@@ -553,7 +553,7 @@ exports.capturePayment = async (req, res) => {
           paymentOperationLockUntil: new Date(lockNow.getTime() + 30_000),
         },
       },
-      { new: true }
+      { returnDocument: "after" }
     )
     if (!checkoutOwner) {
       return paymentFailed(
@@ -993,7 +993,7 @@ exports.requestRefund = async (req, res) => {
           status: "refund_requested",
         },
       },
-      { new: true }
+      { returnDocument: "after" }
     )
     if (!requested) {
       return paymentFailed(
@@ -1341,7 +1341,7 @@ exports.resolvePaymentReview = async (req, res) => {
           reconciliationLockUntil: new Date(now.getTime() + 60_000),
         },
       },
-      { new: true }
+      { returnDocument: "after" }
     )
     if (!purchase) {
       const resolved = await Purchase.findById(purchaseId).select(
@@ -1388,7 +1388,7 @@ exports.resolvePaymentReview = async (req, res) => {
             reconciliationRequiredAt: 1,
           },
         },
-        { new: true }
+        { returnDocument: "after" }
       )
       if (!rejected) throw new Error("Refund rejection lost its lock")
       return res.status(200).json({
@@ -1465,7 +1465,7 @@ exports.resolvePaymentReview = async (req, res) => {
               refundProviderStatus: 1,
             },
           },
-          { new: true }
+          { returnDocument: "after" }
         )
         if (!retryAttempt) throw new Error("Failed refund retry lost its lock")
         purchase = retryAttempt
@@ -1510,7 +1510,7 @@ exports.resolvePaymentReview = async (req, res) => {
                 status: "refund_pending",
               },
             },
-            { new: true }
+            { returnDocument: "after" }
           )
           if (!pendingAttempt) throw new Error("Refund attempt lost its lock")
           purchase = pendingAttempt
@@ -1606,7 +1606,7 @@ exports.resolvePaymentReview = async (req, res) => {
             status: "refund_pending",
           },
         },
-        { new: true }
+        { returnDocument: "after" }
       )
       if (!providerState) throw new Error("Refund provider state lost its lock")
       purchase = providerState
@@ -1639,7 +1639,7 @@ exports.resolvePaymentReview = async (req, res) => {
             status: "refund_pending",
           },
           { $set: { refundEntitlementsRevokedAt: new Date() } },
-          { new: true }
+          { returnDocument: "after" }
         )
         if (!entitlementsRevoked) {
           throw new Error("Refund entitlement audit lost its lock")
@@ -1674,7 +1674,7 @@ exports.resolvePaymentReview = async (req, res) => {
             reconciliationLockUntil: 1,
           },
         },
-        { new: true }
+        { returnDocument: "after" }
       )
       if (!resolved) throw new Error("Refund resolution lost its lock")
       return res.status(200).json({
@@ -1712,7 +1712,7 @@ exports.resolvePaymentReview = async (req, res) => {
         status: "payment_review",
       },
       { $set: { status: "paid" } },
-      { new: true }
+      { returnDocument: "after" }
     )
     const reconciliationAudit = {
       reconciliationNote: note,
@@ -1833,7 +1833,7 @@ const enrollStudent = async (courses, userId) => {
       courseProgress = await CourseProgress.findOneAndUpdate(
         { courseID: courseId, userId },
         { $setOnInsert: { completedVideos: [] } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
       )
     } catch (error) {
       // A concurrent idempotent verification may win the unique upsert race.
@@ -1864,7 +1864,7 @@ const enrollStudent = async (courses, userId) => {
         },
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   )
   if (!enrolledStudent) {
     await CourseProgress.deleteMany({
