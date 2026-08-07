@@ -22,13 +22,14 @@ payments use server-priced Razorpay purchases.
 ## Architecture and stack
 
 The browser uses React 19, React Router 8, Redux Toolkit/RTK Query, Axios, and
-Tailwind CSS. A strict incremental TypeScript configuration checks typed files
-while the existing JavaScript migrates by vertical slice. The API uses Node.js
-24, Express 5, Mongoose/MongoDB, Redis, HttpOnly JWT sessions, Zod-backed shared
-v2 contracts, Resend, Google Identity Services, Razorpay, and Cloudinary. Vite
-builds the static web app; Nginx serves it as a non-root container. Both
-applications share one npm lockfile and communicate through versioned `/api/v1`
-and `/api/v2` routes.
+Tailwind CSS 4 through the official Vite integration. A strict incremental
+TypeScript configuration checks typed files while the existing JavaScript
+migrates by vertical slice. The API uses Node.js 24, Express 5,
+Mongoose/MongoDB, Redis, HttpOnly JWT sessions, Zod-backed shared v2 contracts,
+Resend, Google Identity Services, Razorpay, and Cloudinary. Vite builds the
+static web app; Nginx serves it as a non-root container. Both applications share
+one npm lockfile and communicate through versioned `/api/v1` and `/api/v2`
+routes.
 
 ```text
 src/                    React application, state, UI, and frontend tests
