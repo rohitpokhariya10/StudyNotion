@@ -4,13 +4,37 @@ import { expect, test } from "@playwright/test"
 
 const screenshotDirectory = "docs/audits/screenshots/live"
 
+const waitForVisualAssets = async (page) => {
+  await page.evaluate(async () => {
+    await document.fonts?.ready
+    await Promise.all(
+      [...document.images].map(
+        (image) =>
+          new Promise((resolve) => {
+            const finish = () => {
+              image.removeEventListener("load", finish)
+              image.removeEventListener("error", finish)
+              resolve()
+            }
+
+            image.addEventListener("load", finish)
+            image.addEventListener("error", finish)
+            if (image.complete) finish()
+          })
+      )
+    )
+  })
+}
+
 const capture = async (page, testInfo, state) => {
   await mkdir(screenshotDirectory, { recursive: true })
+  await waitForVisualAssets(page)
   const viewport = testInfo.project.name.replace("live-", "")
   await page.screenshot({
     path: `${screenshotDirectory}/${state}-${viewport}.png`,
     fullPage: true,
     animations: "disabled",
+    scale: "css",
   })
 }
 
@@ -26,6 +50,21 @@ const login = async (page, { email, password, destination }) => {
 test("live public home, catalog, and course detail are connected", async ({
   page,
 }, testInfo) => {
+  await page.goto("/login")
+  await expect(
+    page.getByRole("heading", { name: "Welcome Back", level: 1 })
+  ).toBeVisible()
+  await capture(page, testInfo, "login")
+
+  await page.goto("/signup")
+  await expect(
+    page.getByRole("heading", {
+      name: "Build practical skills with StudyNotion",
+      level: 1,
+    })
+  ).toBeVisible()
+  await capture(page, testInfo, "signup")
+
   await page.goto("/")
   await expect(page.getByText(/Empower Your Future with/)).toBeVisible()
   await capture(page, testInfo, "home")
