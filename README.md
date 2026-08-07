@@ -21,12 +21,14 @@ payments use server-priced Razorpay purchases.
 
 ## Architecture and stack
 
-The browser uses React 18, React Router, Redux Toolkit/RTK Query, Axios, and
-Tailwind CSS. The API uses Node.js 24, Express 5, Mongoose/MongoDB, Redis,
-HttpOnly JWT sessions, Zod-backed shared v2 contracts, Resend, Google
-Identity Services, Razorpay, and Cloudinary. Vite builds the static web app;
-Nginx serves it as a non-root container. Both applications share one npm
-lockfile and communicate through versioned `/api/v1` and `/api/v2` routes.
+The browser uses React 19, React Router, Redux Toolkit/RTK Query, Axios, and
+Tailwind CSS. A strict incremental TypeScript configuration checks typed files
+while the existing JavaScript migrates by vertical slice. The API uses Node.js
+24, Express 5, Mongoose/MongoDB, Redis, HttpOnly JWT sessions, Zod-backed shared
+v2 contracts, Resend, Google Identity Services, Razorpay, and Cloudinary. Vite
+builds the static web app; Nginx serves it as a non-root container. Both
+applications share one npm lockfile and communicate through versioned `/api/v1`
+and `/api/v2` routes.
 
 ```text
 src/                    React application, state, UI, and frontend tests
@@ -117,6 +119,7 @@ npm run client                                   # web only
 npm run server                                   # API only
 npm --workspace studynotion-backend run seed     # idempotent local demo data
 npm run build:local                              # local frontend artifact
+npm run typecheck                                # strict incremental TS gate
 npm run contracts:test                           # shared schema unit tests
 npm run contracts:generate                       # regenerate committed OpenAPI
 ```
@@ -168,8 +171,9 @@ npm run test:e2e
 ```
 
 `npm run verify` checks OpenAPI drift, contract schemas, formatting, ESLint,
-frontend tests, frontend compilation, and backend tests. Individual commands
-are `npm run contracts:test`, `npm run format:check`, `npm run lint`, `npm test`,
+strict TypeScript, frontend tests, frontend compilation, and backend tests.
+Individual commands are `npm run contracts:test`, `npm run format:check`,
+`npm run lint`, `npm run typecheck`, `npm test`,
 `npm --workspace studynotion-backend test`, `npm run test:integration`, and
 `npm run test:e2e`. With the seeded Compose stack running,
 `npm run test:e2e:live` verifies real student, instructor, admin, catalog, and
