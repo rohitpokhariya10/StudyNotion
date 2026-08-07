@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 import { BiArrowBack } from "react-icons/bi"
 import { RxCountdownTimer } from "react-icons/rx"
-import OtpInput from "react-otp-input"
 import { useDispatch, useSelector } from "react-redux"
 import { Link, useNavigate } from "react-router-dom"
 
+import VerificationCodeInput from "../features/auth/ui/VerificationCodeInput"
 import { sendOtp, signUp } from "../services/operations/authAPI"
 
 const RESEND_COOLDOWN_SECONDS = 30
@@ -57,30 +57,10 @@ function VerifyEmail() {
             A verification code has been sent to you. Enter the code below.
           </p>
           <form onSubmit={handleVerifyAndSignup}>
-            <OtpInput
+            <VerificationCodeInput
               value={otp}
               onChange={(value) => setOtp(value.replace(/\D/g, ""))}
-              numInputs={6}
-              shouldAutoFocus
-              inputType="text"
-              renderInput={(props, index) => (
-                <input
-                  {...props}
-                  aria-label={`Verification code digit ${index + 1}`}
-                  autoComplete={index === 0 ? "one-time-code" : "off"}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="-"
-                  style={{
-                    boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
-                  }}
-                  className="aspect-square w-[48px] rounded-[0.5rem] border-0 bg-richblack-800 text-center text-richblack-5 focus:border-0 focus:outline-2 focus:outline-yellow-50 lg:w-[60px]"
-                />
-              )}
-              containerStyle={{
-                justifyContent: "space-between",
-                gap: "0 6px",
-              }}
+              autoFocus
             />
             <button
               type="submit"
