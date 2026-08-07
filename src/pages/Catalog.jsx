@@ -89,10 +89,10 @@ function CatalogSkeleton({ category }) {
             >
               <div className="catalog-skeleton aspect-video bg-catalog-surface-muted" />
               <div className="space-y-3 p-5">
-                <div className="catalog-skeleton h-4 w-1/3 rounded bg-catalog-surface-muted" />
-                <div className="catalog-skeleton h-6 w-4/5 rounded bg-catalog-surface-muted" />
-                <div className="catalog-skeleton h-4 w-1/2 rounded bg-catalog-surface-muted" />
-                <div className="catalog-skeleton h-10 rounded bg-catalog-surface-muted" />
+                <div className="catalog-skeleton h-4 w-1/3 rounded-sm bg-catalog-surface-muted" />
+                <div className="catalog-skeleton h-6 w-4/5 rounded-sm bg-catalog-surface-muted" />
+                <div className="catalog-skeleton h-4 w-1/2 rounded-sm bg-catalog-surface-muted" />
+                <div className="catalog-skeleton h-10 rounded-sm bg-catalog-surface-muted" />
               </div>
             </div>
           ))}
@@ -268,7 +268,7 @@ function Catalog() {
       <CatalogHero category={category} />
       <main className="mx-auto min-h-[560px] w-11/12 max-w-maxContent py-8 sm:py-12">
         <form
-          className="rounded-product-lg border border-catalog-border bg-catalog-surface p-4 shadow-sm sm:p-6"
+          className="rounded-product-lg border border-catalog-border bg-catalog-surface p-4 shadow-xs sm:p-6"
           role="search"
           aria-label={`Search and filter ${category.name} courses`}
           onSubmit={applyFilters}
@@ -558,7 +558,7 @@ function Catalog() {
                       {error.message}
                     </p>
                     {error.requestId && (
-                      <p className="mt-1 break-all font-mono text-xs text-catalog-muted">
+                      <p className="mt-1 font-mono text-xs break-all text-catalog-muted">
                         Request ID: {error.requestId}
                       </p>
                     )}

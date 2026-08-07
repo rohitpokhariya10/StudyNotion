@@ -59,7 +59,7 @@ function UpdatePassword() {
         <div className="spinner"></div>
       ) : (
         <div className="max-w-[500px] p-4 lg:p-8">
-          <h1 className="text-[1.875rem] font-semibold leading-[2.375rem] text-richblack-5">
+          <h1 className="text-[1.875rem] leading-[2.375rem] font-semibold text-richblack-5">
             Choose new password
           </h1>
           <p className="my-4 text-[1.125rem] leading-[1.625rem] text-richblack-100">
@@ -81,12 +81,12 @@ function UpdatePassword() {
                   value={password}
                   onChange={handleOnChange}
                   placeholder="Enter Password"
-                  className="form-style w-full !pr-10"
+                  className="form-style w-full pr-10!"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+                  className="absolute top-[38px] right-3 z-[10] cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -108,12 +108,12 @@ function UpdatePassword() {
                   value={confirmPassword}
                   onChange={handleOnChange}
                   placeholder="Confirm Password"
-                  className="form-style w-full !pr-10"
+                  className="form-style w-full pr-10!"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+                  className="absolute top-[38px] right-3 z-[10] cursor-pointer"
                   aria-label={
                     showConfirmPassword
                       ? "Hide password confirmation"

@@ -31,7 +31,7 @@ export default function PolicyAcceptance() {
         onSubmit={handleSubmit}
       >
         <h1 className="text-3xl font-semibold">Review the current policies</h1>
-        <p className="mb-6 mt-3 leading-6 text-richblack-200">
+        <p className="mt-3 mb-6 leading-6 text-richblack-200">
           We updated the account agreement. Your learning data remains
           available, but you need to review these items before using
           authenticated features.

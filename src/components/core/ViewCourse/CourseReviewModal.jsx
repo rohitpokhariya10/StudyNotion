@@ -36,7 +36,7 @@ export default function CourseReviewModal({ setReviewModal }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] !mt-0 grid h-screen w-screen place-items-center overflow-auto bg-white bg-opacity-10 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[1000] mt-0! grid h-screen w-screen place-items-center overflow-auto bg-white/10 backdrop-blur-xs">
       <div
         className="my-10 w-11/12 max-w-[700px] rounded-lg border border-richblack-400 bg-richblack-800"
         role="dialog"

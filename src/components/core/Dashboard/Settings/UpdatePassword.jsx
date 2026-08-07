@@ -46,7 +46,7 @@ export default function UpdatePassword() {
               <button
                 type="button"
                 onClick={() => setShowOldPassword((prev) => !prev)}
-                className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+                className="absolute top-[38px] right-3 z-[10] cursor-pointer"
                 aria-label={
                   showOldPassword
                     ? "Hide current password"
@@ -85,7 +85,7 @@ export default function UpdatePassword() {
               <button
                 type="button"
                 onClick={() => setShowNewPassword((prev) => !prev)}
-                className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+                className="absolute top-[38px] right-3 z-[10] cursor-pointer"
                 aria-label={
                   showNewPassword ? "Hide new password" : "Show new password"
                 }

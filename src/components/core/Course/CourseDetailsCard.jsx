@@ -97,7 +97,7 @@ function CourseDetailsCard({
             )}
           </div>
           <div>
-            <p className="pb-3 pt-6 text-center text-sm text-richblack-25">
+            <p className="pt-6 pb-3 text-center text-sm text-richblack-25">
               Secure checkout &bull; Access after verified payment
             </p>
           </div>

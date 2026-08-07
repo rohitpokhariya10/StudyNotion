@@ -54,7 +54,7 @@ const TimelineSection = () => {
           })}
         </div>
         <div className="relative h-fit w-fit shadow-[0px_0px_30px_0px] shadow-blue-200">
-          <div className="absolute flex flex-col gap-4 bg-caribbeangreen-700 py-5 uppercase text-white lg:bottom-0 lg:left-[50%] lg:translate-x-[-50%] lg:translate-y-[50%] lg:flex-row lg:gap-0 lg:py-10">
+          <div className="absolute flex flex-col gap-4 bg-caribbeangreen-700 py-5 text-white uppercase lg:bottom-0 lg:left-[50%] lg:translate-x-[-50%] lg:translate-y-[50%] lg:flex-row lg:gap-0 lg:py-10">
             {/* Section 1 */}
             <div className="flex items-center gap-5 border-caribbeangreen-300 px-7 lg:border-r lg:px-14">
               <h1 className="w-[75px] text-3xl font-bold">10</h1>

@@ -70,7 +70,7 @@ export default function ConfirmationModal({ modalData }) {
   }, [])
 
   return (
-    <div className="fixed inset-0 z-[1000] !mt-0 grid place-items-center overflow-auto bg-white bg-opacity-10 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[1000] mt-0! grid place-items-center overflow-auto bg-white/10 backdrop-blur-xs">
       <div
         ref={dialogRef}
         role="dialog"
@@ -85,7 +85,7 @@ export default function ConfirmationModal({ modalData }) {
         </h2>
         <p
           id={descriptionId}
-          className="mb-5 mt-3 leading-6 text-richblack-200"
+          className="mt-3 mb-5 leading-6 text-richblack-200"
         >
           {modalData?.text2}
         </p>

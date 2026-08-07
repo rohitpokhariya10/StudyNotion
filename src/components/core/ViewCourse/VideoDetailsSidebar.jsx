@@ -116,7 +116,7 @@ export default function VideoDetailsSidebar({
                         aria-current={active ? "page" : undefined}
                       >
                         <span
-                          className={`grid h-4 w-4 shrink-0 place-items-center rounded-sm border text-[10px] ${
+                          className={`grid h-4 w-4 shrink-0 place-items-center rounded-xs border text-[10px] ${
                             completed
                               ? "border-caribbeangreen-300 bg-caribbeangreen-300 text-richblack-900"
                               : "border-richblack-300"
@@ -144,13 +144,13 @@ export default function VideoDetailsSidebar({
         <>
           <button
             type="button"
-            className="fixed inset-x-0 bottom-0 top-14 z-30 bg-richblack-900/70 md:hidden"
+            className="fixed inset-x-0 top-14 bottom-0 z-30 bg-richblack-900/70 md:hidden"
             onClick={onClose}
             aria-label="Close course content"
           />
           <aside
             id="course-mobile-navigation"
-            className="fixed bottom-0 left-0 top-14 z-40 flex w-[min(88vw,350px)] flex-col border-r border-richblack-700 bg-richblack-800 shadow-2xl md:hidden"
+            className="fixed top-14 bottom-0 left-0 z-40 flex w-[min(88vw,350px)] flex-col border-r border-richblack-700 bg-richblack-800 shadow-2xl md:hidden"
           >
             {renderContent("mobile")}
           </aside>

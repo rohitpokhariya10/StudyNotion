@@ -110,8 +110,8 @@ function Navbar() {
                       <span>{link.title}</span>
                       <BsChevronDown aria-hidden="true" />
                     </button>
-                    <div className="invisible absolute left-1/2 top-1/2 z-[1000] flex w-[200px] -translate-x-1/2 translate-y-[3em] flex-col rounded-lg bg-richblack-5 p-4 text-richblack-900 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:translate-y-[1.65em] group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-[1.65em] group-hover:opacity-100 lg:w-[300px]">
-                      <div className="absolute left-1/2 top-0 -z-10 h-6 w-6 -translate-y-[40%] translate-x-[80%] rotate-45 select-none rounded bg-richblack-5" />
+                    <div className="invisible absolute top-1/2 left-1/2 z-[1000] flex w-[200px] -translate-x-1/2 translate-y-[3em] flex-col rounded-lg bg-richblack-5 p-4 text-richblack-900 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:translate-y-[1.65em] group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-[1.65em] group-hover:opacity-100 lg:w-[300px]">
+                      <div className="absolute top-0 left-1/2 -z-10 h-6 w-6 translate-x-[80%] -translate-y-[40%] rotate-45 rounded-sm bg-richblack-5 select-none" />
                       {catalogLinksLoading ? (
                         <p className="text-center">Loading...</p>
                       ) : catalogLinks.length ? (
@@ -157,7 +157,7 @@ function Navbar() {
             >
               <AiOutlineShoppingCart className="text-2xl text-richblack-100" />
               {totalItems > 0 && (
-                <span className="absolute -bottom-2 -right-2 grid h-5 w-5 place-items-center overflow-hidden rounded-full bg-richblack-600 text-center text-xs font-bold text-yellow-100">
+                <span className="absolute -right-2 -bottom-2 grid h-5 w-5 place-items-center overflow-hidden rounded-full bg-richblack-600 text-center text-xs font-bold text-yellow-100">
                   {totalItems}
                 </span>
               )}
@@ -206,7 +206,7 @@ function Navbar() {
             <>
               <button
                 type="button"
-                className="fixed inset-x-0 bottom-0 top-14 z-40 cursor-default bg-richblack-900/70"
+                className="fixed inset-x-0 top-14 bottom-0 z-40 cursor-default bg-richblack-900/70"
                 aria-label="Close navigation"
                 onClick={closeMobileMenu}
               />

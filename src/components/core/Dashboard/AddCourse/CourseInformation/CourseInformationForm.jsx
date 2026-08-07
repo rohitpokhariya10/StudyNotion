@@ -210,9 +210,9 @@ export default function CourseInformationForm() {
                 value: /^(0|[1-9]\d*)(\.\d+)?$/,
               },
             })}
-            className="form-style w-full !pl-12"
+            className="form-style w-full pl-12!"
           />
-          <HiOutlineCurrencyRupee className="absolute left-3 top-1/2 inline-block -translate-y-1/2 text-2xl text-richblack-400" />
+          <HiOutlineCurrencyRupee className="absolute top-1/2 left-3 inline-block -translate-y-1/2 text-2xl text-richblack-400" />
         </div>
         {errors.coursePrice && (
           <span className="ml-2 text-xs tracking-wide text-pink-200">

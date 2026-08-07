@@ -202,7 +202,7 @@ export default function PurchaseHistory() {
                 <dl className="mt-4 grid gap-3 text-xs text-richblack-300 sm:grid-cols-2">
                   <div>
                     <dt className="text-richblack-400">Order ID</dt>
-                    <dd className="mt-1 break-all font-mono text-richblack-100">
+                    <dd className="mt-1 font-mono break-all text-richblack-100">
                       {purchase.razorpayOrderId || "Not recorded"}
                     </dd>
                   </div>

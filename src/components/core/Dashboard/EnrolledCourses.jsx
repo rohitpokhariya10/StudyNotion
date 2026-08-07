@@ -102,7 +102,7 @@ export default function EnrolledCourses() {
                 </button>
                 <div className="grid w-full grid-cols-2 gap-5 border-t border-richblack-700 px-5 py-4 sm:contents">
                   <div className="w-auto sm:w-1/4 sm:px-2 sm:py-3">
-                    <span className="mb-1 block text-xs uppercase tracking-wide text-richblack-300 sm:hidden">
+                    <span className="mb-1 block text-xs tracking-wide text-richblack-300 uppercase sm:hidden">
                       Duration
                     </span>
                     {course?.totalDuration || "—"}

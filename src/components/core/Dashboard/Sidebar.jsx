@@ -48,7 +48,7 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
             )
           })}
         </nav>
-        <div className="mx-auto mb-6 mt-6 h-px w-10/12 bg-richblack-700" />
+        <div className="mx-auto mt-6 mb-6 h-px w-10/12 bg-richblack-700" />
         <div className="flex flex-col">
           <SidebarLink
             link={{ name: "Settings", path: "/dashboard/settings" }}
@@ -85,13 +85,13 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
         <>
           <button
             type="button"
-            className="fixed inset-x-0 bottom-0 top-14 z-30 bg-richblack-900/70 md:hidden"
+            className="fixed inset-x-0 top-14 bottom-0 z-30 bg-richblack-900/70 md:hidden"
             onClick={onClose}
             aria-label="Close dashboard navigation"
           />
           <aside
             id="dashboard-mobile-navigation"
-            className={`${sidebarClasses} fixed bottom-0 left-0 top-14 z-40 flex shadow-2xl md:hidden`}
+            className={`${sidebarClasses} fixed top-14 bottom-0 left-0 z-40 flex shadow-2xl md:hidden`}
           >
             {renderSidebarContent()}
           </aside>

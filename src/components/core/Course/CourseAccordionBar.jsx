@@ -16,7 +16,7 @@ export default function CourseAccordionBar({ course, isActive, handleActive }) {
         type="button"
         aria-controls={contentId}
         aria-expanded={active}
-        className="flex w-full cursor-pointer items-start justify-between bg-opacity-20 px-7 py-6 text-left transition-[0.3s]"
+        className="flex w-full cursor-pointer items-start justify-between px-7 py-6 text-left transition-[0.3s]"
         onClick={() => handleActive(course?._id)}
       >
         <span className="flex items-center gap-2">

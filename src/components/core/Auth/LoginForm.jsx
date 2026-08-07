@@ -65,12 +65,12 @@ function LoginForm() {
           value={password}
           onChange={handleOnChange}
           placeholder="Enter Password"
-          className="form-style w-full !pr-10"
+          className="form-style w-full pr-10!"
         />
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
-          className="absolute right-3 top-[38px] z-[10] cursor-pointer"
+          className="absolute top-[38px] right-3 z-[10] cursor-pointer"
           aria-label={showPassword ? "Hide password" : "Show password"}
           aria-pressed={showPassword}
         >
@@ -81,7 +81,7 @@ function LoginForm() {
           )}
         </button>
         <Link to="/forgot-password">
-          <p className="ml-auto mt-1 max-w-max text-xs text-blue-100">
+          <p className="mt-1 ml-auto max-w-max text-xs text-blue-100">
             Forgot Password
           </p>
         </Link>

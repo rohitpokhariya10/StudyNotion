@@ -41,7 +41,7 @@ function CourseDeletionDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] grid place-items-center overflow-y-auto bg-richblack-900/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[1000] grid place-items-center overflow-y-auto bg-richblack-900/80 p-4 backdrop-blur-xs"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !loading) onCancel()
       }}
@@ -61,7 +61,7 @@ function CourseDeletionDialog({
         </h2>
         <p
           id="delete-course-description"
-          className="mb-5 mt-3 leading-6 text-richblack-200"
+          className="mt-3 mb-5 leading-6 text-richblack-200"
         >
           Courses with learners or payment history are archived so existing
           learners keep access. Unsold courses are permanently deleted.
@@ -143,16 +143,16 @@ export default function CoursesTable({ courses, setCourses }) {
       <Table className="rounded-xl border border-richblack-800">
         <Thead>
           <Tr className="flex gap-x-10 rounded-t-md border-b border-b-richblack-800 px-6 py-2">
-            <Th className="flex-1 text-left text-sm font-medium uppercase text-richblack-100">
+            <Th className="flex-1 text-left text-sm font-medium text-richblack-100 uppercase">
               Courses
             </Th>
-            <Th className="text-left text-sm font-medium uppercase text-richblack-100">
+            <Th className="text-left text-sm font-medium text-richblack-100 uppercase">
               Duration
             </Th>
-            <Th className="text-left text-sm font-medium uppercase text-richblack-100">
+            <Th className="text-left text-sm font-medium text-richblack-100 uppercase">
               Price
             </Th>
-            <Th className="text-left text-sm font-medium uppercase text-richblack-100">
+            <Th className="text-left text-sm font-medium text-richblack-100 uppercase">
               Actions
             </Th>
           </Tr>

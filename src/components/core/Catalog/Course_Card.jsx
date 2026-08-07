@@ -47,7 +47,7 @@ function Course_Card({ course, Height, priority = false }) {
   const imageFailed = Boolean(thumbnailUrl && failedImageUrl === thumbnailUrl)
 
   return (
-    <article className="catalog-theme catalog-course-card h-full overflow-hidden rounded-product-lg border border-catalog-border bg-catalog-surface shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-catalog-brand/50 hover:shadow-product">
+    <article className="catalog-theme catalog-course-card h-full overflow-hidden rounded-product-lg border border-catalog-border bg-catalog-surface shadow-xs transition-[border-color,box-shadow,translate] hover:-translate-y-0.5 hover:border-catalog-brand/50 hover:shadow-product">
       <Link
         to={`/courses/${id}`}
         aria-label={`View ${name} course details`}
@@ -80,11 +80,11 @@ function Course_Card({ course, Height, priority = false }) {
 
         <div className="flex flex-1 flex-col p-5">
           {category?.name && (
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-catalog-brand">
+            <p className="text-xs font-semibold tracking-[0.12em] text-catalog-brand uppercase">
               {category.name}
             </p>
           )}
-          <h2 className="mt-2 text-lg font-semibold leading-6 text-catalog-text group-hover:text-catalog-info">
+          <h2 className="mt-2 text-lg leading-6 font-semibold text-catalog-text group-hover:text-catalog-info">
             {name}
           </h2>
           {instructor?.name && (

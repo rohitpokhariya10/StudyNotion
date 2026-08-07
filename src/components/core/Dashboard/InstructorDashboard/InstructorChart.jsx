@@ -72,7 +72,7 @@ export default function InstructorChart({ courses }) {
           type="button"
           onClick={() => setCurrChart("students")}
           aria-pressed={currChart === "students"}
-          className={`rounded-sm p-1 px-3 transition-all duration-200 ${
+          className={`rounded-xs p-1 px-3 transition-all duration-200 ${
             currChart === "students"
               ? "bg-richblack-700 text-yellow-50"
               : "text-yellow-400"
@@ -85,7 +85,7 @@ export default function InstructorChart({ courses }) {
           type="button"
           onClick={() => setCurrChart("income")}
           aria-pressed={currChart === "income"}
-          className={`rounded-sm p-1 px-3 transition-all duration-200 ${
+          className={`rounded-xs p-1 px-3 transition-all duration-200 ${
             currChart === "income"
               ? "bg-richblack-700 text-yellow-50"
               : "text-yellow-400"
@@ -104,7 +104,7 @@ export default function InstructorChart({ courses }) {
             className="flex min-w-0 items-center gap-2"
           >
             <span
-              className="h-3 w-3 shrink-0 rounded-sm"
+              className="h-3 w-3 shrink-0 rounded-xs"
               style={{ backgroundColor: chartColors[index] }}
               aria-hidden="true"
             />

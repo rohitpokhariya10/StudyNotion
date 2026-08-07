@@ -222,26 +222,26 @@ export default function PaymentReconciliation() {
                   <dl className="space-y-3 rounded-md border border-richblack-700 p-4">
                     <div>
                       <dt className="text-richblack-400">Purchase ID</dt>
-                      <dd className="mt-1 break-all font-mono text-richblack-100">
+                      <dd className="mt-1 font-mono break-all text-richblack-100">
                         {purchase._id}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-richblack-400">Razorpay order</dt>
-                      <dd className="mt-1 break-all font-mono text-richblack-100">
+                      <dd className="mt-1 font-mono break-all text-richblack-100">
                         {purchase.razorpayOrderId || "Not recorded"}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-richblack-400">Razorpay payment</dt>
-                      <dd className="mt-1 break-all font-mono text-richblack-100">
+                      <dd className="mt-1 font-mono break-all text-richblack-100">
                         {purchase.razorpayPaymentId || "Not recorded"}
                       </dd>
                     </div>
                     {purchase.refundId && (
                       <div>
                         <dt className="text-richblack-400">Razorpay refund</dt>
-                        <dd className="mt-1 break-all font-mono text-richblack-100">
+                        <dd className="mt-1 font-mono break-all text-richblack-100">
                           {purchase.refundId}
                         </dd>
                       </div>
@@ -308,10 +308,10 @@ export default function PaymentReconciliation() {
 
                 {purchase.refundRequestNote && (
                   <div className="mt-4 rounded-md border border-blue-800 bg-richblack-900 p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-blue-100">
+                    <p className="text-xs font-medium tracking-wide text-blue-100 uppercase">
                       Learner refund reason
                     </p>
-                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-richblack-100">
+                    <p className="mt-2 text-sm leading-6 whitespace-pre-wrap text-richblack-100">
                       {purchase.refundRequestNote}
                     </p>
                   </div>

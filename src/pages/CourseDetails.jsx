@@ -201,7 +201,7 @@ function CourseDetails() {
         <div className="mx-auto box-content px-4 lg:w-[1260px] 2xl:relative">
           <div className="mx-auto grid min-h-[450px] max-w-maxContentTab justify-items-center py-8 lg:mx-0 lg:justify-items-start lg:py-0 xl:max-w-[810px]">
             <div className="relative block max-h-[30rem] lg:hidden">
-              <div className="absolute bottom-0 left-0 h-full w-full shadow-[#161D29_0px_-64px_36px_-28px_inset]"></div>
+              <div className="absolute bottom-0 left-0 h-full w-full shadow-[0_-64px_36px_-28px_#161D29_inset]"></div>
               <img
                 src={thumbnail}
                 alt="course thumbnail"
@@ -212,7 +212,7 @@ function CourseDetails() {
               className={`z-30 my-5 flex flex-col justify-center gap-4 py-5 text-lg text-richblack-5`}
             >
               <div>
-                <p className="text-4xl font-bold text-richblack-5 sm:text-[42px]">
+                <p className="text-4xl leading-10 font-bold text-richblack-5 sm:text-[42px]">
                   {courseName}
                 </p>
               </div>
@@ -296,7 +296,7 @@ function CourseDetails() {
             </div>
           </div>
           {/* Courses Card */}
-          <div className="right-[1rem] top-[60px] mx-auto hidden min-h-[600px] w-1/3 max-w-[410px] translate-y-24 md:translate-y-0 lg:absolute lg:block">
+          <div className="top-[60px] right-[1rem] mx-auto hidden min-h-[600px] w-1/3 max-w-[410px] translate-y-24 md:translate-y-0 lg:absolute lg:block">
             <CourseDetailsCard
               course={courseDetails}
               isEnrolled={isEnrolled}

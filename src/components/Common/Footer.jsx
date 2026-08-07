@@ -59,7 +59,7 @@ const Footer = () => {
           </p>
           <a
             href={`mailto:${supportEmail}`}
-            className="break-all text-sm text-yellow-50 transition-colors hover:text-yellow-100"
+            className="text-sm break-all text-yellow-50 transition-colors hover:text-yellow-100"
           >
             {supportEmail}
           </a>

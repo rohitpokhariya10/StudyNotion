@@ -31,7 +31,7 @@ class ErrorBoundary extends Component {
         role="alert"
       >
         <div className="w-full max-w-xl rounded-xl border border-richblack-600 bg-richblack-800 p-8 text-center shadow-lg">
-          <p className="text-sm font-semibold uppercase tracking-widest text-yellow-100">
+          <p className="text-sm font-semibold tracking-widest text-yellow-100 uppercase">
             StudyNotion
           </p>
           <h1 className="mt-3 text-2xl font-semibold">

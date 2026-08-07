@@ -288,7 +288,7 @@ const VideoDetails = () => {
       )}
 
       <h1 className="mt-4 text-3xl font-semibold">{videoData?.title}</h1>
-      <p className="pb-6 pt-2">{videoData?.description}</p>
+      <p className="pt-2 pb-6">{videoData?.description}</p>
     </div>
   )
 }

@@ -85,7 +85,7 @@ function ReviewSlider() {
 
               return (
                 <SwiperSlide key={review?._id || i}>
-                  <div className="flex h-full flex-col gap-3 rounded-xl bg-richblack-800 p-4 text-[14px] text-richblack-25 shadow-sm transition-shadow duration-200 hover:shadow-md">
+                  <div className="flex h-full flex-col gap-3 rounded-xl bg-richblack-800 p-4 text-[14px] text-richblack-25 shadow-xs transition-shadow duration-200 hover:shadow-md">
                     <div className="flex items-center gap-4">
                       <img
                         src={imgSrc}
@@ -93,7 +93,7 @@ function ReviewSlider() {
                         onError={(event) =>
                           setInitialsAvatarOnError(event, user)
                         }
-                        className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+                        className="h-10 w-10 shrink-0 rounded-full object-cover"
                       />
                       <div className="flex flex-col">
                         <h3 className="text-sm font-semibold text-richblack-5">

@@ -75,7 +75,7 @@ export default function PublishCourse() {
               type="checkbox"
               id="public"
               {...register("public")}
-              className="border-gray-300 h-4 w-4 rounded bg-richblack-500 text-richblack-400 focus:ring-2 focus:ring-richblack-5"
+              className="border-gray-300 h-4 w-4 rounded-sm bg-richblack-500 text-richblack-400 focus:ring-2 focus:ring-richblack-5"
             />
             <span className="ml-2 text-richblack-400">
               Make this course as public

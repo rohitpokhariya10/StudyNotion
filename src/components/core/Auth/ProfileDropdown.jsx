@@ -42,7 +42,7 @@ export default function ProfileDropdown() {
       </button>
       {open && (
         <div
-          className="absolute right-0 top-[118%] z-[1000] divide-y-[1px] divide-richblack-700 overflow-hidden rounded-md border-[1px] border-richblack-700 bg-richblack-800"
+          className="absolute top-[118%] right-0 z-[1000] divide-y-[1px] divide-richblack-700 overflow-hidden rounded-md border-[1px] border-richblack-700 bg-richblack-800"
           role="menu"
         >
           <Link

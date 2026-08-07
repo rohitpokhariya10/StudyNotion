@@ -44,7 +44,7 @@ const CodeBlocks = ({
       <div className="code-border relative flex h-fit w-[100%] flex-row py-3 text-[10px] leading-[18px] sm:text-sm sm:leading-6 lg:w-[470px]">
         {backgroundGradient}
         {/* Indexing */}
-        <div className="flex w-[10%] select-none flex-col text-center font-inter font-bold text-richblack-400">
+        <div className="flex w-[10%] flex-col text-center font-inter font-bold text-richblack-400 select-none">
           <p>1</p>
           <p>2</p>
           <p>3</p>

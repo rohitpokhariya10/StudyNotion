@@ -22,7 +22,7 @@ function StatusPanel({
         {description}
       </p>
       {requestId && (
-        <p className="mt-2 break-all font-mono text-xs text-catalog-muted">
+        <p className="mt-2 font-mono text-xs break-all text-catalog-muted">
           Request ID: {requestId}
         </p>
       )}

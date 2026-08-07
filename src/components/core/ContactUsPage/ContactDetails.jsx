@@ -43,7 +43,7 @@ const ContactDetails = () => (
           <p className="font-medium">{description}</p>
           {href ? (
             <a
-              className="break-all font-semibold text-yellow-50 hover:text-yellow-100"
+              className="font-semibold break-all text-yellow-50 hover:text-yellow-100"
               href={href}
             >
               {details}

@@ -4,7 +4,7 @@ function Error() {
   return (
     <main className="grid min-h-[calc(100vh-3.5rem)] flex-1 place-items-center px-6 py-12 text-richblack-5">
       <div className="max-w-lg text-center">
-        <p className="text-sm font-semibold uppercase tracking-widest text-yellow-100">
+        <p className="text-sm font-semibold tracking-widest text-yellow-100 uppercase">
           Error 404
         </p>
         <h1 className="mt-3 text-4xl font-semibold">Page not found</h1>

@@ -48,7 +48,7 @@ export default function RenderSteps() {
         ))}
       </div>
 
-      <div className="relative mb-16 flex w-full select-none justify-between">
+      <div className="relative mb-16 flex w-full justify-between select-none">
         {steps.map((item) => (
           <React.Fragment key={item.id}>
             <div className="flex min-w-[130px] flex-col items-center gap-y-2">

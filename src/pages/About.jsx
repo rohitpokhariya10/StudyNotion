@@ -46,7 +46,7 @@ const About = () => {
         <div className="mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-richblack-500">
           <div className="flex flex-col items-center justify-between gap-10 lg:flex-row">
             <div className="my-24 flex flex-col gap-10 lg:w-[50%]">
-              <h1 className="bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCB045] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
+              <h1 className="bg-linear-to-br/srgb from-[#833AB4] via-[#FD1D1D] to-[#FCB045] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
                 Our Founding Story
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
@@ -77,7 +77,7 @@ const About = () => {
           </div>
           <div className="flex flex-col items-center justify-between lg:flex-row lg:gap-10">
             <div className="my-24 flex flex-col gap-10 lg:w-[40%]">
-              <h1 className="bg-gradient-to-b from-[#FF512F] to-[#F09819] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
+              <h1 className="bg-linear-to-b/srgb from-[#FF512F] to-[#F09819] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
                 Our Vision
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
@@ -90,7 +90,7 @@ const About = () => {
               </p>
             </div>
             <div className="my-24 flex flex-col gap-10 lg:w-[40%]">
-              <h1 className="bg-gradient-to-b from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
+              <h1 className="bg-linear-to-b/srgb from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
                 Our Mission
               </h1>
               <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
