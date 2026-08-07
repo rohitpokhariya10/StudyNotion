@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit"
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Provider } from "react-redux"
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import rootReducer from "../../reducer"

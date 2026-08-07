@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 import { BsFillCaretRightFill } from "react-icons/bs"
 import { FaShareSquare } from "react-icons/fa"
 import { useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 
 import CheckoutPolicyAcknowledgement from "../../Common/CheckoutPolicyAcknowledgement"
 

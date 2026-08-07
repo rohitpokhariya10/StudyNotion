@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast"
 import { BiInfoCircle } from "react-icons/bi"
 import { HiOutlineGlobeAlt } from "react-icons/hi"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router"
 
 import CheckoutPolicyAcknowledgement from "../components/Common/CheckoutPolicyAcknowledgement"
 import ConfirmationModal from "../components/Common/ConfirmationModal"

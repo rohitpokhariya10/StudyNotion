@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { BiArrowBack } from "react-icons/bi"
 import { RxCountdownTimer } from "react-icons/rx"
 import { useDispatch, useSelector } from "react-redux"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router"
 
 import VerificationCodeInput from "../features/auth/ui/VerificationCodeInput"
 import { sendOtp, signUp } from "../services/operations/authAPI"

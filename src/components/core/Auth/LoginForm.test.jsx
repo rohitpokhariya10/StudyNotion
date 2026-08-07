@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { Provider } from "react-redux"
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { login } from "../../../services/operations/authAPI"
@@ -38,7 +38,6 @@ describe("LoginForm redirect intent", () => {
               },
             },
           ]}
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
         >
           <LoginForm />
         </MemoryRouter>

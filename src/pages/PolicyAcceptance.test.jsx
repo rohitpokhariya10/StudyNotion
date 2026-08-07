@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { Provider } from "react-redux"
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { acceptCurrentPolicies } from "../services/operations/authAPI"
@@ -30,7 +30,6 @@ describe("PolicyAcceptance redirect intent", () => {
               state: { from: "/dashboard/purchases?filter=refundable" },
             },
           ]}
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
         >
           <PolicyAcceptance />
         </MemoryRouter>

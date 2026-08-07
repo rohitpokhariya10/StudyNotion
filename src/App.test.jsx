@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { render, screen } from "@testing-library/react"
 import { Provider } from "react-redux"
-import { MemoryRouter, Outlet, useLocation } from "react-router-dom"
+import { MemoryRouter, Outlet, useLocation } from "react-router"
 import { describe, expect, it, vi } from "vitest"
 
 import App from "./App"
@@ -65,10 +65,7 @@ const renderApp = (initialEntry, state = authenticatedState) => {
 
   return render(
     <Provider store={store}>
-      <MemoryRouter
-        initialEntries={[initialEntry]}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter initialEntries={[initialEntry]}>
         <App />
         <LocationProbe />
       </MemoryRouter>

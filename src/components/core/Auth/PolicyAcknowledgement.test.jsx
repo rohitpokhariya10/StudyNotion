@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter } from "react-router"
 import { describe, expect, it } from "vitest"
 
 import { emptyPolicyAcknowledgement } from "../../../utils/policyAcknowledgement"

@@ -11,7 +11,7 @@ import {
   VscVm,
 } from "react-icons/vsc"
 import { useDispatch } from "react-redux"
-import { matchPath, NavLink, useLocation } from "react-router-dom"
+import { matchPath, NavLink, useLocation } from "react-router"
 
 import { resetCourseState } from "../../../slices/courseSlice"
 

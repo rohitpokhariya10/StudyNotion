@@ -1,6 +1,6 @@
 // This will prevent authenticated users from accessing this route
 import { useSelector } from "react-redux"
-import { Navigate, useLocation } from "react-router-dom"
+import { Navigate, useLocation } from "react-router"
 
 import { sanitizeInternalRedirect } from "../../../utils/internalRedirect"
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { Link, useParams, useSearchParams } from "react-router-dom"
+import { Link, useParams, useSearchParams } from "react-router"
 
 import Footer from "../components/Common/Footer"
 import CourseCard from "../components/core/Catalog/Course_Card"

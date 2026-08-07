@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "react-hot-toast"
 import { useDispatch } from "react-redux"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router"
 
 import { googleLogin } from "../../../services/operations/authAPI"
 import { loadGoogleIdentityServices } from "../../../utils/googleIdentity"

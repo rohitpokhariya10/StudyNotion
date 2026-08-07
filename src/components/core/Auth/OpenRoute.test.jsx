@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { render, screen } from "@testing-library/react"
 import { Provider } from "react-redux"
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom"
+import { MemoryRouter, Route, Routes, useLocation } from "react-router"
 import { describe, expect, it } from "vitest"
 
 import OpenRoute from "./OpenRoute"
@@ -33,10 +33,7 @@ const renderOpenRoute = ({ from, requiresPolicyAcceptance = false }) => {
 
   render(
     <Provider store={store}>
-      <MemoryRouter
-        initialEntries={[{ pathname: "/login", state: { from } }]}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
+      <MemoryRouter initialEntries={[{ pathname: "/login", state: { from } }]}>
         <Routes>
           <Route
             path="/login"

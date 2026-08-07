@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux"
-import { Navigate } from "react-router-dom"
+import { Navigate } from "react-router"
 
 export default function RoleRoute({ allowedRoles, children }) {
   const { isAuthenticated, status } = useSelector((state) => state.auth)

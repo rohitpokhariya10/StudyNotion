@@ -1,6 +1,6 @@
 // Icons Import
 import { FaArrowRight } from "react-icons/fa"
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 
 // Image and Video Import
 import Banner from "../assets/Images/banner.mp4"

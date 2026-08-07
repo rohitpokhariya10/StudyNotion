@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 
 import { updateProfile } from "../../../../services/operations/SettingsAPI"
 import IconBtn from "../../../Common/IconBtn"

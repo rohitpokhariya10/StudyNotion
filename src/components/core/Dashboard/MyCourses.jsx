@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { VscAdd } from "react-icons/vsc"
 import { useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 
 import { fetchInstructorCourses } from "../../../services/operations/courseDetailsAPI"
 import IconBtn from "../../Common/IconBtn"

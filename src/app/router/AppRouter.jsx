@@ -1,5 +1,5 @@
 import { lazy } from "react"
-import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import { Navigate, Route, Routes, useLocation } from "react-router"
 
 import OpenRoute from "../../components/core/Auth/OpenRoute"
 import PrivateRoute from "../../components/core/Auth/PrivateRoute"

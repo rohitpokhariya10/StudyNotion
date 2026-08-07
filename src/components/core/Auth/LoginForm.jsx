@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { useDispatch } from "react-redux"
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router"
 
 import { login } from "../../../services/operations/authAPI"
 import { sanitizeInternalRedirect } from "../../../utils/internalRedirect"

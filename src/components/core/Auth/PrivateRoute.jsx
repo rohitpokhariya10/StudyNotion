@@ -1,6 +1,6 @@
 // This will prevent non-authenticated users from accessing this route
 import { useSelector } from "react-redux"
-import { Navigate, useLocation } from "react-router-dom"
+import { Navigate, useLocation } from "react-router"
 
 function PrivateRoute({ allowPendingPolicies = false, children }) {
   const { isAuthenticated, requiresPolicyAcceptance, status } = useSelector(

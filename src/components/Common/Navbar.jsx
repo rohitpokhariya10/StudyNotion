@@ -6,7 +6,7 @@ import {
 } from "react-icons/ai"
 import { BsChevronDown } from "react-icons/bs"
 import { useDispatch, useSelector } from "react-redux"
-import { Link, matchPath, useLocation, useNavigate } from "react-router-dom"
+import { Link, matchPath, useLocation, useNavigate } from "react-router"
 
 import logo from "../../assets/Logo/Logo-Full-Light.png"
 import { NavbarLinks } from "../../data/navbar-links"

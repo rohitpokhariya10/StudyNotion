@@ -4,7 +4,7 @@ import { FiEdit2 } from "react-icons/fi"
 import { HiClock } from "react-icons/hi"
 import { RiArchiveLine, RiDeleteBin6Line } from "react-icons/ri"
 import { useSelector } from "react-redux"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import { Table, Tbody, Td, Th, Thead, Tr } from "react-super-responsive-table"
 
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css"

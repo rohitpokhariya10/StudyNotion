@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AiOutlineMenu } from "react-icons/ai"
 import { useSelector } from "react-redux"
-import { Outlet, useLocation } from "react-router-dom"
+import { Outlet, useLocation } from "react-router"
 
 import Sidebar from "../components/core/Dashboard/Sidebar"
 

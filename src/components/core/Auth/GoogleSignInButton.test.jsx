@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { act, render, waitFor } from "@testing-library/react"
 import { Provider } from "react-redux"
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter } from "react-router"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { googleLogin } from "../../../services/operations/authAPI"
@@ -57,7 +57,6 @@ describe("GoogleSignInButton redirect intent", () => {
               },
             },
           ]}
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
         >
           <GoogleSignInButton />
         </MemoryRouter>
