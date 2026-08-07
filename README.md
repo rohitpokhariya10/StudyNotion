@@ -21,7 +21,7 @@ payments use server-priced Razorpay purchases.
 
 ## Architecture and stack
 
-The browser uses React 19, React Router, Redux Toolkit/RTK Query, Axios, and
+The browser uses React 19, React Router 8, Redux Toolkit/RTK Query, Axios, and
 Tailwind CSS. A strict incremental TypeScript configuration checks typed files
 while the existing JavaScript migrates by vertical slice. The API uses Node.js
 24, Express 5, Mongoose/MongoDB, Redis, HttpOnly JWT sessions, Zod-backed shared
