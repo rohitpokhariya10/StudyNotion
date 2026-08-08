@@ -92,6 +92,8 @@ jobs:
         env:
           CATALOG_TEST_MONGODB_URI: mongodb://127.0.0.1:27017/studynotion_catalog_test_ci
           CATALOG_TEST_REDIS_URL: redis://127.0.0.1:6379/14
+          LEARNING_TEST_MONGODB_URI: mongodb://127.0.0.1:27017/studynotion_learning_test_ci
+          LEARNING_TEST_REDIS_URL: redis://127.0.0.1:6379/15
           MONGOOSE_TEST_MONGODB_URI: mongodb://127.0.0.1:27017/studynotion_mongoose_test_ci
 
   catalog-e2e:
