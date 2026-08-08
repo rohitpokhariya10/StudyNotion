@@ -18,6 +18,8 @@ const { razorpayWebhook } = require("../controllers/payments")
 const legacyCatalogErrors = require("../domains/catalog/catalogErrors")
 const { apiLimiter, webhookLimiter } = require("../middleware/rateLimiters")
 const { requireTrustedBrowserOrigin } = require("../middleware/trustedOrigin")
+const catalogV2Routes = require("../routes/CatalogV2")
+const learningV2Routes = require("../routes/LearningV2")
 const {
   createErrorHandler,
   errorHandler,
@@ -81,6 +83,7 @@ test("route registration preserves webhook, parser, limiter, and route order", (
       ["use", "<global>"],
       ["use", "/api/v1"],
       ["use", "/api/v2"],
+      ["use", "/api/v2/learning"],
       ["use", "/api/v2"],
       ["use", "/api/v1/auth"],
       ["use", "/api/v1/admin"],
@@ -99,6 +102,8 @@ test("route registration preserves webhook, parser, limiter, and route order", (
   assert.equal(calls[2].args[2], apiLimiter)
   assert.equal(calls[6].args[1], requireTrustedBrowserOrigin)
   assert.equal(calls[7].args[1], requireTrustedBrowserOrigin)
+  assert.equal(calls[8].args[1], learningV2Routes)
+  assert.equal(calls[9].args[1], catalogV2Routes)
 })
 
 test("catalog error imports remain adapters to shared HTTP behavior", () => {

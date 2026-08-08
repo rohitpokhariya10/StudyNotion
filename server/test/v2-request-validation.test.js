@@ -12,6 +12,7 @@ const {
 const {
   createV2ErrorEnvelope,
   normalizeV2ErrorEnvelope,
+  preserveSessionControlCode,
   statusCodeToErrorCode,
 } = require("../shared/http/v2ErrorEnvelope")
 const { errorHandler } = require("../shared/http/errorHandler")
@@ -251,6 +252,49 @@ test("the v2 normalizer replaces envelopes with a mismatched request ID", () => 
       requestId: "current-request",
     },
   })
+})
+
+test("the v2 normalizer preserves allowlisted session-control codes", () => {
+  for (const [statusCode, code] of [
+    [423, "ACCOUNT_DELETION_PENDING"],
+    [428, "POLICY_ACCEPTANCE_REQUIRED"],
+  ]) {
+    const response = {
+      body: undefined,
+      statusCode,
+      json(body) {
+        this.body = body
+        return this
+      },
+      setHeader() {},
+    }
+    normalizeV2ErrorEnvelope(
+      { requestId: "session-control-request" },
+      response,
+      () => {}
+    )
+
+    response.json({ success: false, code, message: "Session control" })
+
+    assert.deepEqual(response.body, {
+      error: {
+        code,
+        message: "Session control",
+        requestId: "session-control-request",
+      },
+    })
+  }
+
+  assert.equal(
+    preserveSessionControlCode(423, {
+      code: "POLICY_ACCEPTANCE_REQUIRED",
+    }),
+    null
+  )
+  assert.equal(
+    preserveSessionControlCode(428, { code: "ACCOUNT_DELETION_PENDING" }),
+    null
+  )
 })
 
 test("the v2 error-envelope factory fails closed on malformed internal input", () => {

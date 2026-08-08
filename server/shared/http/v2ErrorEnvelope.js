@@ -18,6 +18,13 @@ const statusCodeToErrorCode = (statusCode) => {
   return "INTERNAL_ERROR"
 }
 
+const preserveSessionControlCode = (statusCode, body) => {
+  const code = body?.code
+  if (statusCode === 423 && code === "ACCOUNT_DELETION_PENDING") return code
+  if (statusCode === 428 && code === "POLICY_ACCEPTANCE_REQUIRED") return code
+  return null
+}
+
 const createV2ErrorEnvelope = (req, code, message, details) => {
   const parsedRequestId = requestIdSchema.safeParse(req?.requestId)
   const requestId = parsedRequestId.success ? parsedRequestId.data : "unknown"
@@ -71,7 +78,8 @@ const normalizeV2ErrorEnvelope = (req, res, next) => {
       return originalJson(
         createV2ErrorEnvelope(
           req,
-          statusCodeToErrorCode(res.statusCode),
+          preserveSessionControlCode(res.statusCode, body) ||
+            statusCodeToErrorCode(res.statusCode),
           message
         )
       )
@@ -90,6 +98,7 @@ module.exports = {
   createV2ErrorEnvelope,
   isV2Request,
   normalizeV2ErrorEnvelope,
+  preserveSessionControlCode,
   sendV2Error,
   statusCodeToErrorCode,
 }

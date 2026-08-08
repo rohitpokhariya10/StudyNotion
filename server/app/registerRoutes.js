@@ -11,6 +11,7 @@ const adminRoutes = require("../routes/Admin")
 const catalogV2Routes = require("../routes/CatalogV2")
 const contactUsRoutes = require("../routes/Contact")
 const courseRoutes = require("../routes/Course")
+const learningV2Routes = require("../routes/LearningV2")
 const paymentRoutes = require("../routes/Payments")
 const profileRoutes = require("../routes/profile")
 const userRoutes = require("../routes/user")
@@ -42,6 +43,9 @@ const registerRoutes = (app) => {
   app.use("/api/v1", requireTrustedBrowserOrigin)
   app.use("/api/v2", requireTrustedBrowserOrigin)
 
+  // The catalog router owns the generic v2 catch-all, so bounded v2 domains
+  // must be mounted before it.
+  app.use("/api/v2/learning", learningV2Routes)
   app.use("/api/v2", catalogV2Routes)
   app.use("/api/v1/auth", userRoutes)
   app.use("/api/v1/admin", adminRoutes)
