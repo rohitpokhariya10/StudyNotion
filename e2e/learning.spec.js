@@ -108,6 +108,15 @@ const capture = async (page, testInfo, state) => {
   })
 }
 
+const expectAccessible = async (page) => {
+  // Caption metadata does not exist in the current lesson model; all other
+  // player and page rules remain enabled and captions are tracked as debt.
+  const accessibility = await new AxeBuilder({ page })
+    .disableRules(["video-caption"])
+    .analyze()
+  expect(accessibility.violations).toEqual([])
+}
+
 const mockAuthenticatedSession = async (page) => {
   await page.route("**/api/v1/profile/getUserDetails", (route) =>
     json(route, {
@@ -244,13 +253,7 @@ test("learner navigates the curriculum and saves canonical progress", async ({
   ).toBeVisible()
   await expect(page.getByRole("link", { name: "Next lesson" })).toBeVisible()
 
-  // Caption metadata does not exist in the current lesson model; all other
-  // critical player rules remain enabled and captions are tracked as debt.
-  const accessibility = await new AxeBuilder({ page })
-    .include("main")
-    .disableRules(["video-caption"])
-    .analyze()
-  expect(accessibility.violations).toEqual([])
+  await expectAccessible(page)
 })
 
 test("learning exposes loading, retryable failure, and access-denied states", async ({
@@ -262,7 +265,7 @@ test("learning exposes loading, retryable failure, and access-denied states", as
     async (route) => {
       attempts += 1
       if (attempts === 1) {
-        await new Promise((resolve) => setTimeout(resolve, 700))
+        await new Promise((resolve) => setTimeout(resolve, 1500))
         return json(
           route,
           {
@@ -284,12 +287,14 @@ test("learning exposes loading, retryable failure, and access-denied states", as
     page.getByRole("status", { name: "Loading course learning state" })
   ).toBeVisible()
   await capture(page, testInfo, "loading")
+  await expectAccessible(page)
 
   await expect(
     page.getByRole("heading", { name: "This course could not be loaded." })
   ).toBeVisible()
   await expect(page.getByText("Reference: learning-e2e-error")).toBeVisible()
   await capture(page, testInfo, "api-error")
+  await expectAccessible(page)
 
   await page.getByRole("button", { name: "Try again" }).click()
   await expect(
@@ -318,6 +323,7 @@ test("learning exposes loading, retryable failure, and access-denied states", as
   ).toBeVisible()
   await expect(page.getByText("Reference: learning-e2e-denied")).toBeVisible()
   await capture(page, testInfo, "access-denied")
+  await expectAccessible(page)
 })
 
 test("learning has a clear empty-curriculum state", async ({
@@ -332,18 +338,25 @@ test("learning has a clear empty-curriculum state", async ({
   await expect(
     page.getByRole("heading", { name: "Lessons are being prepared." })
   ).toBeVisible()
-  if (testInfo.project.name === "catalog-mobile") {
+  const mobile = testInfo.project.name === "catalog-mobile"
+  if (mobile) {
     await page.getByRole("button", { name: "Course content" }).click()
   }
-  const contentRegion =
-    testInfo.project.name === "catalog-mobile"
-      ? page.getByRole("dialog", { name: "Course content" })
-      : page.getByRole("complementary", { name: "Course content" })
+  const contentRegion = mobile
+    ? page.getByRole("dialog", { name: "Course content" })
+    : page.getByRole("complementary", { name: "Course content" })
   await expect(
     contentRegion.getByText("0 of 0 lessons completed")
   ).toBeVisible()
   await expect(
     contentRegion.getByRole("progressbar", { name: "0% complete" })
   ).toBeVisible()
+  if (mobile) {
+    await page.keyboard.press("Escape")
+    await expect(
+      page.getByRole("button", { name: "Course content" })
+    ).toBeFocused()
+  }
   await capture(page, testInfo, "empty-curriculum")
+  await expectAccessible(page)
 })

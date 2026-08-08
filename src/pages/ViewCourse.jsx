@@ -48,17 +48,18 @@ export default function ViewCourse() {
 
   if (isLoading) {
     return (
-      <div
+      <main
         className="grid min-h-[calc(100vh-3.5rem)] place-items-center bg-richblack-900 px-6 text-center text-richblack-5"
         aria-busy="true"
       >
         <div role="status" aria-label="Loading course learning state">
+          <h1 className="sr-only">Loading course</h1>
           <div className="spinner mx-auto" aria-hidden="true" />
           <p className="mt-4 text-sm text-richblack-200">
             Preparing your course…
           </p>
         </div>
-      </div>
+      </main>
     )
   }
 
@@ -79,7 +80,7 @@ export default function ViewCourse() {
           </h1>
           <p className="mt-3 text-richblack-200">{presentation.message}</p>
           {presentation.requestId && (
-            <p className="mt-2 text-xs text-richblack-400">
+            <p className="mt-2 text-xs text-richblack-200">
               Reference: {presentation.requestId}
             </p>
           )}

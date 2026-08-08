@@ -171,7 +171,7 @@ export default function VideoDetailsSidebar({
                               className={`mt-0.5 block text-xs ${
                                 completed
                                   ? "text-caribbeangreen-100"
-                                  : "text-richblack-400"
+                                  : "text-richblack-200"
                               }`}
                             >
                               {completed ? "Completed" : "Not completed"}
@@ -181,7 +181,7 @@ export default function VideoDetailsSidebar({
                       )
                     })
                   ) : (
-                    <p className="px-5 py-4 text-sm text-richblack-400">
+                    <p className="px-5 py-4 text-sm text-richblack-200">
                       No lessons in this section.
                     </p>
                   )}
