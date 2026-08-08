@@ -1,5 +1,6 @@
 import { combineReducers } from "@reduxjs/toolkit"
 
+import { learningApi } from "../entities/learning/api/learningApi"
 import { catalogApi } from "../services/catalogApi"
 import authReducer from "../slices/authSlice"
 import cartReducer from "../slices/cartSlice"
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   viewCourse: viewCourseReducer,
   [catalogApi.reducerPath]: catalogApi.reducer,
+  [learningApi.reducerPath]: learningApi.reducer,
 })
 
 export default rootReducer

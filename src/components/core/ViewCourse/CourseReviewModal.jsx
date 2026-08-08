@@ -6,10 +6,9 @@ import { createRating } from "../../../services/operations/courseDetailsAPI"
 import IconBtn from "../../Common/IconBtn"
 import RatingInput from "../../Common/RatingInput"
 
-export default function CourseReviewModal({ setReviewModal }) {
+export default function CourseReviewModal({ courseId, setReviewModal }) {
   const { user } = useSelector((state) => state.profile)
   const { token } = useSelector((state) => state.auth)
-  const { courseEntireData } = useSelector((state) => state.viewCourse)
 
   const {
     register,
@@ -26,7 +25,7 @@ export default function CourseReviewModal({ setReviewModal }) {
   const onSubmit = async (data) => {
     const created = await createRating(
       {
-        courseId: courseEntireData._id,
+        courseId,
         rating: data.courseRating,
         review: data.courseExperience,
       },

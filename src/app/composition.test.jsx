@@ -4,6 +4,7 @@ import LegacyApp from "../App"
 import LegacyErrorBoundary from "../components/Common/ErrorBoundary"
 import LegacyButton from "../components/ui/Button"
 import { catalogApi } from "../entities/catalog/api/catalogApi"
+import { learningApi } from "../entities/learning/api/learningApi"
 import * as legacyHttpClient from "../services/apiConnector"
 import * as legacyEndpoints from "../services/apis"
 import * as legacyCatalog from "../services/catalogApi"
@@ -44,6 +45,9 @@ describe("frontend composition compatibility", () => {
       "cart",
       "viewCourse",
       "catalogApi",
+      "learningApi",
     ])
+    expect(store.getState().learningApi).toBeDefined()
+    expect(learningApi.reducerPath).toBe("learningApi")
   })
 })

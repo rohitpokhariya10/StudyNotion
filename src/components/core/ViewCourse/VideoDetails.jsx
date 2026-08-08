@@ -1,43 +1,56 @@
 import { useEffect, useRef, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useParams } from "react-router"
+import { Link, useOutletContext, useParams } from "react-router"
 
 import {
-  getLessonPlaybackUrl,
-  markLectureAsComplete,
-} from "../../../services/operations/courseDetailsAPI"
-import { updateCompletedLectures } from "../../../slices/viewCourseSlice"
-import IconBtn from "../../Common/IconBtn"
+  getLearningErrorPresentation,
+  useMarkLessonCompleteMutation,
+} from "../../../entities/learning/api/learningApi"
+import { getLessonPlaybackUrl } from "../../../services/operations/courseDetailsAPI"
+
+const lessonPath = (courseId, item) =>
+  `/view-course/${encodeURIComponent(courseId)}/section/${encodeURIComponent(
+    item.sectionId
+  )}/sub-section/${encodeURIComponent(item.lesson.id)}`
+
+const lessonDuration = (seconds) => {
+  if (!seconds) return null
+  const minutes = Math.max(1, Math.round(seconds / 60))
+  return `${minutes} min`
+}
 
 const VideoDetails = () => {
   const { courseId, sectionId, subSectionId } = useParams()
-  const navigate = useNavigate()
+  const { learningCourse } = useOutletContext()
   const playerRef = useRef(null)
-  const dispatch = useDispatch()
-  const { token } = useSelector((state) => state.auth)
-  const { courseSectionData, courseEntireData, completedLectures } =
-    useSelector((state) => state.viewCourse)
-
+  const retriedLessonRef = useRef(null)
+  const resumeAtRef = useRef(0)
   const [endedVideoId, setEndedVideoId] = useState(null)
-  const [loading, setLoading] = useState(false)
   const [playback, setPlayback] = useState(null)
   const [playbackError, setPlaybackError] = useState("")
   const [playbackLoading, setPlaybackLoading] = useState(false)
   const [playbackRefresh, setPlaybackRefresh] = useState(0)
-  const retriedLessonRef = useRef(null)
-  const resumeAtRef = useRef(0)
+  const [completionNotice, setCompletionNotice] = useState({
+    lessonId: null,
+    message: "",
+  })
+  const [markLessonComplete, completion] = useMarkLessonCompleteMutation()
 
-  const currentSectionIndex = courseSectionData.findIndex(
-    (section) => section?._id === sectionId
+  const lessonItems = learningCourse.curriculum.flatMap((section) =>
+    section.lessons.map((lesson) => ({ sectionId: section.id, lesson }))
   )
-  const currentSection = courseSectionData[currentSectionIndex]
-  const currentSubSectionIndex = currentSection?.subSection?.findIndex(
-    (subSection) => subSection?._id === subSectionId
+  const currentLessonIndex = lessonItems.findIndex(
+    (item) => item.sectionId === sectionId && item.lesson.id === subSectionId
   )
-  const videoData =
-    currentSubSectionIndex >= 0
-      ? currentSection?.subSection?.[currentSubSectionIndex]
+  const currentItem = lessonItems[currentLessonIndex]
+  const lesson = currentItem?.lesson
+  const previousItem =
+    currentLessonIndex > 0 ? lessonItems[currentLessonIndex - 1] : null
+  const nextItem =
+    currentLessonIndex >= 0 && currentLessonIndex < lessonItems.length - 1
+      ? lessonItems[currentLessonIndex + 1]
       : null
+  const completed =
+    learningCourse.progress.completedLessonIds.includes(subSectionId)
   const videoEnded = endedVideoId === subSectionId
 
   useEffect(() => {
@@ -46,11 +59,12 @@ const VideoDetails = () => {
   }, [courseId, subSectionId])
 
   useEffect(() => {
-    if (!courseId || !subSectionId || !videoData) return undefined
+    if (!courseId || !subSectionId || !lesson) return undefined
 
     let active = true
 
     const loadPlayback = async () => {
+      setEndedVideoId(null)
       setPlaybackLoading(true)
       setPlaybackError("")
 
@@ -72,7 +86,7 @@ const VideoDetails = () => {
     return () => {
       active = false
     }
-  }, [courseId, playbackRefresh, subSectionId, videoData])
+  }, [courseId, lesson, playbackRefresh, subSectionId])
 
   const refreshPlayback = ({ automatic = false } = {}) => {
     const lessonKey = `${courseId}:${subSectionId}`
@@ -91,8 +105,6 @@ const VideoDetails = () => {
     setPlaybackRefresh((value) => value + 1)
   }
 
-  const handlePlaybackError = () => refreshPlayback({ automatic: true })
-
   const restorePlaybackPosition = () => {
     if (!playerRef.current || resumeAtRef.current <= 0) return
     playerRef.current.currentTime = resumeAtRef.current
@@ -100,198 +112,209 @@ const VideoDetails = () => {
     playerRef.current.play().catch(() => undefined)
   }
 
-  // check if the lecture is the first video of the course
-  const isFirstVideo = currentSectionIndex === 0 && currentSubSectionIndex === 0
+  const handleLessonCompletion = async () => {
+    if (completed || completion.isLoading) return
+    setCompletionNotice({ lessonId: subSectionId, message: "" })
 
-  // go to the next video
-  const goToNextVideo = () => {
-    // console.log(courseSectionData)
-
-    if (!currentSection || currentSubSectionIndex < 0) return
-
-    if (currentSubSectionIndex < currentSection.subSection.length - 1) {
-      const nextSubSectionId =
-        currentSection.subSection[currentSubSectionIndex + 1]?._id
-      if (!nextSubSectionId) return
-      navigate(
-        `/view-course/${courseId}/section/${sectionId}/sub-section/${nextSubSectionId}`
-      )
-    } else {
-      const nextSection = courseSectionData[currentSectionIndex + 1]
-      const nextSectionId = nextSection?._id
-      const nextSubSectionId = nextSection?.subSection?.[0]?._id
-      if (!nextSectionId || !nextSubSectionId) return
-      navigate(
-        `/view-course/${courseId}/section/${nextSectionId}/sub-section/${nextSubSectionId}`
-      )
-    }
-  }
-
-  // check if the lecture is the last video of the course
-  const isLastVideo =
-    currentSectionIndex === courseSectionData.length - 1 &&
-    currentSubSectionIndex === (currentSection?.subSection?.length || 0) - 1
-
-  // go to the previous video
-  const goToPrevVideo = () => {
-    // console.log(courseSectionData)
-
-    if (!currentSection || currentSubSectionIndex < 0) return
-
-    if (currentSubSectionIndex > 0) {
-      const prevSubSectionId =
-        currentSection.subSection[currentSubSectionIndex - 1]?._id
-      if (!prevSubSectionId) return
-      navigate(
-        `/view-course/${courseId}/section/${sectionId}/sub-section/${prevSubSectionId}`
-      )
-    } else {
-      const previousSection = courseSectionData[currentSectionIndex - 1]
-      const previousSubSections = previousSection?.subSection || []
-      const prevSectionId = previousSection?._id
-      const prevSubSectionId = previousSubSections.at(-1)?._id
-      if (!prevSectionId || !prevSubSectionId) return
-      navigate(
-        `/view-course/${courseId}/section/${prevSectionId}/sub-section/${prevSubSectionId}`
-      )
-    }
-  }
-
-  const handleLectureCompletion = async () => {
-    setLoading(true)
     try {
-      const completed = await markLectureAsComplete(
-        { courseId, subsectionId: subSectionId },
-        token
-      )
-      if (completed && !completedLectures.includes(subSectionId)) {
-        dispatch(updateCompletedLectures(subSectionId))
-      }
-    } finally {
-      setLoading(false)
+      await markLessonComplete({ courseId, lessonId: subSectionId }).unwrap()
+      setCompletionNotice({
+        lessonId: subSectionId,
+        message: "Lesson marked complete.",
+      })
+    } catch (error) {
+      const presentation = getLearningErrorPresentation(error, {
+        fallbackMessage:
+          "We could not save your progress. Your video remains available.",
+      })
+      setCompletionNotice({
+        lessonId: subSectionId,
+        message: `${presentation.message}${
+          presentation.requestId ? ` Reference: ${presentation.requestId}` : ""
+        }`,
+      })
     }
+  }
+
+  if (!lesson) {
+    return (
+      <section className="grid min-h-[60vh] place-items-center text-center text-richblack-5">
+        <div className="max-w-md" role="alert">
+          <p className="text-sm font-semibold tracking-wide text-yellow-50 uppercase">
+            Lesson not found
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold">
+            This lesson is not part of the current course.
+          </h1>
+          <p className="mt-3 text-richblack-200">
+            Choose an available lesson from the course content panel.
+          </p>
+        </div>
+      </section>
+    )
   }
 
   const activePlayback =
     String(playback?.subSectionId || "") === String(subSectionId || "")
       ? playback
       : null
+  const duration = lessonDuration(lesson.durationSeconds)
+  const completionMessage =
+    completionNotice.lessonId === subSectionId ? completionNotice.message : ""
 
   return (
-    <div className="flex flex-col gap-5 text-white">
-      {!videoData ? (
-        <img
-          src={courseEntireData?.thumbnail}
-          alt="Preview"
-          className="h-full w-full rounded-md object-cover"
-        />
-      ) : playbackLoading || (!playbackError && !activePlayback) ? (
-        <div className="grid aspect-video place-items-center rounded-md bg-black">
+    <article className="text-richblack-5">
+      <header className="mb-5">
+        <p className="text-sm font-medium text-richblack-300">
+          {completed ? "Completed" : "In progress"}
+          {duration ? ` · ${duration}` : ""}
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+          {lesson.title}
+        </h1>
+      </header>
+
+      <section aria-label="Secure lesson video">
+        {playbackLoading || (!playbackError && !activePlayback) ? (
           <div
-            className="spinner"
-            role="status"
-            aria-label="Loading lesson video"
-          />
-        </div>
-      ) : playbackError || !activePlayback?.url ? (
-        <div className="grid aspect-video place-items-center rounded-md bg-black px-6 text-center">
-          <div>
-            <p className="text-lg font-semibold text-richblack-25">
-              This lesson video could not be loaded.
-            </p>
-            {playbackError && (
-              <p className="mt-2 text-sm text-richblack-300" role="alert">
-                {playbackError}
-              </p>
-            )}
-            <button
-              type="button"
-              className="yellowButton mt-4"
-              onClick={() => refreshPlayback()}
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="relative aspect-video overflow-hidden rounded-md bg-black">
-          <video
-            key={`${videoData._id}:${activePlayback.url}`}
-            ref={playerRef}
-            className="h-full w-full"
-            controls
-            playsInline
-            preload="metadata"
-            poster={courseEntireData?.thumbnail}
-            onEnded={() => setEndedVideoId(subSectionId)}
-            onPlay={() => setEndedVideoId(null)}
-            onLoadedMetadata={restorePlaybackPosition}
-            onError={handlePlaybackError}
-            src={activePlayback.url}
+            className="grid aspect-video place-items-center rounded-md border border-richblack-700 bg-black"
+            aria-busy="true"
           >
-            Your browser does not support HTML5 video.
-          </video>
-          {/* Render When Video Ends */}
-          {videoEnded && (
-            <div
-              style={{
-                backgroundImage:
-                  "linear-gradient(to top, rgb(0, 0, 0), rgba(0,0,0,0.7), rgba(0,0,0,0.5), rgba(0,0,0,0.1)",
-              }}
-              className="full absolute inset-0 z-[100] grid h-full place-content-center font-inter"
-            >
-              {!completedLectures.includes(subSectionId) && (
-                <IconBtn
-                  disabled={loading}
-                  onclick={() => handleLectureCompletion()}
-                  text={!loading ? "Mark As Completed" : "Loading..."}
-                  customClasses="text-xl max-w-max px-4 mx-auto"
-                />
+            <div role="status" aria-label="Loading lesson video">
+              <div className="spinner" aria-hidden="true" />
+            </div>
+          </div>
+        ) : playbackError || !activePlayback?.url ? (
+          <div className="grid aspect-video place-items-center rounded-md border border-richblack-700 bg-black px-6 text-center">
+            <div className="max-w-md">
+              <h2 className="text-lg font-semibold text-richblack-25">
+                This lesson video could not be loaded.
+              </h2>
+              {playbackError && (
+                <p className="mt-2 text-sm text-richblack-300" role="alert">
+                  {playbackError}
+                </p>
               )}
-              <IconBtn
-                disabled={loading}
-                onclick={() => {
-                  if (playerRef?.current) {
+              <button
+                type="button"
+                className="yellowButton mt-4 min-h-11"
+                onClick={() => refreshPlayback()}
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="relative aspect-video overflow-hidden rounded-md border border-richblack-700 bg-black">
+            <video
+              key={`${lesson.id}:${activePlayback.url}`}
+              ref={playerRef}
+              className="h-full w-full"
+              controls
+              playsInline
+              preload="metadata"
+              poster={learningCourse.course.thumbnailUrl || undefined}
+              onEnded={() => setEndedVideoId(subSectionId)}
+              onPlay={() => setEndedVideoId(null)}
+              onLoadedMetadata={restorePlaybackPosition}
+              onError={() => refreshPlayback({ automatic: true })}
+              src={activePlayback.url}
+            >
+              Your browser does not support HTML5 video.
+            </video>
+
+            {videoEnded && (
+              <div className="absolute inset-0 z-10 grid place-content-center bg-black/85 px-5 text-center">
+                <p className="font-medium text-richblack-25">
+                  You’ve reached the end of this lesson.
+                </p>
+                {!completed && (
+                  <button
+                    type="button"
+                    disabled={completion.isLoading}
+                    onClick={handleLessonCompletion}
+                    className="yellowButton mx-auto mt-4 min-h-11 disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {completion.isLoading
+                      ? "Saving progress…"
+                      : "Mark lesson complete"}
+                  </button>
+                )}
+                {completed && (
+                  <p className="mt-3 font-semibold text-caribbeangreen-100">
+                    Completed
+                  </p>
+                )}
+                <button
+                  type="button"
+                  disabled={completion.isLoading}
+                  onClick={() => {
+                    if (!playerRef.current) return
                     playerRef.current.currentTime = 0
                     playerRef.current.play().catch(() => undefined)
                     setEndedVideoId(null)
-                  }
-                }}
-                text="Rewatch"
-                customClasses="text-xl max-w-max px-4 mx-auto mt-2"
-              />
-              <div className="mt-10 flex min-w-[250px] justify-center gap-x-4 text-xl">
-                {!isFirstVideo && (
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={goToPrevVideo}
-                    className="blackButton"
-                  >
-                    Prev
-                  </button>
-                )}
-                {!isLastVideo && (
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={goToNextVideo}
-                    className="blackButton"
-                  >
-                    Next
-                  </button>
-                )}
+                  }}
+                  className="mx-auto mt-3 min-h-11 rounded-md border border-richblack-500 px-5 py-2 font-semibold text-richblack-5 hover:border-richblack-300"
+                >
+                  Rewatch
+                </button>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </section>
 
-      <h1 className="mt-4 text-3xl font-semibold">{videoData?.title}</h1>
-      <p className="pt-2 pb-6">{videoData?.description}</p>
-    </div>
+      <div className="mt-5 flex flex-col gap-4 border-b border-richblack-700 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-medium text-richblack-50">
+            {completed ? "Lesson completed" : "Lesson not completed"}
+          </p>
+          {!completed && !videoEnded && (
+            <p className="mt-1 text-sm text-richblack-300">
+              Finish the video to mark this lesson complete.
+            </p>
+          )}
+          <p
+            className="mt-1 text-sm text-richblack-200"
+            aria-live="polite"
+            role={completion.isError ? "alert" : "status"}
+          >
+            {completionMessage}
+          </p>
+        </div>
+
+        <nav className="flex flex-wrap gap-3" aria-label="Lesson navigation">
+          {previousItem && (
+            <Link
+              className="flex min-h-11 items-center rounded-md border border-richblack-600 px-4 py-2 text-sm font-semibold text-richblack-50 hover:border-richblack-400"
+              to={lessonPath(learningCourse.course.id, previousItem)}
+            >
+              Previous lesson
+            </Link>
+          )}
+          {nextItem && (
+            <Link
+              className="flex min-h-11 items-center rounded-md bg-yellow-50 px-4 py-2 text-sm font-semibold text-richblack-900 hover:bg-yellow-100"
+              to={lessonPath(learningCourse.course.id, nextItem)}
+            >
+              Next lesson
+            </Link>
+          )}
+        </nav>
+      </div>
+
+      {lesson.description && (
+        <section className="py-6" aria-labelledby="lesson-about-heading">
+          <h2 id="lesson-about-heading" className="text-lg font-semibold">
+            About this lesson
+          </h2>
+          <p className="mt-2 max-w-3xl leading-7 whitespace-pre-wrap text-richblack-200">
+            {lesson.description}
+          </p>
+        </section>
+      )}
+    </article>
   )
 }
 
 export default VideoDetails
-// video

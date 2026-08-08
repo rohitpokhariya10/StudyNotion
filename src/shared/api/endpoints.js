@@ -110,6 +110,16 @@ export const catalogEndpoints = {
   COURSES_API: API_V2_BASE_URL + "/courses",
 }
 
+// ---------------- V2 LEARNING API ----------------
+export const learningEndpoints = {
+  COURSE_API: (courseId) =>
+    `${API_V2_BASE_URL}/learning/courses/${encodeURIComponent(courseId)}`,
+  LESSON_PROGRESS_API: (courseId, lessonId) =>
+    `${API_V2_BASE_URL}/learning/courses/${encodeURIComponent(
+      courseId
+    )}/lessons/${encodeURIComponent(lessonId)}/progress`,
+}
+
 // ---------------- CONTACT-US API ----------------
 export const contactusEndpoint = {
   CONTACT_US_API: BASE_URL + "/reach/contact",

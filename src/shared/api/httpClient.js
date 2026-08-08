@@ -17,8 +17,8 @@ export const SESSION_RESPONSE_SIGNALS = Object.freeze({
 let sessionResponseHandler = null
 
 export const classifySessionResponseError = (error) => {
-  // Keep the legacy session-control contract exact. Nested v2 envelopes are
-  // presentation data until a later contract migration explicitly adopts them.
+  // Keep the legacy Axios session-control contract exact. Authenticated V2
+  // clients adapt their nested envelope at their own boundary.
   const status = error?.response?.status
   const code = error?.response?.data?.code
 
@@ -39,15 +39,7 @@ export const classifySessionResponseError = (error) => {
   return null
 }
 
-export const registerSessionResponseHandler = (handler) => {
-  sessionResponseHandler = typeof handler === "function" ? handler : null
-
-  return () => {
-    if (sessionResponseHandler === handler) sessionResponseHandler = null
-  }
-}
-
-axiosInstance.interceptors.response.use(undefined, (error) => {
+export const signalSessionResponseError = (error) => {
   const signal = classifySessionResponseError(error)
 
   if (signal && sessionResponseHandler) {
@@ -59,6 +51,19 @@ axiosInstance.interceptors.response.use(undefined, (error) => {
     }
   }
 
+  return signal
+}
+
+export const registerSessionResponseHandler = (handler) => {
+  sessionResponseHandler = typeof handler === "function" ? handler : null
+
+  return () => {
+    if (sessionResponseHandler === handler) sessionResponseHandler = null
+  }
+}
+
+axiosInstance.interceptors.response.use(undefined, (error) => {
+  signalSessionResponseError(error)
   return Promise.reject(error)
 })
 
