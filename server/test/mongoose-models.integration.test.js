@@ -96,6 +96,12 @@ test(
       const instructorProfile = await Profile.create({
         about: "Mongoose compatibility instructor",
       })
+      const legacyAdminProfile = await Profile.create({
+        about: "Legacy Mongoose compatibility administrator",
+      })
+      const googleLearnerProfile = await Profile.create({
+        about: "Mongoose compatibility Google learner",
+      })
       const learner = await User.create({
         accountType: "Student",
         additionalDetails: learnerProfile._id,
@@ -111,6 +117,26 @@ test(
         firstName: "Database",
         password: "hashed-password",
       })
+      const legacyAdminId = new mongoose.Types.ObjectId()
+      await User.collection.insertOne({
+        _id: legacyAdminId,
+        accountType: "Admin",
+        additionalDetails: legacyAdminProfile._id,
+        createdAt: new Date("2025-01-01T00:00:00.000Z"),
+        email: "mongoose-legacy-admin@example.test",
+        firstName: "Legacy",
+        lastName: "Administrator",
+        password: "legacy-hashed-password",
+        updatedAt: new Date("2025-01-01T00:00:00.000Z"),
+      })
+      const googleLearner = await User.create({
+        accountType: "Student",
+        additionalDetails: googleLearnerProfile._id,
+        authProviders: ["google"],
+        email: "mongoose-google-learner@example.test",
+        firstName: "Google",
+        googleId: "mongoose-google-subject",
+      })
 
       assert.equal(learner.active, true)
       assert.equal(learner.approved, true)
@@ -119,6 +145,35 @@ test(
       assert.equal(instructor.approved, false)
       assert.equal(instructor.instructorApprovalStatus, "Pending")
       assert.equal(learner.toJSON().sessionVersion, undefined)
+
+      const legacyAdmin = await User.findById(legacyAdminId)
+        .select("+password")
+        .populate({ path: "additionalDetails", select: "about" })
+      assert.equal(legacyAdmin.accountType, "Admin")
+      assert.equal(legacyAdmin.active, true)
+      assert.equal(legacyAdmin.approved, true)
+      assert.deepEqual(legacyAdmin.authProviders, ["local"])
+      assert.equal(legacyAdmin.instructorApprovalStatus, "NotApplicable")
+      assert.equal(legacyAdmin.sessionVersion, 0)
+      assert.equal(legacyAdmin.password, "legacy-hashed-password")
+      assert.equal(
+        legacyAdmin.additionalDetails.about,
+        "Legacy Mongoose compatibility administrator"
+      )
+      const unchangedLegacyAdmin = await User.collection.findOne({
+        _id: legacyAdminId,
+      })
+      assert.equal(Object.hasOwn(unchangedLegacyAdmin, "sessionVersion"), false)
+      assert.equal(Object.hasOwn(unchangedLegacyAdmin, "authProviders"), false)
+
+      const googleLearnerWithIdentity = await User.findById(googleLearner._id)
+        .select("+googleId +password")
+        .lean()
+      assert.equal(
+        googleLearnerWithIdentity.googleId,
+        "mongoose-google-subject"
+      )
+      assert.equal(googleLearnerWithIdentity.password, undefined)
 
       const defaultLearner = await User.findById(learner._id).lean()
       assert.equal(defaultLearner.password, undefined)
@@ -191,6 +246,31 @@ test(
         sectionName: "Database compatibility",
         subSection: [lesson._id],
       })
+      const updatedSection = await Section.findByIdAndUpdate(
+        section._id,
+        { $set: { sectionName: "Database compatibility updated" } },
+        { returnDocument: "after", runValidators: true }
+      ).lean()
+      assert.equal(updatedSection.sectionName, "Database compatibility updated")
+      await assert.rejects(
+        Section.findByIdAndUpdate(
+          section._id,
+          { $set: { sectionName: "s".repeat(201) } },
+          { returnDocument: "after", runValidators: true }
+        ).exec(),
+        (error) => {
+          assert.equal(error?.name, "ValidationError")
+          assert.equal(error?.errors?.sectionName?.kind, "maxlength")
+          return true
+        }
+      )
+      const sectionAfterRejectedUpdate = await Section.findById(
+        section._id
+      ).lean()
+      assert.equal(
+        sectionAfterRejectedUpdate.sectionName,
+        "Database compatibility updated"
+      )
       const course = await Course.create({
         category: category._id,
         courseContent: [section._id],
@@ -289,15 +369,18 @@ test(
         })
       )
 
-      const progress = await CourseProgress.create({
-        completedVideos: [lesson._id],
-        courseID: course._id,
-        userId: learner._id,
-      })
-      await CourseProgress.updateOne(
-        { _id: progress._id },
-        { $addToSet: { completedVideos: lesson._id } }
+      const progress = await CourseProgress.findOneAndUpdate(
+        { courseID: course._id.toString(), userId: learner._id },
+        { $addToSet: { completedVideos: lesson._id } },
+        { returnDocument: "after", setDefaultsOnInsert: true, upsert: true }
       )
+      assert.equal(progress.completedVideos.length, 1)
+      const repeatedProgress = await CourseProgress.findOneAndUpdate(
+        { courseID: course._id, userId: learner._id },
+        { $addToSet: { completedVideos: lesson._id } },
+        { returnDocument: "after", setDefaultsOnInsert: true, upsert: true }
+      )
+      assert.equal(repeatedProgress.completedVideos.length, 1)
       const storedProgress = await timeOperation(
         timings,
         "courseProgressLookupMs",
@@ -308,6 +391,29 @@ test(
           }).lean()
       )
       assert.equal(storedProgress.completedVideos.length, 1)
+      await User.updateOne(
+        { _id: learner._id },
+        { $addToSet: { courseProgress: progress._id } }
+      )
+      const populatedLearner = await User.findById(learner._id)
+        .populate({ path: "courses", select: "courseName" })
+        .populate({
+          path: "courseProgress",
+          populate: [
+            { path: "courseID", select: "courseName" },
+            { path: "completedVideos", select: "title" },
+          ],
+        })
+        .lean()
+      assert.equal(populatedLearner.courses[0].courseName, course.courseName)
+      assert.equal(
+        populatedLearner.courseProgress[0].courseID.courseName,
+        course.courseName
+      )
+      assert.equal(
+        populatedLearner.courseProgress[0].completedVideos[0].title,
+        lesson.title
+      )
       await expectDuplicateKey(
         CourseProgress.create({
           courseID: course._id,
@@ -342,6 +448,13 @@ test(
       const purchase = await Purchase.create(purchaseInput())
       assert.equal(purchase.status, "created")
       assert.equal(purchase.refundWindowOverride, false)
+      const populatedPurchase = await Purchase.findById(purchase._id)
+        .populate({ path: "user", select: "email accountType" })
+        .populate({ path: "courses", select: "courseName" })
+        .lean()
+      assert.equal(populatedPurchase.user.email, learner.email)
+      assert.equal(populatedPurchase.user.accountType, "Student")
+      assert.equal(populatedPurchase.courses[0].courseName, course.courseName)
 
       purchase.amount = 1
       purchase.courses = []
