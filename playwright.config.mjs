@@ -6,7 +6,7 @@ const e2eApiBaseUrl =
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: "catalog.spec.js",
+  testMatch: ["catalog.spec.js", "learning.spec.js"],
   outputDir: "test-results/playwright",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
