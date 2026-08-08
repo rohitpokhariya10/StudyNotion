@@ -23,6 +23,29 @@ const withRequestIdResponseHeader = (response) => ({
   },
 })
 
+const errorResponse = (description) =>
+  withRequestIdResponseHeader({
+    description,
+    content: {
+      "application/json": {
+        schema: { $ref: "#/components/schemas/ApiErrorResponse" },
+      },
+    },
+  })
+
+const learningErrorResponses = () => ({
+  400: errorResponse("The learning route parameters or request are invalid."),
+  401: errorResponse("Authentication is required or the session is invalid."),
+  403: errorResponse("The learner is not entitled to this course."),
+  404: errorResponse("The course or lesson does not exist for this learner."),
+  413: errorResponse("The request payload is too large."),
+  415: errorResponse("The request media type is not supported."),
+  423: errorResponse("Account deletion is pending."),
+  428: errorResponse("Current policies must be accepted."),
+  429: errorResponse("The global API rate limit was exceeded."),
+  500: errorResponse("The learning state could not be read or updated."),
+})
+
 const createOpenApiDocument = () => {
   const queryShape = catalogQueryOpenApiSchema.shape
   const descriptions = {
@@ -132,8 +155,85 @@ const createOpenApiDocument = () => {
           },
         },
       },
+      "/api/v2/learning/courses/{courseId}": {
+        get: {
+          operationId: "getLearningCourse",
+          summary: "Get an enrolled student's course learning state",
+          security: [{ SessionCookie: [] }],
+          parameters: [
+            { $ref: "#/components/parameters/RequestId" },
+            {
+              name: "courseId",
+              in: "path",
+              required: true,
+              description: "Enrolled course ObjectId.",
+              schema: { $ref: "#/components/schemas/ObjectId" },
+            },
+          ],
+          responses: {
+            200: withRequestIdResponseHeader({
+              description:
+                "The current curriculum and canonical learner progress.",
+              content: {
+                "application/json": {
+                  schema: {
+                    $ref: "#/components/schemas/LearningCourseResponse",
+                  },
+                },
+              },
+            }),
+            ...learningErrorResponses(),
+          },
+        },
+      },
+      "/api/v2/learning/courses/{courseId}/lessons/{lessonId}/progress": {
+        put: {
+          operationId: "markLearningLessonComplete",
+          summary: "Idempotently mark an enrolled course lesson complete",
+          security: [{ SessionCookie: [] }],
+          parameters: [
+            { $ref: "#/components/parameters/RequestId" },
+            {
+              name: "courseId",
+              in: "path",
+              required: true,
+              description: "Enrolled course ObjectId.",
+              schema: { $ref: "#/components/schemas/ObjectId" },
+            },
+            {
+              name: "lessonId",
+              in: "path",
+              required: true,
+              description: "Lesson ObjectId in the current curriculum.",
+              schema: { $ref: "#/components/schemas/ObjectId" },
+            },
+          ],
+          responses: {
+            200: withRequestIdResponseHeader({
+              description: "The canonical progress after completion.",
+              content: {
+                "application/json": {
+                  schema: {
+                    $ref: "#/components/schemas/LearningProgressResponse",
+                  },
+                },
+              },
+            }),
+            ...learningErrorResponses(),
+          },
+        },
+      },
     },
     components: {
+      securitySchemes: {
+        SessionCookie: {
+          type: "apiKey",
+          in: "cookie",
+          name: "studynotion_session",
+          description:
+            "HttpOnly session cookie. Deployments may configure its name.",
+        },
+      },
       headers: {
         RequestId: {
           description: "Correlation ID for this response.",

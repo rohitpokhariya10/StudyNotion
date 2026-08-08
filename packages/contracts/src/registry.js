@@ -70,6 +70,10 @@ const {
 } = require("./errors")
 const {
   courseProgressSchema,
+  learningCourseParamsSchema,
+  learningCourseResponseSchema,
+  learningLessonProgressParamsSchema,
+  learningProgressResponseSchema,
   lessonPlaybackSchema,
   progressUpdateRequestSchema,
 } = require("./learning")
@@ -156,6 +160,10 @@ const contractSchemas = Object.freeze({
   ProgressUpdateRequest: progressUpdateRequestSchema,
   CourseProgress: courseProgressSchema,
   LessonPlayback: lessonPlaybackSchema,
+  LearningCourseParams: learningCourseParamsSchema,
+  LearningLessonProgressParams: learningLessonProgressParamsSchema,
+  LearningCourseResponse: learningCourseResponseSchema,
+  LearningProgressResponse: learningProgressResponseSchema,
   CreateReviewRequest: createReviewRequestSchema,
   PublicReview: publicReviewSchema,
   CheckoutPolicy: checkoutPolicySchema,

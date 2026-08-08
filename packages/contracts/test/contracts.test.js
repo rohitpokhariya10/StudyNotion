@@ -650,6 +650,12 @@ test("OpenAPI 3.1 is deterministic and generated from every registered schema", 
   assert.deepEqual(first, second)
   assert.equal(first.openapi, "3.1.0")
   assert.ok(first.paths["/api/v2/courses"])
+  assert.ok(first.paths["/api/v2/learning/courses/{courseId}"])
+  assert.ok(
+    first.paths[
+      "/api/v2/learning/courses/{courseId}/lessons/{lessonId}/progress"
+    ]
+  )
   assert.deepEqual(
     Object.keys(first.components.schemas),
     Object.keys(contracts.contractSchemas)
@@ -702,5 +708,28 @@ test("OpenAPI 3.1 is deterministic and generated from every registered schema", 
     assert.deepEqual(response.headers["x-request-id"], {
       $ref: "#/components/headers/RequestId",
     })
+  }
+
+  assert.deepEqual(first.components.securitySchemes.SessionCookie, {
+    type: "apiKey",
+    in: "cookie",
+    name: "studynotion_session",
+    description: "HttpOnly session cookie. Deployments may configure its name.",
+  })
+  for (const operation of [
+    first.paths["/api/v2/learning/courses/{courseId}"].get,
+    first.paths[
+      "/api/v2/learning/courses/{courseId}/lessons/{lessonId}/progress"
+    ].put,
+  ]) {
+    assert.deepEqual(operation.security, [{ SessionCookie: [] }])
+    assert.deepEqual(operation.parameters[0], {
+      $ref: "#/components/parameters/RequestId",
+    })
+    for (const response of Object.values(operation.responses)) {
+      assert.deepEqual(response.headers["x-request-id"], {
+        $ref: "#/components/headers/RequestId",
+      })
+    }
   }
 })
