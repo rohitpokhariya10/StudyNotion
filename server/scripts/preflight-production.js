@@ -12,7 +12,67 @@ const RatingAndReview = require("../models/RatingandReview")
 const Section = require("../models/Section")
 const SubSection = require("../models/Subsection")
 const User = require("../models/User")
+const {
+  createEnrollmentConsistencyService,
+} = require("../domains/enrollment/enrollmentConsistencyService")
+const {
+  assertEnrollmentConsistencyReport,
+} = require("../domains/enrollment/enrollmentConsistencyReport")
 const { isLessonPublishReady } = require("../utils/courseLifecycle")
+const logger = require("../utils/logger")
+
+const PREFLIGHT_EXIT_CODES = Object.freeze({
+  healthy: 0,
+  warning: 1,
+  blocking: 2,
+  operational_error: 3,
+})
+
+const PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT = 5
+class EnrollmentPreflightReportError extends Error {
+  constructor() {
+    super("Enrollment consistency audit returned an invalid report")
+    this.name = "EnrollmentPreflightReportError"
+    this.code = "ENROLLMENT_PREFLIGHT_INVALID_REPORT"
+  }
+}
+
+const preflightLogger = logger.createLogger({
+  write: (line) => process.stderr.write(`${line}\n`),
+})
+
+const validateEnrollmentConsistencyReport = (report) => {
+  try {
+    return assertEnrollmentConsistencyReport(report, {
+      expectedMode: "read_only",
+    })
+  } catch {
+    throw new EnrollmentPreflightReportError()
+  }
+}
+
+const classifyPreflightResult = (findings, enrollmentConsistency) => {
+  validateEnrollmentConsistencyReport(enrollmentConsistency)
+  if (Object.values(findings).some((count) => count > 0)) return "blocking"
+  if (enrollmentConsistency.status === "blocking") return "blocking"
+  if (enrollmentConsistency.status === "warning") return "warning"
+  return "healthy"
+}
+
+const enrollmentConsistencyForPreflight = (report) => {
+  validateEnrollmentConsistencyReport(report)
+
+  const samples = Array.isArray(report.samples) ? report.samples : []
+  return {
+    schemaVersion: report.schemaVersion,
+    status: report.status,
+    summary: report.summary,
+    samples: samples.slice(0, PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT),
+    truncated:
+      report.truncated === true ||
+      samples.length > PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT,
+  }
+}
 
 const duplicateGroupCount = async (model, groupId, match = {}) => {
   const [result] = await model.aggregate([
@@ -617,28 +677,58 @@ const run = async () => {
     duplicateIdempotencyKeys,
   }
 
-  console.log(
-    JSON.stringify({ database: mongoose.connection.name, findings }, null, 2)
-  )
-
-  if (Object.values(findings).some((count) => count > 0)) {
-    throw new Error(
-      "Production preflight failed; resolve every non-zero finding before deployment"
-    )
+  const enrollmentConsistency = await createEnrollmentConsistencyService({
+    targetLogger: preflightLogger,
+  }).audit({ sampleLimit: PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT })
+  const status = classifyPreflightResult(findings, enrollmentConsistency)
+  const result = {
+    database: mongoose.connection.name,
+    status,
+    exitCode: PREFLIGHT_EXIT_CODES[status],
+    findings,
+    enrollmentConsistency: enrollmentConsistencyForPreflight(
+      enrollmentConsistency
+    ),
   }
 
-  console.log("Production data preflight passed")
+  console.log(JSON.stringify(result, null, 2))
+  if (status === "healthy") console.log("Production data preflight passed")
+  return result
 }
 
-if (require.main === module) {
-  run()
-    .catch((error) => {
-      console.error("Production preflight failed:", error.message)
-      process.exitCode = 1
+const main = async ({
+  disconnect = mongoose.disconnect.bind(mongoose),
+  runPreflight = run,
+  setExitCode = (exitCode) => {
+    process.exitCode = exitCode
+  },
+  targetLogger = preflightLogger,
+} = {}) => {
+  try {
+    const result = await runPreflight()
+    setExitCode(result.exitCode)
+    return result
+  } catch (error) {
+    targetLogger.error("production.preflight_failed", {
+      error: logger.errorMetadata(error),
+      status: "operational_error",
     })
-    .finally(async () => {
-      await mongoose.disconnect()
-    })
+    setExitCode(PREFLIGHT_EXIT_CODES.operational_error)
+    return undefined
+  } finally {
+    await disconnect()
+  }
 }
 
-module.exports = { isPublishedLessonMetadataValid: isLessonPublishReady }
+if (require.main === module) void main()
+
+module.exports = {
+  EnrollmentPreflightReportError,
+  PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT,
+  PREFLIGHT_EXIT_CODES,
+  classifyPreflightResult,
+  enrollmentConsistencyForPreflight,
+  isPublishedLessonMetadataValid: isLessonPublishReady,
+  main,
+  run,
+}
