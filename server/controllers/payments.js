@@ -27,6 +27,11 @@ const ACTIVE_PURCHASE_STATUSES = [
   "fulfilled",
   "payment_review",
 ]
+const ENTITLEMENT_EVENT_SOURCES = Object.freeze({
+  ADMIN_RECONCILIATION: "admin_reconciliation",
+  BROWSER_VERIFICATION: "browser_verification",
+  WEBHOOK: "webhook",
+})
 
 const safeLogIdentifier = (value) => {
   const normalized = value === undefined || value === null ? "" : String(value)
@@ -34,22 +39,55 @@ const safeLogIdentifier = (value) => {
 }
 
 const logPaymentFailure = (event, error, metadata = {}) => {
-  const providerRequestId =
-    error?.error?.metadata?.request_id ||
-    error?.headers?.["x-request-id"] ||
-    error?.requestId
-  const details = {
-    code:
-      safeLogIdentifier(error?.error?.code || error?.code) || "PAYMENT_ERROR",
-    requestId:
-      safeLogIdentifier(metadata.requestId || providerRequestId) || "unknown",
+  try {
+    const providerRequestId =
+      error?.error?.metadata?.request_id ||
+      error?.headers?.["x-request-id"] ||
+      error?.requestId
+    const details = {
+      code:
+        safeLogIdentifier(error?.error?.code || error?.code) || "PAYMENT_ERROR",
+      requestId:
+        safeLogIdentifier(metadata.requestId || providerRequestId) || "unknown",
+    }
+    for (const [key, value] of Object.entries(metadata)) {
+      if (key === "requestId") continue
+      const safeValue = safeLogIdentifier(value)
+      if (safeValue) details[key] = safeValue
+    }
+    logger.error(event, details)
+  } catch {
+    // Failure reporting is best effort. A logging transport failure must never
+    // interrupt payment state transitions or change an API response.
   }
-  for (const [key, value] of Object.entries(metadata)) {
-    if (key === "requestId") continue
-    const safeValue = safeLogIdentifier(value)
-    if (safeValue) details[key] = safeValue
+}
+
+const boundedCourseCount = (value) =>
+  Number.isInteger(value) ? Math.max(0, Math.min(value, 20)) : 0
+
+const entitlementEventFields = ({
+  courseCount,
+  purchaseId,
+  requestId,
+  revocableCourseCount,
+  source,
+}) => ({
+  requestId: safeLogIdentifier(requestId) || "unknown",
+  purchaseId: safeLogIdentifier(purchaseId) || "unknown",
+  source,
+  courseCount: boundedCourseCount(courseCount),
+  ...(revocableCourseCount === undefined
+    ? {}
+    : { revocableCourseCount: boundedCourseCount(revocableCourseCount) }),
+})
+
+const logEntitlementEvent = (event, fields) => {
+  try {
+    logger.info(event, fields)
+  } catch {
+    // Observability is best effort. A logging transport failure must never
+    // change a completed payment, enrollment, or refund transition.
   }
-  logger.error(event, details)
 }
 
 const paymentUnavailable = (res) =>
@@ -282,7 +320,8 @@ const respondForExistingCheckout = async (
 const fulfillPurchase = async (
   purchase,
   razorpayPaymentId,
-  reconciliationAudit
+  reconciliationAudit,
+  observability
 ) => {
   if (purchase.status === "fulfilled") {
     return purchase.razorpayPaymentId === razorpayPaymentId
@@ -376,6 +415,15 @@ const fulfillPurchase = async (
   )
 
   if (newlyFulfilledPurchase) {
+    logEntitlementEvent(
+      "purchase.entitlement_activated",
+      entitlementEventFields({
+        courseCount: claimedPurchase.courses?.length,
+        purchaseId: claimedPurchase._id,
+        requestId: observability.requestId,
+        source: observability.source,
+      })
+    )
     await sendEnrollmentEmails(enrolledCourses, claimedPurchase.user)
   } else if (reconciliationAudit) {
     const auditedPurchase = await Purchase.findOneAndUpdate(
@@ -783,7 +831,12 @@ exports.razorpayWebhook = async (req, res) => {
       })
     }
 
-    if (!(await fulfillPurchase(purchase, razorpayPaymentId))) {
+    if (
+      !(await fulfillPurchase(purchase, razorpayPaymentId, undefined, {
+        requestId: req.requestId,
+        source: ENTITLEMENT_EVENT_SOURCES.WEBHOOK,
+      }))
+    ) {
       const outcome = await reconcileUnfulfilledCapturedPayment(
         purchase,
         razorpayPaymentId
@@ -879,7 +932,12 @@ exports.verifyPayment = async (req, res) => {
       )
     }
 
-    if (!(await fulfillPurchase(purchase, razorpayPaymentId))) {
+    if (
+      !(await fulfillPurchase(purchase, razorpayPaymentId, undefined, {
+        requestId: req.requestId,
+        source: ENTITLEMENT_EVENT_SOURCES.BROWSER_VERIFICATION,
+      }))
+    ) {
       const outcome = await reconcileUnfulfilledCapturedPayment(
         purchase,
         razorpayPaymentId
@@ -1239,7 +1297,7 @@ const revokeRefundedEntitlements = async (purchase) => {
     })
     if (!otherEntitlement) revocableCourses.push(courseId)
   }
-  if (!revocableCourses.length) return
+  if (!revocableCourses.length) return 0
 
   const progressIds = await CourseProgress.distinct("_id", {
     courseID: { $in: revocableCourses },
@@ -1264,6 +1322,7 @@ const revokeRefundedEntitlements = async (purchase) => {
       }
     ),
   ])
+  return revocableCourses.length
 }
 
 exports.resolvePaymentReview = async (req, res) => {
@@ -1629,7 +1688,7 @@ exports.resolvePaymentReview = async (req, res) => {
       }
 
       if (!purchase.refundEntitlementsRevokedAt) {
-        await revokeRefundedEntitlements(purchase)
+        const revocableCourseCount = await revokeRefundedEntitlements(purchase)
         const entitlementsRevoked = await Purchase.findOneAndUpdate(
           {
             _id: purchase._id,
@@ -1645,6 +1704,16 @@ exports.resolvePaymentReview = async (req, res) => {
           throw new Error("Refund entitlement audit lost its lock")
         }
         purchase = entitlementsRevoked
+        logEntitlementEvent(
+          "purchase.entitlement_revoked",
+          entitlementEventFields({
+            courseCount: purchase.courses?.length,
+            purchaseId: purchase._id,
+            requestId: req.requestId,
+            revocableCourseCount,
+            source: ENTITLEMENT_EVENT_SOURCES.ADMIN_RECONCILIATION,
+          })
+        )
       }
 
       const resolved = await Purchase.findOneAndUpdate(
@@ -1725,7 +1794,11 @@ exports.resolvePaymentReview = async (req, res) => {
       !(await fulfillPurchase(
         payable,
         payable.razorpayPaymentId,
-        reconciliationAudit
+        reconciliationAudit,
+        {
+          requestId: req.requestId,
+          source: ENTITLEMENT_EVENT_SOURCES.ADMIN_RECONCILIATION,
+        }
       ))
     ) {
       return paymentFailed(

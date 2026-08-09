@@ -201,9 +201,19 @@ const loadPaymentsController = (overrides = {}) => {
   installMock("../models/User", User)
   installMock("../utils/logger", {
     debug: (event, fields) => logs.push({ level: "debug", event, fields }),
-    info: (event, fields) => logs.push({ level: "info", event, fields }),
+    info: (event, fields) => {
+      logs.push({ level: "info", event, fields })
+      if (overrides.failingLogEvents?.includes(event)) {
+        throw new Error("simulated logging transport failure")
+      }
+    },
     warn: (event, fields) => logs.push({ level: "warn", event, fields }),
-    error: (event, fields) => logs.push({ level: "error", event, fields }),
+    error: (event, fields) => {
+      logs.push({ level: "error", event, fields })
+      if (overrides.failingErrorLogEvents?.includes(event)) {
+        throw new Error("simulated error logging transport failure")
+      }
+    },
     errorMetadata: (error) => ({ name: error?.name || "Error" }),
   })
   installMock("../utils/mailSender", async () => ({ response: "sent" }))
@@ -548,9 +558,11 @@ test("a repeated capture reuses the active Razorpay order", async () => {
   assert.equal(events.filter(([event]) => event === "razorpay-order").length, 1)
 })
 
-test("verification ignores substituted client course IDs and is idempotent", async () => {
+test("verification ignores substituted client course IDs, survives logging failure, and is idempotent", async () => {
   process.env.RAZORPAY_SECRET = "test-payment-secret"
-  const { controller, events } = loadPaymentsController()
+  const { controller, events, logs } = loadPaymentsController({
+    failingLogEvents: ["purchase.entitlement_activated"],
+  })
   const res = createResponse()
   const signature = crypto
     .createHmac("sha256", process.env.RAZORPAY_SECRET)
@@ -558,6 +570,7 @@ test("verification ignores substituted client course IDs and is idempotent", asy
     .digest("hex")
 
   const request = {
+    requestId: "payment-browser-verification",
     user: { id: userId },
     body: {
       razorpay_order_id: "order_1",
@@ -582,11 +595,26 @@ test("verification ignores substituted client course IDs and is idempotent", asy
   assert.equal(secondResponse.body.success, true)
   assert.equal(secondResponse.body.message, "Payment Verified")
   assert.equal(events.filter(([event]) => event === "enroll").length, 1)
+  assert.deepEqual(
+    logs.filter(({ event }) => event === "purchase.entitlement_activated"),
+    [
+      {
+        level: "info",
+        event: "purchase.entitlement_activated",
+        fields: {
+          requestId: "payment-browser-verification",
+          purchaseId: "64b000000000000000000006",
+          source: "browser_verification",
+          courseCount: 1,
+        },
+      },
+    ]
+  )
 })
 
 test("signed Razorpay webhooks fulfill the server-owned purchase once", async () => {
   process.env.RAZORPAY_WEBHOOK_SECRET = "test-webhook-secret"
-  const { controller, events, purchase } = loadPaymentsController()
+  const { controller, events, logs, purchase } = loadPaymentsController()
   const payload = Buffer.from(
     JSON.stringify({
       event: "payment.captured",
@@ -611,6 +639,7 @@ test("signed Razorpay webhooks fulfill the server-owned purchase once", async ()
     body: payload,
     get: (name) =>
       name.toLowerCase() === "x-razorpay-signature" ? signature : undefined,
+    requestId: "payment-webhook",
   }
 
   const firstResponse = createResponse()
@@ -625,6 +654,88 @@ test("signed Razorpay webhooks fulfill the server-owned purchase once", async ()
   assert.equal(duplicateResponse.statusCode, 200)
   assert.equal(duplicateResponse.body.success, true)
   assert.equal(events.filter(([event]) => event === "enroll").length, 1)
+  assert.deepEqual(
+    logs.filter(({ event }) => event === "purchase.entitlement_activated"),
+    [
+      {
+        level: "info",
+        event: "purchase.entitlement_activated",
+        fields: {
+          requestId: "payment-webhook",
+          purchaseId: "64b000000000000000000006",
+          source: "webhook",
+          courseCount: 1,
+        },
+      },
+    ]
+  )
+})
+
+test("manual fulfillment records one bounded entitlement activation", async () => {
+  let manualPurchase
+  const { controller, logs, purchase } = loadPaymentsController({
+    Purchase: {
+      findOneAndUpdate: async (query, update) => {
+        if (
+          query.status === "payment_review" &&
+          manualPurchase.status !== "payment_review"
+        ) {
+          return null
+        }
+        if (
+          query.status?.$ne === "fulfilled" &&
+          manualPurchase.status === "fulfilled"
+        ) {
+          return null
+        }
+        Object.assign(manualPurchase, update.$set || {})
+        if (update.$unset) {
+          for (const field of Object.keys(update.$unset)) {
+            delete manualPurchase[field]
+          }
+        }
+        return manualPurchase
+      },
+    },
+  })
+  manualPurchase = purchase
+  purchase.status = "payment_review"
+  purchase.paidAt = new Date()
+  purchase.razorpayPaymentId = "pay_manual_fulfillment"
+  const request = {
+    body: {
+      action: "fulfill",
+      confirmation: "FULFILL PAYMENT",
+      note: "Captured payment and learner eligibility were manually reviewed.",
+    },
+    params: { purchaseId: purchase._id },
+    requestId: "payment-admin-reconciliation",
+    user: { id: "64b000000000000000000009" },
+  }
+
+  const firstResponse = createResponse()
+  await controller.resolvePaymentReview(request, firstResponse)
+  assert.equal(firstResponse.statusCode, 200)
+  assert.equal(firstResponse.body.data.resolution, "fulfilled")
+
+  const repeatedResponse = createResponse()
+  await controller.resolvePaymentReview(request, repeatedResponse)
+  assert.equal(repeatedResponse.statusCode, 200)
+  assert.deepEqual(
+    logs.filter(({ event }) => event === "purchase.entitlement_activated"),
+    [
+      {
+        level: "info",
+        event: "purchase.entitlement_activated",
+        fields: {
+          requestId: "payment-admin-reconciliation",
+          purchaseId: "64b000000000000000000006",
+          source: "admin_reconciliation",
+          courseCount: 1,
+        },
+      },
+    ]
+  )
 })
 
 test("a captured payment for an expired checkout is held without enrollment", async () => {
@@ -787,10 +898,11 @@ test("fulfillment holds payment when the Student became inactive", async () => {
   )
 })
 
-test("a captured payment for a missing course becomes payment_review", async () => {
+test("webhook enrollment failure reaches payment_review when error logging fails", async () => {
   process.env.RAZORPAY_WEBHOOK_SECRET = "test-webhook-secret"
-  const { controller, events, purchase } = loadPaymentsController({
+  const { controller, events, logs, purchase } = loadPaymentsController({
     Course: { find: () => ({ select: async () => [] }) },
+    failingErrorLogEvents: ["payment.captured_payment_requires_review"],
   })
   const payload = Buffer.from(
     JSON.stringify({
@@ -819,6 +931,7 @@ test("a captured payment for a missing course becomes payment_review", async () 
       body: payload,
       get: (name) =>
         name.toLowerCase() === "x-razorpay-signature" ? signature : undefined,
+      requestId: "webhook-enrollment-failure",
     },
     res
   )
@@ -829,6 +942,87 @@ test("a captured payment for a missing course becomes payment_review", async () 
   assert.equal(
     events.some(([event]) => event === "enroll"),
     false
+  )
+  assert.equal(
+    logs.filter(
+      ({ event }) => event === "payment.captured_payment_requires_review"
+    ).length,
+    1
+  )
+})
+
+test("verification enrollment failure reaches payment_review when error logging fails", async () => {
+  process.env.RAZORPAY_SECRET = "test-payment-secret"
+  const { controller, events, logs, purchase } = loadPaymentsController({
+    Course: { find: () => ({ select: async () => [] }) },
+    failingErrorLogEvents: ["payment.captured_payment_requires_review"],
+  })
+  const signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET)
+    .update("order_1|payment_missing_course")
+    .digest("hex")
+  const res = createResponse()
+
+  await controller.verifyPayment(
+    {
+      body: {
+        razorpay_order_id: "order_1",
+        razorpay_payment_id: "payment_missing_course",
+        razorpay_signature: signature,
+      },
+      requestId: "verification-enrollment-failure",
+      user: { id: userId },
+    },
+    res
+  )
+
+  assert.equal(res.statusCode, 409)
+  assert.equal(res.body.success, false)
+  assert.equal(purchase.status, "payment_review")
+  assert.equal(
+    events.some(([event]) => event === "enroll"),
+    false
+  )
+  assert.equal(
+    logs.filter(
+      ({ event }) => event === "payment.captured_payment_requires_review"
+    ).length,
+    1
+  )
+})
+
+test("manual fulfillment enrollment failure remains in review when error logging fails", async () => {
+  const { controller, logs, purchase } = loadPaymentsController({
+    Course: { find: () => ({ select: async () => [] }) },
+    failingErrorLogEvents: ["payment.captured_payment_requires_review"],
+  })
+  purchase.status = "payment_review"
+  purchase.paidAt = new Date()
+  purchase.razorpayPaymentId = "payment_manual_enrollment_failure"
+  const res = createResponse()
+
+  await controller.resolvePaymentReview(
+    {
+      body: {
+        action: "fulfill",
+        confirmation: "FULFILL PAYMENT",
+        note: "Captured payment was reviewed before manual enrollment retry.",
+      },
+      params: { purchaseId: purchase._id },
+      requestId: "manual-enrollment-failure",
+      user: { id: "64b000000000000000000009" },
+    },
+    res
+  )
+
+  assert.equal(res.statusCode, 409)
+  assert.equal(res.body.success, false)
+  assert.equal(purchase.status, "payment_review")
+  assert.equal(
+    logs.filter(
+      ({ event }) => event === "payment.captured_payment_requires_review"
+    ).length,
+    1
   )
 })
 
@@ -1197,10 +1391,11 @@ test("a failed provider refund requires an explicit audited retry", async () => 
   assert.equal(providerRefunds, 2)
 })
 
-test("processed refunds retry idempotent entitlement cleanup before finalizing", async () => {
+test("processed refunds survive logging failure and retry idempotent entitlement cleanup before finalizing", async () => {
   let providerRefunds = 0
   let revocationAttempts = 0
-  const { controller, purchase } = loadPaymentsController({
+  const { controller, logs, purchase } = loadPaymentsController({
+    failingLogEvents: ["purchase.entitlement_revoked"],
     Course: {
       updateMany: async (_query, update) => {
         if (update.$pull?.studentsEnroled) {
@@ -1243,6 +1438,7 @@ test("processed refunds retry idempotent entitlement cleanup before finalizing",
       note: "Approved learner refund with entitlement cleanup required.",
     },
     params: { purchaseId: purchase._id },
+    requestId: "payment-refund-reconciliation",
     user: { id: "64b000000000000000000009" },
   }
 
@@ -1259,4 +1455,20 @@ test("processed refunds retry idempotent entitlement cleanup before finalizing",
   assert.equal(purchase.refundEntitlementsRevokedAt instanceof Date, true)
   assert.equal(providerRefunds, 1)
   assert.equal(revocationAttempts, 2)
+  assert.deepEqual(
+    logs.filter(({ event }) => event === "purchase.entitlement_revoked"),
+    [
+      {
+        level: "info",
+        event: "purchase.entitlement_revoked",
+        fields: {
+          requestId: "payment-refund-reconciliation",
+          purchaseId: "64b000000000000000000006",
+          source: "admin_reconciliation",
+          courseCount: 1,
+          revocableCourseCount: 1,
+        },
+      },
+    ]
+  )
 })
