@@ -530,6 +530,20 @@ test("invalid roles never action User.courses ownership evidence", () => {
   assert.deepEqual(issueCodes(contextualOwnership), ["INVALID_USER_ROLE"])
   assert.equal(contextualOwnership.issues[0].severity, "warning")
   assert.equal(contextualOwnership.proposals[0].proposedWrites.length, 0)
+
+  const duplicateContextualOwnership = mapEnrollmentConsistencyDryRun(
+    pairState({ userAccountType: "Instructor", userCourseCount: 2 })
+  )
+  assert.deepEqual(issueCodes(duplicateContextualOwnership), [
+    "INVALID_USER_ROLE",
+    "DUPLICATE_USER_COURSE_REFERENCES",
+  ])
+  assert.equal(
+    duplicateContextualOwnership.proposals.some(({ proposedWrites }) =>
+      proposedWrites.some(({ target }) => target === "User.courses")
+    ),
+    false
+  )
 })
 
 test("ineligible Students never receive entitlement proposals", () => {

@@ -1109,6 +1109,12 @@ const proposalForIssue = ({ canonicalState, issue: foundIssue, state }) => {
       break
   }
 
+  if (state.userAccountType !== "Student") {
+    proposedWrites = proposedWrites.filter(
+      ({ target }) => target !== "User.courses"
+    )
+  }
+
   return {
     canonicalState,
     confidence,
