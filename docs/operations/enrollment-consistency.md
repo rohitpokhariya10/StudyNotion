@@ -23,7 +23,7 @@ There is no HTTP endpoint and no automatic repair mode.
 
 ## Commands
 
-Show usage without reading configuration or connecting to MongoDB:
+Show usage without connecting to MongoDB:
 
 ```bash
 npm --workspace studynotion-backend run enrollment:audit -- --help
