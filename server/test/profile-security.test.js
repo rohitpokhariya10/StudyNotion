@@ -27,6 +27,48 @@ const installMock = (modulePath, exports) => {
   require.cache[filename] = { id: filename, filename, loaded: true, exports }
 }
 
+const installOptionalMock = (modulePath, exports) => {
+  try {
+    installMock(modulePath, exports)
+    return true
+  } catch (error) {
+    if (error?.code !== "MODULE_NOT_FOUND") throw error
+    return false
+  }
+}
+
+const entitlementCalls = []
+const failedEntitlementMethods = new Set()
+const entitlementService = Object.fromEntries(
+  [
+    "reserveForPurchase",
+    "activateForPurchase",
+    "terminalizeProcessedRefund",
+    "terminalizeAccountDeletion",
+    "catchUpBoundaryPurchases",
+  ].map((method) => [
+    method,
+    async (...args) => {
+      entitlementCalls.push([method, ...args])
+      if (failedEntitlementMethods.has(method)) {
+        throw new Error(`simulated ${method} failure`)
+      }
+      return { ok: true }
+    },
+  ])
+)
+entitlementService.runNonAuthoritativeSidecar = async ({ operation }) => {
+  try {
+    return { ok: true, result: await operation() }
+  } catch {
+    return { ok: false }
+  }
+}
+const entitlementServiceMocked = installOptionalMock(
+  "../domains/entitlement/entitlementService",
+  entitlementService
+)
+
 const User = {
   findById: () => ({
     select: async () => currentUser,
@@ -183,18 +225,27 @@ test("account deletion anonymizes identity and removes learner-owned data", asyn
   calls.length = 0
   const response = createResponse()
 
-  await profileController.deleteAccount(
-    {
-      body: {
-        confirmationEmail: "learner@example.com",
-        currentPassword: "CurrentPassword1",
+  failedEntitlementMethods.add("terminalizeAccountDeletion")
+  try {
+    await profileController.deleteAccount(
+      {
+        body: {
+          confirmationEmail: "learner@example.com",
+          currentPassword: "CurrentPassword1",
+        },
+        user: { id: userId },
       },
-      user: { id: userId },
-    },
-    response
-  )
+      response
+    )
+  } finally {
+    failedEntitlementMethods.delete("terminalizeAccountDeletion")
+  }
 
   assert.equal(response.statusCode, 200)
+  assert.deepEqual(response.body, {
+    success: true,
+    message: "Account deleted successfully",
+  })
   assert.equal(response.sessionCleared, true)
   const userUpdate = calls.find(
     ([event, update]) => event === "user-update" && update.$set?.email
@@ -205,6 +256,22 @@ test("account deletion anonymizes identity and removes learner-owned data", asyn
   assert.ok(calls.some(([event]) => event === "progress-delete"))
   assert.ok(calls.some(([event]) => event === "review-delete"))
   assert.ok(calls.some(([event]) => event === "media-delete"))
+  assert.ok(
+    calls.some(
+      ([event, query, update]) =>
+        event === "course-update" &&
+        query.studentsEnroled === currentUser._id &&
+        update.$pull?.studentsEnroled === currentUser._id
+    )
+  )
+  if (entitlementServiceMocked) {
+    const terminalization = entitlementCalls.filter(
+      ([method]) => method === "terminalizeAccountDeletion"
+    )
+    assert.equal(terminalization.length, 1)
+    assert.equal(String(terminalization[0][1].studentId), userId)
+    assert.equal(terminalization[0][1].terminalAt instanceof Date, true)
+  }
 })
 
 test("account deletion requires the current local password", async () => {
@@ -269,6 +336,11 @@ test("a failed deletion cleanup remains pending and retries idempotently", async
   )
 
   assert.equal(response.statusCode, 500)
+  assert.deepEqual(response.body, {
+    success: false,
+    code: "ACCOUNT_DELETION_PENDING",
+    message: "Account deletion is pending and can be retried safely",
+  })
   assert.equal(
     calls.some(
       ([event, update]) =>
@@ -292,6 +364,10 @@ test("a failed deletion cleanup remains pending and retries idempotently", async
     retryResponse
   )
   assert.equal(retryResponse.statusCode, 200)
+  assert.deepEqual(retryResponse.body, {
+    success: true,
+    message: "Account deleted successfully",
+  })
   assert.equal(retryResponse.sessionCleared, true)
 })
 
