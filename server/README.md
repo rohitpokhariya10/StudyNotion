@@ -275,6 +275,13 @@ required. Rolling the application back does not require dropping them; remove
 them only through a separate backup-first database change after confirming the
 previous application does not use them.
 
+The same controlled command declares the seven Entitlement and four private
+Entitlement-operation-audit indexes approved by ADR 0010. These collections are
+inert and may be empty: no payment/refund writer, authorization reader, API, or
+backfill uses them in this release. Exact definitions and guarded MongoDB 8
+verification are recorded in
+`docs/audits/entitlement-inert-persistence-2026-08.md`.
+
 ## Upgrading legacy production data
 
 Take and verify a database backup first. Older users may not have session,
