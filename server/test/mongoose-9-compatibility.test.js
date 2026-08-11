@@ -5,6 +5,8 @@ const mongoose = require("mongoose")
 const Category = require("../models/Category")
 const Course = require("../models/Course")
 const CourseProgress = require("../models/CourseProgress")
+const Entitlement = require("../models/Entitlement")
+const EntitlementOperationAudit = require("../models/EntitlementOperationAudit")
 const OTP = require("../models/OTP")
 const Purchase = require("../models/Purchase")
 const RatingAndReview = require("../models/RatingandReview")
@@ -58,6 +60,8 @@ test("Mongoose 9 index declarations preserve semantics without background", () =
     Category,
     Course,
     CourseProgress,
+    Entitlement,
+    EntitlementOperationAudit,
     RatingAndReview,
     Purchase,
   ]) {

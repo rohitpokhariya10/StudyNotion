@@ -12,6 +12,8 @@ const models = [
   require("../models/CourseProgress"),
   require("../models/RatingandReview"),
   require("../models/Purchase"),
+  require("../models/Entitlement"),
+  require("../models/EntitlementOperationAudit"),
 ]
 
 const run = async () => {
