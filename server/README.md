@@ -121,6 +121,47 @@ are independently bounded by the `MONGODB_*_TIMEOUT_MS` variables in the
 environment examples. Tune them to the deployed region and observed query
 latency; do not remove the bounds.
 
+## Entitlement Stage 2 sidecar
+
+Entitlement is a non-authoritative, authorization-write-only sidecar in Stage 2.
+Recovery and preflight read it operationally, but existing Course/User
+enrollment mirrors and security gates remain the only product authorization
+path; there is no Entitlement fallback or public API. Set one
+immutable `ENTITLEMENT_SIDECAR_STARTED_AT` UTC timestamp on every API,
+preflight, and recovery process. Only a Purchase whose `createdAt` and `paidAt`
+are both at or after that boundary belongs to the Stage 2 cohort. A checkout
+created before the boundary remains legacy-only even if it is paid later, so
+drain or expire all such in-flight checkouts before rollout. Never move the
+boundary backwards to create historical episodes.
+
+Live fulfillment reservation and activation share one five-second sidecar
+budget; legacy work between the phases does not reset it. Sidecar timeout or
+failure is non-gating and remains recoverable without changing legacy outcomes.
+Replacement Purchase selection is deferred, and no Entitlement state authorizes
+learning, playback, progress, My Courses, or dashboard access in this stage.
+
+Run aggregate status or a bounded one-shot recovery batch with:
+
+```bash
+npm run entitlement:recover -- --status-only
+ENTITLEMENT_RECOVERY_CONFIRM=reconcile-entitlements \
+  npm run entitlement:recover -- --limit 25
+```
+
+Production recovery requires the confirmation value shown above. The process
+uses MongoDB CAS and 60-second leases; it does not run a daemon, use Redis, call
+Razorpay, repair legacy mirrors, or backfill history. Schedule it externally
+and keep every invocation below the documented batch maximum. Catch-up pages
+the raw Purchase stream in `_id` order; its protected continuation is the last
+raw Purchase `_id` examined. Continue to the end, then run without a
+continuation to wrap around. Public status and preflight treat
+`malformedEpisodes` and `ageHandoffRequired` as blocking. Run
+`npm run preflight:production` before release or rollback. See
+`../docs/operations/entitlement-recovery.md` for retry timing, continuation,
+privacy, exit codes, scheduler ownership, and rollback, and
+`../docs/audits/entitlement-stage2-sidecar-2026-08.md` for the evidence
+boundary.
+
 ## Razorpay production contract
 
 Configure `RAZORPAY_KEY_ID`, `RAZORPAY_SECRET`, and an independent
@@ -276,11 +317,15 @@ them only through a separate backup-first database change after confirming the
 previous application does not use them.
 
 The same controlled command declares the seven Entitlement and four private
-Entitlement-operation-audit indexes approved by ADR 0010. These collections are
-inert and may be empty: no payment/refund writer, authorization reader, API, or
-backfill uses them in this release. Exact definitions and guarded MongoDB 8
-verification are recorded in
-`docs/audits/entitlement-inert-persistence-2026-08.md`.
+Entitlement-operation-audit indexes approved by ADR 0010. Stage 2 payment,
+refund, account-deletion, and recovery sidecars may write Entitlement only for
+the post-boundary cohort described above. There is still no Entitlement
+authorization reader, public API, or historical backfill, and
+`EntitlementOperationAudit` remains inert outside its model/index tests. The
+Stage 1 definitions and guarded MongoDB 8 verification are recorded in
+`../docs/audits/entitlement-inert-persistence-2026-08.md`; Stage 2 evidence and
+the completed Node 24/MongoDB 8 release verification record are in
+`../docs/audits/entitlement-stage2-sidecar-2026-08.md`.
 
 ## Upgrading legacy production data
 
