@@ -18,6 +18,12 @@ const {
 const {
   assertEnrollmentConsistencyReport,
 } = require("../domains/enrollment/enrollmentConsistencyReport")
+const {
+  createEntitlementRecoveryService,
+} = require("../domains/entitlement/entitlementRecoveryService")
+const {
+  parseSidecarStartedAt,
+} = require("../domains/entitlement/entitlementService")
 const { isLessonPublishReady } = require("../utils/courseLifecycle")
 const logger = require("../utils/logger")
 
@@ -29,11 +35,20 @@ const PREFLIGHT_EXIT_CODES = Object.freeze({
 })
 
 const PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT = 5
+const MAX_BOUNDARY_FUTURE_SKEW_MS = 5 * 60 * 1000
 class EnrollmentPreflightReportError extends Error {
   constructor() {
     super("Enrollment consistency audit returned an invalid report")
     this.name = "EnrollmentPreflightReportError"
     this.code = "ENROLLMENT_PREFLIGHT_INVALID_REPORT"
+  }
+}
+
+class EntitlementPreflightReportError extends Error {
+  constructor(message = "Entitlement recovery returned an invalid report") {
+    super(message)
+    this.name = "EntitlementPreflightReportError"
+    this.code = "ENTITLEMENT_PREFLIGHT_INVALID_REPORT"
   }
 }
 
@@ -51,12 +66,149 @@ const validateEnrollmentConsistencyReport = (report) => {
   }
 }
 
-const classifyPreflightResult = (findings, enrollmentConsistency) => {
+const parsePreflightSidecarStartedAt = (value, now = Date.now()) => {
+  const parsed = parseSidecarStartedAt(value)
+  if (!parsed) return parsed
+  const nowMilliseconds = now instanceof Date ? now.getTime() : Number(now)
+  if (!Number.isFinite(nowMilliseconds)) {
+    throw new TypeError("preflight clock must be a valid time")
+  }
+  if (parsed.getTime() > nowMilliseconds + MAX_BOUNDARY_FUTURE_SKEW_MS) {
+    throw new TypeError(
+      "ENTITLEMENT_SIDECAR_STARTED_AT cannot be more than 5 minutes in the future"
+    )
+  }
+  return parsed
+}
+
+const ENTITLEMENT_COUNT_KEYS = Object.freeze([
+  "activeMissingLegacy",
+  "ageHandoffRequired",
+  "boundaryLifecycleMismatches",
+  "boundaryMissingEpisodes",
+  "completedDeletionCurrent",
+  "dueProvisioning",
+  "expiredLeases",
+  "malformedEpisodes",
+  "manualReview",
+  "terminalLegacyConflicts",
+])
+const ENTITLEMENT_TRUNCATION_KEYS = Object.freeze([
+  "ageHandoff",
+  "boundary",
+  "completedDeletion",
+  "due",
+  "expiredLease",
+  "lifecycle",
+  "manualReview",
+])
+const ENTITLEMENT_REPORT_KEYS = Object.freeze([
+  "schemaVersion",
+  "status",
+  "observedAt",
+  "counts",
+  "boundaryExaminedCount",
+  "truncated",
+])
+
+const isRecord = (value) =>
+  Boolean(value && typeof value === "object" && !Array.isArray(value))
+
+const hasExactKeys = (value, expectedKeys) => {
+  if (!isRecord(value)) return false
+  const actualKeys = Object.keys(value).sort()
+  const sortedExpectedKeys = [...expectedKeys].sort()
+  return (
+    actualKeys.length === sortedExpectedKeys.length &&
+    actualKeys.every((key, index) => key === sortedExpectedKeys[index])
+  )
+}
+
+const isStrictIsoTimestamp = (value) => {
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)
+  ) {
+    return false
+  }
+  const parsed = new Date(value)
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString() === value
+}
+
+const validateEntitlementRecoveryReport = (report) => {
+  const validCount = (value) => Number.isSafeInteger(value) && value >= 0
+  if (
+    !hasExactKeys(report, ENTITLEMENT_REPORT_KEYS) ||
+    report.schemaVersion !== 1 ||
+    !["healthy", "warning", "blocking"].includes(report.status) ||
+    !isStrictIsoTimestamp(report.observedAt) ||
+    !validCount(report.boundaryExaminedCount) ||
+    !hasExactKeys(report.counts, ENTITLEMENT_COUNT_KEYS) ||
+    !hasExactKeys(report.truncated, ENTITLEMENT_TRUNCATION_KEYS) ||
+    !ENTITLEMENT_COUNT_KEYS.every((key) => validCount(report.counts[key])) ||
+    !ENTITLEMENT_TRUNCATION_KEYS.every(
+      (key) => typeof report.truncated[key] === "boolean"
+    )
+  ) {
+    throw new EntitlementPreflightReportError()
+  }
+  const blockingTotal =
+    report.counts.activeMissingLegacy +
+    report.counts.ageHandoffRequired +
+    report.counts.boundaryLifecycleMismatches +
+    report.counts.boundaryMissingEpisodes +
+    report.counts.completedDeletionCurrent +
+    report.counts.malformedEpisodes +
+    report.counts.manualReview +
+    report.counts.terminalLegacyConflicts
+  const warningTotal =
+    report.counts.dueProvisioning + report.counts.expiredLeases
+  const truncated = ENTITLEMENT_TRUNCATION_KEYS.some(
+    (key) => report.truncated[key]
+  )
+  const expectedStatus =
+    truncated || blockingTotal > 0
+      ? "blocking"
+      : warningTotal > 0
+        ? "warning"
+        : "healthy"
+  if (report.status !== expectedStatus) {
+    throw new EntitlementPreflightReportError(
+      "Entitlement recovery report severity is inconsistent"
+    )
+  }
+  return report
+}
+
+const classifyPreflightResult = (
+  findings,
+  enrollmentConsistency,
+  entitlementRecovery
+) => {
   validateEnrollmentConsistencyReport(enrollmentConsistency)
+  validateEntitlementRecoveryReport(entitlementRecovery)
   if (Object.values(findings).some((count) => count > 0)) return "blocking"
   if (enrollmentConsistency.status === "blocking") return "blocking"
+  if (entitlementRecovery.status === "blocking") return "blocking"
   if (enrollmentConsistency.status === "warning") return "warning"
+  if (entitlementRecovery.status === "warning") return "warning"
   return "healthy"
+}
+
+const entitlementRecoveryForPreflight = (report) => {
+  validateEntitlementRecoveryReport(report)
+  return {
+    schemaVersion: report.schemaVersion,
+    status: report.status,
+    observedAt: report.observedAt,
+    counts: Object.fromEntries(
+      ENTITLEMENT_COUNT_KEYS.map((key) => [key, report.counts[key]])
+    ),
+    boundaryExaminedCount: report.boundaryExaminedCount,
+    truncated: Object.fromEntries(
+      ENTITLEMENT_TRUNCATION_KEYS.map((key) => [key, report.truncated[key]])
+    ),
+  }
 }
 
 const enrollmentConsistencyForPreflight = (report) => {
@@ -103,6 +255,12 @@ const duplicateArrayGroupCount = async (model, arrayField, match = {}) => {
 const run = async () => {
   const mongoUrl = process.env.MONGODB_URI || process.env.MONGODB_URL
   if (!mongoUrl) throw new Error("MONGODB_URI is required")
+  const sidecarStartedAt = parsePreflightSidecarStartedAt(
+    process.env.ENTITLEMENT_SIDECAR_STARTED_AT
+  )
+  if (!sidecarStartedAt) {
+    throw new Error("ENTITLEMENT_SIDECAR_STARTED_AT is required")
+  }
 
   await mongoose.connect(mongoUrl, { autoIndex: false })
 
@@ -680,7 +838,15 @@ const run = async () => {
   const enrollmentConsistency = await createEnrollmentConsistencyService({
     targetLogger: preflightLogger,
   }).audit({ sampleLimit: PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT })
-  const status = classifyPreflightResult(findings, enrollmentConsistency)
+  const entitlementRecovery = await createEntitlementRecoveryService({
+    sidecarStartedAt,
+    targetLogger: preflightLogger,
+  }).getOperationalStatus()
+  const status = classifyPreflightResult(
+    findings,
+    enrollmentConsistency,
+    entitlementRecovery
+  )
   const result = {
     database: mongoose.connection.name,
     status,
@@ -689,6 +855,7 @@ const run = async () => {
     enrollmentConsistency: enrollmentConsistencyForPreflight(
       enrollmentConsistency
     ),
+    entitlementRecovery: entitlementRecoveryForPreflight(entitlementRecovery),
   }
 
   console.log(JSON.stringify(result, null, 2))
@@ -723,12 +890,16 @@ const main = async ({
 if (require.main === module) void main()
 
 module.exports = {
+  EntitlementPreflightReportError,
   EnrollmentPreflightReportError,
   PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT,
   PREFLIGHT_EXIT_CODES,
   classifyPreflightResult,
+  entitlementRecoveryForPreflight,
   enrollmentConsistencyForPreflight,
   isPublishedLessonMetadataValid: isLessonPublishReady,
   main,
+  parsePreflightSidecarStartedAt,
   run,
+  validateEntitlementRecoveryReport,
 }

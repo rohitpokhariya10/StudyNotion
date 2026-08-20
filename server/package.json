@@ -15,10 +15,11 @@
     "seed": "node seed",
     "preflight:production": "node scripts/preflight-production.js",
     "enrollment:audit": "node scripts/audit-enrollment-consistency.js",
+    "entitlement:recover": "node scripts/reconcile-entitlements.js",
     "db:backfill-security": "node scripts/backfill-security-fields.js",
     "db:indexes": "node scripts/create-indexes.js",
     "admin:provision": "node scripts/provision-admin.js",
-    "test:integration": "STUDYNOTION_RUN_CATALOG_INTEGRATION=1 STUDYNOTION_RUN_ENROLLMENT_INTEGRATION=1 STUDYNOTION_RUN_ENTITLEMENT_INTEGRATION=1 STUDYNOTION_RUN_LEARNING_INTEGRATION=1 STUDYNOTION_RUN_MONGOOSE_INTEGRATION=1 STUDYNOTION_RUN_PREFLIGHT_INTEGRATION=1 node --test test/*.integration.test.js",
+    "test:integration": "STUDYNOTION_RUN_CATALOG_INTEGRATION=1 STUDYNOTION_RUN_ENROLLMENT_INTEGRATION=1 STUDYNOTION_RUN_ENTITLEMENT_INTEGRATION=1 STUDYNOTION_RUN_ENTITLEMENT_STAGE2_INTEGRATION=1 STUDYNOTION_RUN_LEARNING_INTEGRATION=1 STUDYNOTION_RUN_MONGOOSE_INTEGRATION=1 STUDYNOTION_RUN_PREFLIGHT_INTEGRATION=1 node --test test/*.integration.test.js",
     "test": "node --test"
   },
   "keywords": [
