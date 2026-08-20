@@ -139,6 +139,7 @@ test(
       "MONGODB_URI",
       "MONGODB_URL",
       "NODE_ENV",
+      "ENTITLEMENT_SIDECAR_STARTED_AT",
     ]
     const originalEnvironment = Object.fromEntries(
       environmentKeys.map((key) => [
@@ -163,11 +164,14 @@ test(
     delete process.env.MONGODB_URL
     process.env.NODE_ENV = "test"
     process.env.LOG_LEVEL = "info"
+    process.env.ENTITLEMENT_SIDECAR_STARTED_AT = "2026-08-10T00:00:00.000Z"
 
     const mongoose = require("mongoose")
     const Category = require("../models/Category")
     const Course = require("../models/Course")
     const CourseProgress = require("../models/CourseProgress")
+    const Entitlement = require("../models/Entitlement")
+    const EntitlementOperationAudit = require("../models/EntitlementOperationAudit")
     const OTP = require("../models/OTP")
     const Profile = require("../models/Profile")
     const Purchase = require("../models/Purchase")
@@ -193,6 +197,8 @@ test(
       Category: Category.collection,
       Course: Course.collection,
       CourseProgress: CourseProgress.collection,
+      Entitlement: Entitlement.collection,
+      EntitlementOperationAudit: EntitlementOperationAudit.collection,
       OTP: OTP.collection,
       Profile: Profile.collection,
       Purchase: Purchase.collection,
@@ -366,8 +372,12 @@ test(
 
     const runScenario = async ({
       expectedEnrollmentIssues = {},
+      expectedEnrollmentStatus,
+      expectedEntitlementCounts = {},
+      expectedEntitlementStatus = "healthy",
       expectedLegacyFindings = {},
       expectedStatus,
+      forbiddenOutputValues = [],
       name,
     }) => {
       const before = await snapshotCollections()
@@ -425,12 +435,31 @@ test(
       )
       assert.equal(
         result.enrollmentConsistency.status,
-        Object.keys(expectedEnrollmentIssues).length === 0
-          ? "healthy"
-          : expectedStatus,
+        expectedEnrollmentStatus ||
+          (Object.keys(expectedEnrollmentIssues).length === 0
+            ? "healthy"
+            : expectedStatus),
         `${name}: enrollment status`
       )
+      assert.equal(
+        result.entitlementRecovery.status,
+        expectedEntitlementStatus,
+        `${name}: Entitlement recovery status`
+      )
+      assert.deepEqual(
+        nonZeroCounts(result.entitlementRecovery.counts),
+        expectedEntitlementCounts,
+        `${name}: Entitlement recovery counts`
+      )
       assert.ok(stdout[0]?.includes(`"status": "${expectedStatus}"`))
+      const serializedOutput = stdout.join("\n")
+      for (const value of forbiddenOutputValues) {
+        assert.equal(
+          serializedOutput.includes(String(value)),
+          false,
+          `${name}: preflight output exposed a protected identifier`
+        )
+      }
       assert.ok(stderr.length > 0, `${name}: lifecycle telemetry is missing`)
       assert.equal(
         before.compare(after),
@@ -488,6 +517,222 @@ test(
         expectedStatus: "healthy",
         name: "healthy production-shaped dataset",
       })
+
+      const stage2At = new Date(Date.now() - 10 * 60 * 1000)
+      const stage2PurchaseId = new mongoose.Types.ObjectId()
+      const stage2EpisodeId = new mongoose.Types.ObjectId()
+      const stage2Purchase = {
+        ...documents.purchases[0],
+        _id: stage2PurchaseId,
+        activeCourses: [],
+        createdAt: stage2At,
+        paidAt: stage2At,
+        razorpayOrderId: "order_preflight_stage2_0001",
+        razorpayPaymentId: "pay_preflight_stage2_0001",
+        receipt: "preflight-stage2-0001",
+        status: "paid",
+        updatedAt: stage2At,
+      }
+      delete stage2Purchase.fulfilledAt
+      await Promise.all([
+        Purchase.collection.insertOne(stage2Purchase),
+        Entitlement.collection.insertOne({
+          _id: stage2EpisodeId,
+          schemaVersion: 1,
+          studentId,
+          courseId,
+          purchaseId: stage2PurchaseId,
+          isCurrent: true,
+          status: "provisioning",
+          source: "purchase",
+          reconciliationAttempts: 0,
+          nextReconciliationAt: new Date(stage2At.getTime() + 60_000),
+          revision: 0,
+          createdAt: stage2At,
+          updatedAt: stage2At,
+        }),
+      ])
+
+      await runScenario({
+        expectedEnrollmentIssues: {
+          CAPTURED_PAYMENT_REQUIRES_RECONCILIATION: 1,
+        },
+        expectedEnrollmentStatus: "blocking",
+        expectedEntitlementCounts: { dueProvisioning: 1 },
+        expectedEntitlementStatus: "warning",
+        expectedStatus: "blocking",
+        forbiddenOutputValues: [stage2PurchaseId, stage2EpisodeId],
+        name: "recoverable Stage 2 provisioning work",
+      })
+
+      await Entitlement.collection.updateOne(
+        { _id: stage2EpisodeId },
+        {
+          $set: {
+            manualReviewRequiredAt: new Date(stage2At.getTime() + 120_000),
+            reconciliationAttempts: 5,
+            updatedAt: new Date(stage2At.getTime() + 120_000),
+          },
+          $unset: { nextReconciliationAt: "" },
+        }
+      )
+      await runScenario({
+        expectedEnrollmentIssues: {
+          CAPTURED_PAYMENT_REQUIRES_RECONCILIATION: 1,
+        },
+        expectedEnrollmentStatus: "blocking",
+        expectedEntitlementCounts: { manualReview: 1 },
+        expectedEntitlementStatus: "blocking",
+        expectedStatus: "blocking",
+        forbiddenOutputValues: [stage2PurchaseId, stage2EpisodeId],
+        name: "Stage 2 manual-review blocker",
+      })
+
+      await Entitlement.collection.updateOne(
+        { _id: stage2EpisodeId },
+        {
+          $set: { reconciliationAttempts: 0, updatedAt: stage2At },
+          $unset: { manualReviewRequiredAt: "" },
+        }
+      )
+      await runScenario({
+        expectedEnrollmentIssues: {
+          CAPTURED_PAYMENT_REQUIRES_RECONCILIATION: 1,
+        },
+        expectedEnrollmentStatus: "blocking",
+        expectedEntitlementCounts: {
+          boundaryLifecycleMismatches: 1,
+          malformedEpisodes: 1,
+        },
+        expectedEntitlementStatus: "blocking",
+        expectedStatus: "blocking",
+        forbiddenOutputValues: [stage2PurchaseId, stage2EpisodeId],
+        name: "malformed Stage 2 lifecycle evidence",
+      })
+
+      await Promise.all([
+        Entitlement.collection.deleteOne({ _id: stage2EpisodeId }),
+        Purchase.collection.deleteOne({ _id: stage2PurchaseId }),
+      ])
+
+      const malformedPurchaseId = new mongoose.Types.ObjectId()
+      await Purchase.collection.insertOne({
+        ...stage2Purchase,
+        _id: malformedPurchaseId,
+        lineItems: [
+          {
+            course: courseId,
+            courseName: "Malformed immutable price snapshot",
+          },
+        ],
+        razorpayOrderId: "order_preflight_stage2_malformed_0001",
+        razorpayPaymentId: "pay_preflight_stage2_malformed_0001",
+        receipt: "preflight-stage2-malformed-0001",
+      })
+      await runScenario({
+        expectedEnrollmentIssues: {
+          CAPTURED_PAYMENT_REQUIRES_RECONCILIATION: 1,
+        },
+        expectedEnrollmentStatus: "blocking",
+        expectedEntitlementCounts: { boundaryLifecycleMismatches: 1 },
+        expectedEntitlementStatus: "blocking",
+        expectedStatus: "blocking",
+        forbiddenOutputValues: [malformedPurchaseId],
+        name: "malformed post-boundary Purchase evidence",
+      })
+      await Purchase.collection.deleteOne({ _id: malformedPurchaseId })
+
+      const truncatedEpisodeIds = Array.from(
+        { length: 101 },
+        () => new mongoose.Types.ObjectId()
+      )
+      await Entitlement.collection.insertMany(
+        truncatedEpisodeIds.map((_id, index) => ({
+          _id,
+          schemaVersion: 1,
+          studentId: new mongoose.Types.ObjectId(),
+          courseId: new mongoose.Types.ObjectId(),
+          purchaseId: new mongoose.Types.ObjectId(),
+          isCurrent: true,
+          status: "provisioning",
+          source: "purchase",
+          reconciliationAttempts: 0,
+          nextReconciliationAt: new Date(stage2At.getTime() - index - 1),
+          revision: 0,
+          createdAt: stage2At,
+          updatedAt: stage2At,
+        }))
+      )
+      const truncatedPreflight = await runScenario({
+        expectedEntitlementCounts: {
+          dueProvisioning: 100,
+          malformedEpisodes: 101,
+        },
+        expectedEntitlementStatus: "blocking",
+        expectedStatus: "blocking",
+        forbiddenOutputValues: truncatedEpisodeIds,
+        name: "bounded due-work truncation",
+      })
+      assert.equal(truncatedPreflight.entitlementRecovery.truncated.due, true)
+      await Entitlement.collection.deleteMany({
+        _id: { $in: truncatedEpisodeIds },
+      })
+
+      const activePurchaseId = new mongoose.Types.ObjectId()
+      const activeEpisodeId = new mongoose.Types.ObjectId()
+      const fulfilledAt = new Date(stage2At.getTime() + 10 * 60_000)
+      const activePurchase = {
+        ...documents.purchases[0],
+        _id: activePurchaseId,
+        createdAt: stage2At,
+        fulfilledAt,
+        paidAt: stage2At,
+        razorpayOrderId: "order_preflight_stage2_active_0001",
+        razorpayPaymentId: "pay_preflight_stage2_active_0001",
+        receipt: "preflight-stage2-active-0001",
+        updatedAt: fulfilledAt,
+      }
+      await Purchase.collection.deleteOne({ _id: purchaseId })
+      await Promise.all([
+        Purchase.collection.insertOne(activePurchase),
+        Entitlement.collection.insertOne({
+          _id: activeEpisodeId,
+          schemaVersion: 1,
+          studentId,
+          courseId,
+          purchaseId: activePurchaseId,
+          isCurrent: true,
+          status: "active",
+          source: "purchase",
+          grantedAt: fulfilledAt,
+          reconciliationAttempts: 0,
+          revision: 1,
+          createdAt: stage2At,
+          updatedAt: fulfilledAt,
+        }),
+      ])
+      await runScenario({
+        expectedStatus: "healthy",
+        forbiddenOutputValues: [activePurchaseId, activeEpisodeId],
+        name: "consistent active Stage 2 episode",
+      })
+
+      await CourseProgress.collection.deleteOne({ _id: progressId })
+      await runScenario({
+        expectedEnrollmentIssues: { MISSING_PROGRESS_RECORD: 1 },
+        expectedEnrollmentStatus: "warning",
+        expectedEntitlementCounts: { activeMissingLegacy: 1 },
+        expectedEntitlementStatus: "blocking",
+        expectedStatus: "blocking",
+        forbiddenOutputValues: [activePurchaseId, activeEpisodeId],
+        name: "active Stage 2 episode without legacy progress",
+      })
+      await CourseProgress.collection.insertOne(documents.progress[0])
+      await Promise.all([
+        Entitlement.collection.deleteOne({ _id: activeEpisodeId }),
+        Purchase.collection.deleteOne({ _id: activePurchaseId }),
+      ])
+      await Purchase.collection.insertOne(documents.purchases[0])
 
       await User.collection.updateOne(
         { _id: studentId },

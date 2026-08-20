@@ -89,6 +89,8 @@ const assertSingleLegacyRevocation = (events) => {
   )
 }
 
+const entitlementMethodNames = (calls) => calls.map(([method]) => method)
+
 const loadPaymentsController = (overrides = {}) => {
   const events = []
   const entitlementCalls = []
@@ -299,13 +301,21 @@ const loadPaymentsController = (overrides = {}) => {
       },
     ])
   )
-  entitlementService.runNonAuthoritativeSidecar = async ({ operation }) => {
-    try {
-      return { ok: true, result: await operation() }
-    } catch {
-      return { ok: false }
-    }
-  }
+  entitlementService.SIDECAR_OPERATION_BUDGET_MS = 5_000
+  entitlementService.runNonAuthoritativeSidecar =
+    overrides.entitlementService?.runNonAuthoritativeSidecar ||
+    (async ({ deadlineAt, operation }) => {
+      try {
+        return {
+          ok: true,
+          result: await operation({
+            deadlineAt: deadlineAt || new Date("2099-01-01T00:00:00.000Z"),
+          }),
+        }
+      } catch {
+        return { ok: false }
+      }
+    })
   const entitlementServiceMocked = installOptionalMock(
     "../domains/entitlement/entitlementService",
     entitlementService
@@ -655,17 +665,19 @@ test("a repeated capture reuses the active Razorpay order", async () => {
 
 test("verification ignores substituted client course IDs, survives logging failure, and is idempotent", async () => {
   process.env.RAZORPAY_SECRET = "test-payment-secret"
-  const { controller, events, logs } = loadPaymentsController({
-    entitlementService: {
-      activateForPurchase: async () => {
-        throw new Error("simulated Entitlement activation failure")
+  const { controller, entitlementCalls, events, logs } = loadPaymentsController(
+    {
+      entitlementService: {
+        activateForPurchase: async () => {
+          throw new Error("simulated Entitlement activation failure")
+        },
+        reserveForPurchase: async () => {
+          throw new Error("simulated Entitlement reservation failure")
+        },
       },
-      reserveForPurchase: async () => {
-        throw new Error("simulated Entitlement reservation failure")
-      },
-    },
-    failingLogEvents: ["purchase.entitlement_activated"],
-  })
+      failingLogEvents: ["purchase.entitlement_activated"],
+    }
+  )
   const res = createResponse()
   const signature = crypto
     .createHmac("sha256", process.env.RAZORPAY_SECRET)
@@ -699,6 +711,11 @@ test("verification ignores substituted client course IDs, survives logging failu
     message: "Payment Verified",
   })
   assertSingleLegacyFulfillment(events)
+  assert.deepEqual(entitlementMethodNames(entitlementCalls), [
+    "reserveForPurchase",
+    "reserveForPurchase",
+    "reserveForPurchase",
+  ])
   assert.deepEqual(
     logs.filter(({ event }) => event === "purchase.entitlement_activated"),
     [
@@ -707,7 +724,6 @@ test("verification ignores substituted client course IDs, survives logging failu
         event: "purchase.entitlement_activated",
         fields: {
           requestId: "payment-browser-verification",
-          purchaseId: "64b000000000000000000006",
           source: "browser_verification",
           courseCount: 1,
         },
@@ -716,9 +732,105 @@ test("verification ignores substituted client course IDs, survives logging failu
   )
 })
 
+test("an activation-only sidecar failure preserves verification and legacy fulfillment", async () => {
+  process.env.RAZORPAY_SECRET = "test-payment-secret"
+  const { controller, entitlementCalls, events } = loadPaymentsController({
+    entitlementService: {
+      activateForPurchase: async () => {
+        throw new Error("simulated Entitlement activation-only failure")
+      },
+    },
+  })
+  const signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET)
+    .update("order_1|payment_1")
+    .digest("hex")
+  const request = {
+    requestId: "payment-activation-only-failure",
+    user: { id: userId },
+    body: {
+      razorpay_order_id: "order_1",
+      razorpay_payment_id: "payment_1",
+      razorpay_signature: signature,
+    },
+  }
+
+  const firstResponse = createResponse()
+  await controller.verifyPayment(request, firstResponse)
+  assert.equal(firstResponse.statusCode, 200)
+  assert.deepEqual(firstResponse.body, {
+    success: true,
+    message: "Payment Verified",
+  })
+
+  const replayResponse = createResponse()
+  await controller.verifyPayment(request, replayResponse)
+  assert.equal(replayResponse.statusCode, 200)
+  assert.deepEqual(replayResponse.body, {
+    success: true,
+    message: "Payment Verified",
+  })
+  assertSingleLegacyFulfillment(events)
+  assert.deepEqual(entitlementMethodNames(entitlementCalls), [
+    "reserveForPurchase",
+    "reserveForPurchase",
+    "activateForPurchase",
+    "reserveForPurchase",
+    "activateForPurchase",
+  ])
+})
+
+test("one fulfillment deadline spans reservation and an exhausted activation phase", async () => {
+  process.env.RAZORPAY_SECRET = "test-payment-secret"
+  const observedDeadlines = []
+  let sidecarPhase = 0
+  const { controller, entitlementCalls, events } = loadPaymentsController({
+    entitlementService: {
+      runNonAuthoritativeSidecar: async ({ deadlineAt, operation }) => {
+        observedDeadlines.push(deadlineAt)
+        sidecarPhase += 1
+        if (sidecarPhase > 1) return { ok: false }
+        return { ok: true, result: await operation({ deadlineAt }) }
+      },
+    },
+  })
+  const signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET)
+    .update("order_1|payment_1")
+    .digest("hex")
+  const response = createResponse()
+
+  await controller.verifyPayment(
+    {
+      requestId: "payment-shared-sidecar-deadline",
+      user: { id: userId },
+      body: {
+        razorpay_order_id: "order_1",
+        razorpay_payment_id: "payment_1",
+        razorpay_signature: signature,
+      },
+    },
+    response
+  )
+
+  assert.equal(response.statusCode, 200)
+  assert.deepEqual(response.body, {
+    success: true,
+    message: "Payment Verified",
+  })
+  assert.equal(observedDeadlines.length, 2)
+  assert.equal(observedDeadlines[0] instanceof Date, true)
+  assert.equal(observedDeadlines[0].getTime(), observedDeadlines[1].getTime())
+  assert.deepEqual(entitlementMethodNames(entitlementCalls), [
+    "reserveForPurchase",
+  ])
+  assertSingleLegacyFulfillment(events)
+})
+
 test("signed Razorpay webhooks fulfill the server-owned purchase once", async () => {
   process.env.RAZORPAY_WEBHOOK_SECRET = "test-webhook-secret"
-  const { controller, events, logs, purchase } = loadPaymentsController()
+  const { controller, entitlementCalls, events, logs, purchase } =
+    loadPaymentsController()
   const payload = Buffer.from(
     JSON.stringify({
       event: "payment.captured",
@@ -763,6 +875,13 @@ test("signed Razorpay webhooks fulfill the server-owned purchase once", async ()
     message: "Payment webhook processed",
   })
   assertSingleLegacyFulfillment(events)
+  assert.deepEqual(entitlementMethodNames(entitlementCalls), [
+    "reserveForPurchase",
+    "reserveForPurchase",
+    "activateForPurchase",
+    "reserveForPurchase",
+    "activateForPurchase",
+  ])
   assert.deepEqual(
     logs.filter(({ event }) => event === "purchase.entitlement_activated"),
     [
@@ -771,7 +890,6 @@ test("signed Razorpay webhooks fulfill the server-owned purchase once", async ()
         event: "purchase.entitlement_activated",
         fields: {
           requestId: "payment-webhook",
-          purchaseId: "64b000000000000000000006",
           source: "webhook",
           courseCount: 1,
         },
@@ -780,33 +898,94 @@ test("signed Razorpay webhooks fulfill the server-owned purchase once", async ()
   )
 })
 
+test("webhook fulfillment and replay ignore an unexpected sidecar wrapper rejection", async () => {
+  process.env.RAZORPAY_WEBHOOK_SECRET = "test-webhook-secret"
+  let wrapperAttempts = 0
+  const { controller, entitlementCalls, events, purchase } =
+    loadPaymentsController({
+      entitlementService: {
+        runNonAuthoritativeSidecar: async () => {
+          wrapperAttempts += 1
+          throw new Error("simulated sidecar wrapper rejection")
+        },
+      },
+    })
+  const payload = Buffer.from(
+    JSON.stringify({
+      event: "payment.captured",
+      payload: {
+        payment: {
+          entity: {
+            id: "payment_1",
+            order_id: "order_1",
+            amount: 10000,
+            currency: "INR",
+            status: "captured",
+          },
+        },
+      },
+    })
+  )
+  const signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+    .update(payload)
+    .digest("hex")
+  const request = {
+    body: payload,
+    get: (name) =>
+      name.toLowerCase() === "x-razorpay-signature" ? signature : undefined,
+    requestId: "payment-webhook-wrapper-rejection",
+  }
+
+  const firstResponse = createResponse()
+  await controller.razorpayWebhook(request, firstResponse)
+  assert.equal(firstResponse.statusCode, 200)
+  assert.deepEqual(firstResponse.body, {
+    success: true,
+    message: "Payment webhook processed",
+  })
+
+  purchase.checkoutExpiresAt = new Date(Date.now() - 60_000)
+  const replayResponse = createResponse()
+  await controller.razorpayWebhook(request, replayResponse)
+  assert.equal(replayResponse.statusCode, 200)
+  assert.deepEqual(replayResponse.body, {
+    success: true,
+    message: "Payment webhook processed",
+  })
+  assert.equal(wrapperAttempts, 3)
+  assert.deepEqual(entitlementCalls, [])
+  assertSingleLegacyFulfillment(events)
+})
+
 test("manual fulfillment records one bounded entitlement activation", async () => {
   let manualPurchase
-  const { controller, events, logs, purchase } = loadPaymentsController({
-    Purchase: {
-      findOneAndUpdate: async (query, update) => {
-        if (
-          query.status === "payment_review" &&
-          manualPurchase.status !== "payment_review"
-        ) {
-          return null
-        }
-        if (
-          query.status?.$ne === "fulfilled" &&
-          manualPurchase.status === "fulfilled"
-        ) {
-          return null
-        }
-        Object.assign(manualPurchase, update.$set || {})
-        if (update.$unset) {
-          for (const field of Object.keys(update.$unset)) {
-            delete manualPurchase[field]
+  const { controller, entitlementCalls, events, logs, purchase } =
+    loadPaymentsController({
+      Purchase: {
+        findOneAndUpdate: async (query, update) => {
+          if (
+            query.status === "payment_review" &&
+            manualPurchase.status !== "payment_review"
+          ) {
+            return null
           }
-        }
-        return manualPurchase
+          if (
+            query.status?.$ne === "fulfilled" &&
+            manualPurchase.status === "fulfilled"
+          ) {
+            return null
+          }
+          Object.assign(manualPurchase, update.$set || {})
+          if (update.$unset) {
+            for (const field of Object.keys(update.$unset)) {
+              delete manualPurchase[field]
+            }
+          }
+          return manualPurchase
+        },
       },
-    },
-  })
+    })
   manualPurchase = purchase
   purchase.status = "payment_review"
   purchase.paidAt = new Date()
@@ -848,6 +1027,13 @@ test("manual fulfillment records one bounded entitlement activation", async () =
     message: "Payment review was already resolved",
   })
   assertSingleLegacyFulfillment(events)
+  assert.deepEqual(entitlementMethodNames(entitlementCalls), [
+    "reserveForPurchase",
+    "reserveForPurchase",
+    "activateForPurchase",
+    "reserveForPurchase",
+    "activateForPurchase",
+  ])
   assert.deepEqual(
     logs.filter(({ event }) => event === "purchase.entitlement_activated"),
     [
@@ -856,7 +1042,6 @@ test("manual fulfillment records one bounded entitlement activation", async () =
         event: "purchase.entitlement_activated",
         fields: {
           requestId: "payment-admin-reconciliation",
-          purchaseId: "64b000000000000000000006",
           source: "admin_reconciliation",
           courseCount: 1,
         },
@@ -1208,14 +1393,67 @@ test("an admin refund resolves payment_review with an auditable provider ID", as
   assertSingleLegacyRevocation(events)
 })
 
-test("a learner refund request is processed and revokes its entitlements", async () => {
-  const { controller, events, purchase } = loadPaymentsController({
+test("an already-refunded Admin replay ignores a sidecar wrapper rejection", async () => {
+  let wrapperAttempts = 0
+  const { controller, entitlementCalls, purchase } = loadPaymentsController({
     entitlementService: {
-      terminalizeProcessedRefund: async () => {
-        throw new Error("simulated Entitlement terminalization failure")
+      runNonAuthoritativeSidecar: async () => {
+        wrapperAttempts += 1
+        throw new Error("simulated replay wrapper rejection")
       },
     },
+    Purchase: {
+      findOneAndUpdate: async () => null,
+    },
   })
+  Object.assign(purchase, {
+    reconciliationResolution: "refunded",
+    refundId: "rfnd_replayed_1",
+    refundOriginStatus: "payment_review",
+    refundProcessedAt: new Date(),
+    refundProviderStatus: "processed",
+    status: "refunded",
+  })
+  const response = createResponse()
+
+  await controller.resolvePaymentReview(
+    {
+      body: {
+        action: "refund",
+        confirmation: "REFUND PAYMENT",
+        note: "This processed refund is being replayed idempotently.",
+      },
+      params: { purchaseId: purchase._id },
+      requestId: "payment-refund-replay-wrapper-rejection",
+      user: { id: "64b000000000000000000009" },
+    },
+    response
+  )
+
+  assert.equal(response.statusCode, 200)
+  assert.deepEqual(response.body, {
+    success: true,
+    data: {
+      purchaseId: purchase._id,
+      refundId: "rfnd_replayed_1",
+      resolution: "refunded",
+      status: "refunded",
+    },
+    message: "Payment review was already resolved",
+  })
+  assert.equal(wrapperAttempts, 1)
+  assert.deepEqual(entitlementCalls, [])
+})
+
+test("a learner refund request is processed and revokes its entitlements", async () => {
+  const { controller, entitlementCalls, events, purchase } =
+    loadPaymentsController({
+      entitlementService: {
+        terminalizeProcessedRefund: async () => {
+          throw new Error("simulated Entitlement terminalization failure")
+        },
+      },
+    })
   purchase.status = "fulfilled"
   purchase.paidAt = new Date()
   purchase.refundWindowDays = 7
@@ -1282,6 +1520,9 @@ test("a learner refund request is processed and revokes its entitlements", async
   assert.equal(purchase.status, "refunded")
   assert.equal(purchase.refundOriginStatus, "refund_requested")
   assertSingleLegacyRevocation(events)
+  assert.deepEqual(entitlementMethodNames(entitlementCalls), [
+    "terminalizeProcessedRefund",
+  ])
 })
 
 test("a timely learner request remains valid when support processes it later", async () => {
@@ -1625,12 +1866,64 @@ test("processed refunds survive logging failure and retry idempotent entitlement
         event: "purchase.entitlement_revoked",
         fields: {
           requestId: "payment-refund-reconciliation",
-          purchaseId: "64b000000000000000000006",
           source: "admin_reconciliation",
           courseCount: 1,
           revocableCourseCount: 1,
         },
       },
     ]
+  )
+})
+
+test("a stale refund preserves legacy access written by a newer paid Purchase", async () => {
+  let replacementQuery
+  const { controller, events, purchase } = loadPaymentsController({
+    Purchase: {
+      exists: async (query) => {
+        replacementQuery = query
+        return { _id: "64b000000000000000000010" }
+      },
+    },
+  })
+  purchase.status = "refund_requested"
+  purchase.paidAt = new Date()
+  purchase.refundRequestedAt = new Date()
+  purchase.refundWindowDays = 7
+  purchase.razorpayPaymentId = "pay_stale_refund"
+
+  const response = createResponse()
+  await controller.resolvePaymentReview(
+    {
+      body: {
+        action: "refund",
+        confirmation: "REFUND PAYMENT",
+        note: "Approve the older Purchase refund after the repurchase capture.",
+      },
+      params: { purchaseId: purchase._id },
+      requestId: "stale-refund-newer-paid-purchase",
+      user: { id: "64b000000000000000000009" },
+    },
+    response
+  )
+
+  assert.equal(response.statusCode, 200)
+  assert.equal(purchase.status, "refunded")
+  assert.deepEqual(replacementQuery.status.$in, [
+    "paid",
+    "fulfilled",
+    "refund_pending",
+    "refund_requested",
+  ])
+  assert.equal(
+    events.some(([event]) => event === "unenroll"),
+    false
+  )
+  assert.equal(
+    events.some(([event]) => event === "progress-delete"),
+    false
+  )
+  assert.equal(
+    events.some(([event]) => event === "student-unenrollment-update"),
+    false
   )
 })

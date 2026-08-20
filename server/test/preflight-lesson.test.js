@@ -3,6 +3,7 @@ const test = require("node:test")
 
 const {
   isPublishedLessonMetadataValid,
+  parsePreflightSidecarStartedAt,
 } = require("../scripts/preflight-production")
 
 const validLesson = {
@@ -35,5 +36,20 @@ test("production preflight validates published lesson metadata and duration", ()
       videoUrl: "http://cdn.example.test/public-video.mp4",
     }),
     false
+  )
+})
+
+test("production preflight rejects a materially future Entitlement boundary", () => {
+  const now = new Date("2026-08-21T10:00:00.000Z")
+  assert.equal(
+    parsePreflightSidecarStartedAt(
+      "2026-08-21T10:05:00.000Z",
+      now
+    ).toISOString(),
+    "2026-08-21T10:05:00.000Z"
+  )
+  assert.throws(
+    () => parsePreflightSidecarStartedAt("2099-01-01T00:00:00.000Z", now),
+    /cannot be more than 5 minutes in the future/
   )
 })

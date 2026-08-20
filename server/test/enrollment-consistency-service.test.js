@@ -15,12 +15,42 @@ const {
   PREFLIGHT_ENROLLMENT_SAMPLE_LIMIT,
   PREFLIGHT_EXIT_CODES,
   classifyPreflightResult,
+  entitlementRecoveryForPreflight,
   enrollmentConsistencyForPreflight,
   main: preflightMain,
 } = require("../scripts/preflight-production")
 
 const userId = "64b000000000000000000001"
 const courseId = "64b000000000000000000002"
+
+const validEntitlementReport = (status = "healthy", overrides = {}) => ({
+  schemaVersion: 1,
+  status,
+  observedAt: "2026-08-11T12:00:00.000Z",
+  counts: {
+    activeMissingLegacy: 0,
+    ageHandoffRequired: 0,
+    boundaryLifecycleMismatches: 0,
+    boundaryMissingEpisodes: 0,
+    completedDeletionCurrent: 0,
+    dueProvisioning: status === "warning" ? 1 : 0,
+    expiredLeases: 0,
+    malformedEpisodes: 0,
+    manualReview: status === "blocking" ? 1 : 0,
+    terminalLegacyConflicts: 0,
+  },
+  boundaryExaminedCount: 0,
+  truncated: {
+    ageHandoff: false,
+    boundary: false,
+    completedDeletion: false,
+    due: false,
+    expiredLease: false,
+    lifecycle: false,
+    manualReview: false,
+  },
+  ...overrides,
+})
 
 const pairState = (overrides = {}) => ({
   activeCourseOutsideImmutablePurchaseCount: 0,
@@ -452,28 +482,32 @@ test("production preflight composes legacy findings with enrollment severity", (
   assert.equal(
     classifyPreflightResult(
       { legacyFinding: 0 },
-      validEnrollmentReport("healthy")
+      validEnrollmentReport("healthy"),
+      validEntitlementReport("healthy")
     ),
     "healthy"
   )
   assert.equal(
     classifyPreflightResult(
       { legacyFinding: 0 },
-      validEnrollmentReport("warning")
+      validEnrollmentReport("warning"),
+      validEntitlementReport("healthy")
     ),
     "warning"
   )
   assert.equal(
     classifyPreflightResult(
       { legacyFinding: 0 },
-      validEnrollmentReport("blocking")
+      validEnrollmentReport("blocking"),
+      validEntitlementReport("healthy")
     ),
     "blocking"
   )
   assert.equal(
     classifyPreflightResult(
       { legacyFinding: 1 },
-      validEnrollmentReport("healthy")
+      validEnrollmentReport("healthy"),
+      validEntitlementReport("healthy")
     ),
     "blocking"
   )
@@ -490,10 +524,116 @@ test("production preflight composes legacy findings with enrollment severity", (
   ]) {
     assert.throws(
       () =>
-        classifyPreflightResult({ legacyFinding: 1 }, enrollmentConsistency),
+        classifyPreflightResult(
+          { legacyFinding: 1 },
+          enrollmentConsistency,
+          validEntitlementReport()
+        ),
       (error) => error.code === "ENROLLMENT_PREFLIGHT_INVALID_REPORT"
     )
   }
+
+  assert.equal(
+    classifyPreflightResult(
+      { legacyFinding: 0 },
+      validEnrollmentReport("healthy"),
+      validEntitlementReport("warning")
+    ),
+    "warning"
+  )
+  assert.equal(
+    classifyPreflightResult(
+      { legacyFinding: 0 },
+      validEnrollmentReport("healthy"),
+      validEntitlementReport("blocking")
+    ),
+    "blocking"
+  )
+  assert.equal(
+    classifyPreflightResult(
+      { legacyFinding: 0 },
+      validEnrollmentReport("healthy"),
+      validEntitlementReport("blocking", {
+        counts: {
+          ...validEntitlementReport().counts,
+          boundaryLifecycleMismatches: 1,
+        },
+      })
+    ),
+    "blocking"
+  )
+  assert.equal(
+    classifyPreflightResult(
+      { legacyFinding: 0 },
+      validEnrollmentReport("healthy"),
+      validEntitlementReport("blocking", {
+        counts: {
+          ...validEntitlementReport().counts,
+          ageHandoffRequired: 1,
+        },
+      })
+    ),
+    "blocking"
+  )
+  assert.equal(
+    classifyPreflightResult(
+      { legacyFinding: 0 },
+      validEnrollmentReport("healthy"),
+      validEntitlementReport("blocking", {
+        truncated: {
+          ...validEntitlementReport().truncated,
+          ageHandoff: true,
+        },
+      })
+    ),
+    "blocking"
+  )
+  for (const entitlementRecovery of [
+    undefined,
+    {},
+    { status: "healthy" },
+    { ...validEntitlementReport(), status: "unexpected" },
+    { ...validEntitlementReport(), purchaseId: userId },
+    { ...validEntitlementReport(), observedAt: "2026-08-11T12:00:00Z" },
+    validEntitlementReport("healthy", {
+      counts: {
+        ...validEntitlementReport().counts,
+        purchaseId: userId,
+      },
+    }),
+    validEntitlementReport("healthy", {
+      truncated: {
+        ...validEntitlementReport().truncated,
+        nextCursor: courseId,
+      },
+    }),
+    validEntitlementReport("healthy", {
+      counts: {
+        ...validEntitlementReport().counts,
+        manualReview: 1,
+      },
+    }),
+  ]) {
+    assert.throws(
+      () =>
+        classifyPreflightResult(
+          { legacyFinding: 0 },
+          validEnrollmentReport(),
+          entitlementRecovery
+        ),
+      (error) => error.code === "ENTITLEMENT_PREFLIGHT_INVALID_REPORT"
+    )
+  }
+})
+
+test("production preflight projects only bounded aggregate Entitlement status", () => {
+  const report = validEntitlementReport("warning")
+  const projection = entitlementRecoveryForPreflight(report)
+  assert.deepEqual(projection, report)
+  assert.notEqual(projection.counts, report.counts)
+  assert.notEqual(projection.truncated, report.truncated)
+  assert.equal(JSON.stringify(projection).includes(userId), false)
+  assert.equal(JSON.stringify(projection).includes(courseId), false)
 })
 
 test("production preflight hard-caps enrollment evidence at five samples", () => {
@@ -536,7 +676,50 @@ test("production preflight main maps invalid enrollment reports to operational e
       disconnected = true
     },
     runPreflight: async () => {
-      classifyPreflightResult({}, { status: "unknown" })
+      classifyPreflightResult(
+        {},
+        { status: "unknown" },
+        validEntitlementReport()
+      )
+    },
+    setExitCode: (value) => {
+      exitCode = value
+    },
+    targetLogger: captured.logger,
+  })
+
+  assert.equal(result, undefined)
+  assert.equal(exitCode, PREFLIGHT_EXIT_CODES.operational_error)
+  assert.equal(disconnected, true)
+  assert.deepEqual(
+    captured.events.map(({ event, fields }) => ({
+      event,
+      status: fields.status,
+    })),
+    [{ event: "production.preflight_failed", status: "operational_error" }]
+  )
+})
+
+test("production preflight main maps an invalid Entitlement report to operational exit 3", async () => {
+  const captured = capturingLogger()
+  let disconnected = false
+  let exitCode
+
+  const result = await preflightMain({
+    disconnect: async () => {
+      disconnected = true
+    },
+    runPreflight: async () => {
+      classifyPreflightResult(
+        {},
+        validEnrollmentReport(),
+        validEntitlementReport("healthy", {
+          truncated: {
+            ...validEntitlementReport().truncated,
+            nextCursor: courseId,
+          },
+        })
+      )
     },
     setExitCode: (value) => {
       exitCode = value

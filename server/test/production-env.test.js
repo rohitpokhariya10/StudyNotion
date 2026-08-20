@@ -25,6 +25,7 @@ const validProductionEnv = {
   RAZORPAY_SECRET: "razorpay-secret-1234567890",
   RAZORPAY_WEBHOOK_SECRET: "webhook-secret-1234567890",
   REFUND_WINDOW_DAYS: "7",
+  ENTITLEMENT_SIDECAR_STARTED_AT: "2026-08-11T12:00:00.000Z",
   CLOUD_NAME: "studynotion-production",
   CLOUD_API_KEY: "123456789012345",
   CLOUD_API_SECRET: "cloudinary-secret-1234567890",
@@ -56,6 +57,24 @@ test("production configuration requires independently generated secrets", () => 
   const result = loadEnv({ OTP_SECRET: validProductionEnv.JWT_SECRET })
   assert.notEqual(result.status, 0)
   assert.match(result.stderr, /independently generated/)
+})
+
+test("production configuration requires an immutable Entitlement rollout boundary", () => {
+  const missing = loadEnv({ ENTITLEMENT_SIDECAR_STARTED_AT: "" })
+  assert.notEqual(missing.status, 0)
+  assert.match(missing.stderr, /ENTITLEMENT_SIDECAR_STARTED_AT/)
+
+  const malformed = loadEnv({
+    ENTITLEMENT_SIDECAR_STARTED_AT: "2026-08-11T12:00:00Z",
+  })
+  assert.notEqual(malformed.status, 0)
+  assert.match(malformed.stderr, /exact UTC ISO timestamp/)
+
+  const future = loadEnv({
+    ENTITLEMENT_SIDECAR_STARTED_AT: "2999-01-01T00:00:00.000Z",
+  })
+  assert.notEqual(future.status, 0)
+  assert.match(future.stderr, /cannot be in the future/)
 })
 
 test("production Redis connections require TLS", () => {

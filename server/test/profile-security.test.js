@@ -59,7 +59,10 @@ const entitlementService = Object.fromEntries(
 )
 entitlementService.runNonAuthoritativeSidecar = async ({ operation }) => {
   try {
-    return { ok: true, result: await operation() }
+    return {
+      ok: true,
+      result: await operation({ deadlineAt: new Date("2099-01-01T00:00:00Z") }),
+    }
   } catch {
     return { ok: false }
   }
@@ -252,6 +255,11 @@ test("account deletion anonymizes identity and removes learner-owned data", asyn
   )[1]
   assert.equal(userUpdate.$set.active, false)
   assert.equal(userUpdate.$set.email, `deleted-${userId}@users.invalid`)
+  assert.equal(userUpdate.$set.deletionPending, false)
+  assert.equal(userUpdate.$set.deletionStartedAt instanceof Date, true)
+  assert.equal(userUpdate.$unset.deletionStartedAt, undefined)
+  assert.equal(userUpdate.$unset.deletionLockId, 1)
+  assert.equal(userUpdate.$unset.deletionLockUntil, 1)
   assert.equal(userUpdate.$unset.password, 1)
   assert.ok(calls.some(([event]) => event === "progress-delete"))
   assert.ok(calls.some(([event]) => event === "review-delete"))
@@ -346,7 +354,8 @@ test("a failed deletion cleanup remains pending and retries idempotently", async
       ([event, update]) =>
         event === "user-lock-update" &&
         update.$unset?.deletionLockId === 1 &&
-        update.$unset?.deletionPending === undefined
+        update.$unset?.deletionPending === undefined &&
+        update.$unset?.deletionStartedAt === undefined
     ),
     true
   )
