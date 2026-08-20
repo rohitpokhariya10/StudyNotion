@@ -18,6 +18,13 @@ const {
   CURRENT_TERMS_VERSION,
 } = require("../utils/policyAcceptance")
 const { releaseStaleCheckoutLocks } = require("../utils/purchaseLifecycle")
+const {
+  SIDECAR_OPERATION_BUDGET_MS,
+  activateForPurchase,
+  reserveForPurchase,
+  runNonAuthoritativeSidecar,
+  terminalizeProcessedRefund,
+} = require("../domains/entitlement/entitlementService")
 
 const CURRENCY = "INR"
 const ACTIVE_PURCHASE_STATUSES = [
@@ -67,13 +74,11 @@ const boundedCourseCount = (value) =>
 
 const entitlementEventFields = ({
   courseCount,
-  purchaseId,
   requestId,
   revocableCourseCount,
   source,
 }) => ({
   requestId: safeLogIdentifier(requestId) || "unknown",
-  purchaseId: safeLogIdentifier(purchaseId) || "unknown",
   source,
   courseCount: boundedCourseCount(courseCount),
   ...(revocableCourseCount === undefined
@@ -87,6 +92,26 @@ const logEntitlementEvent = (event, fields) => {
   } catch {
     // Observability is best effort. A logging transport failure must never
     // change a completed payment, enrollment, or refund transition.
+  }
+}
+
+const runEntitlementSidecar = async ({
+  deadlineAt,
+  flow,
+  operation,
+  requestId,
+}) => {
+  try {
+    return await runNonAuthoritativeSidecar({
+      deadlineAt,
+      flow,
+      operation,
+      requestId,
+    })
+  } catch {
+    // The Entitlement sidecar is deliberately non-authoritative in Stage 2.
+    // Even an unexpected wrapper failure cannot change the legacy workflow.
+    return { ok: false }
   }
 }
 
@@ -323,7 +348,17 @@ const fulfillPurchase = async (
   reconciliationAudit,
   observability
 ) => {
+  const sidecarDeadlineAt = new Date(Date.now() + SIDECAR_OPERATION_BUDGET_MS)
   if (purchase.status === "fulfilled") {
+    await runEntitlementSidecar({
+      deadlineAt: sidecarDeadlineAt,
+      flow: "purchase_activation",
+      requestId: observability?.requestId,
+      operation: async ({ deadlineAt }) => {
+        await reserveForPurchase({ deadlineAt, purchase })
+        return activateForPurchase({ deadlineAt, purchaseId: purchase._id })
+      },
+    })
     return purchase.razorpayPaymentId === razorpayPaymentId
   }
 
@@ -378,11 +413,36 @@ const fulfillPurchase = async (
 
   if (!claimedPurchase) {
     const currentPurchase = await Purchase.findOne({ _id: purchase._id })
+    if (
+      currentPurchase?.status === "fulfilled" &&
+      currentPurchase.razorpayPaymentId === razorpayPaymentId
+    ) {
+      await runEntitlementSidecar({
+        deadlineAt: sidecarDeadlineAt,
+        flow: "purchase_activation",
+        requestId: observability?.requestId,
+        operation: async ({ deadlineAt }) => {
+          await reserveForPurchase({ deadlineAt, purchase: currentPurchase })
+          return activateForPurchase({
+            deadlineAt,
+            purchaseId: currentPurchase._id,
+          })
+        },
+      })
+    }
     return (
       currentPurchase?.status === "fulfilled" &&
       currentPurchase.razorpayPaymentId === razorpayPaymentId
     )
   }
+
+  await runEntitlementSidecar({
+    deadlineAt: sidecarDeadlineAt,
+    flow: "purchase_reservation",
+    requestId: observability?.requestId,
+    operation: ({ deadlineAt }) =>
+      reserveForPurchase({ deadlineAt, purchase: claimedPurchase }),
+  })
 
   let enrolledCourses
   try {
@@ -419,7 +479,6 @@ const fulfillPurchase = async (
       "purchase.entitlement_activated",
       entitlementEventFields({
         courseCount: claimedPurchase.courses?.length,
-        purchaseId: claimedPurchase._id,
         requestId: observability.requestId,
         source: observability.source,
       })
@@ -440,6 +499,21 @@ const fulfillPurchase = async (
       throw new Error("Manual fulfillment audit could not be persisted")
     }
   }
+
+  await runEntitlementSidecar({
+    deadlineAt: sidecarDeadlineAt,
+    flow: "purchase_activation",
+    requestId: observability?.requestId,
+    operation: async ({ deadlineAt }) => {
+      // Retry the reservation once after legacy fulfillment. This closes a
+      // transient pre-enrollment sidecar failure without gating the payment.
+      await reserveForPurchase({ deadlineAt, purchase: claimedPurchase })
+      return activateForPurchase({
+        deadlineAt,
+        purchaseId: claimedPurchase._id,
+      })
+    },
+  })
 
   return true
 }
@@ -1292,7 +1366,13 @@ const revokeRefundedEntitlements = async (purchase) => {
     const otherEntitlement = await Purchase.exists({
       _id: { $ne: purchase._id },
       courses: courseId,
-      status: { $in: ["fulfilled", "refund_pending", "refund_requested"] },
+      // A verified-capture fulfillment writes the shared legacy mirrors while
+      // its Purchase is `paid`, immediately before the final fulfilled CAS.
+      // Treat that in-flight grant as protective so a stale refund cannot
+      // delete the newer Purchase's just-written access projection.
+      status: {
+        $in: ["paid", "fulfilled", "refund_pending", "refund_requested"],
+      },
       user: purchase.user,
     })
     if (!otherEntitlement) revocableCourses.push(courseId)
@@ -1404,9 +1484,26 @@ exports.resolvePaymentReview = async (req, res) => {
     )
     if (!purchase) {
       const resolved = await Purchase.findById(purchaseId).select(
-        "status reconciliationResolution refundId"
+        "user courses lineItems status createdAt paidAt fulfilledAt razorpayPaymentId reconciliationResolution refundId"
       )
       if (resolved?.reconciliationResolution) {
+        if (resolved.reconciliationResolution === "fulfilled") {
+          await runEntitlementSidecar({
+            flow: "purchase_activation",
+            requestId: req.requestId,
+            operation: async ({ deadlineAt }) => {
+              await reserveForPurchase({ deadlineAt, purchase: resolved })
+              return activateForPurchase({ deadlineAt, purchaseId })
+            },
+          })
+        } else if (resolved.reconciliationResolution === "refunded") {
+          await runEntitlementSidecar({
+            flow: "processed_refund",
+            requestId: req.requestId,
+            operation: ({ deadlineAt }) =>
+              terminalizeProcessedRefund({ deadlineAt, purchaseId }),
+          })
+        }
         return res.status(200).json({
           success: true,
           data: {
@@ -1708,13 +1805,22 @@ exports.resolvePaymentReview = async (req, res) => {
           "purchase.entitlement_revoked",
           entitlementEventFields({
             courseCount: purchase.courses?.length,
-            purchaseId: purchase._id,
             requestId: req.requestId,
             revocableCourseCount,
             source: ENTITLEMENT_EVENT_SOURCES.ADMIN_RECONCILIATION,
           })
         )
       }
+
+      await runEntitlementSidecar({
+        flow: "processed_refund",
+        requestId: req.requestId,
+        operation: ({ deadlineAt }) =>
+          terminalizeProcessedRefund({
+            deadlineAt,
+            purchaseId: purchase._id,
+          }),
+      })
 
       const resolved = await Purchase.findOneAndUpdate(
         {

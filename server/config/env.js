@@ -38,6 +38,7 @@ const requiredProductionProviders = {
   CLOUD_NAME: process.env.CLOUD_NAME,
   CLOUD_API_KEY: process.env.CLOUD_API_KEY,
   CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
+  ENTITLEMENT_SIDECAR_STARTED_AT: process.env.ENTITLEMENT_SIDECAR_STARTED_AT,
 }
 
 const required = isProduction
@@ -180,6 +181,24 @@ if (isProduction) {
   }
   if (process.env.RAZORPAY_WEBHOOK_SECRET.length < 16) {
     throw new Error("RAZORPAY_WEBHOOK_SECRET is too short")
+  }
+  const entitlementSidecarStartedAt = new Date(
+    process.env.ENTITLEMENT_SIDECAR_STARTED_AT
+  )
+  if (
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(
+      process.env.ENTITLEMENT_SIDECAR_STARTED_AT
+    ) ||
+    !Number.isFinite(entitlementSidecarStartedAt.getTime()) ||
+    entitlementSidecarStartedAt.toISOString() !==
+      process.env.ENTITLEMENT_SIDECAR_STARTED_AT
+  ) {
+    throw new Error(
+      "ENTITLEMENT_SIDECAR_STARTED_AT must be an exact UTC ISO timestamp"
+    )
+  }
+  if (entitlementSidecarStartedAt.getTime() > Date.now() + 5 * 60 * 1000) {
+    throw new Error("ENTITLEMENT_SIDECAR_STARTED_AT cannot be in the future")
   }
   if (!/^[A-Za-z0-9_-]{2,}$/.test(process.env.CLOUD_NAME)) {
     throw new Error("CLOUD_NAME is invalid")

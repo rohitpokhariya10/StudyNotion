@@ -23,8 +23,26 @@ const {
   normalizeEmail,
 } = require("../utils/validation")
 const { releaseStaleCheckoutLocks } = require("../utils/purchaseLifecycle")
+const {
+  runNonAuthoritativeSidecar,
+  terminalizeAccountDeletion,
+} = require("../domains/entitlement/entitlementService")
 
 const GOOGLE_REAUTH_MAX_AGE_MS = 5 * 60 * 1000
+
+const runAccountDeletionSidecar = async ({ operation, requestId }) => {
+  try {
+    return await runNonAuthoritativeSidecar({
+      flow: "account_deletion",
+      operation,
+      requestId,
+    })
+  } catch {
+    // Entitlement is a non-authoritative Stage-2 sidecar. The current account
+    // deletion outcome and response remain controlled by the legacy cleanup.
+    return { ok: false }
+  }
+}
 
 const ALLOWED_GENDERS = new Set([
   "Female",
@@ -364,6 +382,7 @@ exports.deleteAccount = async (req, res) => {
     }
 
     const lockNow = new Date()
+    const deletionStartedAt = user.deletionStartedAt || lockNow
     deletionLockId = crypto.randomUUID()
     const deletionLock = await User.findOneAndUpdate(
       {
@@ -389,7 +408,7 @@ exports.deleteAccount = async (req, res) => {
           deletionLockId,
           deletionLockUntil: new Date(lockNow.getTime() + 5 * 60 * 1000),
           deletionPending: true,
-          deletionStartedAt: user.deletionStartedAt || lockNow,
+          deletionStartedAt,
         },
       },
       { returnDocument: "after" }
@@ -439,6 +458,17 @@ exports.deleteAccount = async (req, res) => {
           "Account deletion is blocked while a checkout or payment requires completion or support reconciliation",
       })
     }
+
+    await runAccountDeletionSidecar({
+      requestId: req.requestId,
+      operation: ({ deadlineAt }) =>
+        terminalizeAccountDeletion({
+          deadlineAt,
+          deletionLockId,
+          studentId: user._id,
+          terminalAt: deletionStartedAt,
+        }),
+    })
 
     const reviewIds = await RatingAndReview.find({ user: user._id }).distinct(
       "_id"
@@ -493,6 +523,7 @@ exports.deleteAccount = async (req, res) => {
           courses: [],
           courseProgress: [],
           deletionPending: false,
+          deletionStartedAt,
           email: anonymizedEmail,
           firstName: "Deleted",
           image: "",
@@ -502,7 +533,6 @@ exports.deleteAccount = async (req, res) => {
         $unset: {
           deletionLockId: 1,
           deletionLockUntil: 1,
-          deletionStartedAt: 1,
           googleId: 1,
           imagePublicId: 1,
           instructorReviewNote: 1,
