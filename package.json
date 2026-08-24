@@ -28,7 +28,7 @@
     "react-markdown": "^10.1.0",
     "react-redux": "^9.3.0",
     "react-router": "^8.3.0",
-    "react-super-responsive-table": "^5.2.1",
+    "react-super-responsive-table": "^6.0.2",
     "react-type-animation": "^3.0.1",
     "swiper": "^14.0.5"
   },
