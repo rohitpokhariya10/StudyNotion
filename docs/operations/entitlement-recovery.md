@@ -91,7 +91,7 @@ Process a bounded batch (default 25, maximum 100):
 npm --workspace studynotion-backend run entitlement:recover -- --limit 25
 ```
 
-Production mutation additionally requires:
+Every mutating recovery invocation additionally requires:
 
 ```text
 ENTITLEMENT_RECOVERY_CONFIRM=reconcile-entitlements
@@ -115,11 +115,26 @@ npm --workspace studynotion-backend run entitlement:recover -- \
 
 The cursor is an internal Purchase identifier. It is accepted only in canonical
 lowercase 24-hex form, narrows the still-mandatory deployment boundary, and
-appears only in the access-controlled mutation report. It must never be copied
-into application logs, monitoring dimensions, tickets, or public output. After
-reaching the end of a continued sweep, run once without a continuation to wrap
-around and retry earlier unresolved work. A durable automatic checkpoint would
-require a separately reviewed model and is intentionally not invented in Stage 2.
+appears only in the access-controlled interactive mutation report. It must
+never be copied into application logs, monitoring dimensions, tickets, or
+public output. After reaching the end of a continued sweep, run once without a
+continuation to wrap around and retry earlier unresolved work.
+
+Production scheduling uses the file-backed adapter instead of exposing the
+cursor to the scheduler:
+
+```bash
+npm --workspace studynotion-backend run entitlement:recover:scheduled
+```
+
+It requires `ENTITLEMENT_RECOVERY_CHECKPOINT_FILE` under a persistent private
+0700 directory and maintains an exact 0600 versioned checkpoint by same-directory
+atomic replacement. Its allowlisted aggregate output never includes the cursor
+or path. At the end of the scan it retains an empty checkpoint, so the next
+one-shot invocation wraps safely. `compose.operations.yml` supplies the hardened
+container adapter; schedule it once per minute with maximum concurrency one and
+a 90-second outer deadline. The full command and host preparation are in
+`deployment.md`.
 
 ## Exit codes
 

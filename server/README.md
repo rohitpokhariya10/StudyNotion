@@ -50,8 +50,10 @@ instructor as approved by that admin. The seed accepts loopback MongoDB hosts by
 default. A non-loopback target additionally requires a database beginning with
 `studynotion_seed_disposable_` and the exact one-run confirmation
 `STUDYNOTION_DISPOSABLE_SEED_CONFIRM=seed-disposable-database`. It always refuses
-to run when `NODE_ENV=production`, and public signup never accepts
-`accountType=Admin`.
+`DEPLOYMENT_TIER=production`. A production-style staging one-shot additionally
+requires `NODE_ENV=production`, `DEPLOYMENT_TIER=staging`,
+`STUDYNOTION_DEMO_SEED_MODE=staging`, that exact confirmation, and a disposable
+database name. Public signup never accepts `accountType=Admin`.
 Provision production admins only through a controlled operational process with
 database access and an audit trail—never through a public HTTP endpoint.
 
@@ -95,8 +97,10 @@ The browser session is an HttpOnly signed cookie. Configure these server values:
 - `COOKIE_DOMAIN`: optional; use `.example.com` only when the deployment needs a
   cookie shared by subdomains.
 - `COOKIE_SECURE=true` in production.
-- `COOKIE_SAME_SITE=lax` when the app and API are on the same site. If they are
-  on different sites, use `none` together with `COOKIE_SECURE=true`.
+- `COOKIE_SAME_SITE=lax` for the required same-site app/API deployment. Keep the
+  app and API on subdomains of one registrable site; cross-site deployments are
+  rejected because browser cookie behavior is not reliable enough for this
+  credentialed session model.
 
 Unsafe browser requests are checked against `FRONTEND_ORIGINS` as a CSRF
 boundary. Do not configure wildcard origins when credentials are enabled. A
@@ -307,6 +311,12 @@ npm --workspace studynotion-backend run db:indexes
 The command only creates declared indexes; it does not drop existing indexes.
 The preflight checks case-normalized identities plus Category, OTP, Google ID,
 and every compound Purchase uniqueness constraint before this command runs.
+Prove that every declared index is present with the read-only mode:
+
+```bash
+MONGODB_AUTO_INDEX=false INDEX_OPERATION=verify \
+npm --workspace studynotion-backend run db:indexes
+```
 
 For the catalog slice this command adds the named
 `catalog_published_newest`, `catalog_category_newest`,
@@ -350,9 +360,11 @@ those cases manually, re-upload every legacy lesson as authenticated Cloudinary
 media, then run:
 
 ```bash
-npm --workspace studynotion-backend run preflight:production
 MIGRATION_CONFIRM=create-indexes \
 npm --workspace studynotion-backend run db:indexes
+INDEX_OPERATION=verify \
+npm --workspace studynotion-backend run db:indexes
+npm --workspace studynotion-backend run preflight:production
 ```
 
 `preflight:production` exits non-zero for insecure or malformed media in both
@@ -364,17 +376,25 @@ account roles, asymmetric learner `User.courses`/`Course.studentsEnroled` mirror
 profile/security gaps, or any duplicate that would violate production indexes.
 A deployment must not proceed until every finding is zero.
 
+The provider-neutral staging/production sequence, scheduler adapter,
+environment matrix, backup/restore rehearsal, and rollback contract are in
+`../docs/operations/deployment.md`.
+
 ## Initial production admin
 
 Public signup can never create an Admin. On a new production database, run the
-one-time provisioning command from a trusted deployment shell. Supply the
-password through an ephemeral secret and remove it immediately afterward:
+one-time provisioning command from a trusted deployment job. Inject
+`ADMIN_PASSWORD` directly from its secret manager (not an inline shell value or
+command-line argument) and remove that secret binding immediately afterward:
 
 ```bash
+test -n "${ADMIN_PASSWORD-}" || {
+  echo "Inject ADMIN_PASSWORD from the one-shot secret binding" >&2
+  exit 2
+}
 PROVISION_ADMIN_CONFIRM=provision-initial-admin \
 ADMIN_ACCEPT_POLICIES=true \
 ADMIN_EMAIL=owner@example.com \
-ADMIN_PASSWORD='replace-with-a-unique-strong-password' \
 ADMIN_FIRST_NAME=Platform \
 ADMIN_LAST_NAME=Owner \
 npm --workspace studynotion-backend run admin:provision

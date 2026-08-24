@@ -58,8 +58,8 @@ Install and configure:
 ```bash
 nvm use
 npm ci
-cp .env.example .env
-cp server/.env.example server/.env
+test -e .env || cp .env.example .env
+test -e server/.env || cp server/.env.example server/.env
 ```
 
 The repository is an npm workspace. The root lockfile installs the React app,
@@ -77,7 +77,9 @@ Environment files are grouped by responsibility:
 - `server/.env`: database, authentication, cookie, email, Google, payment,
   media, rate-limit, timeout, and logging configuration. Never expose these
   secrets through a `VITE_` variable.
-- `*.production.example`: sanitized production contracts. Production startup
+- `*.staging.example` and `*.production.example`: sanitized release contracts.
+  `VITE_DEPLOYMENT_TIER`/`DEPLOYMENT_TIER` select Razorpay test mode for staging
+  and live mode for production. Production startup
   rejects missing providers, placeholder values, insecure application URLs,
   invalid database URLs, invalid cookie settings, weak signing secrets, and
   non-TLS Redis.
@@ -98,7 +100,9 @@ The demo seed accepts loopback MongoDB hosts by default. A non-loopback target i
 rejected unless its database name begins with `studynotion_seed_disposable_` and
 the one-run environment includes
 `STUDYNOTION_DISPOSABLE_SEED_CONFIRM=seed-disposable-database`. Production always
-rejects the seed, including when that confirmation is present.
+rejects the seed when `DEPLOYMENT_TIER=production`, including when that
+confirmation is present. The production-style staging exception is guarded
+separately in the deployment runbook.
 
 - Client: `http://localhost:3000`
 - API: `http://localhost:4000/api/v1`
@@ -133,30 +137,30 @@ uses an explicitly disposable database name and public local-only signing
 values; it is not a production deployment configuration.
 
 ```bash
-cp compose.local.env.example .env.compose.local
-docker compose --env-file .env.compose.local -f compose.local.yml up -d --build --wait
-docker compose --env-file .env.compose.local -f compose.local.yml run --rm seed
+test -e compose.local.env || cp compose.local.env.example compose.local.env
+docker compose --env-file compose.local.env -f compose.local.yml up -d --build --wait
+docker compose --env-file compose.local.env -f compose.local.yml run --rm seed
 ```
 
-Open `http://127.0.0.1:3000` and use any seeded account listed above. Confirm
+Open `http://localhost:3000` and use any seeded account listed above. Confirm
 the web server, API dependencies, and catalog before testing longer journeys:
 
 ```bash
-curl --fail http://127.0.0.1:3000/health
-curl --fail http://127.0.0.1:4000/health/ready
-curl --fail --header 'Origin: http://127.0.0.1:3000' \
-  'http://127.0.0.1:4000/api/v2/courses?limit=3'
+curl --fail http://localhost:3000/health
+curl --fail http://localhost:4000/health/ready
+curl --fail --header 'Origin: http://localhost:3000' \
+  'http://localhost:4000/api/v2/courses?limit=3'
 npm run test:e2e:live
 ```
 
 If you change `STUDYNOTION_WEB_PORT`, set `STUDYNOTION_LIVE_BASE_URL` to the
-matching `http://127.0.0.1:<port>` value when running the live browser suite.
+matching `http://localhost:<port>` value when running the live browser suite.
 Keep the host spelling aligned with `FRONTEND_ORIGINS`.
 
 Stop the stack without deleting its local database volume:
 
 ```bash
-docker compose --env-file .env.compose.local -f compose.local.yml down
+docker compose --env-file compose.local.env -f compose.local.yml down
 ```
 
 To intentionally reset only this Compose project's disposable data, add
@@ -165,6 +169,13 @@ and Cloudinary writes stay disabled until their own development credentials
 are supplied outside the committed sample configuration.
 
 ## Verification
+
+Install the browsers pinned by the repository once after `npm ci` (Linux CI
+uses the same command with `--with-deps`):
+
+```bash
+npx playwright install chromium webkit
+```
 
 ```bash
 npm run verify
@@ -243,9 +254,15 @@ Provider setup checklist:
 
 ## Deployment
 
+The complete environment matrix, backup/restore rehearsal, staging seed,
+controlled index/preflight gate, recovery scheduler, smoke test, monitoring, and
+rollback procedures live in
+[`docs/operations/deployment.md`](docs/operations/deployment.md).
+
 Build the production frontend with `npm run build` and deploy `dist/` as
 immutable static assets. This command validates every public provider, support,
-and legal value and refuses placeholder, HTTP, or test payment configuration.
+and legal value and refuses placeholders, HTTP, loopback hosts, or a payment key
+that does not match the declared deployment tier.
 Use `npm run build:local` only for local artifact verification. Deploy the API
 from the repository-root context with `server/Dockerfile`; an isolated
 `server/` install is not supported because the API consumes the shared contract
@@ -264,6 +281,7 @@ npm --workspace studynotion-backend start
 
 ```bash
 docker build -t studynotion-web \
+  --build-arg VITE_DEPLOYMENT_TIER=production \
   --build-arg VITE_API_BASE_URL=https://api.your-domain.com/api/v1 \
   --build-arg VITE_GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com \
   --build-arg VITE_RAZORPAY_KEY_ID=rzp_live_REPLACE123 \
@@ -296,14 +314,16 @@ A complete container-platform rollout is:
    to the deployment registry.
 2. Load all production values from the platform secret manager; never bake a
    server secret into either image.
-3. Run the security-field backfill once, run `preflight:production`, then create
-   indexes from a controlled release job.
+3. For an upgraded legacy database only, run the separate security-field repair.
+   Create and verify indexes from a controlled release job, then require a
+   healthy read-only `preflight:production` result.
 4. Deploy the API behind HTTPS, forward the configured proxy hop count, and wait
    for `/health/ready` before routing traffic.
 5. Deploy the web image on internal port `8080`, configure its public domain,
    then register the final Google origin and Razorpay webhook URL.
-6. Execute the provider go-live checks in `server/README.md`, monitor structured
-   API logs by request ID, and reconcile any non-empty payment review queue.
+6. Enable the one-shot Entitlement recovery schedule, execute the provider
+   go-live checks, monitor structured API/job logs by request ID, and reconcile
+   any non-empty payment review queue.
 
 Rollback by routing traffic to the previous immutable image tags. Do not roll
 back security-field backfills; they are additive. Restore a database backup only
@@ -316,8 +336,9 @@ for a separately approved data incident, then rerun preflight and index checks.
   check. Inspect API JSON logs using the returned `X-Request-Id`.
 - A browser CORS/CSRF rejection usually means its exact origin is absent from
   `FRONTEND_ORIGINS`; do not solve it with a wildcard.
-- If a production frontend build fails, replace every sample public value and
-  use HTTPS/live-provider identifiers. Use `build:local` only for local checks.
+- If a release frontend build fails, replace every sample public value and use
+  HTTPS plus the tier-matching test/live identifiers. Use `build:local` only for
+  local checks.
 - Never seed production, commit `.env` files, log cookies/provider payloads, or
   put reset credentials in query parameters. Run `node scripts/scan-secrets.mjs`
   before staging and follow `docs/security/repository-safety.md`.
