@@ -12,6 +12,10 @@ function Template({ title, description1, description2, image, formType }) {
   const [policyAcknowledgement, setPolicyAcknowledgement] = useState(
     emptyPolicyAcknowledgement
   )
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
+  const googleIdentityEnabled = Boolean(
+    googleClientId && !googleClientId.includes("replace-with")
+  )
 
   return (
     <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
@@ -37,20 +41,24 @@ function Template({ title, description1, description2, image, formType }) {
             ) : (
               <LoginForm />
             )}
-            <div className="my-5 flex w-full items-center gap-x-2">
-              <div className="h-px flex-1 bg-richblack-700" />
-              <span className="text-sm text-richblack-300">or</span>
-              <div className="h-px flex-1 bg-richblack-700" />
-            </div>
-            <GoogleSignInButton
-              requirePolicyAcknowledgement={formType === "signup"}
-              policyAcknowledgement={policyAcknowledgement}
-            />
-            {formType === "signup" && (
-              <p className="mt-3 text-center text-xs text-richblack-300">
-                Google sign-up creates a Student account. Instructor onboarding
-                is completed separately.
-              </p>
+            {googleIdentityEnabled && (
+              <>
+                <div className="my-5 flex w-full items-center gap-x-2">
+                  <div className="h-px flex-1 bg-richblack-700" />
+                  <span className="text-sm text-richblack-300">or</span>
+                  <div className="h-px flex-1 bg-richblack-700" />
+                </div>
+                <GoogleSignInButton
+                  requirePolicyAcknowledgement={formType === "signup"}
+                  policyAcknowledgement={policyAcknowledgement}
+                />
+                {formType === "signup" && (
+                  <p className="mt-3 text-center text-xs text-richblack-300">
+                    Google sign-up creates a Student account. Instructor
+                    onboarding is completed separately.
+                  </p>
+                )}
+              </>
             )}
           </div>
           <div className="relative mx-auto w-11/12 max-w-[450px] md:mx-0">

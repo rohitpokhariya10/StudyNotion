@@ -49,6 +49,9 @@
     "contracts:openapi:check": "npm run openapi:check --workspace @studynotion/contracts",
     "contracts:test": "npm run test --workspace @studynotion/contracts",
     "architecture:check": "node scripts/check-architecture.mjs",
+    "deploy:validate-pair": "node scripts/validate-release-pair.mjs",
+    "ops:validate-image": "node scripts/validate-image-reference.mjs",
+    "ops:validate-recovery-host": "node scripts/validate-recovery-host.cjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . && npm run architecture:check",
@@ -78,6 +81,7 @@
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "4.3.3",
+    "tldts": "^7.4.9",
     "typescript": "5.9.3",
     "vite": "^8.1.5",
     "vitest": "^4.1.10"

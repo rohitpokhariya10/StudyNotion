@@ -36,6 +36,7 @@ const connect = async () => {
 
   try {
     await mongoose.connect(env.mongoUrl, {
+      autoCreate: env.mongo.autoIndex,
       autoIndex: env.mongo.autoIndex,
       connectTimeoutMS: env.mongo.connectTimeoutMs,
       maxPoolSize: env.mongo.maxPoolSize,

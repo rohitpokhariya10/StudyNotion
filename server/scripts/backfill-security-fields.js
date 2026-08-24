@@ -5,6 +5,11 @@ const mongoose = require("mongoose")
 const Profile = require("../models/Profile")
 const Course = require("../models/Course")
 const User = require("../models/User")
+const logger = require("../utils/logger")
+const {
+  mongoJobOptions,
+  validateMongoUriForEnvironment,
+} = require("../utils/mongoDeployment")
 
 const run = async () => {
   if (process.env.BACKFILL_CONFIRM !== "backfill-security-fields") {
@@ -15,7 +20,8 @@ const run = async () => {
 
   const mongoUrl = process.env.MONGODB_URI || process.env.MONGODB_URL
   if (!mongoUrl) throw new Error("MONGODB_URI is required")
-  await mongoose.connect(mongoUrl, { autoIndex: false })
+  validateMongoUriForEnvironment(mongoUrl, process.env)
+  await mongoose.connect(mongoUrl, mongoJobOptions(process.env))
 
   const users = User.collection
   const courses = Course.collection
@@ -126,7 +132,9 @@ const run = async () => {
 
 run()
   .catch((error) => {
-    console.error("Security-field backfill failed:", error.message)
+    logger.error("security_fields.backfill_failed", {
+      error: logger.errorMetadata(error),
+    })
     process.exitCode = 1
   })
   .finally(async () => {

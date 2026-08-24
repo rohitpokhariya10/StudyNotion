@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim AS build
+FROM node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03 AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -8,6 +8,7 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 ARG VITE_API_BASE_URL
+ARG VITE_DEPLOYMENT_TIER
 ARG VITE_GOOGLE_CLIENT_ID
 ARG VITE_RAZORPAY_KEY_ID
 ARG VITE_SUPPORT_EMAIL
@@ -16,6 +17,7 @@ ARG VITE_LEGAL_ADDRESS
 ARG VITE_LEGAL_JURISDICTION
 ARG STUDYNOTION_WEB_BUILD=production
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_DEPLOYMENT_TIER=$VITE_DEPLOYMENT_TIER
 ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 ENV VITE_RAZORPAY_KEY_ID=$VITE_RAZORPAY_KEY_ID
 ENV VITE_SUPPORT_EMAIL=$VITE_SUPPORT_EMAIL
@@ -33,11 +35,9 @@ RUN if [ "$STUDYNOTION_WEB_BUILD" = "production" ]; then \
     fi
 RUN node scripts/render-nginx-config.mjs
 
-FROM nginx:1.29-alpine
+FROM nginxinc/nginx-unprivileged:1.29-alpine@sha256:0c79d56aee561a1d81c63f00eee5fb5fe29279560cdc55e91425133104c7fbe6
 COPY --from=build /app/nginx.rendered.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
-RUN touch /var/run/nginx.pid \
-  && chown -R nginx:nginx /var/cache/nginx /var/run/nginx.pid
 USER nginx
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

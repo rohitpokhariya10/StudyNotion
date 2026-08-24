@@ -51,7 +51,7 @@ const rules = [
   {
     id: "sensitive-assignment",
     expression:
-      /\b(?:ADMIN_PASSWORD|AWS_SECRET_ACCESS_KEY|CLOUD_API_SECRET|DATABASE_URL|GOOGLE_CLIENT_SECRET|JWT_SECRET|MAIL_PASS|MONGODB_URI|MONGODB_URL|OTP_SECRET|PRIVATE_KEY|RAZORPAY_SECRET|RAZORPAY_WEBHOOK_SECRET|REDIS_URL|RESEND_API_KEY)\b[ \t]*(?:=(?!=)|:)[ \t]*(?:"([^"\r\n]+)"|'([^'\r\n]+)'|`([^`\r\n]+)`|([^\s,#}\r\n]+))/gi,
+      /\b(?:ADMIN_PASSWORD|AWS_SECRET_ACCESS_KEY|CLOUD_API_SECRET|DATABASE_URL|GOOGLE_CLIENT_SECRET|JWT_SECRET|MAIL_PASS|MONGODB_URI|MONGODB_URL|OTP_SECRET|PRIVATE_KEY|RAZORPAY_SECRET|RAZORPAY_WEBHOOK_SECRET|REDIS_URL|RESEND_API_KEY|STUDYNOTION_(?:DEMO|LIVE)_(?:ADMIN|INSTRUCTOR|STUDENT)_PASSWORD)\b[ \t]*(?:=(?!=)|:)[ \t]*(?:"([^"\r\n]+)"|'([^'\r\n]+)'|`([^`\r\n]+)`|([^\s,#}\r\n]+))/gi,
     value(match) {
       return match.slice(1).find((candidate) => candidate !== undefined) || ""
     },
@@ -62,6 +62,7 @@ const placeholderPattern =
   /(?:change[-_ ]?me|ci[-_ ]?build|contract|dummy|example|fake|fixture|local|not[-_ ]?a[-_ ]?real|placeholder|replace|sample|studynotion\.test|test[-_ ])/i
 const fixturePathPattern =
   /(?:^|\/)(?:__fixtures__|fixtures?|tests?)(?:\/|$)|\.(?:spec|test)\.[cm]?[jt]sx?$/i
+const exampleEnvironmentPathPattern = /\.env\.example$/i
 const dynamicReferencePattern =
   /^(?:\$\{|env\.|import\.meta\.env\.|process\.env\.|secrets\.)/i
 const sourceFilePattern = /\.[cm]?[jt]sx?$/i
@@ -114,8 +115,9 @@ const isAllowedFixture = (file, candidate) => {
   if (placeholderPattern.test(value)) return true
 
   return (
-    fixturePathPattern.test(file) &&
-    /(?:0{4,}|1{4,}|123456|abcdef|contract|dummy|example|fake|fixture|local|mock|secret|test)/i.test(
+    (fixturePathPattern.test(file) ||
+      exampleEnvironmentPathPattern.test(file)) &&
+    /(?:0{4,}|1{4,}|123456|@123\b|abcdef|contract|dummy|example|fake|fixture|local|mock|secret|test)/i.test(
       value
     )
   )

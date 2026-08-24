@@ -18,6 +18,7 @@ const policyAcceptanceSchema = new mongoose.Schema(
         "google_signup",
         "account_update",
         "admin_provisioning",
+        "demo_seed",
         "local_seed",
       ],
       required: true,

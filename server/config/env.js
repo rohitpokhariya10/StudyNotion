@@ -1,7 +1,29 @@
-const isProduction = process.env.NODE_ENV === "production"
+const { validateProductionMongoUri } = require("../utils/mongoDeployment")
+const { isLoopbackHostname } = require("../utils/deploymentNetwork")
+const { getDomain } = require("tldts")
+
+const nodeEnvironment =
+  process.env.NODE_ENV === undefined ? "development" : process.env.NODE_ENV
+const supportedNodeEnvironments = new Set(["development", "test", "production"])
+if (!supportedNodeEnvironments.has(nodeEnvironment)) {
+  throw new Error("NODE_ENV must be development, test, or production")
+}
+
+const isProduction = nodeEnvironment === "production"
+const deploymentTier = process.env.DEPLOYMENT_TIER || undefined
+if (deploymentTier && !new Set(["staging", "production"]).has(deploymentTier)) {
+  throw new Error("DEPLOYMENT_TIER must be staging or production")
+}
+if (deploymentTier && nodeEnvironment !== "production") {
+  throw new Error("DEPLOYMENT_TIER requires NODE_ENV=production")
+}
+if (isProduction && !deploymentTier) {
+  throw new Error("DEPLOYMENT_TIER is required when NODE_ENV is production")
+}
+
 const logLevel = (
   process.env.LOG_LEVEL ||
-  (process.env.NODE_ENV === "test" ? "error" : isProduction ? "info" : "debug")
+  (nodeEnvironment === "test" ? "error" : isProduction ? "info" : "debug")
 )
   .trim()
   .toLowerCase()
@@ -22,12 +44,13 @@ const requiredCore = {
 }
 
 const requiredProductionProviders = {
+  DEPLOYMENT_TIER: deploymentTier,
   REDIS_URL: process.env.REDIS_URL,
   APP_URL: process.env.APP_URL,
+  PUBLIC_API_URL: process.env.PUBLIC_API_URL,
   BRAND_NAME: process.env.BRAND_NAME,
   BRAND_LOGO_URL: process.env.BRAND_LOGO_URL,
   SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   EMAIL_FROM: process.env.EMAIL_FROM,
   CONTACT_RECIPIENT: process.env.CONTACT_RECIPIENT,
@@ -38,7 +61,15 @@ const requiredProductionProviders = {
   CLOUD_NAME: process.env.CLOUD_NAME,
   CLOUD_API_KEY: process.env.CLOUD_API_KEY,
   CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
+  FOLDER_NAME: process.env.FOLDER_NAME,
   ENTITLEMENT_SIDECAR_STARTED_AT: process.env.ENTITLEMENT_SIDECAR_STARTED_AT,
+  TRUST_PROXY: process.env.TRUST_PROXY,
+  COOKIE_SAME_SITE: process.env.COOKIE_SAME_SITE,
+  COOKIE_SECURE: process.env.COOKIE_SECURE,
+  MONGODB_AUTO_INDEX: process.env.MONGODB_AUTO_INDEX,
+  ...(deploymentTier === "production"
+    ? { GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID }
+    : {}),
 }
 
 const required = isProduction
@@ -79,6 +110,41 @@ const emailAddressFrom = (value) => {
   return (bracketed?.[1] || normalized).trim()
 }
 
+const isValidCookieDomain = (value) => {
+  const domain = String(value || "").replace(/^\./, "")
+  if (
+    !domain ||
+    domain.length > 253 ||
+    isLoopbackHostname(domain) ||
+    /^\d+(?:\.\d+){3}$/.test(domain)
+  ) {
+    return false
+  }
+
+  return domain
+    .split(".")
+    .every(
+      (label) =>
+        label.length >= 1 &&
+        label.length <= 63 &&
+        /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/.test(label)
+    )
+}
+
+const isValidMediaFolder = (value) => {
+  const folder = String(value || "").trim()
+  return (
+    folder.length >= 2 &&
+    folder.length <= 120 &&
+    !folder.startsWith("/") &&
+    !folder.endsWith("/") &&
+    !folder.includes("//") &&
+    folder
+      .split("/")
+      .every((segment) => /^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(segment))
+  )
+}
+
 if (isProduction) {
   const placeholderValues = {
     ...required,
@@ -86,6 +152,7 @@ if (isProduction) {
     BRAND_NAME: process.env.BRAND_NAME,
     COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
     EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   }
   const placeholderPattern =
     /(?:replace|change[-_ ]?me|example\.com|your[-_ ]?(?:key|secret|domain))/i
@@ -116,6 +183,33 @@ if (isProduction) {
   ) {
     throw new Error("APP_URL must be a valid HTTPS origin without a path")
   }
+  if (isLoopbackHostname(appUrl.hostname)) {
+    throw new Error("APP_URL must not use a loopback or development host")
+  }
+
+  let publicApiUrl
+  try {
+    publicApiUrl = new URL(process.env.PUBLIC_API_URL)
+  } catch {
+    throw new Error("PUBLIC_API_URL must be a valid HTTPS origin")
+  }
+  if (
+    publicApiUrl.protocol !== "https:" ||
+    publicApiUrl.pathname !== "/" ||
+    publicApiUrl.search ||
+    publicApiUrl.hash ||
+    publicApiUrl.username ||
+    publicApiUrl.password
+  ) {
+    throw new Error(
+      "PUBLIC_API_URL must be a valid HTTPS origin without a path"
+    )
+  }
+  if (isLoopbackHostname(publicApiUrl.hostname)) {
+    throw new Error(
+      "PUBLIC_API_URL must not use a loopback or development host"
+    )
+  }
 
   if (process.env.BRAND_LOGO_URL) {
     let brandLogoUrl
@@ -127,6 +221,11 @@ if (isProduction) {
     if (brandLogoUrl.protocol !== "https:") {
       throw new Error("BRAND_LOGO_URL must use HTTPS in production")
     }
+    if (isLoopbackHostname(brandLogoUrl.hostname)) {
+      throw new Error(
+        "BRAND_LOGO_URL must not use a loopback or development host"
+      )
+    }
   }
   if (
     process.env.BRAND_NAME &&
@@ -136,9 +235,7 @@ if (isProduction) {
     throw new Error("BRAND_NAME is invalid")
   }
 
-  if (!/^mongodb(?:\+srv)?:\/\//.test(mongoUrl)) {
-    throw new Error("MONGODB_URI must be a MongoDB connection URI")
-  }
+  validateProductionMongoUri(mongoUrl)
   let redisUrl
   try {
     redisUrl = new URL(process.env.REDIS_URL)
@@ -147,6 +244,19 @@ if (isProduction) {
   }
   if (redisUrl.protocol !== "rediss:") {
     throw new Error("Production REDIS_URL must use rediss:// TLS")
+  }
+  if (redisUrl.search || redisUrl.hash) {
+    throw new Error(
+      "Production REDIS_URL must not contain query parameters or fragments"
+    )
+  }
+  if (!redisUrl.password) {
+    throw new Error("Production REDIS_URL must include authentication")
+  }
+  if (isLoopbackHostname(redisUrl.hostname)) {
+    throw new Error(
+      "Production REDIS_URL must not use a loopback or development host"
+    )
   }
   if (!isEmail(process.env.SUPPORT_EMAIL)) {
     throw new Error("SUPPORT_EMAIL must be a valid email address")
@@ -164,6 +274,7 @@ if (isProduction) {
     throw new Error("EMAIL_FROM must contain a valid sender email address")
   }
   if (
+    process.env.GOOGLE_CLIENT_ID &&
     !/^[A-Za-z0-9-]+\.apps\.googleusercontent\.com$/.test(
       process.env.GOOGLE_CLIENT_ID
     )
@@ -173,14 +284,27 @@ if (isProduction) {
   if (!/^re_[A-Za-z0-9_]{8,}$/.test(process.env.RESEND_API_KEY)) {
     throw new Error("RESEND_API_KEY must be a Resend API key")
   }
-  if (!/^rzp_live_[A-Za-z0-9]{6,}$/.test(process.env.RAZORPAY_KEY_ID)) {
-    throw new Error("RAZORPAY_KEY_ID must be a live Razorpay key in production")
+  const razorpayKeyPrefix =
+    deploymentTier === "staging" ? "rzp_test_" : "rzp_live_"
+  if (
+    !new RegExp(`^${razorpayKeyPrefix}[A-Za-z0-9]{6,}$`).test(
+      process.env.RAZORPAY_KEY_ID
+    )
+  ) {
+    throw new Error(
+      `RAZORPAY_KEY_ID must use the ${razorpayKeyPrefix} prefix for ${deploymentTier}`
+    )
   }
   if (process.env.RAZORPAY_SECRET.length < 16) {
     throw new Error("RAZORPAY_SECRET is too short")
   }
   if (process.env.RAZORPAY_WEBHOOK_SECRET.length < 16) {
     throw new Error("RAZORPAY_WEBHOOK_SECRET is too short")
+  }
+  if (process.env.RAZORPAY_SECRET === process.env.RAZORPAY_WEBHOOK_SECRET) {
+    throw new Error(
+      "RAZORPAY_SECRET and RAZORPAY_WEBHOOK_SECRET must be independent"
+    )
   }
   const entitlementSidecarStartedAt = new Date(
     process.env.ENTITLEMENT_SIDECAR_STARTED_AT
@@ -208,6 +332,9 @@ if (isProduction) {
   }
   if (process.env.CLOUD_API_SECRET.length < 16) {
     throw new Error("CLOUD_API_SECRET is too short")
+  }
+  if (!isValidMediaFolder(process.env.FOLDER_NAME)) {
+    throw new Error("FOLDER_NAME must be a valid isolated media folder")
   }
 }
 
@@ -245,12 +372,13 @@ const parseOrigins = (value) =>
         .map((origin) => origin.trim())
         .filter(Boolean)
     ),
-  ].map((origin) => {
+  ].map((origin, index) => {
+    const originLabel = `Frontend origin ${index + 1}`
     let url
     try {
       url = new URL(origin)
     } catch {
-      throw new Error(`Invalid frontend origin: ${origin}`)
+      throw new Error(`${originLabel} is invalid`)
     }
 
     if (
@@ -260,15 +388,18 @@ const parseOrigins = (value) =>
       url.username ||
       url.password
     ) {
-      throw new Error(
-        `Frontend origins must not contain paths or credentials: ${origin}`
-      )
+      throw new Error(`${originLabel} must not contain paths or credentials`)
     }
     if (isProduction && url.protocol !== "https:") {
-      throw new Error(`Production frontend origins must use HTTPS: ${origin}`)
+      throw new Error(`${originLabel} must use HTTPS in production`)
+    }
+    if (isProduction && isLoopbackHostname(url.hostname)) {
+      throw new Error(
+        `${originLabel} must not use loopback or development hosts in production`
+      )
     }
     if (!isProduction && !["http:", "https:"].includes(url.protocol)) {
-      throw new Error(`Frontend origins must use HTTP or HTTPS: ${origin}`)
+      throw new Error(`${originLabel} must use HTTP or HTTPS`)
     }
     return url.origin
   })
@@ -298,28 +429,98 @@ if (process.env.APP_URL) {
   }
 }
 
-const cookieSameSite = (process.env.COOKIE_SAME_SITE || "lax").toLowerCase()
+if (isProduction) {
+  const apiSite = getDomain(new URL(process.env.PUBLIC_API_URL).hostname, {
+    allowPrivateDomains: true,
+  })
+  const applicationSites = [appUrl, ...frontendOrigins].map((origin) =>
+    getDomain(new URL(origin).hostname, { allowPrivateDomains: true })
+  )
+  if (
+    !apiSite ||
+    applicationSites.some(
+      (applicationSite) => !applicationSite || applicationSite !== apiSite
+    )
+  ) {
+    throw new Error(
+      "APP_URL, every frontend origin, and PUBLIC_API_URL must share one registrable site for reliable cookie authentication"
+    )
+  }
+}
+
+const cookieName = (process.env.COOKIE_NAME || "studynotion_session").trim()
+if (
+  cookieName.length > 128 ||
+  !/^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/.test(cookieName)
+) {
+  throw new Error("COOKIE_NAME must be a valid HTTP cookie name")
+}
+
+const cookieDomain = process.env.COOKIE_DOMAIN?.trim() || undefined
+if (cookieDomain && !isValidCookieDomain(cookieDomain)) {
+  throw new Error("COOKIE_DOMAIN must be a valid DNS domain without a port")
+}
+if (
+  cookieDomain &&
+  !getDomain(cookieDomain.replace(/^\./, ""), { allowPrivateDomains: true })
+) {
+  throw new Error("COOKIE_DOMAIN must not be a public suffix")
+}
+if (cookieDomain) {
+  const appHostname = new URL(appUrl).hostname.toLowerCase()
+  const apiHostname = new URL(
+    process.env.PUBLIC_API_URL || appUrl
+  ).hostname.toLowerCase()
+  const bareCookieDomain = cookieDomain.replace(/^\./, "").toLowerCase()
+  const domainContains = (hostname) =>
+    hostname === bareCookieDomain || hostname.endsWith(`.${bareCookieDomain}`)
+  if (!domainContains(appHostname) || !domainContains(apiHostname)) {
+    throw new Error(
+      "COOKIE_DOMAIN must be a parent of both APP_URL and PUBLIC_API_URL"
+    )
+  }
+}
+if (cookieName.startsWith("__Host-") && cookieDomain) {
+  throw new Error("A __Host- cookie cannot set COOKIE_DOMAIN")
+}
+
+const cookieSameSite = (process.env.COOKIE_SAME_SITE || "lax")
+  .trim()
+  .toLowerCase()
 if (!["lax", "strict", "none"].includes(cookieSameSite)) {
   throw new Error("COOKIE_SAME_SITE must be lax, strict, or none")
 }
 
-const cookieSecure = isProduction || process.env.COOKIE_SECURE === "true"
+const cookieSecure = readBoolean("COOKIE_SECURE", isProduction)
+if (isProduction && !cookieSecure) {
+  throw new Error("COOKIE_SECURE must be true in a production runtime")
+}
 if (cookieSameSite === "none" && !cookieSecure) {
   throw new Error("COOKIE_SECURE must be true when COOKIE_SAME_SITE is none")
+}
+if (
+  (cookieName.startsWith("__Secure-") || cookieName.startsWith("__Host-")) &&
+  !cookieSecure
+) {
+  throw new Error("Prefixed cookies require COOKIE_SECURE=true")
 }
 
 const parseTrustProxy = () => {
   const value = process.env.TRUST_PROXY
   if (!value) return isProduction ? 1 : false
-  if (value === "false" || value === "0") return false
-  if (value === "true") {
-    throw new Error(
-      "TRUST_PROXY=true is unsafe; configure a proxy hop count or subnet"
-    )
+  if (value === "false" || value === "0") {
+    if (isProduction) {
+      throw new Error(
+        "TRUST_PROXY must be a reviewed proxy hop count from 1 through 10 in production"
+      )
+    }
+    return false
   }
   if (/^\d+$/.test(value))
     return readInteger("TRUST_PROXY", 1, { min: 1, max: 10 })
-  return value
+  throw new Error(
+    "TRUST_PROXY must be false, 0, or a reviewed proxy hop count from 1 through 10"
+  )
 }
 
 const mongoMaxPoolSize = readInteger("MONGODB_MAX_POOL_SIZE", 20, {
@@ -333,16 +534,33 @@ const mongoMinPoolSize = readInteger("MONGODB_MIN_POOL_SIZE", 1, {
 if (mongoMinPoolSize > mongoMaxPoolSize) {
   throw new Error("MONGODB_MIN_POOL_SIZE cannot exceed MONGODB_MAX_POOL_SIZE")
 }
+const mongoAutoIndex = readBoolean("MONGODB_AUTO_INDEX", !isProduction)
+if (isProduction && mongoAutoIndex) {
+  throw new Error("MONGODB_AUTO_INDEX must be false in a production runtime")
+}
 
 module.exports = Object.freeze({
   isProduction,
+  nodeEnvironment,
+  deploymentTier: deploymentTier || null,
   logLevel,
   port: readInteger("PORT", 4000, { min: 1, max: 65535 }),
   frontendOrigins,
   frontendOrigin: frontendOrigins[0],
   appUrl,
+  publicApiUrl: process.env.PUBLIC_API_URL || "",
   mongoUrl,
   redisUrl: process.env.REDIS_URL || "",
+  redis: {
+    connectTimeoutMs: readInteger("REDIS_CONNECT_TIMEOUT_MS", 10000, {
+      min: 1000,
+      max: 30000,
+    }),
+    commandTimeoutMs: readInteger("REDIS_COMMAND_TIMEOUT_MS", 5000, {
+      min: 1000,
+      max: 30000,
+    }),
+  },
   trustProxy: parseTrustProxy(),
   jsonBodyLimit: readSize("JSON_BODY_LIMIT", "100kb"),
   formBodyLimit: readSize("FORM_BODY_LIMIT", "100kb"),
@@ -379,7 +597,7 @@ module.exports = Object.freeze({
     max: 60000,
   }),
   mongo: {
-    autoIndex: readBoolean("MONGODB_AUTO_INDEX", !isProduction),
+    autoIndex: mongoAutoIndex,
     maxPoolSize: mongoMaxPoolSize,
     minPoolSize: mongoMinPoolSize,
     serverSelectionTimeoutMs: readInteger(
@@ -405,8 +623,8 @@ module.exports = Object.freeze({
     }),
   },
   cookie: {
-    name: process.env.COOKIE_NAME || "studynotion_session",
-    domain: process.env.COOKIE_DOMAIN || undefined,
+    name: cookieName,
+    domain: cookieDomain,
     sameSite: cookieSameSite,
     secure: cookieSecure,
   },

@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim
+FROM node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./

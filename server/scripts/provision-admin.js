@@ -6,6 +6,11 @@ const mongoose = require("mongoose")
 const Profile = require("../models/Profile")
 const User = require("../models/User")
 const { createPolicyAcceptance } = require("../utils/policyAcceptance")
+const logger = require("../utils/logger")
+const {
+  mongoJobOptions,
+  validateMongoUriForEnvironment,
+} = require("../utils/mongoDeployment")
 const {
   isStrongPassword,
   isValidEmail,
@@ -44,7 +49,8 @@ const run = async () => {
   }
   if (!firstName || !lastName) throw new Error("Admin names are invalid")
 
-  await mongoose.connect(mongoUrl, { autoIndex: false })
+  validateMongoUriForEnvironment(mongoUrl, process.env)
+  await mongoose.connect(mongoUrl, mongoJobOptions(process.env))
 
   if (await User.exists({ accountType: "Admin", active: true })) {
     throw new Error(
@@ -81,7 +87,9 @@ const run = async () => {
 
 run()
   .catch((error) => {
-    console.error("Admin provisioning failed:", error.message)
+    logger.error("admin.provision_failed", {
+      error: logger.errorMetadata(error),
+    })
     process.exitCode = 1
   })
   .finally(async () => {

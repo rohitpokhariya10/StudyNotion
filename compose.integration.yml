@@ -2,7 +2,7 @@ name: studynotion-integration
 
 services:
   mongo:
-    image: mongo:8.0
+    image: mongo:8.0@sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a
     restart: "no"
     environment:
       MONGO_INITDB_DATABASE: studynotion_integration
@@ -24,7 +24,7 @@ services:
       start_period: 10s
 
   redis:
-    image: redis:7.4-alpine
+    image: redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
     restart: "no"
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     ports:

@@ -8,6 +8,10 @@ const {
   assertEnrollmentConsistencyReport,
 } = require("../domains/enrollment/enrollmentConsistencyReport")
 const logger = require("../utils/logger")
+const {
+  mongoJobOptions,
+  validateMongoUriForEnvironment,
+} = require("../utils/mongoDeployment")
 
 const EXIT_CODES = Object.freeze({
   healthy: 0,
@@ -92,19 +96,7 @@ const parseArguments = (argv) => {
   return help ? { help: true } : { mode, sampleLimit }
 }
 
-const mongoOptions = (environment) => ({
-  autoIndex: false,
-  connectTimeoutMS: parseInteger(
-    environment.MONGODB_CONNECT_TIMEOUT_MS || 10_000,
-    "MONGODB_CONNECT_TIMEOUT_MS",
-    { maximum: 60_000, minimum: 1_000 }
-  ),
-  serverSelectionTimeoutMS: parseInteger(
-    environment.MONGODB_SERVER_SELECTION_TIMEOUT_MS || 10_000,
-    "MONGODB_SERVER_SELECTION_TIMEOUT_MS",
-    { maximum: 60_000, minimum: 1_000 }
-  ),
-})
+const mongoOptions = (environment) => mongoJobOptions(environment)
 
 const classifyOperationalError = (error) => {
   if (error?.code === "ENROLLMENT_AUDIT_CONFIGURATION") {
@@ -145,6 +137,7 @@ const run = async ({
     if (!mongoUrl) {
       throw new EnrollmentAuditConfigurationError("MONGODB_URI is required")
     }
+    validateMongoUriForEnvironment(mongoUrl, environment)
     await connect(mongoUrl, mongoOptions(environment))
     connected = true
     const report = await serviceFactory({ targetLogger }).audit(options)

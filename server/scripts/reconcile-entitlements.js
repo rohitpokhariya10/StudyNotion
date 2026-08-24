@@ -7,6 +7,10 @@ const {
   createEntitlementRecoveryService,
 } = require("../domains/entitlement/entitlementRecoveryService")
 const logger = require("../utils/logger")
+const {
+  mongoJobOptions,
+  validateMongoUriForEnvironment,
+} = require("../utils/mongoDeployment")
 
 const RECOVERY_CONFIRMATION = "reconcile-entitlements"
 const MAX_BOUNDARY_FUTURE_SKEW_MS = 5 * 60 * 1000
@@ -162,29 +166,13 @@ const parseStrictIsoTimestamp = (value, name, now = Date.now()) => {
   return parsed
 }
 
-const mongoOptions = (environment) => ({
-  autoIndex: false,
-  connectTimeoutMS: parseInteger(
-    environment.MONGODB_CONNECT_TIMEOUT_MS || 10_000,
-    "MONGODB_CONNECT_TIMEOUT_MS",
-    { maximum: 60_000, minimum: 1_000 }
-  ),
-  serverSelectionTimeoutMS: parseInteger(
-    environment.MONGODB_SERVER_SELECTION_TIMEOUT_MS || 10_000,
-    "MONGODB_SERVER_SELECTION_TIMEOUT_MS",
-    { maximum: 60_000, minimum: 1_000 }
-  ),
-  socketTimeoutMS: parseInteger(
-    environment.MONGODB_SOCKET_TIMEOUT_MS || 10_000,
-    "MONGODB_SOCKET_TIMEOUT_MS",
-    { maximum: 10_000, minimum: 1_000 }
-  ),
-  timeoutMS: parseInteger(
-    environment.MONGODB_OPERATION_TIMEOUT_MS || 10_000,
-    "MONGODB_OPERATION_TIMEOUT_MS",
-    { maximum: 10_000, minimum: 1_000 }
-  ),
-})
+const mongoOptions = (environment) =>
+  mongoJobOptions(environment, {
+    operationFallback: 10_000,
+    operationMaximum: 10_000,
+    socketFallback: 10_000,
+    socketMaximum: 10_000,
+  })
 
 const isRecord = (value) =>
   Boolean(value && typeof value === "object" && !Array.isArray(value))
@@ -346,7 +334,10 @@ const validateStatusReport = (report) => {
 }
 
 const classifyOperationalError = (error) => {
-  if (error?.code === "ENTITLEMENT_RECOVERY_CONFIGURATION") {
+  if (
+    error?.code === "ENTITLEMENT_RECOVERY_CONFIGURATION" ||
+    error?.code === "MONGODB_DEPLOYMENT_CONFIGURATION"
+  ) {
     return "configuration_error"
   }
   if (error?.code === "ENTITLEMENT_RECOVERY_INVALID_REPORT") {
@@ -383,13 +374,13 @@ const run = async ({
     "ENTITLEMENT_SIDECAR_STARTED_AT",
     clock()
   )
+  validateMongoUriForEnvironment(mongoUrl, environment)
   if (
-    environment.NODE_ENV === "production" &&
     !options.statusOnly &&
     environment.ENTITLEMENT_RECOVERY_CONFIRM !== RECOVERY_CONFIRMATION
   ) {
     throw new EntitlementRecoveryConfigurationError(
-      `Set ENTITLEMENT_RECOVERY_CONFIRM=${RECOVERY_CONFIRMATION} to run production recovery`
+      `Set ENTITLEMENT_RECOVERY_CONFIRM=${RECOVERY_CONFIRMATION} to run recovery`
     )
   }
 

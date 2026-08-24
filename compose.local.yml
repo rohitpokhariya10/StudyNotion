@@ -3,10 +3,11 @@ name: studynotion-local
 x-api-environment: &api-environment
   NODE_ENV: development
   PORT: "4000"
-  FRONTEND_ORIGINS: http://127.0.0.1:${STUDYNOTION_WEB_PORT:-3000}
-  APP_URL: http://127.0.0.1:${STUDYNOTION_WEB_PORT:-3000}
+  FRONTEND_ORIGINS: http://localhost:${STUDYNOTION_WEB_PORT:-3000}
+  APP_URL: http://localhost:${STUDYNOTION_WEB_PORT:-3000}
+  PUBLIC_API_URL: http://localhost:${STUDYNOTION_API_PORT:-4000}
   BRAND_NAME: StudyNotion local container evaluation
-  BRAND_LOGO_URL: http://127.0.0.1:${STUDYNOTION_WEB_PORT:-3000}/logo.png
+  BRAND_LOGO_URL: http://localhost:${STUDYNOTION_WEB_PORT:-3000}/logo.png
   SUPPORT_EMAIL: support@studynotion.local
   MONGODB_URI: mongodb://mongo:27017/studynotion_seed_disposable_local
   REDIS_URL: redis://redis:6379/0
@@ -17,11 +18,19 @@ x-api-environment: &api-environment
   COOKIE_SAME_SITE: lax
   COOKIE_SECURE: "false"
   MONGODB_AUTO_INDEX: "true"
+  ENTITLEMENT_SIDECAR_STARTED_AT: ${STUDYNOTION_LOCAL_ENTITLEMENT_SIDECAR_STARTED_AT:-2026-08-24T00:00:00.000Z}
   STUDYNOTION_DISPOSABLE_SEED_CONFIRM: seed-disposable-database
+  STUDYNOTION_DEMO_SEED_MODE: local
+  STUDYNOTION_DEMO_ADMIN_EMAIL: ${STUDYNOTION_DEMO_ADMIN_EMAIL:-admin@studynotion.local}
+  STUDYNOTION_DEMO_ADMIN_PASSWORD: ${STUDYNOTION_DEMO_ADMIN_PASSWORD:-Admin@123}
+  STUDYNOTION_DEMO_INSTRUCTOR_EMAIL: ${STUDYNOTION_DEMO_INSTRUCTOR_EMAIL:-instructor@studynotion.local}
+  STUDYNOTION_DEMO_INSTRUCTOR_PASSWORD: ${STUDYNOTION_DEMO_INSTRUCTOR_PASSWORD:-Instructor@123}
+  STUDYNOTION_DEMO_STUDENT_EMAIL: ${STUDYNOTION_DEMO_STUDENT_EMAIL:-student@studynotion.local}
+  STUDYNOTION_DEMO_STUDENT_PASSWORD: ${STUDYNOTION_DEMO_STUDENT_PASSWORD:-Student@123}
 
 services:
   mongo:
-    image: mongo:8.0
+    image: mongo:8.0@sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a
     restart: unless-stopped
     environment:
       MONGO_INITDB_DATABASE: studynotion_seed_disposable_local
@@ -40,7 +49,7 @@ services:
       start_period: 10s
 
   redis:
-    image: redis:7.4-alpine
+    image: redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
     restart: unless-stopped
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     tmpfs:
@@ -79,7 +88,7 @@ services:
       context: .
       args:
         STUDYNOTION_WEB_BUILD: local
-        VITE_API_BASE_URL: http://127.0.0.1:${STUDYNOTION_API_PORT:-4000}/api/v1
+        VITE_API_BASE_URL: http://localhost:${STUDYNOTION_API_PORT:-4000}/api/v1
         VITE_GOOGLE_CLIENT_ID: ""
         VITE_RAZORPAY_KEY_ID: ""
         VITE_SUPPORT_EMAIL: support@studynotion.local
@@ -103,7 +112,7 @@ services:
     profiles: ["seed"]
     init: true
     environment: *api-environment
-    command: ["node", "seed"]
+    command: ["npm", "run", "seed"]
     depends_on:
       mongo:
         condition: service_healthy

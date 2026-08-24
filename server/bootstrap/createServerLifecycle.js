@@ -42,6 +42,15 @@ const createServerLifecycle = ({
       server.close((error) => (error ? reject(error) : resolve()))
     })
 
+  const captureCleanupFailure = async (service, cleanup) => {
+    try {
+      await cleanup()
+      return null
+    } catch (error) {
+      return { error, service }
+    }
+  }
+
   const shutdown = async (reason, exitCode = 0) => {
     if (lifecycleState.isShuttingDown) return
     lifecycleState.isShuttingDown = true
@@ -56,16 +65,32 @@ const createServerLifecycle = ({
     }, services.env.shutdownTimeoutMs)
     forceExit.unref()
 
+    let cleanupCompleted = false
     try {
-      await closeHttpServer()
-      await services.redis.disconnect()
-      await services.database.disconnect()
+      const httpFailure = await captureCleanupFailure("http", closeHttpServer)
+      const dependencyFailures = await Promise.all([
+        captureCleanupFailure("redis", () => services.redis.disconnect()),
+        captureCleanupFailure("database", () => services.database.disconnect()),
+      ])
+      const failures = [httpFailure, ...dependencyFailures].filter(Boolean)
+      if (failures.length) {
+        throw new AggregateError(
+          failures.map(({ error }) => error),
+          `API shutdown cleanup failed: ${failures
+            .map(({ service }) => service)
+            .join(", ")}`
+        )
+      }
       process.exitCode = exitCode
+      cleanupCompleted = true
     } catch (error) {
       services.logger.error("api.shutdown_failed", { error })
       process.exitCode = 1
     } finally {
-      clearTimeout(forceExit)
+      // A rejected cleanup can leave a provider socket alive. Retain the
+      // bounded forced-exit guard in that case; it is unref'ed, so it does not
+      // delay an otherwise clean natural exit.
+      if (cleanupCompleted) clearTimeout(forceExit)
     }
   }
 

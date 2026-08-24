@@ -26,6 +26,11 @@ const {
 } = require("../domains/entitlement/entitlementService")
 const { isLessonPublishReady } = require("../utils/courseLifecycle")
 const logger = require("../utils/logger")
+const {
+  models: indexModels,
+  mongoOptions,
+  verifyDeclaredIndexes,
+} = require("./create-indexes")
 
 const PREFLIGHT_EXIT_CODES = Object.freeze({
   healthy: 0,
@@ -252,7 +257,40 @@ const duplicateArrayGroupCount = async (model, arrayField, match = {}) => {
   return result?.groups || 0
 }
 
+const validateRuntimeConfiguration = ({
+  environment = process.env,
+  loadConfiguration = () => require("../config/env"),
+} = {}) => {
+  if (
+    environment.NODE_ENV === "production" ||
+    String(environment.DEPLOYMENT_TIER || "").trim()
+  ) {
+    loadConfiguration()
+    return
+  }
+  if (
+    environment.NODE_ENV === "test" &&
+    environment.STUDYNOTION_RUN_PREFLIGHT_INTEGRATION === "1"
+  ) {
+    return
+  }
+  throw new Error(
+    "Production preflight requires NODE_ENV=production; disposable execution is limited to its guarded integration suite"
+  )
+}
+
+const verifyPreflightIndexes = ({
+  registeredModels = indexModels,
+  verifyIndexes = verifyDeclaredIndexes,
+} = {}) => verifyIndexes({ registeredModels })
+
 const run = async () => {
+  // A release preflight must prove that the exact production/staging runtime
+  // contract is valid before it reaches MongoDB. Unit and disposable integration
+  // fixtures use NODE_ENV=test and continue to exercise the read-only data gate
+  // without requiring credentials for external providers.
+  validateRuntimeConfiguration()
+
   const mongoUrl = process.env.MONGODB_URI || process.env.MONGODB_URL
   if (!mongoUrl) throw new Error("MONGODB_URI is required")
   const sidecarStartedAt = parsePreflightSidecarStartedAt(
@@ -262,7 +300,13 @@ const run = async () => {
     throw new Error("ENTITLEMENT_SIDECAR_STARTED_AT is required")
   }
 
-  await mongoose.connect(mongoUrl, { autoIndex: false })
+  await mongoose.connect(mongoUrl, mongoOptions(process.env))
+
+  // diffIndexes only performs index metadata reads. Production startup never
+  // creates or drops indexes; the controlled index job owns those operations.
+  const indexVerification = await verifyPreflightIndexes({
+    registeredModels: indexModels,
+  })
 
   const publishedCourses = await Course.find({ status: "Published" })
     .select(
@@ -695,6 +739,7 @@ const run = async () => {
   ])
 
   const findings = {
+    missingRequiredIndexes: indexVerification.missingIndexCount,
     insecurePublishedLessons: publishedLessons.filter(
       (lesson) =>
         !lesson.videoPublicId ||
@@ -851,6 +896,10 @@ const run = async () => {
     database: mongoose.connection.name,
     status,
     exitCode: PREFLIGHT_EXIT_CODES[status],
+    indexes: {
+      modelsChecked: indexVerification.modelCount,
+      missingRequiredIndexes: indexVerification.missingIndexCount,
+    },
     findings,
     enrollmentConsistency: enrollmentConsistencyForPreflight(
       enrollmentConsistency
@@ -901,5 +950,7 @@ module.exports = {
   main,
   parsePreflightSidecarStartedAt,
   run,
+  validateRuntimeConfiguration,
   validateEntitlementRecoveryReport,
+  verifyPreflightIndexes,
 }

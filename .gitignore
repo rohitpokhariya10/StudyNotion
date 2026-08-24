@@ -22,6 +22,8 @@
 .env*
 !.env.example
 !.env.production.example
+!.env.staging.example
+/compose.local.env
 
 # local source/release archives
 *.7z

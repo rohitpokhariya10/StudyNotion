@@ -1,0 +1,38 @@
+name: studynotion-operations
+
+services:
+  entitlement-recovery:
+    # The fixed name makes `docker compose up` a max-one invocation boundary on
+    # one Docker host. Do not use `docker compose run` or scale this service.
+    container_name: studynotion-entitlement-recovery
+    image: ${STUDYNOTION_API_IMAGE_DIGEST:?Set the immutable API image digest}
+    pull_policy: missing
+    init: true
+    restart: "no"
+    user: node
+    working_dir: /app/server
+    command: ["node", "scripts/schedule-entitlement-recovery.js"]
+    env_file:
+      - ${STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE:?Set the absolute private recovery env-file path}
+    environment:
+      NODE_ENV: production
+      STUDYNOTION_API_IMAGE_DIGEST: ${STUDYNOTION_API_IMAGE_DIGEST:?Set the immutable API image digest}
+      ENTITLEMENT_RECOVERY_BATCH_SIZE: "25"
+      ENTITLEMENT_RECOVERY_CHECKPOINT_FILE: /var/lib/studynotion/entitlement-recovery/checkpoint.json
+    volumes:
+      # Pre-create the host directory as the container's node UID/GID with mode
+      # 0700. The adapter refuses a group/world-accessible state directory.
+      - type: bind
+        source: ${STUDYNOTION_ENTITLEMENT_RECOVERY_STATE_DIR:?Set the absolute private recovery state directory}
+        target: /var/lib/studynotion/entitlement-recovery
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    stop_grace_period: 10s
+    healthcheck:
+      disable: true
