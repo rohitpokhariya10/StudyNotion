@@ -264,3 +264,53 @@ test("server lifecycle retains startup order, timeouts, and idempotency", async 
     process.exitCode = originalExitCode
   }
 })
+
+test("server shutdown attempts every dependency cleanup after a rejection", async () => {
+  const calls = []
+  const errors = []
+  const lifecycleState = { isShuttingDown: false }
+  const services = {
+    cloudinaryConnect() {},
+    database: {
+      async connect() {},
+      async disconnect() {
+        calls.push("database.disconnect")
+      },
+    },
+    env: {
+      port: 4321,
+      requestTimeoutMs: 65_000,
+      shutdownTimeoutMs: 60_000,
+    },
+    logger: {
+      error(event, metadata) {
+        errors.push([event, metadata])
+      },
+      info() {},
+    },
+    redis: {
+      async connect() {},
+      async disconnect() {
+        calls.push("redis.disconnect")
+        throw new Error("simulated Redis shutdown failure")
+      },
+    },
+  }
+  const { shutdown } = createServerLifecycle({
+    app: { listen: assert.fail },
+    lifecycleState,
+    services,
+  })
+
+  const originalExitCode = process.exitCode
+  try {
+    await shutdown("dependency rejection", 0)
+    assert.deepEqual(calls, ["redis.disconnect", "database.disconnect"])
+    assert.equal(process.exitCode, 1)
+    assert.equal(errors.length, 1)
+    assert.equal(errors[0][0], "api.shutdown_failed")
+    assert.match(errors[0][1].error.message, /redis/)
+  } finally {
+    process.exitCode = originalExitCode
+  }
+})

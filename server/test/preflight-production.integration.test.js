@@ -179,6 +179,7 @@ test(
     const Section = require("../models/Section")
     const SubSection = require("../models/Subsection")
     const User = require("../models/User")
+    const { models: indexModels } = require("../scripts/create-indexes")
     const { main, run } = loadPreflightWithoutRepositoryEnvironment()
 
     const now = new Date("2026-08-09T12:00:00.000Z")
@@ -429,6 +430,11 @@ test(
         `${name}: unrelated production findings`
       )
       assert.deepEqual(
+        result.indexes,
+        { modelsChecked: indexModels.length, missingRequiredIndexes: 0 },
+        `${name}: declared indexes`
+      )
+      assert.deepEqual(
         result.enrollmentConsistency.summary.issueCounts,
         expectedEnrollmentIssues,
         `${name}: enrollment issues`
@@ -503,6 +509,7 @@ test(
         SubSection.collection.insertMany(documents.subsections),
         User.collection.insertMany(documents.users),
       ])
+      await Promise.all(indexModels.map((model) => model.createIndexes()))
 
       const buildInfo = await mongoose.connection.db
         .admin()

@@ -34,5 +34,9 @@ export default defineConfig({
       name: "catalog-mobile",
       use: { ...devices["Pixel 7"], ...localChrome },
     },
+    {
+      name: "catalog-webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
   ],
 })

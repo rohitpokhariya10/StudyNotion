@@ -2,7 +2,11 @@ import { mkdir } from "node:fs/promises"
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test } from "@playwright/test"
 
+import liveEnvironmentResolver from "./live-environment.cjs"
+
 const screenshotDirectory = "docs/audits/screenshots/live"
+const { resolveLiveEnvironment } = liveEnvironmentResolver
+const { credentials } = resolveLiveEnvironment()
 
 const waitForVisualAssets = async (page) => {
   await page.evaluate(async () => {
@@ -92,8 +96,7 @@ test("live student session returns to enrollment and opens protected playback", 
   page,
 }, testInfo) => {
   await login(page, {
-    email: "student@studynotion.local",
-    password: "Student@123",
+    ...credentials.student,
     destination: "/dashboard/enrolled-courses",
   })
 
@@ -124,8 +127,7 @@ test("live instructor workspace loads owned course data", async ({
   page,
 }, testInfo) => {
   await login(page, {
-    email: "instructor@studynotion.local",
-    password: "Instructor@123",
+    ...credentials.instructor,
     destination: "/dashboard/instructor",
   })
   await expect(page.getByText(/Hi Instructor/)).toBeVisible()
@@ -137,8 +139,7 @@ test("live admin workspaces expose empty operational queues", async ({
   page,
 }, testInfo) => {
   await login(page, {
-    email: "admin@studynotion.local",
-    password: "Admin@123",
+    ...credentials.admin,
     destination: "/dashboard/instructor-approvals",
   })
   await expect(

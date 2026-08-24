@@ -181,6 +181,7 @@ test("sidecar boundary accepts only an exact valid UTC ISO timestamp", () => {
 
 test("MongoDB runner timeouts stay strictly below the 60-second recovery lease", () => {
   assert.deepEqual(mongoOptions({}), {
+    autoCreate: false,
     autoIndex: false,
     connectTimeoutMS: 10_000,
     serverSelectionTimeoutMS: 10_000,
@@ -225,6 +226,7 @@ test("runner hard-binds the parsed boundary and never passes a mutable override"
       disconnected = true
     },
     environment: {
+      ENTITLEMENT_RECOVERY_CONFIRM: ENTITLEMENT_RECOVERY_CONFIRMATION,
       ENTITLEMENT_SIDECAR_STARTED_AT: BOUNDARY_TEXT,
       MONGODB_URI: "mongodb://127.0.0.1:27017/studynotion_recovery_test_cli",
       NODE_ENV: "test",
@@ -244,6 +246,7 @@ test("runner hard-binds the parsed boundary and never passes a mutable override"
   assert.equal(disconnected, true)
   assert.equal(calls[0][0], "connect")
   assert.equal(calls[0][2].autoIndex, false)
+  assert.equal(calls[0][2].autoCreate, false)
   assert.equal(calls[0][2].socketTimeoutMS, 10_000)
   assert.equal(calls[0][2].timeoutMS, 10_000)
   assert.equal(calls[1][1].toISOString(), BOUNDARY_TEXT)
@@ -253,10 +256,11 @@ test("runner hard-binds the parsed boundary and never passes a mutable override"
   ])
 })
 
-test("production mutation requires exact confirmation while status remains read-only", async () => {
+test("mutation always requires exact confirmation while status remains read-only", async () => {
   const baseEnvironment = {
     ENTITLEMENT_SIDECAR_STARTED_AT: BOUNDARY_TEXT,
-    MONGODB_URI: "mongodb://production.invalid/studynotion",
+    MONGODB_URI:
+      "mongodb+srv://recovery:database-secret@production.invalid/studynotion?w=majority",
     NODE_ENV: "production",
   }
   await assert.rejects(
@@ -298,6 +302,41 @@ test("production mutation requires exact confirmation while status remains read-
     }),
   })
   assert.equal(mutation.exitCode, EXIT_CODES.completed)
+
+  await assert.rejects(
+    run({
+      connect: async () => assert.fail("must reject before connecting"),
+      environment: {
+        ENTITLEMENT_SIDECAR_STARTED_AT: BOUNDARY_TEXT,
+        MONGODB_URI:
+          "mongodb://production.example.invalid/studynotion_recovery",
+        NODE_ENV: "development",
+      },
+    }),
+    /ENTITLEMENT_RECOVERY_CONFIRM/
+  )
+})
+
+test("recovery rejects empty or mistyped runtime modes before connecting", async () => {
+  for (const nodeEnvironment of [undefined, "", "prod"]) {
+    let connected = false
+    await assert.rejects(
+      run({
+        connect: async () => {
+          connected = true
+        },
+        environment: {
+          ENTITLEMENT_SIDECAR_STARTED_AT: BOUNDARY_TEXT,
+          MONGODB_URI: "mongodb://127.0.0.1/studynotion_recovery_test_cli",
+          ...(nodeEnvironment === undefined
+            ? {}
+            : { NODE_ENV: nodeEnvironment }),
+        },
+      }),
+      /NODE_ENV/
+    )
+    assert.equal(connected, false)
+  }
 })
 
 test("blocking operational status has exit code 2", async () => {
@@ -338,6 +377,7 @@ test("runner fails closed on missing boundary, invalid reports, and dependency e
       connect: async () => {},
       disconnect: async () => {},
       environment: {
+        ENTITLEMENT_RECOVERY_CONFIRM: ENTITLEMENT_RECOVERY_CONFIRMATION,
         ENTITLEMENT_SIDECAR_STARTED_AT: BOUNDARY_TEXT,
         MONGODB_URI: "mongodb://localhost/test",
         NODE_ENV: "test",
@@ -366,6 +406,7 @@ test("runner rejects report fields that could leak identifiers or cursors", asyn
     connect: async () => {},
     disconnect: async () => {},
     environment: {
+      ENTITLEMENT_RECOVERY_CONFIRM: ENTITLEMENT_RECOVERY_CONFIRMATION,
       ENTITLEMENT_SIDECAR_STARTED_AT: BOUNDARY_TEXT,
       MONGODB_URI: "mongodb://127.0.0.1/studynotion_recovery_test_cli",
       NODE_ENV: "test",

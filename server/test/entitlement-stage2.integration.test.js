@@ -308,6 +308,7 @@ test(
           encoding: "utf8",
           env: {
             ...process.env,
+            MIGRATION_CONFIRM: "create-indexes",
             MONGODB_URI: target.uri,
             NODE_ENV: "test",
           },

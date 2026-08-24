@@ -24,7 +24,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit
       - run: npm run contracts:openapi:check
       - run: npm run contracts:test
       - run: npm run contracts:generate
@@ -35,6 +35,7 @@ jobs:
       - run: npm test -- --run
       - run: npm run build
         env:
+          VITE_DEPLOYMENT_TIER: production
           VITE_API_BASE_URL: https://api.example.test/api/v1
           VITE_GOOGLE_CLIENT_ID: ci-test.apps.googleusercontent.com
           VITE_RAZORPAY_KEY_ID: rzp_live_CIBUILD123
@@ -42,6 +43,46 @@ jobs:
           VITE_LEGAL_ENTITY_NAME: StudyNotion CI
           VITE_LEGAL_ADDRESS: CI test environment
           VITE_LEGAL_JURISDICTION: India
+      - name: Verify production web artifact boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep --recursive --binary-files=without-match --extended-regexp --ignore-case --quiet \
+            'https?://(localhost|127\.0\.0\.1|host\.docker\.internal)(:4000)?/api' dist; then
+            echo "Production web artifact contains a development API URL" >&2
+            exit 1
+          fi
+          if find dist -type f -name '*.map' -print -quit | grep --quiet .; then
+            echo "Production web artifact contains source maps" >&2
+            exit 1
+          fi
+      - name: Build staging web bundle without Google sign-in
+        run: npm run build
+        env:
+          VITE_DEPLOYMENT_TIER: staging
+          VITE_API_BASE_URL: https://api.staging.example.test/api/v1
+          VITE_GOOGLE_CLIENT_ID: ""
+          VITE_RAZORPAY_KEY_ID: rzp_test_CIBUILD123
+          VITE_SUPPORT_EMAIL: support@studynotion.test
+          VITE_LEGAL_ENTITY_NAME: StudyNotion CI
+          VITE_LEGAL_ADDRESS: CI staging test environment
+          VITE_LEGAL_JURISDICTION: India
+      - name: Validate representative staging release pair
+        run: npm run deploy:validate-pair
+        env:
+          APP_URL: https://app.staging.example.test
+          COOKIE_SAME_SITE: lax
+          DEPLOYMENT_TIER: staging
+          FRONTEND_ORIGINS: https://app.staging.example.test
+          GOOGLE_CLIENT_ID: ""
+          PUBLIC_API_URL: https://api.staging.example.test
+          RAZORPAY_KEY_ID: rzp_test_CIBUILD123
+          SUPPORT_EMAIL: support@studynotion.test
+          VITE_API_BASE_URL: https://api.staging.example.test/api/v1
+          VITE_DEPLOYMENT_TIER: staging
+          VITE_GOOGLE_CLIENT_ID: ""
+          VITE_RAZORPAY_KEY_ID: rzp_test_CIBUILD123
+          VITE_SUPPORT_EMAIL: support@studynotion.test
 
   server:
     name: API unit and contract tests
@@ -55,6 +96,8 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
+      - run: npm audit
+        working-directory: server
       - run: npm --workspace studynotion-backend test
 
   catalog-integration:
@@ -63,7 +106,7 @@ jobs:
     timeout-minutes: 15
     services:
       mongo:
-        image: mongo:8.0
+        image: mongo:8.0@sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a
         ports:
           - 27017:27017
         options: >-
@@ -72,7 +115,7 @@ jobs:
           --health-timeout 5s
           --health-retries 20
       redis:
-        image: redis:7.4-alpine
+        image: redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
         ports:
           - 6379:6379
         options: >-
@@ -112,7 +155,7 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
         env:
           VITE_API_BASE_URL: http://127.0.0.1:4000/api/v1
@@ -123,14 +166,41 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
       - name: Validate local Compose configuration
         run: >-
           docker compose
           --env-file compose.local.env.example
           -f compose.local.yml
           config --quiet
+      - name: Validate Entitlement recovery operations configuration
+        shell: bash
+        env:
+          STUDYNOTION_API_IMAGE_DIGEST: studynotion-api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+          STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE: ${{ runner.temp }}/studynotion-entitlement-recovery.env
+          STUDYNOTION_ENTITLEMENT_RECOVERY_STATE_DIR: /var/lib/studynotion/entitlement-recovery
+        run: |
+          set -euo pipefail
+          npm run ops:validate-image
+          sudo install -d --mode=0700 --owner="$(id -u)" --group="$(id -g)" \
+            "$STUDYNOTION_ENTITLEMENT_RECOVERY_STATE_DIR"
+          install --mode=0600 /dev/null "$STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE"
+          printf '%s\n' \
+            'MONGODB_URI=mongodb+srv://worker:secret@cluster.example.test/studynotion?w=majority' \
+            'ENTITLEMENT_SIDECAR_STARTED_AT=2026-08-24T00:00:00.000Z' \
+            'ENTITLEMENT_RECOVERY_CONFIRM=reconcile-entitlements' \
+            >"$STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE"
+          npm run ops:validate-recovery-host
+          docker compose -f compose.operations.yml config --quiet
+      - name: Add a nested environment-file exclusion canary
+        run: >-
+          printf 'DO_NOT_COPY=container-context-canary\n'
+          > server/.env.release-context-probe
       - run: >-
           docker build
+          --build-arg VITE_DEPLOYMENT_TIER=production
           --build-arg VITE_API_BASE_URL=https://api.example.test/api/v1
           --build-arg VITE_GOOGLE_CLIENT_ID=ci-test.apps.googleusercontent.com
           --build-arg VITE_RAZORPAY_KEY_ID=rzp_live_CIBUILD123
@@ -146,6 +216,19 @@ jobs:
           set -euo pipefail
           test "$(docker image inspect studynotion-web:ci --format '{{.Config.User}}')" = "nginx"
           test "$(docker image inspect studynotion-api:ci --format '{{.Config.User}}')" = "node"
+
+          docker run --rm --entrypoint sh studynotion-web:ci -ec '
+            test ! -e /usr/share/nginx/html/.env
+            test ! -e /usr/share/nginx/html/.git
+            ! find /usr/share/nginx/html -type f \( -name "*.map" -o -name ".env*" \) -print -quit | grep -q .
+          '
+          docker run --rm --entrypoint sh studynotion-api:ci -ec '
+            test ! -e /app/.git
+            test ! -e /app/server/test
+            test ! -e /app/server/README.md
+            test ! -e /app/server/seed
+            ! find /app/server /app/packages/contracts -type f \( -name "*.map" -o -name ".env*" -o -name "*.test.js" \) -print -quit | grep -q .
+          '
 
           container_id="$(docker run --detach --publish 127.0.0.1:18080:8080 studynotion-web:ci)"
           trap 'docker rm --force "$container_id" >/dev/null' EXIT
@@ -167,6 +250,17 @@ jobs:
           grep -qi '^X-Content-Type-Options: nosniff' <<<"$headers"
           grep -qi '^X-Frame-Options: DENY' <<<"$headers"
           grep -qi '^Content-Security-Policy:' <<<"$headers"
+          grep -q "connect-src 'self' https://api.example.test" <<<"$headers"
+          ! grep -q '__API_ORIGIN__' <<<"$headers"
+
+          api_headers="$(curl --silent --show-error --head http://127.0.0.1:18080/api/not-an-api)"
+          grep -q '^HTTP/1.1 404' <<<"$api_headers"
+          grep -qi '^Content-Type: application/json' <<<"$api_headers"
+          curl --silent --show-error http://127.0.0.1:18080/api/not-an-api |
+            grep -q 'API requests must use the configured API origin'
+          exact_api_headers="$(curl --silent --show-error --head http://127.0.0.1:18080/api)"
+          grep -q '^HTTP/1.1 404' <<<"$exact_api_headers"
+          grep -qi '^Content-Type: application/json' <<<"$exact_api_headers"
       - name: Verify API container readiness
         shell: bash
         run: |

@@ -55,6 +55,8 @@ test("Mongo deadlines use supported client and Mongoose options", async () => {
 
   assert.deepEqual(calls[0], ["set", "maxTimeMS", 15_000])
   const options = calls.find(([event]) => event === "connect")[2]
+  assert.equal(options.autoCreate, false)
+  assert.equal(options.autoIndex, false)
   assert.equal("maxTimeMS" in options, false)
   assert.equal(options.timeoutMS, 15_000)
   assert.equal(options.socketTimeoutMS, 30_000)

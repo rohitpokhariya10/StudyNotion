@@ -1,6 +1,10 @@
 import { defineConfig, devices } from "@playwright/test"
 
+import liveEnvironmentResolver from "./e2e/live-environment.cjs"
+
 const localChrome = process.env.CI ? {} : { channel: "chrome" }
+const { resolveLiveEnvironment } = liveEnvironmentResolver
+const liveEnvironment = resolveLiveEnvironment()
 
 export default defineConfig({
   testDir: "./e2e",
@@ -12,9 +16,9 @@ export default defineConfig({
   retries: 0,
   reporter: "list",
   use: {
-    baseURL: process.env.STUDYNOTION_LIVE_BASE_URL || "http://127.0.0.1:3000",
+    baseURL: liveEnvironment.baseURL,
     screenshot: "only-on-failure",
-    trace: "retain-on-failure",
+    trace: liveEnvironment.loopback ? "retain-on-failure" : "off",
     video: "off",
   },
   projects: [
@@ -25,6 +29,10 @@ export default defineConfig({
     {
       name: "live-mobile",
       use: { ...devices["Pixel 7"], ...localChrome },
+    },
+    {
+      name: "live-webkit",
+      use: { ...devices["Desktop Safari"] },
     },
   ],
 })

@@ -393,7 +393,10 @@ test("operational CLI always disconnects after an audit and never exposes a writ
     argv: ["--dry-run"],
     connect: async (_uri, options) => calls.push(["connect", options]),
     disconnect: async () => calls.push(["disconnect"]),
-    environment: { MONGODB_URI: "mongodb://localhost/test" },
+    environment: {
+      MONGODB_URI: "mongodb://localhost/test",
+      NODE_ENV: "test",
+    },
     serviceFactory: () => ({
       audit: async (options) => {
         calls.push(["audit", options])
@@ -417,7 +420,10 @@ test("operational failures are classified safely and disconnect after service fa
       disconnect: async () => {
         disconnected = true
       },
-      environment: { MONGODB_URI: "mongodb://localhost/test" },
+      environment: {
+        MONGODB_URI: "mongodb://localhost/test",
+        NODE_ENV: "test",
+      },
       serviceFactory: () => ({
         audit: async () => {
           const simulatedPrivateUri = [
@@ -463,7 +469,10 @@ test("operational CLI rejects missing or unknown report statuses and disconnects
         disconnect: async () => {
           disconnected = true
         },
-        environment: { MONGODB_URI: "mongodb://localhost/test" },
+        environment: {
+          MONGODB_URI: "mongodb://localhost/test",
+          NODE_ENV: "test",
+        },
         serviceFactory: () => ({ audit: async () => report }),
         targetLogger: capturingLogger().logger,
       }),
