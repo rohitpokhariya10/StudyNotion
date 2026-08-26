@@ -20,6 +20,7 @@ const CHECKPOINT_SCHEMA_VERSION = 1
 const CHECKPOINT_FILE_MODE = 0o600
 const CHECKPOINT_MAX_BYTES = 512
 const CANONICAL_OBJECT_ID = /^[0-9a-f]{24}$/
+const HAS_POSIX_PERMISSION_MODEL = process.platform !== "win32"
 
 class ScheduledRecoveryConfigurationError extends Error {
   constructor(message) {
@@ -118,10 +119,12 @@ const assertPrivateCheckpointDirectory = async (
   if (
     !metadata.isDirectory() ||
     metadata.isSymbolicLink() ||
-    (metadata.mode & 0o077) !== 0 ||
-    (typeof process.getuid === "function" &&
-      metadata.uid !== process.getuid()) ||
-    (typeof process.getgid === "function" && metadata.gid !== process.getgid())
+    (HAS_POSIX_PERMISSION_MODEL &&
+      ((metadata.mode & 0o077) !== 0 ||
+        (typeof process.getuid === "function" &&
+          metadata.uid !== process.getuid()) ||
+        (typeof process.getgid === "function" &&
+          metadata.gid !== process.getgid())))
   ) {
     throw checkpointError()
   }
@@ -165,7 +168,8 @@ const readCheckpoint = async (checkpointPath, fs = fileSystem) => {
   if (
     !metadata.isFile() ||
     metadata.isSymbolicLink() ||
-    (metadata.mode & 0o7777) !== CHECKPOINT_FILE_MODE ||
+    (HAS_POSIX_PERMISSION_MODEL &&
+      (metadata.mode & 0o7777) !== CHECKPOINT_FILE_MODE) ||
     metadata.size < 1 ||
     metadata.size > CHECKPOINT_MAX_BYTES
   ) {
@@ -215,7 +219,8 @@ const writeCheckpoint = async (
     if (
       !metadata.isFile() ||
       metadata.isSymbolicLink() ||
-      (metadata.mode & 0o7777) !== CHECKPOINT_FILE_MODE
+      (HAS_POSIX_PERMISSION_MODEL &&
+        (metadata.mode & 0o7777) !== CHECKPOINT_FILE_MODE)
     ) {
       throw checkpointError()
     }

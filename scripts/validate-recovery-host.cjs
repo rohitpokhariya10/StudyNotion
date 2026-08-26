@@ -94,7 +94,9 @@ const assertPathOutsideRepository = (targetPath, repositoryRoot) => {
   const relative = path.relative(repositoryRoot, targetPath)
   if (
     relative === "" ||
-    (!relative.startsWith(`..${path.sep}`) && relative !== "..")
+    (!path.isAbsolute(relative) &&
+      !relative.startsWith(`..${path.sep}`) &&
+      relative !== "..")
   ) {
     fail(
       "The recovery environment file must be stored outside the Git checkout"
@@ -117,6 +119,7 @@ const validateRecoveryHost = ({
   expectedStateDirectory = CANONICAL_STATE_DIRECTORY,
   filesystem = fs,
   repositoryRoot = process.cwd(),
+  platform = process.platform,
   uid = typeof process.getuid === "function" ? process.getuid() : undefined,
 } = {}) => {
   const environmentFile = environment.STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE
@@ -151,15 +154,16 @@ const validateRecoveryHost = ({
   if (
     !fileMetadata.isFile() ||
     fileMetadata.isSymbolicLink() ||
-    (fileMetadata.mode & 0o7777) !== 0o600 ||
-    (uid !== undefined && fileMetadata.uid !== uid)
+    (platform !== "win32" &&
+      ((fileMetadata.mode & 0o7777) !== 0o600 ||
+        (uid !== undefined && fileMetadata.uid !== uid)))
   ) {
     fail("The recovery environment file must be owner-controlled mode 0600")
   }
   if (
     !stateMetadata.isDirectory() ||
     stateMetadata.isSymbolicLink() ||
-    (stateMetadata.mode & 0o7777) !== 0o700
+    (platform !== "win32" && (stateMetadata.mode & 0o7777) !== 0o700)
   ) {
     fail(
       "The recovery state directory must be a non-symlink mode 0700 directory"

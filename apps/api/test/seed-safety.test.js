@@ -19,6 +19,7 @@ const {
 } = require("../utils/seedSafety")
 
 const serverDirectory = path.resolve(__dirname, "..")
+const seedEntrypoint = path.join("scripts", "seed.js")
 const boundary = "2026-08-24T00:00:00.000Z"
 
 const demoEnvironment = (overrides = {}) => ({
@@ -34,7 +35,7 @@ const demoEnvironment = (overrides = {}) => ({
 })
 
 test("demo admin provisioning is disabled in production", () => {
-  const result = spawnSync(process.execPath, ["seed"], {
+  const result = spawnSync(process.execPath, [seedEntrypoint], {
     cwd: serverDirectory,
     encoding: "utf8",
     env: {
@@ -258,7 +259,7 @@ test("non-loopback targets are rejected without the exact disposable guard", () 
     assert.doesNotMatch(error.message, /seed-user|seed-password/)
   }
 
-  const result = spawnSync(process.execPath, ["seed"], {
+  const result = spawnSync(process.execPath, [seedEntrypoint], {
     cwd: serverDirectory,
     encoding: "utf8",
     env: {
