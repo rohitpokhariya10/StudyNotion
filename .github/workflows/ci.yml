@@ -17,22 +17,38 @@ jobs:
     name: Contracts and web
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
+
       - run: npm ci
+
       - run: npm audit
+
       - run: npm run contracts:openapi:check
+
       - run: npm run contracts:test
+
       - run: npm run contracts:generate
+
       - run: git diff --exit-code -- packages/contracts/openapi.json
+
       - run: npm run format:check
+
       - run: npm run lint
+
       - run: npm run typecheck
+
       - run: npm run test:frontend
+
+      # Keep explicit absolute-origin production coverage.
+      # This verifies that the application can still support a deployment
+      # where the frontend and API use separate HTTPS origins.
       - run: npm run build
         env:
           VITE_DEPLOYMENT_TIER: production
@@ -43,19 +59,34 @@ jobs:
           VITE_LEGAL_ENTITY_NAME: StudyNotion CI
           VITE_LEGAL_ADDRESS: CI test environment
           VITE_LEGAL_JURISDICTION: India
+
       - name: Verify production web artifact boundaries
         shell: bash
         run: |
           set -euo pipefail
-          if grep --recursive --binary-files=without-match --extended-regexp --ignore-case --quiet \
-            'https?://(localhost|127\.0\.0\.1|host\.docker\.internal)(:4000)?/api' apps/web/dist; then
+
+          if grep --recursive \
+            --binary-files=without-match \
+            --extended-regexp \
+            --ignore-case \
+            --quiet \
+            'https?://(localhost|127\.0\.0\.1|host\.docker\.internal)(:4000)?/api' \
+            apps/web/dist; then
             echo "Production web artifact contains a development API URL" >&2
             exit 1
           fi
-          if find apps/web/dist -type f -name '*.map' -print -quit | grep --quiet .; then
+
+          if find apps/web/dist \
+            -type f \
+            -name '*.map' \
+            -print -quit |
+            grep --quiet .; then
             echo "Production web artifact contains source maps" >&2
             exit 1
           fi
+
+      # Keep separate-origin staging coverage as well.
+      # The ECS container smoke test below covers the new same-origin mode.
       - name: Build staging web bundle without Google sign-in
         run: npm run build
         env:
@@ -67,6 +98,7 @@ jobs:
           VITE_LEGAL_ENTITY_NAME: StudyNotion CI
           VITE_LEGAL_ADDRESS: CI staging test environment
           VITE_LEGAL_JURISDICTION: India
+
       - name: Validate representative staging release pair
         run: npm run deploy:validate-pair
         env:
@@ -88,22 +120,28 @@ jobs:
     name: API unit and contract tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: package-lock.json
+
       - run: npm ci
+
       - run: npm audit
         working-directory: apps/api
+
       - run: npm --workspace studynotion-backend test
 
   catalog-integration:
     name: MongoDB and Redis integration
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     services:
       mongo:
         image: mongo:8.0@sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a
@@ -114,6 +152,7 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
+
       redis:
         image: redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
         ports:
@@ -123,14 +162,18 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 20
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: package-lock.json
+
       - run: npm ci
+
       - run: npm run test:integration
         env:
           CATALOG_TEST_MONGODB_URI: mongodb://127.0.0.1:27017/studynotion_catalog_test_ci
@@ -147,15 +190,20 @@ jobs:
     name: Catalog Playwright
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: package-lock.json
+
       - run: npm ci
+
       - run: npx playwright install --with-deps chromium webkit
+
       - run: npm run test:e2e
         env:
           VITE_API_BASE_URL: http://127.0.0.1:4000/api/v1
@@ -164,17 +212,21 @@ jobs:
     name: Container builds and runtime smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
+
       - name: Validate local Compose configuration
         run: >-
           docker compose
           --env-file compose.local.env.example
           -f compose.local.yml
           config --quiet
+
       - name: Validate Entitlement recovery operations configuration
         shell: bash
         env:
@@ -183,96 +235,247 @@ jobs:
           STUDYNOTION_ENTITLEMENT_RECOVERY_STATE_DIR: /var/lib/studynotion/entitlement-recovery
         run: |
           set -euo pipefail
+
           npm run ops:validate-image
-          sudo install -d --mode=0700 --owner="$(id -u)" --group="$(id -g)" \
+
+          sudo install \
+            -d \
+            --mode=0700 \
+            --owner="$(id -u)" \
+            --group="$(id -g)" \
             "$STUDYNOTION_ENTITLEMENT_RECOVERY_STATE_DIR"
-          install --mode=0600 /dev/null "$STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE"
+
+          install \
+            --mode=0600 \
+            /dev/null \
+            "$STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE"
+
           printf '%s\n' \
             'MONGODB_URI=mongodb+srv://worker:secret@cluster.example.test/studynotion?w=majority' \
             'ENTITLEMENT_SIDECAR_STARTED_AT=2026-08-24T00:00:00.000Z' \
             'ENTITLEMENT_RECOVERY_CONFIRM=reconcile-entitlements' \
             >"$STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE"
+
           npm run ops:validate-recovery-host
-          docker compose -f compose.operations.yml config --quiet
+
+          docker compose \
+            -f compose.operations.yml \
+            config --quiet
+
       - name: Add a nested environment-file exclusion canary
         run: >-
           printf 'DO_NOT_COPY=container-context-canary\n'
           > apps/api/.env.release-context-probe
-      - run: >-
+
+      # This image matches the ECS/Fargate deployment architecture:
+      #
+      # Browser -> HTTPS AWS endpoint -> Nginx -> /api/v1 -> API container.
+      #
+      # Google sign-in remains optional in staging.
+      # Razorpay must use a TEST key in staging.
+      - name: Build same-origin staging web container
+        run: >-
           docker build
-          --build-arg VITE_DEPLOYMENT_TIER=production
-          --build-arg VITE_API_BASE_URL=https://api.example.test/api/v1
-          --build-arg VITE_GOOGLE_CLIENT_ID=ci-test.apps.googleusercontent.com
-          --build-arg VITE_RAZORPAY_KEY_ID=rzp_live_CIBUILD123
+          --build-arg VITE_DEPLOYMENT_TIER=staging
+          --build-arg VITE_API_BASE_URL=/api/v1
+          --build-arg VITE_RAZORPAY_KEY_ID=rzp_test_CIBUILD123
           --build-arg VITE_SUPPORT_EMAIL=support@studynotion.test
           --build-arg VITE_LEGAL_ENTITY_NAME="StudyNotion CI"
           --build-arg VITE_LEGAL_ADDRESS="CI test environment"
           --build-arg VITE_LEGAL_JURISDICTION=India
           -f apps/web/Dockerfile
-          -t studynotion-web:ci .
-      - run: docker build -f apps/api/Dockerfile -t studynotion-api:ci .
+          -t studynotion-web:ci
+          .
+
+      - name: Build API container
+        run: docker build -f apps/api/Dockerfile -t studynotion-api:ci .
+
       - name: Verify container users and web runtime
         shell: bash
         run: |
           set -euo pipefail
-          test "$(docker image inspect studynotion-web:ci --format '{{.Config.User}}')" = "nginx"
-          test "$(docker image inspect studynotion-api:ci --format '{{.Config.User}}')" = "node"
 
-          docker run --rm --entrypoint sh studynotion-web:ci -ec '
-            test ! -e /usr/share/nginx/html/.env
-            test ! -e /usr/share/nginx/html/.git
-            ! find /usr/share/nginx/html -type f \( -name "*.map" -o -name ".env*" \) -print -quit | grep -q .
-          '
-          docker run --rm --entrypoint sh studynotion-api:ci -ec '
-            test ! -e /app/.git
-            test ! -e /app/apps/api/test
-            test ! -e /app/apps/api/README.md
-            test ! -e /app/apps/api/seed
-            ! find /app/apps/api /app/packages/contracts -type f \( -name "*.map" -o -name ".env*" -o -name "*.test.js" \) -print -quit | grep -q .
-          '
+          test "$(
+            docker image inspect \
+              studynotion-web:ci \
+              --format '{{.Config.User}}'
+          )" = "nginx"
 
-          container_id="$(docker run --detach --publish 127.0.0.1:18080:8080 studynotion-web:ci)"
+          test "$(
+            docker image inspect \
+              studynotion-api:ci \
+              --format '{{.Config.User}}'
+          )" = "node"
+
+          docker run \
+            --rm \
+            --entrypoint sh \
+            studynotion-web:ci \
+            -ec '
+              test ! -e /usr/share/nginx/html/.env
+              test ! -e /usr/share/nginx/html/.git
+
+              ! find /usr/share/nginx/html \
+                -type f \
+                \( -name "*.map" -o -name ".env*" \) \
+                -print -quit |
+                grep -q .
+            '
+
+          docker run \
+            --rm \
+            --entrypoint sh \
+            studynotion-api:ci \
+            -ec '
+              test ! -e /app/.git
+              test ! -e /app/apps/api/test
+              test ! -e /app/apps/api/README.md
+              test ! -e /app/apps/api/seed
+
+              ! find /app/apps/api /app/packages/contracts \
+                -type f \
+                \( \
+                  -name "*.map" \
+                  -o -name ".env*" \
+                  -o -name "*.test.js" \
+                \) \
+                -print -quit |
+                grep -q .
+            '
+
+          container_id="$(
+            docker run \
+              --detach \
+              --publish 127.0.0.1:18080:8080 \
+              studynotion-web:ci
+          )"
+
           trap 'docker rm --force "$container_id" >/dev/null' EXIT
 
           for attempt in {1..30}; do
-            if [ "$(docker inspect --format '{{.State.Health.Status}}' "$container_id")" = "healthy" ]; then
+            health_status="$(
+              docker inspect \
+                --format '{{.State.Health.Status}}' \
+                "$container_id"
+            )"
+
+            if [ "$health_status" = "healthy" ]; then
               break
             fi
+
             if [ "$attempt" -eq 30 ]; then
               docker logs "$container_id"
               exit 1
             fi
+
             sleep 2
           done
 
+          # Container must run as a non-root user.
           test "$(docker exec "$container_id" id -u)" -ne 0
-          curl --fail --silent --show-error http://127.0.0.1:18080/health >/dev/null
-          headers="$(curl --fail --silent --show-error --head http://127.0.0.1:18080/)"
+
+          # Public Nginx health endpoint.
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            http://127.0.0.1:18080/health \
+            >/dev/null
+
+          headers="$(
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              --head \
+              http://127.0.0.1:18080/
+          )"
+
+          # Security headers must remain present.
           grep -qi '^X-Content-Type-Options: nosniff' <<<"$headers"
           grep -qi '^X-Frame-Options: DENY' <<<"$headers"
           grep -qi '^Content-Security-Policy:' <<<"$headers"
-          grep -q "connect-src 'self' https://api.example.test" <<<"$headers"
+
+          # Same-origin API requests are covered by CSP 'self'.
+          grep -q "connect-src 'self'" <<<"$headers"
+
+          # Rendering must remove the build-time placeholder.
           ! grep -q '__API_ORIGIN__' <<<"$headers"
 
-          api_headers="$(curl --silent --show-error --head http://127.0.0.1:18080/api/not-an-api)"
-          grep -q '^HTTP/1.1 404' <<<"$api_headers"
-          grep -qi '^Content-Type: application/json' <<<"$api_headers"
-          curl --silent --show-error http://127.0.0.1:18080/api/not-an-api |
-            grep -q 'API requests must use the configured API origin'
-          exact_api_headers="$(curl --silent --show-error --head http://127.0.0.1:18080/api)"
-          grep -q '^HTTP/1.1 404' <<<"$exact_api_headers"
-          grep -qi '^Content-Type: application/json' <<<"$exact_api_headers"
+          # The same-origin image must not contain the previous
+          # representative separate API origin.
+          ! grep -q 'https://api.example.test' <<<"$headers"
+
+          # Verify that the production Nginx image contains the internal
+          # API proxy expected by the ECS/Fargate same-task deployment.
+          docker exec "$container_id" \
+            grep -Fq \
+            'proxy_pass http://127.0.0.1:4000;' \
+            /etc/nginx/conf.d/default.conf
+
+          # This specific smoke test intentionally starts only the web
+          # container. There is no API process listening on localhost:4000.
+          #
+          # Therefore /api must reach the configured reverse-proxy boundary
+          # and return 502. A 200 response here could mean the request
+          # incorrectly fell through to the React SPA.
+          api_status="$(
+            curl \
+              --silent \
+              --show-error \
+              --output /dev/null \
+              --write-out '%{http_code}' \
+              http://127.0.0.1:18080/api/not-an-api
+          )"
+
+          test "$api_status" = "502"
+
+          exact_api_status="$(
+            curl \
+              --silent \
+              --show-error \
+              --output /dev/null \
+              --write-out '%{http_code}' \
+              http://127.0.0.1:18080/api
+          )"
+
+          test "$exact_api_status" = "502"
+
       - name: Verify API container readiness
         shell: bash
         run: |
           set -euo pipefail
-          docker tag studynotion-api:ci studynotion-api:local
-          trap 'docker compose --env-file compose.local.env.example -f compose.local.yml down --volumes >/dev/null' EXIT
+
+          docker tag \
+            studynotion-api:ci \
+            studynotion-api:local
+
+          trap '
+            docker compose \
+              --env-file compose.local.env.example \
+              -f compose.local.yml \
+              down --volumes >/dev/null
+          ' EXIT
 
           docker compose \
             --env-file compose.local.env.example \
             -f compose.local.yml \
-            up --detach --no-build --wait mongo redis api
+            up \
+            --detach \
+            --no-build \
+            --wait \
+            mongo redis api
 
-          test "$(docker compose --env-file compose.local.env.example -f compose.local.yml exec -T api id -u)" -ne 0
-          curl --fail --silent --show-error http://127.0.0.1:4000/health/ready >/dev/null
+          test "$(
+            docker compose \
+              --env-file compose.local.env.example \
+              -f compose.local.yml \
+              exec -T api id -u
+          )" -ne 0
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            http://127.0.0.1:4000/health/ready \
+            >/dev/null

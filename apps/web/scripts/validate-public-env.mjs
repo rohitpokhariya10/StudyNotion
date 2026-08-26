@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url"
 import { loadEnv } from "vite"
+
 import { isLoopbackHostname } from "./deployment-network.mjs"
 
 const webRoot = fileURLToPath(new URL("../", import.meta.url))
@@ -35,9 +36,7 @@ const required = [
 const missing = required.filter((name) => !env[name]?.trim())
 
 if (missing.length) {
-  throw new Error(
-    `Missing production public variables: ${missing.join(", ")}`
-  )
+  throw new Error(`Missing production public variables: ${missing.join(", ")}`)
 }
 
 const placeholderPattern =
@@ -47,10 +46,7 @@ const placeholders = [
   ...required,
   ...(env.VITE_GOOGLE_CLIENT_ID ? ["VITE_GOOGLE_CLIENT_ID"] : []),
 ].filter((name, index, names) => {
-  return (
-    names.indexOf(name) === index &&
-    placeholderPattern.test(env[name])
-  )
+  return names.indexOf(name) === index && placeholderPattern.test(env[name])
 })
 
 if (placeholders.length) {
@@ -116,9 +112,7 @@ if (
     env.VITE_GOOGLE_CLIENT_ID
   )
 ) {
-  throw new Error(
-    "VITE_GOOGLE_CLIENT_ID must be a Google Web Client ID"
-  )
+  throw new Error("VITE_GOOGLE_CLIENT_ID must be a Google Web Client ID")
 }
 
 const razorpayKeyPrefix =
@@ -134,14 +128,8 @@ if (
   )
 }
 
-if (
-  !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(
-    env.VITE_SUPPORT_EMAIL
-  )
-) {
-  throw new Error(
-    "VITE_SUPPORT_EMAIL must be a valid email address"
-  )
+if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(env.VITE_SUPPORT_EMAIL)) {
+  throw new Error("VITE_SUPPORT_EMAIL must be a valid email address")
 }
 
 for (const name of [
@@ -151,11 +139,7 @@ for (const name of [
 ]) {
   const value = env[name].trim()
 
-  if (
-    value.length < 2 ||
-    value.length > 300 ||
-    /\p{Cc}/u.test(value)
-  ) {
+  if (value.length < 2 || value.length > 300 || /\p{Cc}/u.test(value)) {
     throw new Error(`${name} is invalid`)
   }
 }

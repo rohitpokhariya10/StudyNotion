@@ -23,18 +23,13 @@ if (!isSameOriginApi) {
   }
 
   if (parsedApiUrl.protocol !== "https:") {
-    throw new Error(
-      "Absolute VITE_API_BASE_URL must use HTTPS"
-    )
+    throw new Error("Absolute VITE_API_BASE_URL must use HTTPS")
   }
 
   apiOrigin = parsedApiUrl.origin
 }
 
-const source = await readFile(
-  new URL("../nginx.conf", import.meta.url),
-  "utf8"
-)
+const source = await readFile(new URL("../nginx.conf", import.meta.url), "utf8")
 
 const placeholder = "__API_ORIGIN__"
 
@@ -48,12 +43,6 @@ if (!source.includes(placeholder)) {
  *
  * Separate API deployments inject their HTTPS origin.
  */
-const rendered = source.replaceAll(
-  placeholder,
-  apiOrigin
-)
+const rendered = source.replaceAll(placeholder, apiOrigin)
 
-await writeFile(
-  new URL("../nginx.rendered.conf", import.meta.url),
-  rendered
-)
+await writeFile(new URL("../nginx.rendered.conf", import.meta.url), rendered)
