@@ -92,6 +92,10 @@ step succeeds.
 
 ## Production session contract
 
+The current AWS topology exposes the API through the web container's same-origin
+`/api` proxy. An absolute API subdomain remains supported when ingress is
+deliberately configured for it.
+
 The browser session is an HttpOnly signed cookie. Configure these server values:
 
 - `JWT_SECRET`: at least 32 random characters from a secret manager.
@@ -100,13 +104,14 @@ The browser session is an HttpOnly signed cookie. Configure these server values:
 - `GOOGLE_TIMEOUT_MS`: bounds both Google sign-in verification and the fresh
   Google re-authentication required for account deletion.
 - `COOKIE_NAME`: normally `studynotion_session`.
-- `COOKIE_DOMAIN`: optional; use `.example.com` only when the deployment needs a
-  cookie shared by subdomains.
+- `COOKIE_DOMAIN`: leave blank for the current host-only same-origin cookie. Use
+  `.example.com` only when a reviewed separate-subdomain deployment needs a
+  shared cookie.
 - `COOKIE_SECURE=true` in production.
-- `COOKIE_SAME_SITE=lax` for the required same-site app/API deployment. Keep the
-  app and API on subdomains of one registrable site; cross-site deployments are
-  rejected because browser cookie behavior is not reliable enough for this
-  credentialed session model.
+- `COOKIE_SAME_SITE=lax` for the current same-origin deployment. If the app and
+  API use separate origins, keep both on one registrable site; cross-site
+  deployments are rejected because browser cookie behavior is not reliable
+  enough for this credentialed session model.
 
 Unsafe browser requests are checked against `FRONTEND_ORIGINS` as a CSRF
 boundary. Do not configure wildcard origins when credentials are enabled. A
@@ -187,8 +192,11 @@ window, and checkout lifetime cannot drift from the server.
 In the Razorpay dashboard, register this HTTPS endpoint:
 
 ```text
-https://api.example.com/api/v1/payment/webhook
+https://app.example.com/api/v1/payment/webhook
 ```
+
+Use the API host instead only when the reviewed release pair deliberately uses
+a separate public API origin.
 
 Subscribe it to `payment.captured` and `order.paid`. The API verifies
 `X-Razorpay-Signature` against the untouched raw request body, checks the order,

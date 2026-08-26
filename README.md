@@ -1,10 +1,12 @@
 # StudyNotion
 
-StudyNotion is a full-stack learning platform with a React/Vite web application
-and an Express/MongoDB API. It supports public course discovery, student
-learning and progress, instructor course management, admin operations,
-cookie-based authentication, protected Cloudinary media, Resend email, Google
-Identity, and server-priced Razorpay purchases.
+StudyNotion is a modernized MERN learning-commerce and LMS application. The
+repository has evolved from an earlier full-stack codebase into a production-
+oriented npm monorepo; it is not presented as a ground-up rewrite. It supports
+public course discovery, student learning and progress, instructor course
+management, admin operations, cookie-based authentication, protected
+Cloudinary media, Resend email, Google Identity, and server-priced Razorpay
+purchases.
 
 The repository is an npm workspace. Application code is separated under
 `apps/`, while shared API contracts, end-to-end tests, deployment orchestration,
@@ -40,6 +42,16 @@ scripts/                  repository-wide validation and operations helpers
 compose.*.yml              local, integration, and operations adapters
 ```
 
+## Current stack
+
+- React 19, React Router 8, Vite 8, Tailwind CSS 4, Redux Toolkit, and RTK Query
+- Node.js 24, Express 5, Mongoose 9, MongoDB 8-compatible deployments, and Redis
+- Zod 4 shared runtime contracts with a committed OpenAPI 3.1 document
+- Razorpay, Cloudinary, Resend, and Google Identity provider integrations
+- Vitest, Node's test runner, Playwright, ESLint, Prettier, Docker, and Nginx
+
+## Architecture
+
 The frontend dependency direction is:
 
 ```text
@@ -54,7 +66,36 @@ use validation, controller, service, repository, mapper, and shared-contract
 boundaries where that structure already adds value.
 
 See [ADR 0011](docs/architecture/0011-repository-modularization.md) for the
-current architecture and dependency rules.
+repository boundaries and dependency rules. The
+[deployment runbook](docs/operations/deployment.md) is authoritative for the
+newer runtime topology.
+
+The current AWS staging topology is same-origin:
+
+```text
+Browser
+  -> HTTPS / AWS entry point
+  -> main Nginx/web container :8080
+  -> /api/v1
+  -> API container on task loopback :4000
+```
+
+Nginx serves the React application and proxies `/api` without rewriting the
+path. An explicit separate HTTPS API origin remains supported for deployments
+that deliberately route the two services independently.
+
+## Main functionality
+
+- Public users can browse and filter published courses, view course details,
+  use the contact flow, and review the legal policies before signup or checkout.
+- Students can manage a cart, purchase server-priced courses, view immutable
+  purchase history, request eligible refunds, access enrolled curricula, record
+  progress, and submit course reviews.
+- Instructors require Admin approval before login. Approved instructors can
+  create, edit, publish, and manage their own courses and curricula and view
+  instructor dashboard data.
+- Admins can approve or reject instructor applications, manage categories, and
+  resolve payment/refund reconciliation cases through server-authorized routes.
 
 ## Requirements
 
@@ -82,10 +123,12 @@ test -e apps/api/.env || cp apps/api/.env.example apps/api/.env
 
 Generate different random values of at least 32 characters for `JWT_SECRET`
 and `OTP_SECRET`. `ALLOW_DEV_OTP=true` may be used only in local development.
-The preferred locations are `apps/web/.env` for browser-public `VITE_*` values
-and `apps/api/.env` for private API values. Legacy root `.env` and
-`server/.env` files remain user-owned compatibility fallbacks during migration;
-do not print, move, or overwrite them automatically.
+Use `apps/web/.env` for browser-public `VITE_*` values and `apps/api/.env` for
+private API values. The API loads only its application-owned file. A legacy
+root `.env` may still supply browser-public `VITE_*` values for compatibility;
+new configuration belongs under `apps/web`. An old `server/.env`, if found in
+another checkout, is sensitive local residue: it remains ignored but is not
+loaded by the application and must never be migrated into Git.
 
 Start both applications:
 
@@ -124,11 +167,14 @@ Run normal development and verification commands from the repository root:
 npm run dev                 # web and API watch processes
 npm run dev:web             # Vite only
 npm run dev:api             # API only
+npm run format:check        # repository formatting
+npm run lint                # ESLint and architecture boundaries
+npm run typecheck           # web TypeScript boundary
+npm run test:frontend       # Vitest frontend suite
+npm run test:backend        # Node API suite
 npm run build               # validated release web build
 npm run build:local         # local web build
 npm run verify              # contracts, format, lint, types, unit tests, build
-npm test                    # frontend unit tests
-npm run test:backend        # backend unit and contract tests
 npm run test:integration    # guarded MongoDB/Redis integration suites
 npm run test:e2e            # mock Playwright browser matrix
 npm run test:e2e:live       # configured live-stack browser journeys
@@ -222,7 +268,7 @@ available:
 ```bash
 docker build -f apps/web/Dockerfile -t studynotion-web \
   --build-arg VITE_DEPLOYMENT_TIER=production \
-  --build-arg VITE_API_BASE_URL=https://api.example.com/api/v1 \
+  --build-arg VITE_API_BASE_URL=/api/v1 \
   --build-arg VITE_GOOGLE_CLIENT_ID=replace.apps.googleusercontent.com \
   --build-arg VITE_RAZORPAY_KEY_ID=rzp_live_REPLACE123 \
   --build-arg VITE_SUPPORT_EMAIL=support@example.com \
@@ -233,10 +279,13 @@ docker build -f apps/web/Dockerfile -t studynotion-web \
 docker build -f apps/api/Dockerfile -t studynotion-api .
 ```
 
-The web image is an unprivileged static Nginx service on port 8080. It does not
-proxy API traffic; `/api*` deliberately returns a JSON 404 so an API routing
-mistake cannot masquerade as the React SPA. Public HTTPS ingress routes the app
-and API hosts separately.
+The web image is an unprivileged Nginx service on port 8080. In the current
+same-origin AWS deployment it is the main container: it serves the SPA and
+proxies `/api` to the API container on task loopback port 4000. The API path is
+preserved, forwarded request metadata is retained, and API-shaped requests
+cannot fall through to the SPA. An absolute HTTPS `VITE_API_BASE_URL` remains a
+supported alternative when public ingress intentionally exposes a separate API
+origin.
 
 The complete environment inventory, staging seed, backup/restore rehearsal,
 controlled indexes, production preflight, recovery scheduler, smoke tests,
@@ -248,6 +297,23 @@ payment, Entitlement, index, and provider procedures are in the
 Entitlement remains a Stage 2 non-authoritative sidecar: writers and bounded
 recovery are active, legacy enrollment mirrors remain the authorization source,
 and there is no historical backfill or shadow authorization reader.
+
+## Security posture
+
+- Real environment files and Compose secrets are ignored; browser `VITE_*`
+  values are public build inputs, while API/provider credentials are injected at
+  runtime and are never copied into either image.
+- Production sessions use HttpOnly cookies with explicit Secure, SameSite,
+  domain, trusted-origin, CORS, proxy-hop, and session-version controls.
+- Server middleware enforces active-account, policy, deletion-state, role, and
+  resource-ownership authorization; frontend route guards are not treated as
+  the security boundary.
+- Checkout totals come from server-side course prices. Razorpay browser and
+  webhook signatures, immutable purchase evidence, idempotency, and audited
+  reconciliation protect payment state.
+- New lesson videos use authenticated Cloudinary delivery. Only entitled
+  students, owning instructors, or Admins receive short-lived signed playback
+  URLs; protected media metadata is excluded from public contracts.
 
 ## Security and dependency maintenance
 

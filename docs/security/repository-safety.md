@@ -27,12 +27,14 @@ git ls-files -- \
   full-stack-project-clean.zip
 ```
 
-The app-local files, user-owned Compose file, and both legacy compatibility
-locations must be reported as ignored by the first command and must produce no
-output from `git ls-files`. The local archive must also remain untracked and
-ignored. Never print environment values into a terminal transcript. Do not move
-or delete a legacy environment file until its app-local replacement has been
-verified independently.
+The app-local files, user-owned Compose file, and legacy root/server locations
+must be reported as ignored by the first command and must produce no output from
+`git ls-files`. The local archive must also remain untracked and ignored. New
+configuration belongs in the app-local files; the API reads only
+`apps/api/.env`. A root or `server/.env` file found in another checkout is
+sensitive local residue, not a runtime fallback. Never print its values or
+migrate it into Git. Back it up outside the checkout before any deliberate local
+removal when credential ownership is uncertain.
 
 For local filesystem hygiene:
 
