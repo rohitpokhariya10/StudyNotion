@@ -4,30 +4,11 @@ const test = require("node:test")
 
 const {
   apiEnvironmentPath,
-  legacyEnvironmentPath,
   loadEnvironment,
-  selectEnvironmentPath,
 } = require("../config/loadEnvironment")
 
-test("environment loading prefers the API-owned environment file", () => {
+test("environment loading uses the API-owned environment file", () => {
   assert.equal(apiEnvironmentPath, path.resolve(__dirname, "../.env"))
-  assert.equal(
-    selectEnvironmentPath({ fileExists: () => true }),
-    apiEnvironmentPath
-  )
-})
-
-test("environment loading falls back to the untouched legacy file", () => {
-  const checkedPaths = []
-  const selectedPath = selectEnvironmentPath({
-    fileExists(candidate) {
-      checkedPaths.push(candidate)
-      return candidate === legacyEnvironmentPath
-    },
-  })
-
-  assert.deepEqual(checkedPaths, [apiEnvironmentPath, legacyEnvironmentPath])
-  assert.equal(selectedPath, legacyEnvironmentPath)
 })
 
 test("environment loading delegates one quiet load without inspecting values", () => {
@@ -37,10 +18,9 @@ test("environment loading delegates one quiet load without inspecting values", (
       calls.push(options)
       return { parsed: {} }
     },
-    fileExists: (candidate) => candidate === legacyEnvironmentPath,
   })
 
-  assert.deepEqual(calls, [{ path: legacyEnvironmentPath, quiet: true }])
+  assert.deepEqual(calls, [{ path: apiEnvironmentPath, quiet: true }])
   assert.deepEqual(result, { parsed: {} })
 })
 

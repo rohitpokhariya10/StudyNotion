@@ -1,3 +1,0 @@
-const { runSeedCli } = require("./scripts/seed")
-
-void runSeedCli()
