@@ -10,6 +10,18 @@ updates:
       time: "04:00"
       timezone: Asia/Kolkata
     open-pull-requests-limit: 5
+    groups:
+      routine-npm-updates:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "@types/node"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: eslint
+        update-types:
+          - "version-update:semver-major"
 
   - package-ecosystem: github-actions
     directory: /
@@ -20,3 +32,7 @@ updates:
       time: "04:15"
       timezone: Asia/Kolkata
     open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
