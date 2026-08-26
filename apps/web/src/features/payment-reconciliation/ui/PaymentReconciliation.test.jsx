@@ -3,7 +3,7 @@ import {
   resolvePaymentReconciliation,
 } from "@/features/payment-reconciliation/api/paymentReconciliationApi"
 import PaymentReconciliation from "@/features/payment-reconciliation/ui/PaymentReconciliation"
-import { render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -81,7 +81,9 @@ describe("PaymentReconciliation", () => {
     await user.click(screen.getByRole("button", { name: "Reject request" }))
     const note =
       "Course access was delivered and the policy conditions were unmet."
-    await user.type(screen.getByRole("textbox", { name: "Audit note" }), note)
+    fireEvent.change(screen.getByRole("textbox", { name: "Audit note" }), {
+      target: { value: note },
+    })
     await user.click(
       screen.getByRole("button", { name: "Confirm request rejection" })
     )
@@ -136,7 +138,9 @@ describe("PaymentReconciliation", () => {
       await screen.findByRole("button", { name: "Retry failed refund" })
     )
     const note = "Provider failure confirmed; one audited retry is approved."
-    await user.type(screen.getByRole("textbox", { name: "Audit note" }), note)
+    fireEvent.change(screen.getByRole("textbox", { name: "Audit note" }), {
+      target: { value: note },
+    })
     await user.click(
       screen.getByRole("button", { name: "Confirm one refund retry" })
     )
