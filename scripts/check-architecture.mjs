@@ -3,25 +3,20 @@ import { dirname, extname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-const sourceRoot = join(repositoryRoot, "src")
-const serverRoot = join(repositoryRoot, "server")
+const webSourceRoot = join(repositoryRoot, "apps", "web", "src")
+const apiRoot = join(repositoryRoot, "apps", "api")
 const sourceExtensions = new Set([".cjs", ".js", ".jsx", ".mjs"])
-const importExtensions = [".js", ".jsx", ".mjs", ".cjs"]
-
-// Keep this list exact. A missing edge fails the check so the exception cannot
-// outlive the compatibility adapter it documents.
-const grandfatheredDirectTransportEdges = new Set([
-  "src/components/Common/ReviewSlider.jsx -> src/services/apiConnector.js",
-  "src/components/core/ContactUsPage/ContactUsForm.jsx -> src/services/apiConnector.js",
-])
-
-const directTransportTargets = new Set([
-  "src/services/apiConnector.js",
-  "src/shared/api/httpClient.js",
+const importExtensions = [".js", ".jsx", ".mjs", ".cjs", ".json"]
+const layerRanks = new Map([
+  ["shared", 0],
+  ["entities", 1],
+  ["features", 2],
+  ["widgets", 3],
+  ["pages", 4],
+  ["app", 5],
 ])
 
 const compareText = (left, right) => (left < right ? -1 : left > right ? 1 : 0)
-
 const toRepositoryPath = (absolutePath) =>
   relative(repositoryRoot, absolutePath).split(sep).join("/")
 
@@ -33,9 +28,8 @@ const listSourceFiles = (directory) => {
     .flatMap((entry) => {
       const entryPath = join(directory, entry.name)
       if (entry.isDirectory()) return listSourceFiles(entryPath)
-      if (!entry.isFile() || !sourceExtensions.has(extname(entry.name))) {
+      if (!entry.isFile() || !sourceExtensions.has(extname(entry.name)))
         return []
-      }
       return [entryPath]
     })
 }
@@ -58,11 +52,10 @@ const extractModuleReferences = (content) => {
 
   for (const pattern of patterns) {
     for (const match of content.matchAll(pattern)) {
-      const reference = {
+      references.set(`${match.index}\0${match[1]}`, {
         line: lineNumberAt(content, match.index),
         specifier: match[1],
-      }
-      references.set(`${match.index}\0${reference.specifier}`, reference)
+      })
     }
   }
 
@@ -93,10 +86,10 @@ const resolveRepositoryImport = (sourceFile, specifier) => {
   if (specifier.startsWith(".")) {
     basePath = resolve(dirname(sourceFile), specifier)
   } else if (specifier.startsWith("@/")) {
-    basePath = resolve(sourceRoot, specifier.slice(2))
-  } else if (specifier.startsWith("src/")) {
+    basePath = resolve(webSourceRoot, specifier.slice(2))
+  } else if (specifier.startsWith("apps/web/src/")) {
     basePath = resolve(repositoryRoot, specifier)
-  } else if (specifier.startsWith("server/")) {
+  } else if (specifier.startsWith("apps/api/")) {
     basePath = resolve(repositoryRoot, specifier)
   } else {
     return null
@@ -105,138 +98,218 @@ const resolveRepositoryImport = (sourceFile, specifier) => {
   return toRepositoryPath(resolveExistingImport(basePath) || basePath)
 }
 
-const isPageOrUiSource = (repositoryPath) => {
-  if (/\.(?:spec|test)\.[cm]?[jt]sx?$/.test(repositoryPath)) return false
-  if (/^src\/(?:app|components|pages|widgets)\//.test(repositoryPath)) {
-    return true
-  }
-  if (/^src\/shared\/ui\//.test(repositoryPath)) return true
-  return /^src\/(?:entities|features)\/[^/]+\/ui\//.test(repositoryPath)
+const webCoordinate = (repositoryPath) => {
+  const match =
+    /^apps\/web\/src\/(app|pages|widgets|features|entities|shared)(?:\/([^/]+))?\//.exec(
+      repositoryPath
+    )
+  if (!match) return null
+  return { layer: match[1], rank: layerRanks.get(match[1]), slice: match[2] }
 }
 
-const featureSlice = (repositoryPath) => {
-  const match = /^src\/features\/([^/]+)\//.exec(repositoryPath)
+const isTestFile = (repositoryPath) =>
+  /\.(?:spec|test)\.[cm]?[jt]sx?$/.test(repositoryPath)
+
+const isUiSource = (repositoryPath) => {
+  if (isTestFile(repositoryPath)) return false
+  return (
+    /^apps\/web\/src\/(?:app|pages|widgets)\//.test(repositoryPath) ||
+    /^apps\/web\/src\/(?:features|entities)\/[^/]+\/ui\//.test(
+      repositoryPath
+    ) ||
+    /^apps\/web\/src\/shared\/ui\//.test(repositoryPath)
+  )
+}
+
+const apiModule = (repositoryPath) => {
+  const match = /^apps\/api\/modules\/([^/]+)\//.exec(repositoryPath)
   return match?.[1] || null
 }
 
-const serverModule = (repositoryPath) => {
-  const match = /^server\/modules\/([^/]+)\//.exec(repositoryPath)
+const apiDomain = (repositoryPath) => {
+  const match = /^apps\/api\/domains\/([^/]+)\//.exec(repositoryPath)
   return match?.[1] || null
 }
 
-const isServerCompositionTarget = (repositoryPath) =>
-  repositoryPath === "server/index.js" ||
-  /^server\/(?:app|bootstrap)\//.test(repositoryPath)
+const isApiCompositionTarget = (repositoryPath) =>
+  repositoryPath === "apps/api/index.js" ||
+  /^apps\/api\/(?:app|bootstrap)\//.test(repositoryPath)
 
 const isPublicModuleEntry = (repositoryPath, moduleName) =>
-  repositoryPath === `server/modules/${moduleName}/index.js`
+  repositoryPath === `apps/api/modules/${moduleName}/index.js`
 
 const violations = []
-const observedGrandfatheredEdges = new Set()
-const sourceFiles = listSourceFiles(sourceRoot)
-const backendSourceFiles = [
-  ...listSourceFiles(join(serverRoot, "app")),
-  ...listSourceFiles(join(serverRoot, "bootstrap")),
-  ...listSourceFiles(join(serverRoot, "modules")),
-  ...listSourceFiles(join(serverRoot, "shared")),
-].sort((left, right) => compareText(left, right))
+const report = (sourcePath, line, target, message) => {
+  violations.push({ sourcePath, line, target, message })
+}
 
-for (const sourceFile of sourceFiles) {
+for (const layer of layerRanks.keys()) {
+  const layerPath = join(webSourceRoot, layer)
+  if (!existsSync(layerPath)) {
+    report(
+      "apps/web/src",
+      0,
+      layer,
+      `required frontend layer '${layer}' is missing`
+    )
+  }
+}
+
+for (const legacyDirectory of [
+  "components",
+  "hooks",
+  "reducer",
+  "services",
+  "slices",
+  "utils",
+]) {
+  if (existsSync(join(webSourceRoot, legacyDirectory))) {
+    report(
+      "apps/web/src",
+      0,
+      legacyDirectory,
+      "legacy frontend dumping-ground directory must be classified into a feature layer"
+    )
+  }
+}
+
+const frontendSourceFiles = listSourceFiles(webSourceRoot)
+for (const sourceFile of frontendSourceFiles) {
   const sourcePath = toRepositoryPath(sourceFile)
+  const sourceCoordinate = webCoordinate(sourcePath)
   const content = readFileSync(sourceFile, "utf8")
 
   for (const reference of extractModuleReferences(content)) {
-    const targetPath = resolveRepositoryImport(sourceFile, reference.specifier)
-    const isExternalAxios = reference.specifier === "axios"
-    const isDirectTransport =
-      isExternalAxios || directTransportTargets.has(targetPath)
-
-    if (isPageOrUiSource(sourcePath) && isDirectTransport) {
-      const edge = `${sourcePath} -> ${targetPath || reference.specifier}`
-      if (grandfatheredDirectTransportEdges.has(edge)) {
-        observedGrandfatheredEdges.add(edge)
-      } else {
-        violations.push({
-          line: reference.line,
-          message:
-            "page/UI code must use an entity or feature API boundary, not a direct HTTP transport",
-          sourcePath,
-          target: targetPath || reference.specifier,
-        })
-      }
+    if (
+      reference.specifier.startsWith("src/") ||
+      reference.specifier.startsWith("server/")
+    ) {
+      report(
+        sourcePath,
+        reference.line,
+        reference.specifier,
+        "stale pre-modularization source path"
+      )
+      continue
     }
 
-    const sourceFeature = featureSlice(sourcePath)
-    const targetFeature = targetPath && featureSlice(targetPath)
-    if (sourceFeature && targetFeature && sourceFeature !== targetFeature) {
-      violations.push({
-        line: reference.line,
-        message: `feature '${sourceFeature}' must not import feature '${targetFeature}' directly`,
+    const targetPath = resolveRepositoryImport(sourceFile, reference.specifier)
+    const targetCoordinate = targetPath && webCoordinate(targetPath)
+
+    if (
+      sourceCoordinate &&
+      targetCoordinate &&
+      targetCoordinate.rank > sourceCoordinate.rank
+    ) {
+      report(
         sourcePath,
-        target: targetPath,
-      })
+        reference.line,
+        targetPath,
+        `layer '${sourceCoordinate.layer}' must not import upward from '${targetCoordinate.layer}'`
+      )
+    }
+
+    if (
+      sourceCoordinate?.layer === "features" &&
+      targetCoordinate?.layer === "features" &&
+      sourceCoordinate.slice !== targetCoordinate.slice
+    ) {
+      report(
+        sourcePath,
+        reference.line,
+        targetPath,
+        `feature '${sourceCoordinate.slice}' must not import feature '${targetCoordinate.slice}' directly`
+      )
+    }
+
+    const isDirectTransport =
+      reference.specifier === "axios" ||
+      targetPath === "apps/web/src/shared/api/httpClient.js"
+    if (isUiSource(sourcePath) && isDirectTransport) {
+      report(
+        sourcePath,
+        reference.line,
+        targetPath || reference.specifier,
+        "page/UI code must use its owning feature or entity API boundary"
+      )
     }
   }
 }
+
+const backendSourceFiles = [
+  ...listSourceFiles(join(apiRoot, "app")),
+  ...listSourceFiles(join(apiRoot, "bootstrap")),
+  ...listSourceFiles(join(apiRoot, "domains")),
+  ...listSourceFiles(join(apiRoot, "modules")),
+  ...listSourceFiles(join(apiRoot, "shared")),
+].sort((left, right) => compareText(left, right))
 
 for (const sourceFile of backendSourceFiles) {
   const sourcePath = toRepositoryPath(sourceFile)
   const content = readFileSync(sourceFile, "utf8")
 
   for (const reference of extractModuleReferences(content)) {
+    if (reference.specifier.startsWith("server/")) {
+      report(
+        sourcePath,
+        reference.line,
+        reference.specifier,
+        "stale pre-modularization API path"
+      )
+      continue
+    }
+
     const targetPath = resolveRepositoryImport(sourceFile, reference.specifier)
     if (!targetPath) continue
 
     if (
-      sourcePath.startsWith("server/shared/") &&
-      (isServerCompositionTarget(targetPath) ||
-        targetPath.startsWith("server/modules/"))
+      sourcePath.startsWith("apps/api/shared/") &&
+      (isApiCompositionTarget(targetPath) ||
+        targetPath.startsWith("apps/api/domains/") ||
+        targetPath.startsWith("apps/api/modules/"))
     ) {
-      violations.push({
-        line: reference.line,
-        message:
-          "shared backend code must not depend on app/bootstrap composition or domain modules",
+      report(
         sourcePath,
-        target: targetPath,
-      })
+        reference.line,
+        targetPath,
+        "shared API code must not depend on composition or business domains"
+      )
     }
 
-    const sourceModule = serverModule(sourcePath)
+    const sourceDomain = apiDomain(sourcePath)
+    if (sourceDomain && isApiCompositionTarget(targetPath)) {
+      report(
+        sourcePath,
+        reference.line,
+        targetPath,
+        `domain '${sourceDomain}' must not depend on app/bootstrap composition`
+      )
+    }
+
+    const sourceModule = apiModule(sourcePath)
     if (!sourceModule) continue
-
-    if (isServerCompositionTarget(targetPath)) {
-      violations.push({
-        line: reference.line,
-        message: `module '${sourceModule}' must not depend on app/bootstrap composition`,
+    if (isApiCompositionTarget(targetPath)) {
+      report(
         sourcePath,
-        target: targetPath,
-      })
+        reference.line,
+        targetPath,
+        `module '${sourceModule}' must not depend on app/bootstrap composition`
+      )
     }
 
-    const targetModule = serverModule(targetPath)
+    const targetModule = apiModule(targetPath)
     if (
       targetModule &&
       targetModule !== sourceModule &&
       !isPublicModuleEntry(targetPath, targetModule)
     ) {
-      violations.push({
-        line: reference.line,
-        message: `module '${sourceModule}' must use module '${targetModule}' through its public index`,
+      report(
         sourcePath,
-        target: targetPath,
-      })
+        reference.line,
+        targetPath,
+        `module '${sourceModule}' must use module '${targetModule}' through its public index`
+      )
     }
-  }
-}
-
-for (const edge of grandfatheredDirectTransportEdges) {
-  if (!observedGrandfatheredEdges.has(edge)) {
-    violations.push({
-      line: 0,
-      message: "remove this stale grandfathered transport exception",
-      sourcePath: edge.split(" -> ")[0],
-      target: edge.split(" -> ")[1],
-    })
   }
 }
 
@@ -258,6 +331,6 @@ if (violations.length) {
   process.exitCode = 1
 } else {
   console.log(
-    `Architecture check passed (${sourceFiles.length} frontend and ${backendSourceFiles.length} bounded backend source files, ${observedGrandfatheredEdges.size} grandfathered direct transport edges)`
+    `Architecture check passed (${frontendSourceFiles.length} frontend and ${backendSourceFiles.length} bounded backend source files; six frontend layers enforced)`
   )
 }

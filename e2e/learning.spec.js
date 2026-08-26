@@ -152,7 +152,7 @@ const mockPlayback = async (page) => {
     route.fulfill({
       status: 200,
       contentType: "video/mp4",
-      path: "src/assets/Images/banner.mp4",
+      path: "apps/web/src/shared/assets/Images/banner.mp4",
     })
   )
 }

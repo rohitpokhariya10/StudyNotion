@@ -1,0 +1,20 @@
+{
+  "files.exclude": {
+    "**/blob-report": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/playwright-report": true,
+    "**/test-results": true
+  },
+  "search.exclude": {
+    "**/blob-report": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/playwright-report": true,
+    "**/test-results": true
+  }
+}

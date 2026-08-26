@@ -1,0 +1,492 @@
+@import "tailwindcss" source("../../");
+
+/*
+ * Keep the Tailwind 3 replacement semantics: StudyNotion owns the color and
+ * font namespaces instead of inheriting Tailwind's defaults. This prevents
+ * previously unknown classes from becoming active during the migration.
+ */
+@theme {
+  --color-*: initial;
+  --color-white: #fff;
+  --color-black: #000;
+  --color-transparent: #ffffff00;
+
+  --color-richblack-5: #f1f2ff;
+  --color-richblack-25: #dbddea;
+  --color-richblack-50: #c5c7d4;
+  --color-richblack-100: #afb2bf;
+  --color-richblack-200: #999daa;
+  --color-richblack-300: #838894;
+  --color-richblack-400: #6e727f;
+  --color-richblack-500: #585d69;
+  --color-richblack-600: #424854;
+  --color-richblack-700: #2c333f;
+  --color-richblack-800: #161d29;
+  --color-richblack-900: #000814;
+
+  --color-richblue-5: #ecf5ff;
+  --color-richblue-25: #c6d6e1;
+  --color-richblue-50: #a0b7c3;
+  --color-richblue-100: #7a98a6;
+  --color-richblue-200: #537988;
+  --color-richblue-300: #2d5a6a;
+  --color-richblue-400: #073b4c;
+  --color-richblue-500: #063544;
+  --color-richblue-600: #042e3b;
+  --color-richblue-700: #032833;
+  --color-richblue-800: #01212a;
+  --color-richblue-900: #001b22;
+
+  --color-blue-5: #eaf5ff;
+  --color-blue-25: #b4daec;
+  --color-blue-50: #7ec0d9;
+  --color-blue-100: #47a5c5;
+  --color-blue-200: #118ab2;
+  --color-blue-300: #0f7a9d;
+  --color-blue-400: #0c6a87;
+  --color-blue-500: #0a5a72;
+  --color-blue-600: #074b5d;
+  --color-blue-700: #053b48;
+  --color-blue-800: #022b32;
+  --color-blue-900: #001b1d;
+
+  --color-caribbeangreen-5: #c1fffd;
+  --color-caribbeangreen-25: #83f1de;
+  --color-caribbeangreen-50: #44e4bf;
+  --color-caribbeangreen-100: #06d6a0;
+  --color-caribbeangreen-200: #05bf8e;
+  --color-caribbeangreen-300: #05a77b;
+  --color-caribbeangreen-400: #049069;
+  --color-caribbeangreen-500: #037957;
+  --color-caribbeangreen-600: #026144;
+  --color-caribbeangreen-700: #014a32;
+  --color-caribbeangreen-800: #01321f;
+  --color-caribbeangreen-900: #001b0d;
+
+  --color-brown-5: #fff4c4;
+  --color-brown-25: #ffe395;
+  --color-brown-50: #ffd166;
+  --color-brown-100: #e7bc5b;
+  --color-brown-200: #cfa64f;
+  --color-brown-300: #b89144;
+  --color-brown-400: #a07c39;
+  --color-brown-500: #88662d;
+  --color-brown-600: #705122;
+  --color-brown-700: #593c17;
+  --color-brown-800: #41260b;
+  --color-brown-900: #291100;
+
+  --color-pink-5: #fff1f1;
+  --color-pink-25: #fbc7d1;
+  --color-pink-50: #f79cb0;
+  --color-pink-100: #f37290;
+  --color-pink-200: #ef476f;
+  --color-pink-300: #d43d63;
+  --color-pink-400: #ba3356;
+  --color-pink-500: #9f294a;
+  --color-pink-600: #841e3e;
+  --color-pink-700: #691432;
+  --color-pink-800: #4f0a25;
+  --color-pink-900: #340019;
+
+  --color-yellow-5: #fff970;
+  --color-yellow-25: #ffe83d;
+  --color-yellow-50: #ffd60a;
+  --color-yellow-100: #e7c009;
+  --color-yellow-200: #cfab08;
+  --color-yellow-300: #b69507;
+  --color-yellow-400: #9e8006;
+  --color-yellow-500: #866a04;
+  --color-yellow-600: #6e5503;
+  --color-yellow-700: #553f02;
+  --color-yellow-800: #3d2a01;
+  --color-yellow-900: #251400;
+
+  --color-pure-greys-5: #f9f9f9;
+  --color-pure-greys-25: #e2e2e2;
+  --color-pure-greys-50: #ccc;
+  --color-pure-greys-100: #b5b5b5;
+  --color-pure-greys-200: #9e9e9e;
+  --color-pure-greys-300: #888;
+  --color-pure-greys-400: #717171;
+  --color-pure-greys-500: #5b5b5b;
+  --color-pure-greys-600: #444;
+  --color-pure-greys-700: #2d2d2d;
+  --color-pure-greys-800: #171717;
+  --color-pure-greys-900: #141414;
+
+  --font-*: initial;
+  --font-inter: ui-sans-serif, system-ui, sans-serif;
+  --font-edu-sa: Georgia, ui-serif, serif;
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
+  --default-font-family:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+
+  --container-maxContent: 1260px;
+  --container-maxContentTab: 650px;
+}
+
+/* Catalog tokens retain their scoped runtime values and alpha modifiers. */
+@theme inline {
+  --color-catalog-canvas: rgb(var(--catalog-canvas));
+  --color-catalog-surface: rgb(var(--catalog-surface));
+  --color-catalog-surface-muted: rgb(var(--catalog-surface-muted));
+  --color-catalog-text: rgb(var(--catalog-text));
+  --color-catalog-muted: rgb(var(--catalog-muted));
+  --color-catalog-border: rgb(var(--catalog-border));
+  --color-catalog-action: rgb(var(--catalog-action));
+  --color-catalog-brand: rgb(var(--catalog-brand));
+  --color-catalog-brand-soft: rgb(var(--catalog-brand-soft));
+  --color-catalog-info: rgb(var(--catalog-info));
+  --color-catalog-danger: rgb(var(--catalog-danger));
+  --color-catalog-focus: rgb(var(--catalog-focus));
+  --radius-product: var(--catalog-radius);
+  --radius-product-lg: var(--catalog-radius-lg);
+  --shadow-product: var(--catalog-shadow);
+
+  /* Shared semantic aliases are intentionally mapped to the existing palette. */
+  --color-brand-primary: var(--color-yellow-50);
+  --color-surface-primary: var(--color-richblack-900);
+  --color-surface-secondary: var(--color-richblack-800);
+  --color-surface-elevated: var(--color-richblack-700);
+  --color-text-primary: var(--color-richblack-5);
+  --color-text-secondary: var(--color-richblack-100);
+  --color-text-muted: var(--color-richblack-300);
+  --color-border-default: var(--color-richblack-600);
+  --color-border-subtle: var(--color-richblack-700);
+  --color-focus: var(--color-yellow-25);
+  --color-success: var(--color-caribbeangreen-100);
+  --color-warning: var(--color-yellow-50);
+  --color-danger: var(--color-pink-200);
+}
+
+/* Preserve the Tailwind 3 Preflight defaults that Tailwind 4 intentionally changed. */
+@layer base {
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+.catalog-theme {
+  --catalog-canvas: 247 243 234;
+  --catalog-surface: 255 252 247;
+  --catalog-surface-muted: 239 234 223;
+  --catalog-text: 24 32 44;
+  --catalog-muted: 93 102 116;
+  --catalog-border: 217 210 197;
+  --catalog-action: 27 39 56;
+  --catalog-brand: 180 83 9;
+  --catalog-brand-soft: 254 243 199;
+  --catalog-info: 7 89 133;
+  --catalog-danger: 180 35 24;
+  --catalog-focus: 14 116 144;
+  --catalog-radius: 0.625rem;
+  --catalog-radius-lg: 0.75rem;
+  --catalog-shadow: 0 12px 32px rgb(24 32 44 / 0.08);
+  color-scheme: light;
+}
+
+.catalog-theme :where(a, button, input, select):focus-visible {
+  outline: 3px solid rgb(var(--catalog-focus));
+  outline-offset: 3px;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #ffe83d;
+  outline-offset: 3px;
+}
+
+.catalog-course-card:focus-within {
+  border-color: rgb(var(--catalog-focus));
+  box-shadow:
+    0 0 0 3px rgb(var(--catalog-canvas)),
+    0 0 0 6px rgb(var(--catalog-focus));
+}
+
+.catalog-course-card > a:focus-visible {
+  outline: none;
+}
+
+.catalog-line-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.catalog-skeleton {
+  animation: catalog-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes catalog-pulse {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* ===== Scrollbar CSS ===== */
+/* Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #afb2bf;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #000814;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #afb2bf;
+  border-radius: 10px;
+  visibility: hidden;
+}
+
+*:active::-webkit-scrollbar-thumb,
+*:focus::-webkit-scrollbar-thumb,
+*:hover::-webkit-scrollbar-thumb {
+  visibility: visible;
+}
+
+/* Hide default styling of details/summary */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* https://10015.io/tools/css-loader-generator */
+.spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 9px solid #f1f2ff;
+  animation:
+    spinner-bulqg1 0.8s infinite linear alternate,
+    spinner-oaa3wk 1.6s infinite linear;
+}
+
+.codeblock1 {
+  width: 372.95px;
+  height: 257.05px;
+  border-radius: 100%;
+  left: calc(50% - 372.95px / 2 - 76.53px);
+  top: calc(50% - 257.05px / 2 - 47.47px);
+  background: linear-gradient(
+    123.77deg,
+    #8a2be2 -6.46%,
+    #ffa500 59.04%,
+    #f8f8ff 124.53%
+  );
+  opacity: 0.2;
+  filter: blur(34px);
+  transform: matrix(1, 0, -0.03, 1, 0, 0);
+}
+.codeblock2 {
+  position: absolute;
+  width: 372.95px;
+  height: 257.05px;
+  left: calc(50% - 372.95px / 2 - 76.53px);
+  top: calc(50% - 257.05px / 2 - 47.47px);
+  border-radius: 100%;
+  background: linear-gradient(
+    118.19deg,
+    #1fa2ff -3.62%,
+    #12d8fa 50.44%,
+    #a6ffcb 104.51%
+  );
+  opacity: 0.2;
+  filter: blur(34px);
+  transform: matrix(1, 0, -0.03, 1, 0, 0);
+}
+.code-border {
+  border: 2px solid;
+  border-image-slice: 1;
+  border-width: 2px;
+  border-image-source: linear-gradient(to right bottom, #ffffff38, #ffffff00);
+  background: linear-gradient(
+    111.93deg,
+    rgba(14, 26, 45, 0.24) -1.4%,
+    rgba(17, 30, 50, 0.38) 104.96%
+  );
+  /* backdrop-filter: blur(26px); */
+}
+.homepage_bg {
+  background: url("../assets/Images/bghome.svg");
+  /* background-size: contain; */
+}
+
+@keyframes spinner-bulqg1 {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
+  }
+
+  12.5% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 0%,
+      100% 0%,
+      100% 0%
+    );
+  }
+
+  25% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 100%,
+      100% 100%,
+      100% 100%
+    );
+  }
+
+  50% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+
+  62.5% {
+    clip-path: polygon(
+      50% 50%,
+      100% 0,
+      100% 0%,
+      100% 0%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+
+  75% {
+    clip-path: polygon(
+      50% 50%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+
+  100% {
+    clip-path: polygon(
+      50% 50%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+}
+
+@keyframes spinner-oaa3wk {
+  0% {
+    transform: scaleY(1) rotate(0deg);
+  }
+
+  49.99% {
+    transform: scaleY(1) rotate(135deg);
+  }
+
+  50% {
+    transform: scaleY(-1) rotate(0deg);
+  }
+
+  100% {
+    transform: scaleY(-1) rotate(-135deg);
+  }
+}
+
+/* For conditional coloring of icons in dashboard sidebar */
+.active-icon {
+  fill: #ffd60a !important;
+  color: #ffd60a !important;
+}
+
+.inactive-icon {
+  fill: #838894;
+  color: #838894;
+}
+
+/* Buttons */
+.yellowButton {
+  @apply cursor-pointer rounded-md bg-yellow-50 px-[20px] py-[8px] font-semibold text-richblack-900;
+}
+
+/* Swiper CSS Starts */
+/* .swiper {
+  max-width: 1200px;
+  width: 91.66%;
+  height: 185px;
+  margin: 50px 0px;
+} */
+
+.swiper-slide {
+  width: 100%;
+  height: 100%;
+}
+/* .swiper-slide {
+  @apply bg-richblack-800 text-richblack-25 p-3 text-[14px];
+} */
+/* Swiper CSS Ends */
+
+.blackButton {
+  @apply cursor-pointer rounded-md bg-richblack-800 px-[20px] py-[8px] font-semibold text-richblack-5;
+}
+.lable-style {
+  @apply text-[14px] text-richblack-5;
+}
+.form-style {
+  @apply rounded-lg bg-richblack-700 p-3 text-[16px] leading-[24px] text-richblack-5 shadow-[0_1px_0_0] shadow-white/50 placeholder:text-richblack-400;
+}
+.section_heading {
+  @apply text-2xl font-bold text-richblack-5 lg:text-4xl;
+}

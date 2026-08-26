@@ -10,7 +10,7 @@ services:
     init: true
     restart: "no"
     user: node
-    working_dir: /app/server
+    working_dir: /app/apps/api
     command: ["node", "scripts/schedule-entitlement-recovery.js"]
     env_file:
       - ${STUDYNOTION_ENTITLEMENT_RECOVERY_ENV_FILE:?Set the absolute private recovery env-file path}

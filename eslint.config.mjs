@@ -30,9 +30,19 @@ const directApiImportRestrictions = [
 ]
 
 export default [
-  { ignores: ["dist", "build", "node_modules", "test-results"] },
   {
-    files: ["src/**/*.{js,jsx}"],
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/blob-report/**",
+      "**/coverage/**",
+      "**/playwright-report/**",
+      "**/test-results/**",
+    ],
+  },
+  {
+    files: ["apps/web/src/**/*.{js,jsx}"],
     languageOptions: {
       ecmaVersion: "latest",
       globals: globals.browser,
@@ -63,7 +73,13 @@ export default [
     },
   },
   {
-    files: ["server/**/*.js", "packages/contracts/src/**/*.js", "*.{js,cjs}"],
+    files: [
+      "apps/api/**/*.js",
+      "packages/contracts/{src,test}/**/*.js",
+      "scripts/**/*.cjs",
+      "e2e/**/*.cjs",
+      "*.{js,cjs}",
+    ],
     languageOptions: {
       ecmaVersion: "latest",
       globals: globals.node,
@@ -78,7 +94,13 @@ export default [
     },
   },
   {
-    files: ["scripts/**/*.mjs", "e2e/**/*.js", "*.mjs"],
+    files: [
+      "apps/web/test/**/*.js",
+      "apps/web/scripts/**/*.mjs",
+      "scripts/**/*.mjs",
+      "e2e/**/*.js",
+      "*.mjs",
+    ],
     languageOptions: {
       ecmaVersion: "latest",
       globals: { ...globals.browser, ...globals.node },
@@ -94,13 +116,12 @@ export default [
   },
   {
     files: [
-      "src/pages/**/*.{js,jsx}",
-      "src/components/**/*.{js,jsx}",
-      "src/app/**/*.{js,jsx}",
-      "src/shared/ui/**/*.{js,jsx}",
-      "src/entities/*/ui/**/*.{js,jsx}",
-      "src/features/*/ui/**/*.{js,jsx}",
-      "src/widgets/**/*.{js,jsx}",
+      "apps/web/src/app/**/*.{js,jsx}",
+      "apps/web/src/pages/**/*.{js,jsx}",
+      "apps/web/src/widgets/**/*.{js,jsx}",
+      "apps/web/src/features/*/ui/**/*.{js,jsx}",
+      "apps/web/src/entities/*/ui/**/*.{js,jsx}",
+      "apps/web/src/shared/ui/**/*.{js,jsx}",
     ],
     rules: {
       "no-restricted-imports": directApiImportRestrictions,
@@ -108,18 +129,7 @@ export default [
   },
   {
     // Compatibility tests may inspect both sides of a transport adapter.
-    files: ["src/app/composition.test.jsx"],
-    rules: {
-      "no-restricted-imports": "off",
-    },
-  },
-  {
-    // These exact legacy connector users are recorded by the architecture check.
-    // Remove an override as soon as its caller moves behind a feature API boundary.
-    files: [
-      "src/components/Common/ReviewSlider.jsx",
-      "src/components/core/ContactUsPage/ContactUsForm.jsx",
-    ],
+    files: ["apps/web/src/app/composition.test.jsx"],
     rules: {
       "no-restricted-imports": "off",
     },

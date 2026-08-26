@@ -6,7 +6,7 @@ module.exports = {
   tabWidth: 2,
   trailingComma: "es5",
   bracketSpacing: true,
-  tailwindStylesheet: "./src/App.css",
+  tailwindStylesheet: "./apps/web/src/shared/styles/globals.css",
   importOrder: ["<BUILTIN_MODULES>", "<THIRD_PARTY_MODULES>", "", "^[./]"],
   importOrderParserPlugins: ["jsx", "decorators-legacy"],
   plugins: [

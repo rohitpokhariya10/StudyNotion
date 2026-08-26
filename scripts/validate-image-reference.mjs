@@ -1,4 +1,4 @@
-import imageReference from "../server/utils/imageReference.js"
+import imageReference from "../apps/api/utils/imageReference.js"
 
 const { isImmutableImageReference } = imageReference
 const image = process.env.STUDYNOTION_API_IMAGE_DIGEST || ""

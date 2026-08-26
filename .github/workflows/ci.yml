@@ -32,7 +32,7 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test -- --run
+      - run: npm run test:frontend
       - run: npm run build
         env:
           VITE_DEPLOYMENT_TIER: production
@@ -48,11 +48,11 @@ jobs:
         run: |
           set -euo pipefail
           if grep --recursive --binary-files=without-match --extended-regexp --ignore-case --quiet \
-            'https?://(localhost|127\.0\.0\.1|host\.docker\.internal)(:4000)?/api' dist; then
+            'https?://(localhost|127\.0\.0\.1|host\.docker\.internal)(:4000)?/api' apps/web/dist; then
             echo "Production web artifact contains a development API URL" >&2
             exit 1
           fi
-          if find dist -type f -name '*.map' -print -quit | grep --quiet .; then
+          if find apps/web/dist -type f -name '*.map' -print -quit | grep --quiet .; then
             echo "Production web artifact contains source maps" >&2
             exit 1
           fi
@@ -97,7 +97,7 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm audit
-        working-directory: server
+        working-directory: apps/api
       - run: npm --workspace studynotion-backend test
 
   catalog-integration:
@@ -197,7 +197,7 @@ jobs:
       - name: Add a nested environment-file exclusion canary
         run: >-
           printf 'DO_NOT_COPY=container-context-canary\n'
-          > server/.env.release-context-probe
+          > apps/api/.env.release-context-probe
       - run: >-
           docker build
           --build-arg VITE_DEPLOYMENT_TIER=production
@@ -208,8 +208,9 @@ jobs:
           --build-arg VITE_LEGAL_ENTITY_NAME="StudyNotion CI"
           --build-arg VITE_LEGAL_ADDRESS="CI test environment"
           --build-arg VITE_LEGAL_JURISDICTION=India
+          -f apps/web/Dockerfile
           -t studynotion-web:ci .
-      - run: docker build -f server/Dockerfile -t studynotion-api:ci .
+      - run: docker build -f apps/api/Dockerfile -t studynotion-api:ci .
       - name: Verify container users and web runtime
         shell: bash
         run: |
@@ -224,10 +225,10 @@ jobs:
           '
           docker run --rm --entrypoint sh studynotion-api:ci -ec '
             test ! -e /app/.git
-            test ! -e /app/server/test
-            test ! -e /app/server/README.md
-            test ! -e /app/server/seed
-            ! find /app/server /app/packages/contracts -type f \( -name "*.map" -o -name ".env*" -o -name "*.test.js" \) -print -quit | grep -q .
+            test ! -e /app/apps/api/test
+            test ! -e /app/apps/api/README.md
+            test ! -e /app/apps/api/seed
+            ! find /app/apps/api /app/packages/contracts -type f \( -name "*.map" -o -name ".env*" -o -name "*.test.js" \) -print -quit | grep -q .
           '
 
           container_id="$(docker run --detach --publish 127.0.0.1:18080:8080 studynotion-web:ci)"

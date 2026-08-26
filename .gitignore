@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules/
 /.pnp
 .pnp.js
 
@@ -14,8 +15,11 @@
 # production
 /build
 /dist
+/apps/*/build/
+/apps/*/dist/
+/apps/*/coverage/
 /packages/*/dist
-/nginx.rendered.conf
+/apps/web/nginx.rendered.conf
 
 # misc
 .DS_Store
@@ -23,6 +27,13 @@
 !.env.example
 !.env.production.example
 !.env.staging.example
+!/apps/web/.env.example
+!/apps/web/.env.production.example
+!/apps/web/.env.staging.example
+!/apps/api/.env.example
+!/apps/api/.env.production.example
+!/apps/api/.env.staging.example
+!/apps/api/.env.staging.seed.example
 /compose.local.env
 
 # local source/release archives
