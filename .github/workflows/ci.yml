@@ -99,7 +99,7 @@ jobs:
           VITE_LEGAL_ADDRESS: CI staging test environment
           VITE_LEGAL_JURISDICTION: India
 
-      - name: Validate representative staging release pair
+      - name: Validate representative same-origin staging release pair
         run: npm run deploy:validate-pair
         env:
           APP_URL: https://app.staging.example.test
@@ -107,10 +107,10 @@ jobs:
           DEPLOYMENT_TIER: staging
           FRONTEND_ORIGINS: https://app.staging.example.test
           GOOGLE_CLIENT_ID: ""
-          PUBLIC_API_URL: https://api.staging.example.test
+          PUBLIC_API_URL: https://app.staging.example.test
           RAZORPAY_KEY_ID: rzp_test_CIBUILD123
           SUPPORT_EMAIL: support@studynotion.test
-          VITE_API_BASE_URL: https://api.staging.example.test/api/v1
+          VITE_API_BASE_URL: /api/v1
           VITE_DEPLOYMENT_TIER: staging
           VITE_GOOGLE_CLIENT_ID: ""
           VITE_RAZORPAY_KEY_ID: rzp_test_CIBUILD123

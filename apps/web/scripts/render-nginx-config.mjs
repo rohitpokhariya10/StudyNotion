@@ -1,33 +1,11 @@
 import { readFile, writeFile } from "node:fs/promises"
 
-const apiBaseUrl = process.env.VITE_API_BASE_URL?.trim()
+import { resolveNginxApiOrigin } from "./deployment-network.mjs"
 
-if (!apiBaseUrl) {
-  throw new Error("VITE_API_BASE_URL is required")
-}
-
-const normalizedApiBaseUrl = apiBaseUrl.replace(/\/$/, "")
-const isSameOriginApi = normalizedApiBaseUrl === "/api/v1"
-
-let apiOrigin = ""
-
-if (!isSameOriginApi) {
-  let parsedApiUrl
-
-  try {
-    parsedApiUrl = new URL(apiBaseUrl)
-  } catch {
-    throw new Error(
-      "VITE_API_BASE_URL must be /api/v1 or a valid HTTPS API URL"
-    )
-  }
-
-  if (parsedApiUrl.protocol !== "https:") {
-    throw new Error("Absolute VITE_API_BASE_URL must use HTTPS")
-  }
-
-  apiOrigin = parsedApiUrl.origin
-}
+const apiOrigin = resolveNginxApiOrigin({
+  apiBaseUrl: process.env.VITE_API_BASE_URL,
+  webBuild: process.env.STUDYNOTION_WEB_BUILD,
+})
 
 const source = await readFile(new URL("../nginx.conf", import.meta.url), "utf8")
 

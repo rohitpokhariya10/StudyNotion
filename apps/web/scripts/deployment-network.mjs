@@ -45,3 +45,55 @@ export const isLoopbackHostname = (value) => {
     mapped && (mapped[0] === 127 || mapped.every((octet) => octet === 0))
   )
 }
+
+export const resolveNginxApiOrigin = ({
+  apiBaseUrl,
+  webBuild = "production",
+}) => {
+  const buildMode = String(webBuild || "").trim()
+  if (!new Set(["local", "production"]).has(buildMode)) {
+    throw new Error("STUDYNOTION_WEB_BUILD must be production or local")
+  }
+
+  const rawApiBaseUrl = String(apiBaseUrl || "").trim()
+  if (!rawApiBaseUrl) {
+    throw new Error("VITE_API_BASE_URL is required")
+  }
+
+  if (rawApiBaseUrl.replace(/\/$/, "") === "/api/v1") return ""
+
+  let parsedApiUrl
+  try {
+    parsedApiUrl = new URL(rawApiBaseUrl)
+  } catch {
+    throw new Error(
+      "VITE_API_BASE_URL must be /api/v1 or a canonical absolute API URL"
+    )
+  }
+
+  if (
+    parsedApiUrl.pathname.replace(/\/$/, "") !== "/api/v1" ||
+    parsedApiUrl.username ||
+    parsedApiUrl.password ||
+    parsedApiUrl.search ||
+    parsedApiUrl.hash
+  ) {
+    throw new Error(
+      "VITE_API_BASE_URL must use the canonical /api/v1 path without credentials, query, or fragment"
+    )
+  }
+
+  const isSecureApi = parsedApiUrl.protocol === "https:"
+  const isLocalLoopbackApi =
+    buildMode === "local" &&
+    parsedApiUrl.protocol === "http:" &&
+    isLoopbackHostname(parsedApiUrl.hostname)
+
+  if (!isSecureApi && !isLocalLoopbackApi) {
+    throw new Error(
+      "Absolute VITE_API_BASE_URL values must use HTTPS; local builds may use loopback HTTP"
+    )
+  }
+
+  return parsedApiUrl.origin
+}

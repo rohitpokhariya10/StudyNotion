@@ -48,6 +48,7 @@ test("public production configuration accepts HTTPS and live provider identifier
 
 test("public staging configuration requires a test key and can hide Google sign-in", () => {
   const accepted = validatePublicEnv({
+    VITE_API_BASE_URL: "/api/v1",
     VITE_DEPLOYMENT_TIER: "staging",
     VITE_GOOGLE_CLIENT_ID: "",
     VITE_RAZORPAY_KEY_ID: "rzp_test_1234567890",
@@ -127,13 +128,14 @@ test("optional staging Google configuration is still validated when supplied", (
 test("checked-in staging examples preserve the isolated test-mode contract", () => {
   const publicExample = readExampleEnv("apps/web/.env.staging.example")
   assert.equal(publicExample.VITE_DEPLOYMENT_TIER, "staging")
-  assert.match(publicExample.VITE_API_BASE_URL, /^https:\/\//)
+  assert.equal(publicExample.VITE_API_BASE_URL, "/api/v1")
   assert.equal(publicExample.VITE_GOOGLE_CLIENT_ID, "")
   assert.match(publicExample.VITE_RAZORPAY_KEY_ID, /^rzp_test_/)
 
   const serverExample = readExampleEnv("apps/api/.env.staging.example")
   assert.equal(serverExample.NODE_ENV, "production")
   assert.equal(serverExample.DEPLOYMENT_TIER, "staging")
+  assert.equal(serverExample.PUBLIC_API_URL, serverExample.APP_URL)
   assert.equal(serverExample.MONGODB_AUTO_INDEX, "false")
   assert.equal(serverExample.COOKIE_SECURE, "true")
   assert.equal(serverExample.GOOGLE_CLIENT_ID, "")
@@ -155,4 +157,40 @@ test("checked-in staging examples preserve the isolated test-mode contract", () 
   assert.equal(seedExample.STUDYNOTION_DISPOSABLE_SEED_CONFIRM, "")
   assert.equal(seedExample.STUDYNOTION_DEMO_VIDEO_PUBLIC_ID, "")
   assert.equal(seedExample.STUDYNOTION_DEMO_VIDEO_FORMAT, "mp4")
+})
+
+test("Nginx rendering permits loopback HTTP only for local builds", async () => {
+  const { resolveNginxApiOrigin } =
+    await import("../../web/scripts/deployment-network.mjs")
+
+  assert.equal(
+    resolveNginxApiOrigin({
+      apiBaseUrl: "/api/v1",
+      webBuild: "production",
+    }),
+    ""
+  )
+  assert.equal(
+    resolveNginxApiOrigin({
+      apiBaseUrl: "http://localhost:4000/api/v1",
+      webBuild: "local",
+    }),
+    "http://localhost:4000"
+  )
+  assert.throws(
+    () =>
+      resolveNginxApiOrigin({
+        apiBaseUrl: "http://localhost:4000/api/v1",
+        webBuild: "production",
+      }),
+    /must use HTTPS/
+  )
+  assert.throws(
+    () =>
+      resolveNginxApiOrigin({
+        apiBaseUrl: "http://api.example.test/api/v1",
+        webBuild: "local",
+      }),
+    /must use HTTPS/
+  )
 })
