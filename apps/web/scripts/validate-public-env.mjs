@@ -1,19 +1,22 @@
 import { fileURLToPath } from "node:url"
 import { loadEnv } from "vite"
-
 import { isLoopbackHostname } from "./deployment-network.mjs"
 
 const webRoot = fileURLToPath(new URL("../", import.meta.url))
 const repositoryRoot = fileURLToPath(new URL("../../../", import.meta.url))
+
 const env = {
   ...loadEnv("production", repositoryRoot, ""),
   ...loadEnv("production", webRoot, ""),
   ...process.env,
 }
+
 const deploymentTier = env.VITE_DEPLOYMENT_TIER?.trim()
+
 if (!deploymentTier) {
   throw new Error("VITE_DEPLOYMENT_TIER is required for production builds")
 }
+
 if (!new Set(["staging", "production"]).has(deploymentTier)) {
   throw new Error("VITE_DEPLOYMENT_TIER must be staging or production")
 }
@@ -30,18 +33,26 @@ const required = [
 ]
 
 const missing = required.filter((name) => !env[name]?.trim())
+
 if (missing.length) {
-  throw new Error(`Missing production public variables: ${missing.join(", ")}`)
+  throw new Error(
+    `Missing production public variables: ${missing.join(", ")}`
+  )
 }
 
 const placeholderPattern =
   /(?:replace|change[-_ ]?me|example\.com|your-domain|studynotion\.local|not configured)/i
+
 const placeholders = [
   ...required,
   ...(env.VITE_GOOGLE_CLIENT_ID ? ["VITE_GOOGLE_CLIENT_ID"] : []),
 ].filter((name, index, names) => {
-  return names.indexOf(name) === index && placeholderPattern.test(env[name])
+  return (
+    names.indexOf(name) === index &&
+    placeholderPattern.test(env[name])
+  )
 })
+
 if (placeholders.length) {
   throw new Error(
     `Production public variables still contain placeholders: ${placeholders.join(
@@ -50,29 +61,53 @@ if (placeholders.length) {
   )
 }
 
-let apiUrl
-try {
-  apiUrl = new URL(env.VITE_API_BASE_URL)
-} catch {
-  throw new Error("VITE_API_BASE_URL must be a valid HTTPS API URL")
-}
+/*
+ * Supported production API layouts:
+ *
+ * 1. Same-origin:
+ *    /api/v1
+ *
+ *    Browser -> public HTTPS origin -> Nginx -> API container
+ *
+ * 2. Separate API origin:
+ *    https://api.company.com/api/v1
+ *
+ * Same-origin is used by the ECS/Fargate deployment so the API container
+ * does not need a separate public browser-facing origin.
+ */
+const rawApiBaseUrl = env.VITE_API_BASE_URL.trim()
+const normalizedApiBaseUrl = rawApiBaseUrl.replace(/\/$/, "")
+const isSameOriginApi = normalizedApiBaseUrl === "/api/v1"
 
-if (
-  apiUrl.protocol !== "https:" ||
-  apiUrl.username ||
-  apiUrl.password ||
-  apiUrl.search ||
-  apiUrl.hash ||
-  apiUrl.pathname.replace(/\/$/, "") !== "/api/v1"
-) {
-  throw new Error(
-    "VITE_API_BASE_URL must be an HTTPS URL ending in /api/v1 without credentials, query, or fragment"
-  )
-}
-if (isLoopbackHostname(apiUrl.hostname)) {
-  throw new Error(
-    "VITE_API_BASE_URL must not use a loopback or development host"
-  )
+if (!isSameOriginApi) {
+  let apiUrl
+
+  try {
+    apiUrl = new URL(rawApiBaseUrl)
+  } catch {
+    throw new Error(
+      "VITE_API_BASE_URL must be /api/v1 or a valid HTTPS API URL"
+    )
+  }
+
+  if (
+    apiUrl.protocol !== "https:" ||
+    apiUrl.username ||
+    apiUrl.password ||
+    apiUrl.search ||
+    apiUrl.hash ||
+    apiUrl.pathname.replace(/\/$/, "") !== "/api/v1"
+  ) {
+    throw new Error(
+      "VITE_API_BASE_URL must be /api/v1 or an HTTPS URL ending in /api/v1 without credentials, query, or fragment"
+    )
+  }
+
+  if (isLoopbackHostname(apiUrl.hostname)) {
+    throw new Error(
+      "VITE_API_BASE_URL must not use a loopback or development host"
+    )
+  }
 }
 
 if (
@@ -81,10 +116,14 @@ if (
     env.VITE_GOOGLE_CLIENT_ID
   )
 ) {
-  throw new Error("VITE_GOOGLE_CLIENT_ID must be a Google Web Client ID")
+  throw new Error(
+    "VITE_GOOGLE_CLIENT_ID must be a Google Web Client ID"
+  )
 }
+
 const razorpayKeyPrefix =
   deploymentTier === "staging" ? "rzp_test_" : "rzp_live_"
+
 if (
   !new RegExp(`^${razorpayKeyPrefix}[A-Za-z0-9]{6,}$`).test(
     env.VITE_RAZORPAY_KEY_ID
@@ -94,8 +133,15 @@ if (
     `VITE_RAZORPAY_KEY_ID must use the ${razorpayKeyPrefix} prefix for ${deploymentTier}`
   )
 }
-if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(env.VITE_SUPPORT_EMAIL)) {
-  throw new Error("VITE_SUPPORT_EMAIL must be a valid email address")
+
+if (
+  !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(
+    env.VITE_SUPPORT_EMAIL
+  )
+) {
+  throw new Error(
+    "VITE_SUPPORT_EMAIL must be a valid email address"
+  )
 }
 
 for (const name of [
@@ -104,7 +150,12 @@ for (const name of [
   "VITE_LEGAL_JURISDICTION",
 ]) {
   const value = env[name].trim()
-  if (value.length < 2 || value.length > 300 || /\p{Cc}/u.test(value)) {
+
+  if (
+    value.length < 2 ||
+    value.length > 300 ||
+    /\p{Cc}/u.test(value)
+  ) {
     throw new Error(`${name} is invalid`)
   }
 }
