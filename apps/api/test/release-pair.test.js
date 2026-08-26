@@ -11,10 +11,10 @@ const validEnvironment = {
   DEPLOYMENT_TIER: "staging",
   FRONTEND_ORIGINS: "https://app.studynotion.test",
   GOOGLE_CLIENT_ID: "",
-  PUBLIC_API_URL: "https://api.studynotion.test",
+  PUBLIC_API_URL: "https://app.studynotion.test",
   RAZORPAY_KEY_ID: "rzp_test_1234567890",
   SUPPORT_EMAIL: "support@studynotion.test",
-  VITE_API_BASE_URL: "https://api.studynotion.test/api/v1",
+  VITE_API_BASE_URL: "/api/v1",
   VITE_DEPLOYMENT_TIER: "staging",
   VITE_GOOGLE_CLIENT_ID: "",
   VITE_RAZORPAY_KEY_ID: "rzp_test_1234567890",
@@ -28,10 +28,18 @@ const validatePair = (overrides = {}) =>
     env: { ...validEnvironment, ...overrides },
   })
 
-test("release pair accepts matching staging browser and API contracts", () => {
+test("release pair accepts the matching same-origin staging contract", () => {
   const result = validatePair()
   assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /Release pair validated for staging/)
+})
+
+test("release pair preserves the supported separate-origin contract", () => {
+  const result = validatePair({
+    PUBLIC_API_URL: "https://api.studynotion.test",
+    VITE_API_BASE_URL: "https://api.studynotion.test/api/v1",
+  })
+  assert.equal(result.status, 0, result.stderr)
 })
 
 test("release pair rejects tier, API origin, and public provider drift", () => {
@@ -114,6 +122,7 @@ test("release pair rejects every cookie policy across registrable sites", () => 
 
 test("release pair rejects non-canonical API paths and cross-site secondary origins", () => {
   const wrongPath = validatePair({
+    PUBLIC_API_URL: "https://api.studynotion.test",
     VITE_API_BASE_URL: "https://api.studynotion.test/wrong/api/v1",
   })
   assert.notEqual(wrongPath.status, 0)

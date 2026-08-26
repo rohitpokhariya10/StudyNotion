@@ -1,5 +1,12 @@
 # ADR 0011: Modularize the repository around deployable applications
 
+> **Status note (2026-08-27):** The repository boundaries and dependency rules
+> below remain accepted. The environment-fallback and static-only Nginx clauses
+> are historical migration decisions that have since been superseded: the API
+> now loads only `apps/api/.env`, and the current web image proxies `/api` to the
+> co-located API container. See the current deployment runbook for runtime
+> topology.
+
 - **Status:** Accepted
 - **Date:** 24 August 2026
 - **Scope:** Repository layout, frontend dependency layers, backend boundaries,

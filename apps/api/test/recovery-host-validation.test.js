@@ -68,7 +68,9 @@ test("recovery host validation rejects provider secrets and permissive files", (
           STUDYNOTION_ENTITLEMENT_RECOVERY_STATE_DIR: stateDirectory,
         },
         expectedStateDirectory: stateDirectory,
+        platform: "linux",
         repositoryRoot: path.resolve(__dirname, "../../.."),
+        uid: undefined,
       }),
     /owner-controlled mode 0600/
   )

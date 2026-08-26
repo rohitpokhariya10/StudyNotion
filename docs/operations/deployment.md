@@ -18,13 +18,14 @@ image and each tier-specific web image from one reviewed Git SHA, publish
 immutable tags such as `registry.example/studynotion-api:<git-sha>`, and record
 the registry digest after push. Never promote a floating `latest` tag.
 
-The web image is an unprivileged Nginx process on port 8080. It serves static
-assets and the SPA only. The API image is an unprivileged Node process on port 4000. The existing Nginx image deliberately returns JSON 404 for `/api/*`
-instead of proxying it, so the recommended provider-neutral domain layout is:
+The web image is an unprivileged Nginx process on port 8080. It serves the SPA
+and proxies `/api` to `127.0.0.1:4000` without rewriting the request path. The
+API image is an unprivileged Node process on port 4000. The current AWS staging
+task uses this same-origin topology:
 
 ```text
-https://app.<owned-domain>          -> web image:8080
-https://api.<owned-domain>          -> API image:4000
+Browser / HTTPS AWS entry point     -> web/Nginx image:8080
+/api and /api/*                     -> task loopback -> API image:4000
 MongoDB 8 / Atlas-compatible TLS   -> API and operational jobs only
 TLS Redis                          -> API shared rate limiting only
 Cloudinary                         -> uploads and authenticated lesson media
@@ -33,14 +34,17 @@ Resend                             -> transactional email
 Google Identity                    -> optional in staging, required in production
 ```
 
-The public app and API hosts must share one registrable site in both staging and
-production. This is required even when the configured cookie policy could
-otherwise cross sites, because browsers can block credentialed cross-site
-requests. Use a host-only session cookie unless reviewed cross-subdomain
-sharing is required. The HTTPS ingress must preserve the `Host`, `Origin`, and
-request ID headers, forward the exact configured number of proxy hops,
-terminate TLS, redirect HTTP to HTTPS, and expose only ports 443/80. MongoDB and
-Redis must not be exposed by the application ingress.
+`VITE_API_BASE_URL=/api/v1` selects that topology; `PUBLIC_API_URL` is then the
+same public origin as `APP_URL`. An absolute HTTPS API base remains supported
+when a platform deliberately exposes and routes a separate API origin. In that
+layout, the public app and API hosts must share one registrable site. This is
+required even when the configured cookie policy could otherwise cross sites,
+because browsers can block credentialed cross-site requests. Use a host-only
+session cookie unless reviewed cross-subdomain sharing is required. The HTTPS
+ingress must preserve the `Host`, `Origin`, and request ID headers, forward the
+exact configured number of proxy hops, terminate TLS, redirect HTTP to HTTPS,
+and expose only ports 443/80. MongoDB and Redis must not be exposed by the
+application ingress.
 
 ## Environment inventory
 
@@ -51,17 +55,17 @@ frontend variable.
 
 ### Browser build
 
-| Variable                  | Classification                                                  | Contract                                                                                                                                       |
-| ------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_DEPLOYMENT_TIER`    | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | `staging` or `production`; selects the allowed Razorpay key prefix.                                                                            |
-| `VITE_API_BASE_URL`       | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | HTTPS URL ending in `/api/v1`; credentials, query, fragment, placeholders, and loopback/development hosts are rejected. V2 is derived from it. |
-| `VITE_GOOGLE_CLIENT_ID`   | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`; `OPTIONAL` in staging | Google Web Client ID. Omit it from both staging sides to remove the complete Google sign-in affordance cleanly.                                |
-| `VITE_RAZORPAY_KEY_ID`    | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | `rzp_test_...` in staging and `rzp_live_...` in production. This is the public key ID, never the secret.                                       |
-| `VITE_SUPPORT_EMAIL`      | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Public support address.                                                                                                                        |
-| `VITE_LEGAL_ENTITY_NAME`  | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Registered operator shown on policy pages.                                                                                                     |
-| `VITE_LEGAL_ADDRESS`      | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Public legal address.                                                                                                                          |
-| `VITE_LEGAL_JURISDICTION` | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Public governing jurisdiction.                                                                                                                 |
-| `STUDYNOTION_WEB_BUILD`   | `BUILD_ONLY`                                                    | Docker build selector: `production` runs the validated public build and `local` runs the local build. It is not a browser runtime variable.    |
+| Variable                  | Classification                                                  | Contract                                                                                                                                                                                         |
+| ------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `VITE_DEPLOYMENT_TIER`    | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | `staging` or `production`; selects the allowed Razorpay key prefix.                                                                                                                              |
+| `VITE_API_BASE_URL`       | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Exact same-origin path `/api/v1`, or an HTTPS URL ending in `/api/v1`; absolute values reject credentials, query, fragment, placeholders, and loopback/development hosts. V2 is derived from it. |
+| `VITE_GOOGLE_CLIENT_ID`   | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`; `OPTIONAL` in staging | Google Web Client ID. Omit it from both staging sides to remove the complete Google sign-in affordance cleanly.                                                                                  |
+| `VITE_RAZORPAY_KEY_ID`    | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | `rzp_test_...` in staging and `rzp_live_...` in production. This is the public key ID, never the secret.                                                                                         |
+| `VITE_SUPPORT_EMAIL`      | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Public support address.                                                                                                                                                                          |
+| `VITE_LEGAL_ENTITY_NAME`  | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Registered operator shown on policy pages.                                                                                                                                                       |
+| `VITE_LEGAL_ADDRESS`      | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Public legal address.                                                                                                                                                                            |
+| `VITE_LEGAL_JURISDICTION` | `REQUIRED_PRODUCTION`, `PUBLIC_FRONTEND`                        | Public governing jurisdiction.                                                                                                                                                                   |
+| `STUDYNOTION_WEB_BUILD`   | `BUILD_ONLY`                                                    | Docker build selector: `production` runs the validated public build and `local` runs the local build. It is not a browser runtime variable.                                                      |
 
 Vite supplies `DEV` and `PROD`; operators must not set them. `build:local`
 intentionally bypasses the public production validator and must never produce a
@@ -78,7 +82,7 @@ staging or production artifact.
 | `FRONTEND_ORIGINS`                                | `REQUIRED_PRODUCTION`, `PRIVATE_BACKEND`                        | Comma-separated exact HTTPS origins. No wildcard, path, credentials, or loopback host; every origin must share one registrable site with `PUBLIC_API_URL`.                            |
 | `FRONTEND_URL`                                    | `OPTIONAL`, `PRIVATE_BACKEND`                                   | Legacy single-origin alias; prefer `FRONTEND_ORIGINS`.                                                                                                                                |
 | `APP_URL`                                         | `REQUIRED_PRODUCTION`, `PRIVATE_BACKEND`                        | Canonical HTTPS frontend origin and one member of `FRONTEND_ORIGINS`.                                                                                                                 |
-| `PUBLIC_API_URL`                                  | `REQUIRED_PRODUCTION`, `PRIVATE_BACKEND`                        | Canonical non-loopback HTTPS API origin; it must equal the origin of `VITE_API_BASE_URL`.                                                                                             |
+| `PUBLIC_API_URL`                                  | `REQUIRED_PRODUCTION`, `PRIVATE_BACKEND`                        | Canonical non-loopback HTTPS API origin. It equals `APP_URL` for `/api/v1`, or the origin of an absolute `VITE_API_BASE_URL`.                                                         |
 | `BRAND_NAME`, `BRAND_LOGO_URL`, `SUPPORT_EMAIL`   | `REQUIRED_PRODUCTION`, `PRIVATE_BACKEND`                        | Transactional-email branding; logo must be a non-loopback HTTPS URL.                                                                                                                  |
 | `MONGODB_URI`                                     | `REQUIRED_PRODUCTION`, `PRIVATE_BACKEND`                        | Authenticated TLS MongoDB/Atlas URI naming a non-system database, with `w=majority` and primary reads; standard URIs must set `tls=true`, and `j=false`/`journal=false` are rejected. |
 | `MONGODB_URL`                                     | `OPTIONAL`, `PRIVATE_BACKEND`                                   | Legacy alias; prefer `MONGODB_URI`.                                                                                                                                                   |
@@ -223,11 +227,13 @@ overwritten by automation.
 
 ## Staging release
 
-Staging must have a public HTTPS app/API pair, a separate MongoDB database,
-separate TLS Redis, a separate Cloudinary folder, Razorpay test-mode keys and
-webhook secret, and sandbox/test email. Never point staging at production data
-or copy production personal data into fixtures. Google may be disabled by
-omitting both client-ID variables.
+Staging must have a public HTTPS app origin and API route, a separate MongoDB
+database, separate TLS Redis, a separate Cloudinary folder, Razorpay test-mode
+keys and webhook secret, and sandbox/test email. The checked-in examples use
+the current same-origin `/api/v1` route; a deliberate separate-origin deployment
+remains supported. Never point staging at production data or copy production
+personal data into fixtures. Google may be disabled by omitting both client-ID
+variables.
 
 1. Require green CI at the reviewed SHA. Build the web image with
    `apps/web/.env.staging.example` inputs and the API image from
@@ -296,8 +302,9 @@ not seed it.
    preflight exit holds the release. Do not suppress findings or treat
    historical pre-boundary Entitlement absence as drift.
 8. Start API replicas without traffic and require readiness 200. Deploy the web
-   digest and check its rendered CSP contains the exact API origin and no source
-   maps or local endpoints.
+   digest and check its rendered CSP uses `'self'` for a same-origin API or the
+   exact configured HTTPS API origin for a separate-origin release, with no
+   source maps or local endpoints.
 9. Route a canary, run non-destructive health/auth/catalog/media checks, then
    increase traffic. Keep real-money mutation outside an automated smoke test.
 10. Start the scheduler, watch structured logs and provider dashboards, and

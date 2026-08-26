@@ -73,9 +73,21 @@ let browserApiUrl
 try {
   appUrl = new URL(environment.APP_URL)
   publicApiUrl = new URL(environment.PUBLIC_API_URL)
-  browserApiUrl = new URL(environment.VITE_API_BASE_URL)
 } catch {
   throw new Error("Release-pair application and API URLs must be valid URLs")
+}
+
+const browserApiBaseUrl = environment.VITE_API_BASE_URL.trim()
+const isSameOriginApi = browserApiBaseUrl.replace(/\/$/, "") === "/api/v1"
+
+try {
+  browserApiUrl = isSameOriginApi
+    ? new URL(browserApiBaseUrl, appUrl)
+    : new URL(browserApiBaseUrl)
+} catch {
+  throw new Error(
+    "VITE_API_BASE_URL must be /api/v1 or a canonical HTTPS /api/v1 endpoint"
+  )
 }
 
 if (publicApiUrl.origin !== browserApiUrl.origin) {
@@ -90,7 +102,7 @@ if (
   browserApiUrl.hash
 ) {
   throw new Error(
-    "VITE_API_BASE_URL must be the canonical HTTPS /api/v1 endpoint"
+    "VITE_API_BASE_URL must be /api/v1 or a canonical HTTPS /api/v1 endpoint"
   )
 }
 

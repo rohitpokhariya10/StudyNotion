@@ -27,6 +27,7 @@ const {
 
 const CURSOR_A = "64b000000000000000000003"
 const CURSOR_B = "64b000000000000000000004"
+const HAS_POSIX_PERMISSION_MODEL = process.platform !== "win32"
 
 const recoveryReport = ({ continuation, hasMore = false } = {}) => ({
   schemaVersion: 1,
@@ -75,9 +76,16 @@ test("scheduled recovery configuration requires an absolute path and bounded bat
     assert.throws(() => parseBatchSize(value), /integer from 1 through 100/)
   }
 
+  const absoluteCheckpointPath = path.join(
+    path.parse(process.cwd()).root,
+    "var",
+    "lib",
+    "studynotion",
+    "checkpoint.json"
+  )
   assert.equal(
-    parseCheckpointPath("/var/lib/studynotion/checkpoint.json"),
-    "/var/lib/studynotion/checkpoint.json"
+    parseCheckpointPath(absoluteCheckpointPath),
+    path.normalize(absoluteCheckpointPath)
   )
   assert.throws(() => parseCheckpointPath(), /is required/)
   assert.throws(
@@ -105,12 +113,14 @@ test("checkpoint storage is exact-mode, strict-shape, and symlink refusing", asy
   const { checkpointPath, directory } = await privateCheckpoint(t)
   assert.equal(await readCheckpoint(checkpointPath), undefined)
 
-  await chmod(directory, 0o755)
-  await assert.rejects(
-    readCheckpoint(checkpointPath),
-    (error) => error?.code === "ENTITLEMENT_RECOVERY_SCHEDULER_CHECKPOINT"
-  )
-  await chmod(directory, 0o700)
+  if (HAS_POSIX_PERMISSION_MODEL) {
+    await chmod(directory, 0o755)
+    await assert.rejects(
+      readCheckpoint(checkpointPath),
+      (error) => error?.code === "ENTITLEMENT_RECOVERY_SCHEDULER_CHECKPOINT"
+    )
+    await chmod(directory, 0o700)
+  }
 
   await writeFile(
     checkpointPath,
@@ -120,11 +130,13 @@ test("checkpoint storage is exact-mode, strict-shape, and symlink refusing", asy
   await chmod(checkpointPath, CHECKPOINT_FILE_MODE)
   assert.equal(await readCheckpoint(checkpointPath), CURSOR_A)
 
-  await chmod(checkpointPath, 0o640)
-  await assert.rejects(
-    readCheckpoint(checkpointPath),
-    (error) => error?.code === "ENTITLEMENT_RECOVERY_SCHEDULER_CHECKPOINT"
-  )
+  if (HAS_POSIX_PERMISSION_MODEL) {
+    await chmod(checkpointPath, 0o640)
+    await assert.rejects(
+      readCheckpoint(checkpointPath),
+      (error) => error?.code === "ENTITLEMENT_RECOVERY_SCHEDULER_CHECKPOINT"
+    )
+  }
 
   await rm(checkpointPath)
   await writeFile(checkpointPath, '{"schemaVersion":1,"extra":true}\n', {
@@ -137,15 +149,35 @@ test("checkpoint storage is exact-mode, strict-shape, and symlink refusing", asy
   await writeFile(targetPath, '{"schemaVersion":1}\n', {
     mode: CHECKPOINT_FILE_MODE,
   })
-  await symlink(targetPath, checkpointPath)
-  await assert.rejects(readCheckpoint(checkpointPath), /checkpoint/i)
+  if (process.platform === "win32") {
+    await assert.rejects(
+      readCheckpoint(checkpointPath, {
+        lstat: async (candidatePath) =>
+          candidatePath === directory
+            ? {
+                isDirectory: () => true,
+                isSymbolicLink: () => false,
+              }
+            : {
+                isFile: () => true,
+                isSymbolicLink: () => true,
+              },
+      }),
+      /checkpoint/i
+    )
+  } else {
+    await symlink(targetPath, checkpointPath)
+    await assert.rejects(readCheckpoint(checkpointPath), /checkpoint/i)
+  }
 })
 
 test("checkpoint replacement is atomic, mode 0600, and represents wraparound without deletion", async (t) => {
   const { checkpointPath, directory } = await privateCheckpoint(t)
 
   await writeCheckpoint(checkpointPath, CURSOR_A)
-  assert.equal((await stat(checkpointPath)).mode & 0o777, 0o600)
+  if (HAS_POSIX_PERMISSION_MODEL) {
+    assert.equal((await stat(checkpointPath)).mode & 0o777, 0o600)
+  }
   assert.equal(await readCheckpoint(checkpointPath), CURSOR_A)
 
   await writeCheckpoint(checkpointPath, CURSOR_B)

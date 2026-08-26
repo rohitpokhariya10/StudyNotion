@@ -3,7 +3,7 @@ import {
   requestPurchaseRefund,
 } from "@/features/course-purchase"
 import PurchaseHistory from "@/pages/purchase-history"
-import { render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -65,11 +65,11 @@ describe("PurchaseHistory", () => {
     expect(await screen.findByText("Production React")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Request refund" }))
     const reason = "The course content could not be accessed after payment."
-    await user.type(
+    fireEvent.change(
       screen.getByRole("textbox", {
         name: "Why are you requesting a refund?",
       }),
-      reason
+      { target: { value: reason } }
     )
     await user.click(
       screen.getByRole("button", { name: "Submit refund request" })

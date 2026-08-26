@@ -27,12 +27,14 @@ git ls-files -- \
   full-stack-project-clean.zip
 ```
 
-The app-local files, user-owned Compose file, and both legacy compatibility
-locations must be reported as ignored by the first command and must produce no
-output from `git ls-files`. The local archive must also remain untracked and
-ignored. Never print environment values into a terminal transcript. Do not move
-or delete a legacy environment file until its app-local replacement has been
-verified independently.
+The app-local files, user-owned Compose file, and legacy root/server locations
+must be reported as ignored by the first command and must produce no output from
+`git ls-files`. The local archive must also remain untracked and ignored. New
+configuration belongs in the app-local files; the API reads only
+`apps/api/.env`. A root or `server/.env` file found in another checkout is
+sensitive local residue, not a runtime fallback. Never print its values or
+migrate it into Git. Back it up outside the checkout before any deliberate local
+removal when credential ownership is uncertain.
 
 For local filesystem hygiene:
 
@@ -91,6 +93,16 @@ repository safety check:
 Enable GitHub's dependency graph so the pull-request dependency-review job can
 enforce the existing high-severity gate. Do not disable that job merely to make
 bot branches green.
+
+GitHub's dependency-review compare API returns `403` when the repository that
+runs the workflow is itself a fork. The security workflow therefore retains the
+official dependency-review action for supported, non-fork repositories and runs
+`npm audit --audit-level=high` against the complete workspace lockfile for pull
+requests hosted by a fork. The fallback is not a dependency-diff replacement;
+keep the official action in place so it resumes automatically if the repository
+is detached from the fork network. Enabling the dependency graph remains useful
+for GitHub's other supply-chain features, but it does not remove the fork API
+restriction.
 
 Rebase a dependency update onto current `main`, inspect its major-version and
 runtime implications, and require the complete affected test matrix. Keep
