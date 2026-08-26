@@ -31,22 +31,22 @@
   "dependencies": {
     "@studynotion/contracts": "0.1.0",
     "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.10.0",
+    "cloudinary": "^2.10.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-fileupload": "^1.4.0",
-    "express-rate-limit": "^8.6.0",
+    "express-rate-limit": "^8.6.2",
     "google-auth-library": "^10.9.0",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.0",
     "mongodb-connection-string-url": "^7.0.2",
-    "mongoose": "9.9.1",
-    "rate-limit-redis": "^6.0.0",
+    "mongoose": "9.9.3",
+    "rate-limit-redis": "^6.0.1",
     "razorpay": "^2.8.6",
-    "redis": "^6.1.0",
-    "tldts": "^7.4.9"
+    "redis": "^6.2.1",
+    "tldts": "^7.4.10"
   },
   "optionalDependencies": {
     "gcp-metadata": "^7.0.1"
