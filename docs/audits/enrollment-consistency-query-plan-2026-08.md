@@ -16,7 +16,7 @@ run.
 
 ## Guarded verification fixture
 
-[`server/test/enrollment-consistency.integration.test.js`](../../server/test/enrollment-consistency.integration.test.js)
+[`apps/api/test/enrollment-consistency.integration.test.js`](../../apps/api/test/enrollment-consistency.integration.test.js)
 is disabled unless `STUDYNOTION_RUN_ENROLLMENT_INTEGRATION=1`. It accepts only
 a single `mongodb://` local or CI host and a database whose name starts with
 `studynotion_enrollment_test_`. It rejects production mode, SRV URIs,
@@ -182,7 +182,7 @@ Use Node 24 and a disposable MongoDB 8 instance already dedicated to testing:
 ```sh
 STUDYNOTION_RUN_ENROLLMENT_INTEGRATION=1 \
 ENROLLMENT_TEST_MONGODB_URI=mongodb://127.0.0.1:27017/studynotion_enrollment_test_local \
-node --test server/test/enrollment-consistency.integration.test.js
+node --test apps/api/test/enrollment-consistency.integration.test.js
 ```
 
 The test prints one JSON line prefixed with

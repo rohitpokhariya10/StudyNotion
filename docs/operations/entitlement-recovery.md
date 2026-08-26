@@ -11,6 +11,11 @@ The runner can reserve or reconcile only Purchase-backed lifecycle events whose
 deployment boundary. It is not a historical backfill and it does not repair
 legacy mirrors.
 
+Run every command from the repository root. The implementation and tests live
+under `apps/api/domains/entitlement`, `apps/api/scripts`, and `apps/api/test`;
+the backend workspace commands remain the stable operator interface after the
+repository move.
+
 ## Deployment boundary
 
 Set `ENTITLEMENT_SIDECAR_STARTED_AT` once, before deploying Stage 2, to the exact

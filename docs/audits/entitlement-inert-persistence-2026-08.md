@@ -92,7 +92,7 @@ Run the focused database check with Node 24 and disposable MongoDB 8:
 ```bash
 STUDYNOTION_RUN_ENTITLEMENT_INTEGRATION=1 \
 ENTITLEMENT_TEST_MONGODB_URI=mongodb://127.0.0.1:27018/studynotion_entitlement_test_local \
-node --test server/test/entitlement-models.integration.test.js
+node --test apps/api/test/entitlement-models.integration.test.js
 ```
 
 On 11 August 2026 this command ran locally with Node 24.19.0 against disposable

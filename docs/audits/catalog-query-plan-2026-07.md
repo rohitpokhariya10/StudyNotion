@@ -10,7 +10,7 @@ target and is also exercised by both container builds.
 
 ## Scope and method
 
-`server/test/catalog-v2.integration.test.js` exercises the real Express v2
+`apps/api/test/catalog-v2.integration.test.js` exercises the real Express v2
 route, MongoDB aggregation/index planner, and Redis-backed API limiter against
 disposable services. It explicitly refuses Atlas/production-looking MongoDB
 targets, permits only a database named `studynotion_catalog_test_*` on a local
@@ -66,7 +66,7 @@ The additive indexes relevant to this slice are:
 
 No production index was created by this audit and no document was migrated. In
 production, keep `autoIndex` disabled and use the backup-first, confirmed
-`db:indexes` procedure in `server/README.md`.
+`db:indexes` procedure in `apps/api/README.md`.
 
 ## Limitations and follow-up
 

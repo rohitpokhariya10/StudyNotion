@@ -185,8 +185,8 @@ local MongoDB, and optionally run Redis:
 
 ```bash
 npm ci
-test -e .env || cp .env.example .env
-test -e server/.env || cp server/.env.example server/.env
+test -e apps/web/.env || cp apps/web/.env.example apps/web/.env
+test -e apps/api/.env || cp apps/api/.env.example apps/api/.env
 npm --workspace studynotion-backend run seed
 npm run dev
 ```
@@ -230,17 +230,18 @@ or copy production personal data into fixtures. Google may be disabled by
 omitting both client-ID variables.
 
 1. Require green CI at the reviewed SHA. Build the web image with
-   `.env.staging.example` inputs and the API image from `server/Dockerfile`.
+   `apps/web/.env.staging.example` inputs and the API image from
+   `apps/api/Dockerfile`.
    In the release job, inject the exact browser values plus their matching API
    runtime tier, origins, Google/Razorpay IDs, cookie policy, and support address;
    run `npm run deploy:validate-pair` before the build. Publish both images with
    the Git SHA and record their registry digests and validator result.
 2. Create the database and provider resources through the chosen platform's
    normal private workflow. Do not place credentials in build arguments.
-3. Put the long-lived runtime variables from `server/.env.staging.example` in
+3. Put the long-lived runtime variables from `apps/api/.env.staging.example` in
    the API secret manager. Set `NODE_ENV=production`,
    `DEPLOYMENT_TIER=staging`, `MONGODB_AUTO_INDEX=false`, test Razorpay keys,
-   and the immutable boundary. Use `server/.env.staging.seed.example` as the
+   and the immutable boundary. Use `apps/api/.env.staging.seed.example` as the
    contract for a separate seed-job-only secret; never merge it into the API
    or recovery secret.
 4. Capture and verify a backup. Run additive indexes, read-only index
@@ -664,7 +665,7 @@ audits from the backend package directory. Do not use `npm audit fix --force`.
 
 ```bash
 npm audit
-cd server && npm audit
+cd apps/api && npm audit
 ```
 
 ## Logging, monitoring, and alerts

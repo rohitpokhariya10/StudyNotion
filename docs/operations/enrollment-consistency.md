@@ -4,6 +4,10 @@ This runbook operates the read-only enrollment consistency audit introduced by
 ADR 0009. It does not grant, revoke, repair, refund, delete, or migrate data.
 There is no HTTP endpoint and no automatic repair mode.
 
+Run every command from the repository root. The implementation and tests live
+under `apps/api/domains/enrollment`, `apps/api/scripts`, and `apps/api/test`;
+the workspace command is the stable operator interface.
+
 ## Before running
 
 - Use Node 24 and the lockfile-installed dependencies.

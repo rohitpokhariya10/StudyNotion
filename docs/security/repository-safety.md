@@ -20,18 +20,27 @@ evidence, but it does not replace the Node 24 CI result.
 ## 2. Protect environment files and local artifacts
 
 ```bash
-git check-ignore -v .env server/.env
-git ls-files .env server/.env full-stack-project-clean.zip
+git check-ignore -v \
+  .env server/.env apps/web/.env apps/api/.env compose.local.env
+git ls-files -- \
+  .env server/.env apps/web/.env apps/api/.env compose.local.env \
+  full-stack-project-clean.zip
 ```
 
-Both environment files must be reported as ignored by the first command and must
-produce no output from `git ls-files`. The local archive must also remain
-untracked and ignored. Never print environment values into a terminal transcript.
+The app-local files, user-owned Compose file, and both legacy compatibility
+locations must be reported as ignored by the first command and must produce no
+output from `git ls-files`. The local archive must also remain untracked and
+ignored. Never print environment values into a terminal transcript. Do not move
+or delete a legacy environment file until its app-local replacement has been
+verified independently.
 
 For local filesystem hygiene:
 
 ```bash
-chmod 600 .env server/.env
+for environment_file in \
+  .env server/.env apps/web/.env apps/api/.env compose.local.env; do
+  test ! -e "$environment_file" || chmod 600 "$environment_file"
+done
 ```
 
 ## 3. Scan before staging
@@ -60,13 +69,13 @@ entered Git history.
 
 ```bash
 npm ci
-npm run lint
-npm test
-npm run build:local
-npm --workspace studynotion-backend test
+npm run verify
+npm run architecture:check
+npm run test:e2e
 ```
 
 CI runs the public production configuration validator through `npm run build`.
+The local build output belongs under `apps/web/dist`; it must remain ignored.
 Do not place backend secrets in `VITE_*` values or in a frontend bundle.
 
 The following scripts can change database or account state and are not part of a
@@ -77,7 +86,20 @@ repository safety check:
 - `npm --workspace studynotion-backend run db:indexes`
 - `npm --workspace studynotion-backend run admin:provision`
 
-## 5. Use disposable integration dependencies
+## 5. Review dependency updates deliberately
+
+Enable GitHub's dependency graph so the pull-request dependency-review job can
+enforce the existing high-severity gate. Do not disable that job merely to make
+bot branches green.
+
+Rebase a dependency update onto current `main`, inspect its major-version and
+runtime implications, and require the complete affected test matrix. Keep
+substantive major upgrades separate from structural changes. Never use
+`npm audit fix --force` or peer-dependency bypass flags as routine automation.
+The August 2026 queue disposition is a dated audit in
+`docs/audits/dependabot-2026-08.md`; it is not permanent merge approval.
+
+## 6. Use disposable integration dependencies
 
 ```bash
 docker compose -f compose.integration.yml up -d --wait
@@ -90,7 +112,7 @@ default. Override `INTEGRATION_MONGO_PORT` or `INTEGRATION_REDIS_PORT` when thos
 ports are occupied. The services use container tmpfs storage and no host volume;
 stopping them discards their data.
 
-## 6. Review the exact staged snapshot
+## 7. Review the exact staged snapshot
 
 Stage named paths, then inspect the index:
 
@@ -105,7 +127,7 @@ Do not commit until the staged list contains only intended source, configuration
 tests, and documentation. Never stage real environment files, dependency folders,
 generated builds, browser-test reports, or source archives.
 
-## 7. Commit, push, and roll back safely
+## 8. Commit, push, and roll back safely
 
 Run the relevant checks immediately before each feature commit and push. Prefer a
 new revert commit for rollback:
