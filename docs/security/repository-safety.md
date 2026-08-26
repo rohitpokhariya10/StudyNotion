@@ -94,6 +94,16 @@ Enable GitHub's dependency graph so the pull-request dependency-review job can
 enforce the existing high-severity gate. Do not disable that job merely to make
 bot branches green.
 
+GitHub's dependency-review compare API returns `403` when the repository that
+runs the workflow is itself a fork. The security workflow therefore retains the
+official dependency-review action for supported, non-fork repositories and runs
+`npm audit --audit-level=high` against the complete workspace lockfile for pull
+requests hosted by a fork. The fallback is not a dependency-diff replacement;
+keep the official action in place so it resumes automatically if the repository
+is detached from the fork network. Enabling the dependency graph remains useful
+for GitHub's other supply-chain features, but it does not remove the fork API
+restriction.
+
 Rebase a dependency update onto current `main`, inspect its major-version and
 runtime implications, and require the complete affected test matrix. Keep
 substantive major upgrades separate from structural changes. Never use
