@@ -12,7 +12,7 @@
     "npm": ">=10"
   },
   "dependencies": {
-    "tldts": "^7.4.9"
+    "tldts": "^7.4.11"
   },
   "scripts": {
     "start": "npm run dev:web",
@@ -46,16 +46,16 @@
     "verify": "npm run contracts:openapi:check && npm run contracts:test && npm run format:check && npm run lint && npm run typecheck && npm run test:frontend && npm run build:local && npm run test:backend"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.11.1",
+    "@axe-core/playwright": "^4.13.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.62.1",
     "concurrently": "^9.2.4",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.26",
-    "globals": "^17.3.0",
-    "prettier": "^3.9.5",
+    "eslint-plugin-react-refresh": "^0.5.5",
+    "globals": "^17.11.0",
+    "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1"
   }
 }
