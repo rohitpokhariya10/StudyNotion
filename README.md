@@ -1,4 +1,4 @@
-# StudyNotion
+# CommingSoon......
 
 StudyNotion is a modernized MERN learning-commerce and LMS application. The
 repository has evolved from an earlier full-stack codebase into a production-
