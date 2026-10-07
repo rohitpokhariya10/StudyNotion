@@ -1,0 +1,50 @@
+/* White quote cards for the blue review band (variant="spotlight"). */
+.sn-quote-card {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  border-radius: 6px;
+  background: #fff;
+  padding: 18px 18px 20px;
+  color: #111;
+  box-shadow: 0 6px 18px rgb(8 40 95 / 0.18);
+}
+.sn-quote-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.sn-quote-more {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.sn-quote-more summary {
+  cursor: pointer;
+  color: var(--sn-brand);
+  font-weight: 500;
+}
+.sn-quote-more p {
+  margin-top: 8px;
+}
+.sn-quote-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.sn-quote-person img {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 999px;
+  object-fit: cover;
+}
+.sn-quote-person strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}

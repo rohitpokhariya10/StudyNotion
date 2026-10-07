@@ -1,3 +1,4 @@
+import PageLoadingFallback from "@/shared/ui/PageLoadingFallback"
 // This will prevent non-authenticated users from accessing this route
 import { useSelector } from "react-redux"
 import { Navigate, useLocation } from "react-router"
@@ -12,15 +13,7 @@ function PrivateRoute({ allowPendingPolicies = false, children }) {
   const location = useLocation()
 
   if (status === "checking") {
-    return (
-      <div
-        className="grid min-h-[calc(100vh-3.5rem)] place-items-center"
-        role="status"
-        aria-label="Checking your session"
-      >
-        <div className="spinner" />
-      </div>
-    )
+    return <PageLoadingFallback accessibleLabel="Checking your session" />
   }
 
   if (!isAuthenticated) {

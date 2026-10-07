@@ -22,7 +22,7 @@ vi.mock("@/entities/catalog", async (importOriginal) => ({
 }))
 
 vi.mock("@/widgets/footer", () => ({
-  default: () => <footer>StudyNotion footer</footer>,
+  default: () => <footer>Prahit footer</footer>,
 }))
 
 const category = {

@@ -1,0 +1,79 @@
+{
+  "recordedAt": "2026-10-06T19:48:30.973630+00:00",
+  "originalAuditExitCode": 1,
+  "baselineCommit": "7b367c025898c8a5e655b6e3e21091210e2c3dbf",
+  "baselineFiles": 720,
+  "baselineSha256": "5ee51b6176a6b38d818b625b258af92351ee49a638b3d5b4240988fb62ff98c4",
+  "frozenBaselineFiles": 306,
+  "frozenViolationsBefore": [
+    "apps/web/package.json",
+    "apps/web/src/features/authentication/routing/OpenRoute.jsx",
+    "apps/web/src/features/authentication/routing/PrivateRoute.jsx",
+    "apps/web/src/features/authentication/routing/RoleRoute.jsx",
+    "package-lock.json"
+  ],
+  "frozenViolationsAfter": [
+    "apps/web/package.json",
+    "apps/web/src/features/authentication/routing/OpenRoute.jsx",
+    "apps/web/src/features/authentication/routing/PrivateRoute.jsx",
+    "apps/web/src/features/authentication/routing/RoleRoute.jsx",
+    "package-lock.json"
+  ],
+  "preExistingFrozenFileHashes": {
+    "apps/web/package.json": {
+      "atContinuationStart": "3523b1034026984dc989a6bd657b356354b5345ecf794d8f2e97ce2e17e88999",
+      "final": "3523b1034026984dc989a6bd657b356354b5345ecf794d8f2e97ce2e17e88999",
+      "unchanged": true
+    },
+    "apps/web/src/features/authentication/routing/OpenRoute.jsx": {
+      "atContinuationStart": "71dbbf76fdc96d27a56b62a5c93b6892f623b86dcc7d44db33e96a5a712586ed",
+      "final": "71dbbf76fdc96d27a56b62a5c93b6892f623b86dcc7d44db33e96a5a712586ed",
+      "unchanged": true
+    },
+    "apps/web/src/features/authentication/routing/PrivateRoute.jsx": {
+      "atContinuationStart": "847948ab1f7ee1ef9688a38757fff7a605bc5c9025168f6eaf9cd8c41e193611",
+      "final": "847948ab1f7ee1ef9688a38757fff7a605bc5c9025168f6eaf9cd8c41e193611",
+      "unchanged": true
+    },
+    "apps/web/src/features/authentication/routing/RoleRoute.jsx": {
+      "atContinuationStart": "20f58ef14281e162fef9e887adb0f5d8f18801f011d4e8f9832abfe56640cc52",
+      "final": "20f58ef14281e162fef9e887adb0f5d8f18801f011d4e8f9832abfe56640cc52",
+      "unchanged": true
+    },
+    "package-lock.json": {
+      "atContinuationStart": "7e0e3fd453204c3e49200829c84e27e61eea40bcad8ec570356905e5938993a1",
+      "final": "7e0e3fd453204c3e49200829c84e27e61eea40bcad8ec570356905e5938993a1",
+      "unchanged": true
+    }
+  },
+  "projectNeetSourceChanges": [],
+  "continuationChangedExistingFiles": [
+    "apps/web/src/shared/ui/BrandMark.jsx",
+    "apps/web/src/widgets/footer/ui/Footer.jsx",
+    "apps/web/src/widgets/footer/ui/Footer.test.jsx",
+    "apps/web/src/widgets/footer/ui/footer.css",
+    "docs/growed-redesign/PROGRESS.md"
+  ],
+  "continuationAddedFiles": [
+    "docs/growed-redesign/screenshots/footer-localhost-1440.png",
+    "docs/growed-redesign/screenshots/footer-localhost-1920.png",
+    "docs/growed-redesign/screenshots/footer-localhost-390.png",
+    "docs/growed-redesign/screenshots/footer-localhost-768.png",
+    "docs/growed-redesign/screenshots/footer-localhost-fallback-1440.png",
+    "docs/growed-redesign/verification/footer-contrast.json",
+    "docs/growed-redesign/verification/footer-format.log",
+    "docs/growed-redesign/verification/footer-lint.log",
+    "docs/growed-redesign/verification/footer-localhost.json",
+    "docs/growed-redesign/verification/footer-served-assets.json",
+    "docs/growed-redesign/verification/footer-typecheck.log",
+    "docs/growed-redesign/verification/footer-unit-tests.log",
+    "docs/growed-redesign/verification/footer-web-build.log",
+    "docs/growed-redesign/verification/footer-web-container-audit.json",
+    "docs/growed-redesign/verification/footer-web-up.log",
+    "docs/growed-redesign/verification/footer-preservation.json"
+  ],
+  "continuationRemovedFiles": [],
+  "allOtherCapturedExistingFilesUnchanged": true,
+  "auditScriptUnchanged": true,
+  "note": "This attribution inventory supplements the original immutable baseline. The five pre-existing frozen flags remain; the audit is not reported as passing."
+}

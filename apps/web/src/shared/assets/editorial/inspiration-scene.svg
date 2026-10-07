@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="397" height="288" viewBox="0 0 397 288" role="img" aria-labelledby="t"><title id="t">A young plant beside a letterboard reading: small steps, new possibilities</title>
+<defs><linearGradient id="b" x1="0" x2="1"><stop offset="0" stop-color="#d9d5ce"/><stop offset="1" stop-color="#bdb8b0"/></linearGradient><pattern id="p" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r=".9" fill="#3a3d42"/></pattern></defs>
+<rect width="397" height="288" fill="url(#b)"/>
+<rect x="168" y="18" width="170" height="226" rx="4" fill="#24272c"/><rect x="176" y="26" width="154" height="210" fill="url(#p)"/>
+<text x="186" y="66" font-family="'Courier New', Courier, monospace" font-weight="700" font-size="21" letter-spacing="4" fill="#f4f4f2">SMALL</text><text x="186" y="100" font-family="'Courier New', Courier, monospace" font-weight="700" font-size="21" letter-spacing="4" fill="#f4f4f2">STEPS.</text><text x="186" y="134" font-family="'Courier New', Courier, monospace" font-weight="700" font-size="21" letter-spacing="4" fill="#f4f4f2">NEW</text><text x="186" y="168" font-family="'Courier New', Courier, monospace" font-weight="700" font-size="14.5" letter-spacing="1" fill="#f4f4f2">POSSIBILITIES.</text>
+<rect x="188" y="196" width="10" height="3" fill="#f0645a"/>
+<path d="M0 240h397v48H0z" fill="#3b322d"/><path d="M0 240h397" stroke="#55483f" stroke-width="3"/>
+<ellipse cx="104" cy="242" rx="44" ry="5" fill="#2b2420" opacity=".6"/>
+<g transform="translate(104 186)"><path d="M-30 0h60l-8 54h-44z" fill="#c8693f"/><path d="M-32 -6h64v10h-64z" fill="#b65a32"/><path d="M-26 -2h52" stroke="#5a4334" stroke-width="5"/>
+<path d="M0 -4v-58" stroke="#5c8f3e" stroke-width="2.4"/><path d="M0 -26c-18-6-30 2-34 10 14 4 26 0 34-10z" fill="#79b85b"/><path d="M0 -40c16-10 30-6 36 2-14 6-26 6-36-2z" fill="#6aa94f"/><path d="M0 -58c-10-14-24-14-30-8 10 8 20 10 30 8z" fill="#8cc66b"/><path d="M0 -62c6-16 18-20 26-14-8 8-16 12-26 14z" fill="#5c9c47"/></g></svg>

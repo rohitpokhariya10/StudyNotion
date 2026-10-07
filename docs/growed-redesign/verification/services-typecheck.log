@@ -1,0 +1,8 @@
+
+> studynotion@0.1.0 typecheck
+> npm run typecheck --workspace studynotion-web
+
+
+> studynotion-web@0.1.0 typecheck
+> tsc --project tsconfig.json
+

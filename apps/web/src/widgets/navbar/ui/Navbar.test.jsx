@@ -41,6 +41,7 @@ describe("Navbar", () => {
       </Provider>
     )
 
+    await userEvent.click(screen.getByRole("button", { name: "Catalog" }))
     expect(await screen.findByText("No Courses Found")).toBeTruthy()
   })
 

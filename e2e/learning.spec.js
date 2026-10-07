@@ -102,7 +102,7 @@ const capture = async (page, testInfo, state) => {
   if (!captureScreenshots) return
   const viewport = testInfo.project.name.replace("catalog-", "")
   await page.screenshot({
-    path: `docs/audits/screenshots/learning/${state}-${viewport}.png`,
+    path: testInfo.outputPath(`learning-${state}-${viewport}.png`),
     fullPage: true,
     animations: "disabled",
   })
@@ -359,4 +359,44 @@ test("learning has a clear empty-curriculum state", async ({
   }
   await capture(page, testInfo, "empty-curriculum")
   await expectAccessible(page)
+})
+
+test("review dialog preserves rating validation and the existing submission shape", async ({
+  page,
+}, testInfo) => {
+  await page.route(`**/api/v2/learning/courses/${ids.course}`, (route) =>
+    json(route, learningState())
+  )
+  let reviewPayload
+  await page.route("**/api/v1/course/createRating", (route) => {
+    reviewPayload = route.request().postDataJSON()
+    return json(route, {
+      success: true,
+      message: "Synthetic review saved",
+      data: {},
+    })
+  })
+  await page.goto(coursePath)
+  if (testInfo.project.name === "catalog-mobile")
+    await page
+      .getByRole("button", { name: "Course content", exact: true })
+      .click()
+  await page.getByRole("button", { name: "Add review", exact: true }).click()
+  const dialog = page.getByRole("dialog", { name: "Add Review", exact: true })
+  await expect(dialog).toBeVisible()
+  await dialog.getByRole("button", { name: "Save", exact: true }).click()
+  await expect(dialog.getByText("Please select a rating")).toBeVisible()
+  await dialog.getByRole("radio", { name: "4 out of 5 stars" }).check()
+  await dialog
+    .getByLabel("Add Your Experience")
+    .fill("A synthetic review checking the redesigned learning form.")
+  await expectAccessible(page)
+  await capture(page, testInfo, "review-dialog")
+  await dialog.getByRole("button", { name: "Save", exact: true }).click()
+  await expect(dialog).toHaveCount(0)
+  expect(reviewPayload).toEqual({
+    courseId: ids.course,
+    rating: 4,
+    review: "A synthetic review checking the redesigned learning form.",
+  })
 })

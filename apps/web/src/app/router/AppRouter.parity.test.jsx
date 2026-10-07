@@ -15,6 +15,12 @@ vi.mock("@/pages/home", () => ({
 vi.mock("@/pages/about", () => ({
   default: () => <h1>About route</h1>,
 }))
+vi.mock("@/pages/services", () => ({ default: () => <h1>Services route</h1> }))
+vi.mock("@/pages/careers", () => ({ default: () => <h1>Careers route</h1> }))
+vi.mock("@/pages/blogs", () => ({ default: () => <h1>Blogs route</h1> }))
+vi.mock("@/pages/blog-article", () => ({
+  default: () => <h1>Article route</h1>,
+}))
 vi.mock("@/pages/contact", () => ({
   default: () => <h1>Contact route</h1>,
 }))
@@ -140,6 +146,16 @@ const renderRouter = (initialEntry, preloadedState = anonymousState) => {
 describe("Router 8 public route parity", () => {
   it.each([
     ["/", "Home route", "/"],
+    ["/home?q=react#subjects", "Home route", "/?q=react#subjects"],
+    ["/about-us?from=home#story", "About route", "/about?from=home#story"],
+    ["/services", "Services route", "/services"],
+    ["/careers", "Careers route", "/careers"],
+    ["/blogs", "Blogs route", "/blogs"],
+    [
+      "/blogs/make-a-little-time-for-learning",
+      "Article route",
+      "/blogs/make-a-little-time-for-learning",
+    ],
     ["/about", "About route", "/about"],
     ["/contact", "Contact route", "/contact"],
     ["/login", "Login route", "/login"],

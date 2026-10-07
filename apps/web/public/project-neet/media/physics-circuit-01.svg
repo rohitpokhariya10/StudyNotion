@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" width="520" height="220" role="img" aria-labelledby="title desc">
+  <title id="title">Series–parallel resistor circuit</title>
+  <desc id="desc">From terminal A a 4 ohm resistor leads to a junction. The junction splits into a 6 ohm branch and a 3 ohm branch in parallel, which rejoin and lead to terminal B.</desc>
+  <rect width="520" height="220" fill="#ffffff"/>
+  <g fill="none" stroke="#13201f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40 110 H95"/>
+    <path d="M95 110 l8 -14 l14 28 l14 -28 l14 28 l14 -28 l14 28 l8 -14"/>
+    <path d="M195 110 H240"/>
+    <path d="M240 110 V60 H285"/>
+    <path d="M240 110 V160 H285"/>
+    <path d="M285 60 l7 -12 l12 24 l12 -24 l12 24 l12 -24 l12 24 l7 -12"/>
+    <path d="M285 160 l7 -12 l12 24 l12 -24 l12 24 l12 -24 l12 24 l7 -12"/>
+    <path d="M371 60 H410 V110"/>
+    <path d="M371 160 H410 V110"/>
+    <path d="M410 110 H480"/>
+  </g>
+  <g fill="#13201f">
+    <circle cx="40" cy="110" r="6"/>
+    <circle cx="480" cy="110" r="6"/>
+    <circle cx="240" cy="110" r="4"/>
+    <circle cx="410" cy="110" r="4"/>
+  </g>
+  <g font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" fill="#13201f" text-anchor="middle">
+    <text x="40" y="142" font-weight="700">A</text>
+    <text x="480" y="142" font-weight="700">B</text>
+    <text x="145" y="82">4 Ω</text>
+    <text x="328" y="34">6 Ω</text>
+    <text x="328" y="200">3 Ω</text>
+  </g>
+</svg>

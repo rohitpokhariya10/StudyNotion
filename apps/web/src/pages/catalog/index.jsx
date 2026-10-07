@@ -8,7 +8,6 @@ import {
   catalogFiltersToSearchParams,
   categoryPathSlug,
   countActiveCatalogFilters,
-  durationFiltersFromPreset,
   durationPresetFromFilters,
   readCatalogFilters,
 } from "@/features/course-filter"
@@ -17,10 +16,12 @@ import FormField from "@/shared/ui/FormField"
 import StatusPanel from "@/shared/ui/StatusPanel"
 import Footer from "@/widgets/footer"
 import { useMemo, useState } from "react"
-import { Link, useParams, useSearchParams } from "react-router"
+import { FiSliders } from "react-icons/fi"
+import { useParams, useSearchParams } from "react-router"
 
-const inputClassName =
-  "min-h-11 w-full rounded-product border border-catalog-border bg-catalog-surface px-3 py-2 text-sm text-catalog-text placeholder:text-catalog-muted disabled:cursor-not-allowed disabled:opacity-60"
+import CatalogFilters, { catalogInputClassName } from "./ui/CatalogFilters"
+import CatalogHero, { CatalogSearch } from "./ui/CatalogHero"
+import CategoryChips from "./ui/CategoryChips"
 
 const SORT_OPTIONS = [
   { label: "Most relevant", value: "relevance" },
@@ -31,67 +32,33 @@ const SORT_OPTIONS = [
   { label: "Price: high to low", value: "price_desc" },
 ]
 
-function CatalogHero({ category }) {
-  return (
-    <header className="bg-catalog-action text-white">
-      <div className="mx-auto w-11/12 max-w-maxContent py-10 sm:py-14">
-        <nav aria-label="Breadcrumb">
-          <ol className="flex flex-wrap items-center gap-2 text-sm text-white/75">
-            <li>
-              <Link className="min-h-11 py-3 hover:text-white" to="/">
-                Home
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li>Catalog</li>
-            {category?.name && (
-              <>
-                <li aria-hidden="true">/</li>
-                <li aria-current="page" className="text-catalog-brand-soft">
-                  {category.name}
-                </li>
-              </>
-            )}
-          </ol>
-        </nav>
-        <h1 className="mt-5 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
-          {category?.name || "Course catalog"}
-        </h1>
-        {category?.description && (
-          <p className="mt-4 max-w-3xl text-base leading-7 text-white/80">
-            {category.description}
-          </p>
-        )}
-      </div>
-    </header>
-  )
-}
-
 function CatalogSkeleton({ category }) {
   return (
-    <div className="catalog-theme min-h-[calc(100vh-3.5rem)] bg-catalog-canvas text-catalog-text">
+    <div className="bg-catalog-canvas text-catalog-text">
       <CatalogHero category={category} />
       <main
-        className="mx-auto w-11/12 max-w-maxContent py-10"
+        className="sn-container grid gap-8 py-10 lg:grid-cols-[17rem_minmax(0,1fr)]"
         aria-busy="true"
         aria-label="Loading courses"
         role="status"
       >
         <span className="sr-only">Loading courses…</span>
-        <div className="catalog-skeleton h-11 max-w-2xl rounded-product bg-catalog-surface-muted" />
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }, (_, index) => (
+        <div
+          aria-hidden="true"
+          className="catalog-skeleton hidden h-96 rounded-2xl bg-catalog-surface-muted lg:block"
+        />
+        <div className="grid gap-6 sm:grid-cols-2">
+          {Array.from({ length: 4 }, (_, index) => (
             <div
               key={index}
               aria-hidden="true"
-              className="overflow-hidden rounded-product-lg border border-catalog-border bg-catalog-surface"
+              className="overflow-hidden rounded-2xl border border-catalog-border bg-white"
             >
-              <div className="catalog-skeleton aspect-video bg-catalog-surface-muted" />
-              <div className="space-y-3 p-5">
-                <div className="catalog-skeleton h-4 w-1/3 rounded-sm bg-catalog-surface-muted" />
+              <div className="catalog-skeleton aspect-[16/10] bg-catalog-surface-muted" />
+              <div className="space-y-3 p-6">
+                <div className="catalog-skeleton h-5 w-24 rounded-full bg-catalog-surface-muted" />
                 <div className="catalog-skeleton h-6 w-4/5 rounded-sm bg-catalog-surface-muted" />
                 <div className="catalog-skeleton h-4 w-1/2 rounded-sm bg-catalog-surface-muted" />
-                <div className="catalog-skeleton h-10 rounded-sm bg-catalog-surface-muted" />
               </div>
             </div>
           ))}
@@ -220,9 +187,9 @@ function Catalog() {
   if (categoriesQuery.isError) {
     const error = getCatalogErrorPresentation(categoriesQuery.error)
     return (
-      <div className="catalog-theme bg-catalog-canvas text-catalog-text">
+      <div className="bg-catalog-canvas text-catalog-text">
         <CatalogHero />
-        <main className="mx-auto min-h-[420px] w-11/12 max-w-maxContent py-12">
+        <main className="sn-container min-h-[420px] py-12">
           <StatusPanel
             tone="error"
             title="The catalog is temporarily unavailable"
@@ -240,9 +207,9 @@ function Catalog() {
 
   if (!category) {
     return (
-      <div className="catalog-theme bg-catalog-canvas text-catalog-text">
+      <div className="bg-catalog-canvas text-catalog-text">
         <CatalogHero />
-        <main className="mx-auto min-h-[420px] w-11/12 max-w-maxContent py-12">
+        <main className="sn-container min-h-[420px] py-12">
           <StatusPanel
             title="Catalog category not found"
             description="This category may have moved or is no longer available. Choose another category from the catalog menu."
@@ -263,335 +230,191 @@ function Catalog() {
   const hasPaginationError = coursesHaveError && courses.length > 0
 
   return (
-    <div className="catalog-theme bg-catalog-canvas text-catalog-text">
-      <CatalogHero category={category} />
-      <main className="mx-auto min-h-[560px] w-11/12 max-w-maxContent py-8 sm:py-12">
-        <form
-          className="rounded-product-lg border border-catalog-border bg-catalog-surface p-4 shadow-xs sm:p-6"
-          role="search"
-          aria-label={`Search and filter ${category.name} courses`}
-          onSubmit={applyFilters}
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <FormField htmlFor="catalog-search" label="Search courses">
-                <input
-                  id="catalog-search"
-                  name="q"
-                  type="search"
-                  maxLength="120"
-                  autoComplete="off"
-                  value={draftFilters.q}
-                  placeholder={`Search in ${category.name}`}
-                  className={inputClassName}
-                  onChange={(event) =>
-                    setDraftFilters((current) => ({
-                      ...current,
-                      q: event.target.value,
-                    }))
-                  }
-                />
-              </FormField>
+    <div className="bg-catalog-canvas text-catalog-text">
+      <CatalogHero
+        category={category}
+        search={
+          <CatalogSearch
+            categoryName={category.name}
+            value={draftFilters.q}
+            onSubmit={applyFilters}
+            onChange={(q) => setDraftFilters((current) => ({ ...current, q }))}
+          />
+        }
+      />
+      <CategoryChips activeId={category.id} categories={categoriesQuery.data} />
+      <main className="sn-container grid min-h-[560px] items-start gap-8 py-10 sm:py-14 lg:grid-cols-[17rem_minmax(0,1fr)]">
+        <CatalogFilters
+          draftFilters={draftFilters}
+          durationPreset={durationPreset}
+          error={filterError}
+          mobileOpen={mobileFiltersOpen}
+          onApply={applyFilters}
+          onClear={clearFilters}
+          onChange={(changes) =>
+            setDraftFilters((current) => ({ ...current, ...changes }))
+          }
+        />
+
+        <section aria-labelledby="catalog-results-title" className="min-w-0">
+          <div className="flex flex-col gap-4 border-b border-catalog-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2
+                id="catalog-results-title"
+                className="sn-subheading text-catalog-text"
+              >
+                {filters.q
+                  ? `Results for “${filters.q}”`
+                  : `${category.name} courses`}
+              </h2>
+              <p
+                className="mt-2 text-sm text-catalog-muted"
+                role="status"
+                aria-live="polite"
+              >
+                {courses.length > 0
+                  ? `${courses.length} course${courses.length === 1 ? "" : "s"} shown`
+                  : activeFilterCount > 0
+                    ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"} active`
+                    : "Browse the latest published courses"}
+                {isFetching && !isFetchingNextPage ? " · Updating…" : ""}
+              </p>
             </div>
-            <Button className="sm:min-w-28" type="submit">
-              Search
-            </Button>
-            <Button
-              className="lg:hidden"
-              type="button"
-              variant="secondary"
-              aria-controls="catalog-filters"
-              aria-expanded={mobileFiltersOpen}
-              onClick={() => setMobileFiltersOpen((open) => !open)}
-            >
-              {mobileFiltersOpen ? "Hide filters" : "Show filters"}
-            </Button>
+
+            <div className="flex w-full items-end gap-3 sm:w-auto">
+              <Button
+                className="flex-none whitespace-nowrap lg:hidden"
+                type="button"
+                variant="secondary"
+                aria-controls="catalog-filters"
+                aria-expanded={mobileFiltersOpen}
+                onClick={() => setMobileFiltersOpen((open) => !open)}
+              >
+                <FiSliders aria-hidden="true" />
+                {mobileFiltersOpen ? "Hide filters" : "Show filters"}
+              </Button>
+              <div className="min-w-0 flex-1 sm:w-52 sm:flex-none">
+                <FormField htmlFor="catalog-sort" label="Sort by">
+                  <select
+                    id="catalog-sort"
+                    className={catalogInputClassName}
+                    value={filters.sort}
+                    onChange={(event) => updateSort(event.target.value)}
+                  >
+                    {SORT_OPTIONS.map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.value === "relevance" && !filters.q}
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+              </div>
+            </div>
           </div>
 
-          <div
-            id="catalog-filters"
-            className={`${mobileFiltersOpen ? "grid" : "hidden"} mt-6 gap-4 border-t border-catalog-border pt-6 sm:grid-cols-2 lg:grid lg:grid-cols-4`}
-          >
-            <FormField htmlFor="catalog-level" label="Level">
-              <select
-                id="catalog-level"
-                className={inputClassName}
-                value={draftFilters.level}
-                onChange={(event) =>
-                  setDraftFilters((current) => ({
-                    ...current,
-                    level: event.target.value,
-                  }))
-                }
-              >
-                <option value="">All levels</option>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </FormField>
-
-            <FormField htmlFor="catalog-language" label="Language">
-              <select
-                id="catalog-language"
-                className={inputClassName}
-                value={draftFilters.language}
-                onChange={(event) =>
-                  setDraftFilters((current) => ({
-                    ...current,
-                    language: event.target.value,
-                  }))
-                }
-              >
-                <option value="">All languages</option>
-                <option value="en">English</option>
-                <option value="hi">Hindi</option>
-              </select>
-            </FormField>
-
-            <FormField htmlFor="catalog-rating" label="Minimum rating">
-              <select
-                id="catalog-rating"
-                className={inputClassName}
-                value={draftFilters.minRating}
-                onChange={(event) =>
-                  setDraftFilters((current) => ({
-                    ...current,
-                    minRating: event.target.value,
-                  }))
-                }
-              >
-                <option value="">Any rating</option>
-                <option value="3">3.0 and up</option>
-                <option value="4">4.0 and up</option>
-                <option value="4.5">4.5 and up</option>
-              </select>
-            </FormField>
-
-            <FormField htmlFor="catalog-duration" label="Duration">
-              <select
-                id="catalog-duration"
-                className={inputClassName}
-                value={durationPreset}
-                onChange={(event) =>
-                  setDraftFilters((current) => ({
-                    ...current,
-                    ...durationFiltersFromPreset(event.target.value),
-                  }))
-                }
-              >
-                <option value="">Any duration</option>
-                <option value="under-2">Under 2 hours</option>
-                <option value="2-6">2–6 hours</option>
-                <option value="6-12">6–12 hours</option>
-                <option value="over-12">Over 12 hours</option>
-              </select>
-            </FormField>
-
-            <FormField htmlFor="catalog-min-price" label="Minimum price">
-              <input
-                id="catalog-min-price"
-                className={inputClassName}
-                type="number"
-                min="0"
-                max="10000000"
-                step="1"
-                inputMode="decimal"
-                value={draftFilters.minPrice}
-                placeholder="₹0"
-                onChange={(event) =>
-                  setDraftFilters((current) => ({
-                    ...current,
-                    minPrice: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
-
-            <FormField htmlFor="catalog-max-price" label="Maximum price">
-              <input
-                id="catalog-max-price"
-                className={inputClassName}
-                type="number"
-                min="0"
-                max="10000000"
-                step="1"
-                inputMode="decimal"
-                value={draftFilters.maxPrice}
-                placeholder="No maximum"
-                onChange={(event) =>
-                  setDraftFilters((current) => ({
-                    ...current,
-                    maxPrice: event.target.value,
-                  }))
-                }
-              />
-            </FormField>
-
-            <div className="flex items-end gap-3 sm:col-span-2">
-              <Button className="flex-1" type="submit">
-                Apply filters
-              </Button>
+          {activeFilterCount > 0 && courses.length > 0 && (
+            <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-[var(--sn-blue-line)] bg-brand-soft px-4 py-3">
+              <p className="text-sm font-medium text-catalog-text">
+                {activeFilterCount} active filter
+                {activeFilterCount === 1 ? "" : "s"}
+              </p>
               <Button
-                className="flex-1"
-                type="button"
+                className="ml-auto"
                 variant="quiet"
                 onClick={clearFilters}
               >
-                Clear all
+                Clear filters
               </Button>
             </div>
-          </div>
-
-          {filterError && (
-            <p
-              className="mt-4 text-sm font-medium text-catalog-danger"
-              role="alert"
-            >
-              {filterError}
-            </p>
           )}
-        </form>
 
-        <div className="mt-8 flex flex-col gap-4 border-b border-catalog-border pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-catalog-text">
-              {filters.q
-                ? `Results for “${filters.q}”`
-                : `${category.name} courses`}
-            </h2>
-            <p
-              className="mt-1 text-sm text-catalog-muted"
-              role="status"
-              aria-live="polite"
-            >
-              {courses.length > 0
-                ? `${courses.length} course${courses.length === 1 ? "" : "s"} shown`
-                : activeFilterCount > 0
-                  ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"} active`
-                  : "Browse the latest published courses"}
-              {isFetching && !isFetchingNextPage ? " · Updating…" : ""}
-            </p>
-          </div>
-
-          <div className="w-full sm:w-56">
-            <FormField htmlFor="catalog-sort" label="Sort by">
-              <select
-                id="catalog-sort"
-                className={inputClassName}
-                value={filters.sort}
-                onChange={(event) => updateSort(event.target.value)}
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                    disabled={option.value === "relevance" && !filters.q}
-                  >
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-          </div>
-        </div>
-
-        {activeFilterCount > 0 && courses.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-product border border-catalog-border bg-catalog-brand-soft/60 px-4 py-3">
-            <p className="text-sm font-medium text-catalog-text">
-              {activeFilterCount} active filter
-              {activeFilterCount === 1 ? "" : "s"}
-            </p>
-            <Button className="ml-auto" variant="quiet" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          </div>
-        )}
-
-        <div className="mt-7">
-          {hasInitialError ? (
-            <StatusPanel
-              tone="error"
-              title="Courses could not be loaded"
-              description={error.message}
-              requestId={error.requestId}
-              action={<Button onClick={refetchCourses}>Try again</Button>}
-            />
-          ) : courses.length === 0 ? (
-            activeFilterCount > 0 ? (
+          <div className="mt-8">
+            {hasInitialError ? (
               <StatusPanel
-                title="No courses match these filters"
-                description="Try a broader search, adjust the price or duration, or clear the filters to see every published course in this category."
-                action={
-                  <Button variant="secondary" onClick={clearFilters}>
-                    Clear filters
-                  </Button>
-                }
+                tone="error"
+                title="Courses could not be loaded"
+                description={error.message}
+                requestId={error.requestId}
+                action={<Button onClick={refetchCourses}>Try again</Button>}
               />
+            ) : courses.length === 0 ? (
+              activeFilterCount > 0 ? (
+                <StatusPanel
+                  title="No courses match these filters"
+                  description="Try a broader search, adjust the price or duration, or clear the filters to see every published course in this category."
+                  action={
+                    <Button variant="secondary" onClick={clearFilters}>
+                      Clear filters
+                    </Button>
+                  }
+                />
+              ) : (
+                <StatusPanel
+                  title="No courses published yet"
+                  description={`There are no published courses in ${category.name} right now. Please check back later.`}
+                />
+              )
             ) : (
-              <StatusPanel
-                title="No courses published yet"
-                description={`There are no published courses in ${category.name} right now. Please check back later.`}
-              />
-            )
-          ) : (
-            <>
-              <ul
-                className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                aria-label="Courses"
-              >
-                {courses.map((course, index) => (
-                  <li key={course.id}>
-                    <CourseCard course={course} priority={index < 3} />
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="grid gap-6 sm:grid-cols-2" aria-label="Courses">
+                  {courses.map((course, index) => (
+                    <li key={course.id}>
+                      <CourseCard course={course} priority={index < 2} />
+                    </li>
+                  ))}
+                </ul>
 
-              <div className="mt-9 flex flex-col items-center gap-3">
-                {hasPaginationError && (
-                  <div
-                    className="w-full max-w-2xl rounded-product border border-catalog-danger/30 bg-catalog-surface p-4 text-center"
-                    role="alert"
-                  >
-                    <p className="text-sm text-catalog-danger">
-                      {error.message}
-                    </p>
-                    {error.requestId && (
-                      <p className="mt-1 font-mono text-xs break-all text-catalog-muted">
-                        Request ID: {error.requestId}
+                <div className="mt-10 flex flex-col items-center gap-3">
+                  {hasPaginationError && (
+                    <div
+                      className="w-full max-w-2xl rounded-xl border border-catalog-danger/30 bg-white p-4 text-center"
+                      role="alert"
+                    >
+                      <p className="text-sm text-catalog-danger">
+                        {error.message}
                       </p>
-                    )}
-                  </div>
-                )}
-                {hasNextPage ? (
-                  <Button
-                    variant="secondary"
-                    disabled={isFetchingNextPage}
-                    aria-describedby="catalog-pagination-status"
-                    onClick={() => fetchNextPage()}
+                      {error.requestId && (
+                        <p className="mt-1 font-mono text-xs break-all text-catalog-muted">
+                          Request ID: {error.requestId}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {hasNextPage ? (
+                    <Button
+                      variant="secondary"
+                      className="sn-btn-lg"
+                      disabled={isFetchingNextPage}
+                      aria-describedby="catalog-pagination-status"
+                      onClick={() => fetchNextPage()}
+                    >
+                      {isFetchingNextPage
+                        ? "Loading more courses…"
+                        : "Load more courses"}
+                    </Button>
+                  ) : (
+                    <p className="text-sm text-catalog-muted" role="status">
+                      You’ve reached the end of this category.
+                    </p>
+                  )}
+                  <p
+                    id="catalog-pagination-status"
+                    className="sr-only"
+                    aria-live="polite"
                   >
                     {isFetchingNextPage
-                      ? "Loading more courses…"
-                      : "Load more courses"}
-                  </Button>
-                ) : (
-                  <p className="text-sm text-catalog-muted" role="status">
-                    You’ve reached the end of this category.
+                      ? "Loading more courses"
+                      : `${courses.length} courses currently shown`}
                   </p>
-                )}
-                <p
-                  id="catalog-pagination-status"
-                  className="sr-only"
-                  aria-live="polite"
-                >
-                  {isFetchingNextPage
-                    ? "Loading more courses"
-                    : `${courses.length} courses currently shown`}
-                </p>
-              </div>
-            </>
-          )}
-        </div>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
       </main>
       <Footer />
     </div>

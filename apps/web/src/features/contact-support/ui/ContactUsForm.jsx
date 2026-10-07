@@ -32,11 +32,12 @@ const ContactUsForm = () => {
 
   return (
     <form
-      className="flex flex-col gap-7"
+      className="flex min-w-0 flex-col gap-6"
+      aria-busy={loading}
       onSubmit={handleSubmit(submitContactForm)}
     >
       <div className="flex flex-col gap-5 lg:flex-row">
-        <div className="flex flex-col gap-2 lg:w-[48%]">
+        <div className="flex min-w-0 flex-col gap-2 lg:w-[48%]">
           <label htmlFor="firstname" className="lable-style">
             First Name
           </label>
@@ -45,16 +46,16 @@ const ContactUsForm = () => {
             name="firstname"
             id="firstname"
             placeholder="Enter first name"
-            className="form-style"
+            className="form-style w-full min-w-0"
             {...register("firstname", { required: true })}
           />
           {errors.firstname && (
-            <span className="-mt-1 text-[12px] text-yellow-100">
+            <span className="-mt-1 text-[12px] text-brand-primary">
               Please enter your name.
             </span>
           )}
         </div>
-        <div className="flex flex-col gap-2 lg:w-[48%]">
+        <div className="flex min-w-0 flex-col gap-2 lg:w-[48%]">
           <label htmlFor="lastname" className="lable-style">
             Last Name
           </label>
@@ -63,7 +64,7 @@ const ContactUsForm = () => {
             name="lastname"
             id="lastname"
             placeholder="Enter last name"
-            className="form-style"
+            className="form-style w-full min-w-0"
             {...register("lastname")}
           />
         </div>
@@ -78,11 +79,11 @@ const ContactUsForm = () => {
           name="email"
           id="email"
           placeholder="Enter email address"
-          className="form-style"
+          className="form-style w-full min-w-0"
           {...register("email", { required: true })}
         />
         {errors.email && (
-          <span className="-mt-1 text-[12px] text-yellow-100">
+          <span className="-mt-1 text-[12px] text-brand-primary">
             Please enter your Email address.
           </span>
         )}
@@ -93,12 +94,12 @@ const ContactUsForm = () => {
           Phone Number
         </label>
 
-        <div className="flex gap-5">
-          <div className="flex w-[81px] flex-col gap-2">
+        <div className="flex gap-3">
+          <div className="flex w-[90px] shrink-0 flex-col gap-2">
             <select
               id="countrycode"
               aria-label="Country calling code"
-              className="form-style"
+              className="form-style w-full min-w-0"
               {...register("countrycode", { required: true })}
             >
               {CountryCode.map((ele, i) => {
@@ -110,14 +111,14 @@ const ContactUsForm = () => {
               })}
             </select>
           </div>
-          <div className="flex w-[calc(100%-90px)] flex-col gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
             <input
               type="tel"
               inputMode="numeric"
               name="phonenumber"
               id="phonenumber"
               placeholder="12345 67890"
-              className="form-style"
+              className="form-style w-full min-w-0"
               {...register("phoneNo", {
                 required: {
                   value: true,
@@ -134,7 +135,7 @@ const ContactUsForm = () => {
           </div>
         </div>
         {errors.phoneNo && (
-          <span className="-mt-1 text-[12px] text-yellow-100">
+          <span className="-mt-1 text-[12px] text-brand-primary">
             {errors.phoneNo.message}
           </span>
         )}
@@ -150,11 +151,11 @@ const ContactUsForm = () => {
           cols="30"
           rows="7"
           placeholder="Enter your message here"
-          className="form-style"
+          className="form-style w-full min-w-0"
           {...register("message", { required: true })}
         />
         {errors.message && (
-          <span className="-mt-1 text-[12px] text-yellow-100">
+          <span className="-mt-1 text-[12px] text-brand-primary">
             Please enter your Message.
           </span>
         )}
@@ -163,10 +164,7 @@ const ContactUsForm = () => {
       <button
         disabled={loading}
         type="submit"
-        className={`rounded-md bg-yellow-50 px-6 py-3 text-center text-[13px] font-bold text-black shadow-[2px_2px_0px_0px_rgba(255,255,255,0.18)] ${
-          !loading &&
-          "transition-all duration-200 hover:scale-95 hover:shadow-none"
-        } disabled:bg-richblack-500 sm:text-[16px]`}
+        className="sn-btn sn-btn-primary w-full"
       >
         {loading ? "Sending..." : "Send Message"}
       </button>

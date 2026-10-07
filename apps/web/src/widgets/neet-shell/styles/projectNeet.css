@@ -1,0 +1,561 @@
+/*
+ * Project NEET visual system.
+ *
+ * Two deliberate modes share one set of semantic token names:
+ *   .pn-experience  warm science palette for landing, onboarding
+ *                   and results; expressive motion is allowed here.
+ *   .pn-exam        calm, paper-like focus palette used once the timer
+ *                   starts; motion is reduced to essential state feedback.
+ * Components consume only the semantic names (Tailwind `neet-*` colors or
+ * the variables below), never raw hex values.
+ */
+
+/*
+ * Component styles live in the `components` cascade layer so Tailwind
+ * utilities (responsive `hidden`, sizes, spacing) always override them.
+ */
+@layer components {
+  .pn-root {
+    /* Shared StudyNotion typography (Poppins is loaded app-wide). */
+    --pn-font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+    --pn-font-body:
+      "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --pn-font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+    --pn-radius: 0.625rem;
+    --pn-radius-lg: 1rem;
+    --pn-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --pn-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    font-family: var(--pn-font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Practice mode: the StudyNotion ivory foundation with science accents. */
+  .pn-experience {
+    /* Mirrors the shared StudyNotion palette (education.css). */
+    --pn-canvas: 255 255 255;
+    --pn-canvas-raised: 242 247 255;
+    --pn-surface: 255 255 255;
+    --pn-surface-muted: 242 247 255;
+    --pn-ink: 16 24 40;
+    --pn-muted: 74 85 103;
+    --pn-line: 227 232 239;
+    --pn-accent: 26 102 204;
+    --pn-accent-ink: 255 255 255;
+    --pn-accent-soft: 242 247 255;
+    --pn-pulse: 180 64 52;
+    --pn-sun: 137 86 18;
+    --pn-cell: 100 75 159;
+    --pn-success: 31 122 82;
+    --pn-warning: 154 91 7;
+    --pn-danger: 180 35 53;
+    --pn-review: 100 75 159;
+    --pn-focus: 26 102 204;
+    --pn-physics: 26 102 204;
+    --pn-chemistry: 157 76 28;
+    --pn-botany: 31 122 82;
+    --pn-zoology: 156 53 98;
+    --pn-shadow: 0 18px 50px rgb(29 48 72 / 0.08);
+    color-scheme: light;
+    background-color: rgb(var(--pn-canvas));
+    color: rgb(var(--pn-ink));
+  }
+
+  /* Exam focus mode: high-contrast reading surface, calm accents. */
+  .pn-exam {
+    --pn-font-body:
+      "Atkinson Hyperlegible Next Variable", "Poppins", ui-sans-serif,
+      system-ui, sans-serif;
+    --pn-canvas: 248 247 243;
+    --pn-canvas-raised: 248 250 248;
+    --pn-surface: 255 255 255;
+    --pn-surface-muted: 234 239 236;
+    --pn-ink: 16 29 28;
+    --pn-muted: 74 92 89;
+    --pn-line: 205 215 211;
+    --pn-accent: 13 110 102;
+    --pn-accent-ink: 255 255 255;
+    --pn-accent-soft: 214 238 233;
+    --pn-pulse: 183 50 38;
+    --pn-sun: 146 88 6;
+    --pn-cell: 98 70 199;
+    --pn-success: 21 122 58;
+    --pn-warning: 146 88 6;
+    --pn-danger: 180 31 31;
+    --pn-review: 98 70 199;
+    --pn-focus: 29 78 216;
+    --pn-physics: 37 89 205;
+    --pn-chemistry: 176 62 10;
+    --pn-botany: 21 122 58;
+    --pn-zoology: 176 24 92;
+    --pn-shadow: 0 10px 30px rgb(16 29 28 / 0.08);
+    color-scheme: light;
+    background-color: rgb(var(--pn-canvas));
+    color: rgb(var(--pn-ink));
+  }
+
+  .pn-root ::selection {
+    background: rgb(var(--pn-accent) / 0.35);
+  }
+
+  .pn-display {
+    font-family: var(--pn-font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+
+  .pn-eyebrow {
+    font-family: var(--pn-font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .pn-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Buttons ------------------------------------------------------------------ */
+
+  .pn-btn {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.875rem;
+    border: 1px solid transparent;
+    padding: 0.625rem 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    transition:
+      transform 180ms var(--pn-ease-out),
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pn-btn:disabled,
+  .pn-btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .pn-btn-primary {
+    background: rgb(var(--pn-accent));
+    color: rgb(var(--pn-accent-ink));
+    box-shadow: 0 10px 30px rgb(var(--pn-accent) / 0.22);
+  }
+
+  .pn-experience .pn-btn-primary:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 40px rgb(var(--pn-accent) / 0.32);
+  }
+
+  .pn-exam .pn-btn-primary:not(:disabled):hover {
+    background: rgb(var(--pn-accent) / 0.9);
+  }
+
+  .pn-btn-secondary {
+    border-color: rgb(var(--pn-line));
+    background: rgb(var(--pn-surface));
+    color: rgb(var(--pn-ink));
+  }
+
+  .pn-btn-secondary:not(:disabled):hover {
+    border-color: rgb(var(--pn-accent) / 0.7);
+  }
+
+  .pn-btn-ghost {
+    background: transparent;
+    color: rgb(var(--pn-ink));
+  }
+
+  .pn-btn-ghost:not(:disabled):hover {
+    background: rgb(var(--pn-surface-muted));
+  }
+
+  .pn-btn-danger {
+    background: rgb(var(--pn-danger));
+    color: rgb(var(--pn-surface));
+  }
+
+  .pn-btn-lg {
+    min-height: 3.25rem;
+    padding: 0.85rem 1.75rem;
+    font-size: 1.0625rem;
+  }
+
+  /* Surfaces ----------------------------------------------------------------- */
+
+  .pn-card {
+    border: 1px solid rgb(var(--pn-line));
+    border-radius: var(--pn-radius-lg);
+    background: rgb(var(--pn-surface));
+  }
+
+  .pn-experience .pn-card {
+    background:
+      linear-gradient(
+        160deg,
+        rgb(var(--pn-surface-muted) / 0.65),
+        rgb(var(--pn-surface) / 0.9)
+      ),
+      rgb(var(--pn-surface));
+  }
+
+  .pn-glass {
+    border: 1px solid rgb(var(--pn-ink) / 0.12);
+    background: rgb(var(--pn-canvas-raised) / 0.6);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  .pn-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    border: 1px solid rgb(var(--pn-line));
+    padding: 0.25rem 0.7rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* Subtle film grain for depth on immersive screens. */
+  .pn-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Form fields -------------------------------------------------------------- */
+
+  .pn-field {
+    width: 100%;
+    min-height: 3.25rem;
+    border-radius: var(--pn-radius);
+    border: 1.5px solid rgb(var(--pn-line));
+    background: rgb(var(--pn-canvas-raised));
+    padding: 0.75rem 1rem;
+    font-size: 1.0625rem;
+    color: rgb(var(--pn-ink));
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .pn-field::placeholder {
+    color: rgb(var(--pn-muted) / 0.75);
+  }
+
+  .pn-field:focus {
+    border-color: rgb(var(--pn-accent));
+    box-shadow: 0 0 0 4px rgb(var(--pn-accent) / 0.18);
+    outline: none;
+  }
+
+  .pn-field[aria-invalid="true"] {
+    border-color: rgb(var(--pn-danger));
+  }
+
+  /* Motion: expressive only in experience mode, always reduced-motion safe. -- */
+
+  .pn-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 900ms var(--pn-ease-out),
+      transform 900ms var(--pn-ease-out);
+  }
+
+  .pn-reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @keyframes pn-ecg-draw {
+    from {
+      stroke-dashoffset: var(--pn-ecg-length, 1200);
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes pn-breathe {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    50% {
+      transform: scale(1.08);
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes pn-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, -10px, 0);
+    }
+  }
+
+  @keyframes pn-shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes pn-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .pn-ecg-line {
+    stroke-dasharray: var(--pn-ecg-length, 1200);
+    animation: pn-ecg-draw 2.6s var(--pn-ease-in-out) both;
+  }
+
+  .pn-breathe {
+    animation: pn-breathe 6s ease-in-out infinite;
+  }
+
+  .pn-float {
+    animation: pn-float 7s ease-in-out infinite;
+  }
+
+  .pn-skeleton {
+    border-radius: var(--pn-radius);
+    background: linear-gradient(
+        90deg,
+        rgb(var(--pn-surface-muted)) 0%,
+        rgb(var(--pn-line) / 0.55) 50%,
+        rgb(var(--pn-surface-muted)) 100%
+      )
+      0 0 / 200% 100%;
+    animation: pn-shimmer 1.6s linear infinite;
+  }
+
+  .pn-spinner {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 999px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: pn-spin 0.8s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pn-reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .pn-ecg-line {
+      stroke-dasharray: none;
+    }
+  }
+
+  /* Exam focus mode specifics ------------------------------------------------ */
+
+  .pn-question-text {
+    font-size: clamp(1.0625rem, 0.98rem + 0.3vw, 1.25rem);
+    line-height: 1.7;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  .pn-question-text sub,
+  .pn-question-text sup,
+  .pn-option-text sub,
+  .pn-option-text sup {
+    font-size: 0.72em;
+    line-height: 0;
+  }
+
+  /* Option rows: large targets, state communicated by mark, border, and text. */
+  .pn-option {
+    display: flex;
+    width: 100%;
+    min-height: 3.75rem;
+    align-items: center;
+    gap: 1rem;
+    border-radius: var(--pn-radius);
+    border: 1.5px solid rgb(var(--pn-line));
+    background: rgb(var(--pn-surface));
+    padding: 0.75rem 1rem;
+    text-align: left;
+    transition:
+      border-color 120ms ease,
+      background-color 120ms ease;
+  }
+
+  .pn-option:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .pn-option:hover {
+    border-color: rgb(var(--pn-accent) / 0.6);
+  }
+
+  .pn-option[data-selected="true"] {
+    border-color: rgb(var(--pn-accent));
+    background: rgb(var(--pn-accent-soft));
+    box-shadow: inset 0 0 0 1px rgb(var(--pn-accent));
+  }
+
+  .pn-option-key {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    place-items: center;
+    border-radius: 999px;
+    border: 1.5px solid rgb(var(--pn-muted) / 0.6);
+    font-weight: 700;
+  }
+
+  .pn-option[data-selected="true"] .pn-option-key {
+    border-color: rgb(var(--pn-accent));
+    background: rgb(var(--pn-accent));
+    color: rgb(var(--pn-accent-ink));
+  }
+
+  .pn-option-text {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  /* Digital OMR bubbles: shape + fill + badge + label, never color alone. ---- */
+
+  .pn-omr-bubble {
+    position: relative;
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border-radius: 999px;
+    border: 1.5px solid rgb(var(--pn-line));
+    background: rgb(var(--pn-surface));
+    color: rgb(var(--pn-muted));
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: transform 120ms ease;
+  }
+
+  .pn-omr-bubble:hover {
+    transform: translateY(-1px);
+  }
+
+  .pn-omr-bubble[data-state="NOT_ANSWERED"] {
+    border: 2px solid rgb(var(--pn-pulse));
+    color: rgb(var(--pn-pulse));
+  }
+
+  .pn-omr-bubble[data-state="ANSWERED"] {
+    border-color: rgb(var(--pn-success));
+    background: rgb(var(--pn-success));
+    color: rgb(var(--pn-surface));
+  }
+
+  .pn-omr-bubble[data-state="MARKED_FOR_REVIEW"] {
+    border: 2px dashed rgb(var(--pn-review));
+    color: rgb(var(--pn-review));
+    border-radius: 0.6rem;
+  }
+
+  .pn-omr-bubble[data-state="ANSWERED_AND_MARKED"] {
+    border-color: rgb(var(--pn-review));
+    background: rgb(var(--pn-review));
+    color: rgb(var(--pn-surface));
+    border-radius: 0.6rem;
+  }
+
+  .pn-omr-bubble[data-current="true"] {
+    box-shadow:
+      0 0 0 3px rgb(var(--pn-surface)),
+      0 0 0 5px rgb(var(--pn-ink));
+  }
+
+  .pn-omr-badge {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    display: grid;
+    width: 1.05rem;
+    height: 1.05rem;
+    place-items: center;
+    border-radius: 999px;
+    border: 1.5px solid rgb(var(--pn-surface));
+    background: rgb(var(--pn-ink));
+    color: rgb(var(--pn-surface));
+  }
+}
+
+/*
+ * Unlayered: these must outrank StudyNotion's unlayered global focus outline
+ * and thin hidden scrollbars inside Project NEET.
+ */
+.pn-root :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgb(var(--pn-focus));
+  outline-offset: 3px;
+}
+
+.pn-option:has(input:focus-visible) {
+  outline: 3px solid rgb(var(--pn-focus));
+  outline-offset: 3px;
+}
+
+.pn-exam *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.pn-exam *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pn-exam *::-webkit-scrollbar-thumb {
+  visibility: visible;
+  border-radius: 999px;
+  background-color: rgb(var(--pn-line));
+}
+
+.pn-exam * {
+  scrollbar-color: rgb(var(--pn-line)) transparent;
+  scrollbar-width: thin;
+}
+
+/*
+ * The global `html, body { overflow-x: hidden }` turns <body> into a scroll
+ * container, which silently disables `position: sticky`. Inside Project NEET
+ * (sticky exam header, timer and action bar) use `clip`, which prevents
+ * horizontal overflow without creating a scroll container. Unlayered on
+ * purpose so it outranks the global rule; StudyNotion pages are unaffected.
+ */
+@supports (overflow: clip) {
+  html:has(.pn-root),
+  html:has(.pn-root) body {
+    overflow-x: clip;
+  }
+}

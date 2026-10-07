@@ -4,6 +4,7 @@ import {
   updateSubSection,
 } from "@/entities/course"
 import Upload from "@/features/course-authoring/ui/AddCourse/Upload"
+import AccessibleDialog from "@/shared/ui/AccessibleDialog"
 import IconBtn from "@/shared/ui/IconBtn"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -130,88 +131,93 @@ export default function SubSectionModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] mt-0! grid h-screen w-screen place-items-center overflow-auto bg-white/10 backdrop-blur-xs">
-      <div className="my-10 w-11/12 max-w-[700px] rounded-lg border border-richblack-400 bg-richblack-800">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between rounded-t-lg bg-richblack-700 p-5">
-          <p className="text-xl font-semibold text-richblack-5">
-            {view && "Viewing"} {add && "Adding"} {edit && "Editing"} Lecture
-          </p>
-          <button
-            type="button"
-            onClick={() => (!loading ? setModalData(null) : {})}
-            aria-label="Close lecture dialog"
-          >
-            <RxCross2
-              className="text-2xl text-richblack-5"
-              aria-hidden="true"
-            />
-          </button>
-        </div>
-        {/* Modal Form */}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-8 px-8 py-10"
+    <AccessibleDialog
+      title={`${view ? "Viewing" : add ? "Adding" : "Editing"} Lecture`}
+      titleClassName="sr-only"
+      onClose={() => {
+        if (!loading) setModalData(null)
+      }}
+      closeOnEscape={!loading}
+      className="my-4 w-full max-w-[700px] rounded-xl border border-border-default bg-white"
+      overlayClassName="bg-black/40"
+    >
+      {/* Modal Header */}
+      <div className="flex items-center justify-between rounded-t-lg bg-surface-elevated p-5">
+        <p className="text-xl font-semibold text-text-primary">
+          {view && "Viewing"} {add && "Adding"} {edit && "Editing"} Lecture
+        </p>
+        <button
+          type="button"
+          onClick={() => (!loading ? setModalData(null) : {})}
+          aria-label="Close lecture dialog"
+          disabled={loading}
+          className="sn-btn sn-btn-icon"
         >
-          {/* Lecture Video Upload */}
-          <Upload
-            name="lectureVideo"
-            label="Lecture Video"
-            register={register}
-            setValue={setValue}
-            errors={errors}
-            video={true}
-            viewData={view ? modalData.videoUrl : null}
-            editData={edit ? modalData.videoUrl : null}
-          />
-          {/* Lecture Title */}
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm text-richblack-5" htmlFor="lectureTitle">
-              Lecture Title {!view && <sup className="text-pink-200">*</sup>}
-            </label>
-            <input
-              disabled={view || loading}
-              id="lectureTitle"
-              placeholder="Enter Lecture Title"
-              {...register("lectureTitle", { required: true })}
-              className="form-style w-full"
-            />
-            {errors.lectureTitle && (
-              <span className="ml-2 text-xs tracking-wide text-pink-200">
-                Lecture title is required
-              </span>
-            )}
-          </div>
-          {/* Lecture Description */}
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm text-richblack-5" htmlFor="lectureDesc">
-              Lecture Description{" "}
-              {!view && <sup className="text-pink-200">*</sup>}
-            </label>
-            <textarea
-              disabled={view || loading}
-              id="lectureDesc"
-              placeholder="Enter Lecture Description"
-              {...register("lectureDesc", { required: true })}
-              className="form-style resize-x-none min-h-[130px] w-full"
-            />
-            {errors.lectureDesc && (
-              <span className="ml-2 text-xs tracking-wide text-pink-200">
-                Lecture Description is required
-              </span>
-            )}
-          </div>
-          {!view && (
-            <div className="flex justify-end">
-              <IconBtn
-                type="submit"
-                disabled={loading}
-                text={loading ? "Loading.." : edit ? "Save Changes" : "Save"}
-              />
-            </div>
-          )}
-        </form>
+          <RxCross2 className="text-2xl text-text-primary" aria-hidden="true" />
+        </button>
       </div>
-    </div>
+      {/* Modal Form */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-7 px-5 py-7 sm:px-8"
+      >
+        {/* Lecture Video Upload */}
+        <Upload
+          name="lectureVideo"
+          label="Lecture Video"
+          register={register}
+          setValue={setValue}
+          errors={errors}
+          video={true}
+          viewData={view ? modalData.videoUrl : null}
+          editData={edit ? modalData.videoUrl : null}
+        />
+        {/* Lecture Title */}
+        <div className="flex flex-col space-y-2">
+          <label className="text-sm text-text-primary" htmlFor="lectureTitle">
+            Lecture Title {!view && <sup className="text-danger">*</sup>}
+          </label>
+          <input
+            disabled={view || loading}
+            id="lectureTitle"
+            placeholder="Enter Lecture Title"
+            {...register("lectureTitle", { required: true })}
+            className="form-style w-full"
+          />
+          {errors.lectureTitle && (
+            <span className="ml-2 text-xs tracking-wide text-danger">
+              Lecture title is required
+            </span>
+          )}
+        </div>
+        {/* Lecture Description */}
+        <div className="flex flex-col space-y-2">
+          <label className="text-sm text-text-primary" htmlFor="lectureDesc">
+            Lecture Description {!view && <sup className="text-danger">*</sup>}
+          </label>
+          <textarea
+            disabled={view || loading}
+            id="lectureDesc"
+            placeholder="Enter Lecture Description"
+            {...register("lectureDesc", { required: true })}
+            className="form-style resize-x-none min-h-[130px] w-full"
+          />
+          {errors.lectureDesc && (
+            <span className="ml-2 text-xs tracking-wide text-danger">
+              Lecture Description is required
+            </span>
+          )}
+        </div>
+        {!view && (
+          <div className="flex justify-end">
+            <IconBtn
+              type="submit"
+              disabled={loading}
+              text={loading ? "Loading.." : edit ? "Save Changes" : "Save"}
+            />
+          </div>
+        )}
+      </form>
+    </AccessibleDialog>
   )
 }

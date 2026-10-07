@@ -1,0 +1,196 @@
+/* Shared flask loader (FlaskLoader.jsx). Colours come from the GrowEd theme
+   tokens: brand-blue liquid, a translucent wash of it behind, ink outline and
+   muted label. The flask itself never moves; only the liquid does.
+   Unlayered, so it sets no outer spacing for sections or compact loaders:
+   callers' wrappers (and Tailwind margin utilities) own the layout. */
+.sn-loader {
+  --sn-flask-liquid: var(--sn-brand);
+  --sn-flask-outline: var(--sn-ink);
+  --sn-flask-label: var(--sn-muted);
+  --sn-flask-size: 4rem;
+  --sn-flask-stroke: 1.75px;
+  --sn-flask-phase: 0ms;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  color: var(--sn-flask-label);
+}
+.sn-loader-page {
+  --sn-flask-size: 5.5rem;
+  --sn-flask-stroke: 2px;
+  width: 100%;
+  min-height: calc(100dvh - var(--sn-header-height));
+  padding: 2rem 1rem;
+}
+.sn-loader-compact {
+  --sn-flask-size: 1.75rem;
+  --sn-flask-stroke: 1.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sn-loader-inverse {
+  --sn-flask-outline: #ffffff;
+  --sn-flask-label: rgb(255 255 255 / 0.85);
+}
+
+.sn-flask {
+  flex: none;
+  width: calc(var(--sn-flask-size) * 100 / 110);
+  height: var(--sn-flask-size);
+  overflow: visible;
+}
+.sn-flask-outline {
+  fill: none;
+  stroke: var(--sn-flask-outline);
+  stroke-width: var(--sn-flask-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Two waves slide by exactly one wavelength (80 units) per cycle, in
+   opposite directions and a quarter wave apart: a seamless loop with a
+   steady average level. */
+.sn-flask-wave {
+  animation: 1.92s linear infinite;
+  animation-delay: var(--sn-flask-phase);
+}
+.sn-flask-wave-front {
+  fill: var(--sn-flask-liquid);
+  animation-name: sn-flask-flow;
+}
+.sn-flask-wave-back {
+  fill: var(--sn-flask-liquid);
+  fill-opacity: 0.3;
+  transform: translateX(-60px);
+  animation-name: sn-flask-flow-back;
+}
+@keyframes sn-flask-flow {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-80px);
+  }
+}
+@keyframes sn-flask-flow-back {
+  from {
+    transform: translateX(-60px);
+  }
+  to {
+    transform: translateX(20px);
+  }
+}
+
+/* Bubbles surface through the liquid and fade as they rise, staggered. */
+.sn-flask-bubble {
+  fill: var(--sn-flask-liquid);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sn-flask-bubble 1.92s ease-in infinite;
+  animation-delay: calc(var(--sn-flask-phase) - var(--sn-bubble) * 0.48s);
+}
+.sn-flask-bubble:nth-of-type(even) {
+  fill-opacity: 0.55;
+}
+@keyframes sn-flask-bubble {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  75% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) scale(1);
+  }
+}
+
+.sn-loader-label {
+  font-family: var(--sn-font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.sn-loader-page .sn-loader-label {
+  font-size: 0.9375rem;
+}
+.sn-loader-compact .sn-loader-label {
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+/* Fixed width, so the stepping dots never shift the layout. */
+.sn-loader-dots {
+  display: inline-block;
+  width: 1.1em;
+  text-align: left;
+}
+.sn-loader-dots > span {
+  opacity: 0;
+  animation: 0.96s linear infinite;
+  animation-delay: var(--sn-flask-phase);
+}
+.sn-loader-dots > span:nth-child(1) {
+  animation-name: sn-flask-dot-1;
+}
+.sn-loader-dots > span:nth-child(2) {
+  animation-name: sn-flask-dot-2;
+}
+.sn-loader-dots > span:nth-child(3) {
+  animation-name: sn-flask-dot-3;
+}
+@keyframes sn-flask-dot-1 {
+  0%,
+  24.9% {
+    opacity: 0;
+  }
+  25%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes sn-flask-dot-2 {
+  0%,
+  49.9% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes sn-flask-dot-3 {
+  0%,
+  74.9% {
+    opacity: 0;
+  }
+  75%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion: a still flask with settled liquid, two resting bubbles
+   and a complete "Loading..." label. */
+@media (prefers-reduced-motion: reduce) {
+  .sn-flask-wave,
+  .sn-flask-bubble,
+  .sn-loader-dots > span {
+    animation: none;
+  }
+  .sn-loader-dots > span {
+    opacity: 1;
+  }
+  .sn-flask-bubble:nth-of-type(-n + 2) {
+    opacity: 0.7;
+    transform: translateY(-12px);
+  }
+}

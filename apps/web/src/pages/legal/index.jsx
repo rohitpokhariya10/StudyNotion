@@ -1,12 +1,13 @@
 import { fetchCheckoutConfig } from "@/features/course-purchase"
+import {
+  legalAddress,
+  legalEntity,
+  supportEmail,
+} from "@/shared/config/publicContact"
 import Footer from "@/widgets/footer"
 import { useEffect, useState } from "react"
+import { Link } from "react-router"
 
-const supportEmail =
-  import.meta.env.VITE_SUPPORT_EMAIL || "support@studynotion.local"
-const legalEntity =
-  import.meta.env.VITE_LEGAL_ENTITY_NAME || "StudyNotion (local development)"
-const legalAddress = import.meta.env.VITE_LEGAL_ADDRESS || "Not configured"
 const legalJurisdiction = import.meta.env.VITE_LEGAL_JURISDICTION || "India"
 const effectiveDate = "18 July 2026"
 
@@ -14,14 +15,14 @@ const documents = {
   privacy: {
     title: "Privacy Policy",
     intro:
-      "This policy explains what StudyNotion processes when you use the learning platform, why it is needed, and the choices available to you.",
+      "This policy explains what Prahit processes when you use the learning platform, why it is needed, and the choices available to you.",
     sections: [
       {
         heading: "Information we process",
         paragraphs: [
           "Account data includes your name, email address, account role, encrypted password credentials, and—when you choose Google sign-in—the verified Google account identifier and profile information Google provides.",
           "Learning data includes enrollments, lesson progress, reviews, course content, and instructor uploads. Optional profile fields can include a phone number, date of birth, gender, profile image, and biography.",
-          "Transaction records include course, amount, currency, order, payment, and fulfillment identifiers. Razorpay processes payment-instrument details; StudyNotion does not store full card or bank credentials.",
+          "Transaction records include course, amount, currency, order, payment, and fulfillment identifiers. Razorpay processes payment-instrument details; Prahit does not store full card or bank credentials.",
           "Support and security data includes contact-form messages, request identifiers, and hashed rate-limit identifiers used to prevent abuse. Infrastructure providers may retain limited network logs under their own retention settings.",
         ],
       },
@@ -29,7 +30,7 @@ const documents = {
         heading: "How information is used",
         paragraphs: [
           "We use this information to authenticate accounts, deliver purchased learning content, record progress, review instructors, process and reconcile payments, send transactional messages, answer support requests, secure the service, and comply with legal obligations.",
-          "StudyNotion does not sell personal information or use it for third-party behavioural advertising in this release.",
+          "Prahit does not sell personal information or use it for third-party behavioural advertising in this release.",
         ],
       },
       {
@@ -57,7 +58,7 @@ const documents = {
   cookies: {
     title: "Cookie Policy",
     intro:
-      "StudyNotion currently uses cookies and similar browser storage only where needed to operate authentication and provider-initiated features.",
+      "Prahit currently uses cookies and similar browser storage only where needed to operate authentication and provider-initiated features.",
     sections: [
       {
         heading: "Essential session cookie",
@@ -69,7 +70,7 @@ const documents = {
       {
         heading: "Google and Razorpay",
         paragraphs: [
-          "Google Identity Services and Razorpay may use their own cookies or local browser storage when you actively open sign-in or checkout. Their use is governed by their respective privacy and cookie policies. StudyNotion does not load an advertising or analytics cookie SDK in this release.",
+          "Google Identity Services and Razorpay may use their own cookies or local browser storage when you actively open sign-in or checkout. Their use is governed by their respective privacy and cookie policies. Prahit does not load an advertising or analytics cookie SDK in this release.",
         ],
       },
       {
@@ -83,7 +84,7 @@ const documents = {
   terms: {
     title: "Terms of Use",
     intro:
-      "These terms govern access to StudyNotion. By creating an account or purchasing a course, you agree to them and to the policies linked from this page.",
+      "These terms govern access to Prahit. By creating an account or purchasing a course, you agree to them and to the policies linked from this page.",
     sections: [
       {
         heading: "Accounts and acceptable use",
@@ -102,8 +103,8 @@ const documents = {
       {
         heading: "Content and intellectual property",
         paragraphs: [
-          "StudyNotion and its licensors retain rights in the platform. A paid enrollment gives the learner a limited, personal, non-transferable right to view the available course content through the service.",
-          "Instructors keep ownership of content they are entitled to upload and grant StudyNotion the rights needed to host, secure, display, and deliver it. Instructors are responsible for permissions, accuracy, and lawful use of all uploaded material.",
+          "Prahit and its licensors retain rights in the platform. A paid enrollment gives the learner a limited, personal, non-transferable right to view the available course content through the service.",
+          "Instructors keep ownership of content they are entitled to upload and grant Prahit the rights needed to host, secure, display, and deliver it. Instructors are responsible for permissions, accuracy, and lawful use of all uploaded material.",
         ],
       },
       {
@@ -124,12 +125,12 @@ const documents = {
   refunds: {
     title: "Refund & Cancellation Policy",
     intro:
-      "This policy explains how to cancel an unpaid checkout and how StudyNotion handles refund requests after a verified course purchase.",
+      "This policy explains how to cancel an unpaid checkout and how Prahit handles refund requests after a verified course purchase.",
     sections: [
       {
         heading: "Before payment",
         paragraphs: [
-          "You may close or cancel Razorpay Checkout before completing payment. A course is not purchased and access is not granted until StudyNotion verifies the provider payment on the server.",
+          "You may close or cancel Razorpay Checkout before completing payment. A course is not purchased and access is not granted until Prahit verifies the provider payment on the server.",
         ],
       },
       {
@@ -151,7 +152,7 @@ const documents = {
       {
         heading: "Course cancellation and access",
         paragraphs: [
-          "Archived courses remain available to existing enrolled learners where delivery remains possible. If StudyNotion cannot provide purchased access, we will offer an appropriate remedy or refund as required by this policy and applicable law.",
+          "Archived courses remain available to existing enrolled learners where delivery remains possible. If Prahit cannot provide purchased access, we will offer an appropriate remedy or refund as required by this policy and applicable law.",
         ],
       },
     ],
@@ -177,21 +178,21 @@ export default function Legal({ document }) {
 
   return (
     <>
-      <main className="mx-auto w-11/12 max-w-4xl flex-1 py-16 text-richblack-100">
-        <header className="border-b border-richblack-700 pb-8">
-          <h1 className="text-4xl font-semibold text-richblack-5">
+      <main className="mx-auto w-11/12 max-w-4xl flex-1 py-16 text-text-secondary">
+        <header className="sn-card mb-8 bg-brand-soft">
+          <h1 className="text-4xl font-semibold text-text-primary">
             {content.title}
           </h1>
-          <p className="mt-3 text-sm text-richblack-300">
+          <p className="mt-3 text-sm text-text-secondary">
             Effective date: {effectiveDate}
           </p>
           <p className="mt-6 text-base leading-7">{content.intro}</p>
         </header>
 
-        <div className="space-y-10 py-10">
+        <div className="sn-card space-y-10 py-10">
           {content.sections.map((section) => (
             <section key={section.heading}>
-              <h2 className="text-2xl font-semibold text-richblack-25">
+              <h2 className="text-2xl font-semibold text-text-primary">
                 {section.heading}
               </h2>
               <div className="mt-4 space-y-4 leading-7">
@@ -207,18 +208,28 @@ export default function Legal({ document }) {
           ))}
 
           <section>
-            <h2 className="text-2xl font-semibold text-richblack-25">
+            <h2 className="text-2xl font-semibold text-text-primary">
               Contact
             </h2>
             <p className="mt-4 leading-7">
-              StudyNotion is operated by {legalEntity}, {legalAddress}.
+              {legalEntity && <>Prahit is operated by {legalEntity}. </>}
+              {legalAddress && <>{legalAddress}. </>}
               Questions or rights requests can be sent to{" "}
-              <a
-                className="text-yellow-100 underline-offset-4 hover:underline"
-                href={`mailto:${supportEmail}`}
-              >
-                {supportEmail}
-              </a>
+              {supportEmail ? (
+                <a
+                  className="text-brand-primary underline underline-offset-4"
+                  href={`mailto:${supportEmail}`}
+                >
+                  {supportEmail}
+                </a>
+              ) : (
+                <Link
+                  className="text-brand-primary underline underline-offset-4"
+                  to="/contact"
+                >
+                  our support team
+                </Link>
+              )}
               .
             </p>
           </section>

@@ -43,14 +43,14 @@ export default function SidebarLink({ link, iconName, onNavigate }) {
         dispatch(resetCourseState())
         onNavigate?.()
       }}
-      className={`relative px-8 py-2 text-sm font-medium ${
+      className={`relative mx-3 flex min-h-11 items-center rounded-xl px-5 text-sm font-medium ${
         matchRoute(link.path)
-          ? "bg-yellow-800 text-yellow-50"
-          : "text-richblack-300"
-      } transition-all duration-200`}
+          ? "bg-brand-soft text-brand-primary"
+          : "text-text-secondary hover:bg-[#f7f9fc] hover:text-text-primary"
+      } transition-colors duration-150`}
     >
       <span
-        className={`absolute top-0 left-0 h-full w-[0.15rem] bg-yellow-50 ${
+        className={`absolute top-3 bottom-3 left-0 w-[0.2rem] rounded-full bg-brand-primary ${
           matchRoute(link.path) ? "opacity-100" : "opacity-0"
         }`}
       ></span>

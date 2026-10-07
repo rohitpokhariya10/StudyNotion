@@ -6,11 +6,20 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { useDispatch } from "react-redux"
-import { useNavigate } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 
 function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  // An email typed into the footer sign-up strip is carried over as a
+  // convenience only; the form's normal validation still applies.
+  const { state } = useLocation()
+  const prefillEmail =
+    typeof state?.email === "string" &&
+    state.email.length <= 254 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)
+      ? state.email
+      : ""
 
   // student or instructor
   const [accountType, setAccountType] = useState(ACCOUNT_TYPE.STUDENT)
@@ -18,7 +27,7 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    email: "",
+    email: prefillEmail,
     password: "",
     confirmPassword: "",
   })
@@ -78,10 +87,10 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
       <Tab tabData={tabData} field={accountType} setField={setAccountType} />
       {/* Form */}
       <form onSubmit={handleOnSubmit} className="flex w-full flex-col gap-y-4">
-        <div className="flex gap-x-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <label>
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
-              First Name <sup className="text-pink-200">*</sup>
+            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
+              First Name <sup className="text-danger">*</sup>
             </p>
             <input
               required
@@ -95,8 +104,8 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
             />
           </label>
           <label>
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
-              Last Name <sup className="text-pink-200">*</sup>
+            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
+              Last Name <sup className="text-danger">*</sup>
             </p>
             <input
               required
@@ -111,8 +120,8 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
           </label>
         </div>
         <label className="w-full">
-          <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
-            Email Address <sup className="text-pink-200">*</sup>
+          <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
+            Email Address <sup className="text-danger">*</sup>
           </p>
           <input
             required
@@ -125,10 +134,10 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
             className="form-style w-full"
           />
         </label>
-        <div className="flex gap-x-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <label className="relative">
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
-              Create Password <sup className="text-pink-200">*</sup>
+            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
+              Create Password <sup className="text-danger">*</sup>
             </p>
             <input
               required
@@ -159,8 +168,8 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
             </button>
           </label>
           <label className="relative">
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
-              Confirm Password <sup className="text-pink-200">*</sup>
+            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
+              Confirm Password <sup className="text-danger">*</sup>
             </p>
             <input
               required
@@ -200,7 +209,7 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
         />
         <button
           type="submit"
-          className="mt-6 rounded-[8px] bg-yellow-50 px-[12px] py-[8px] font-medium text-richblack-900"
+          className="mt-6 rounded-[8px] bg-brand-primary px-[12px] py-[8px] font-medium text-white"
         >
           Create Account
         </button>

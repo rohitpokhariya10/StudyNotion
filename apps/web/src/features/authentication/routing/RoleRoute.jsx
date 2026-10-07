@@ -1,3 +1,4 @@
+import PageLoadingFallback from "@/shared/ui/PageLoadingFallback"
 import { useSelector } from "react-redux"
 import { Navigate } from "react-router"
 
@@ -7,13 +8,7 @@ export default function RoleRoute({ allowedRoles, children }) {
 
   if (status === "checking") {
     return (
-      <div
-        className="grid min-h-[calc(100vh-3.5rem)] place-items-center"
-        role="status"
-        aria-label="Checking account permissions"
-      >
-        <div className="spinner" />
-      </div>
+      <PageLoadingFallback accessibleLabel="Checking account permissions" />
     )
   }
 

@@ -1,0 +1,300 @@
+{
+  "before": {
+    "shell": {
+      "rawBytes": 870984,
+      "gzipBytes": 242979,
+      "files": [
+        "assets/accountTypes-CBfgh1_Z.js",
+        "assets/ai-C8jawuK2.js",
+        "assets/avatar-BfYSsIO0.js",
+        "assets/cart-y7CS5Dl1.js",
+        "assets/common-Dqex0tqO.js",
+        "assets/course-DuJ1qiz5.js",
+        "assets/dist-FTkF3YjC.js",
+        "assets/hi-DkxvWNLK.js",
+        "assets/hooks-xUr9xJQu.js",
+        "assets/httpClient-B-FDPDP8.js",
+        "assets/iconBase-CspdFgeK.js",
+        "assets/index-C1rayJwy.js",
+        "assets/jsx-runtime-KJkY8l8U.js",
+        "assets/learning-5vRzoZD0.js",
+        "assets/lib-CUHWgMOE.js",
+        "assets/react-redux-BshjH2cz.js",
+        "assets/redux-toolkit.modern-Dv3Qt6rz.js",
+        "assets/review-D-TEeBEk.js",
+        "assets/rtk-query-react.modern-CTcsPBCi.js",
+        "assets/user-CBczfgfX.js"
+      ]
+    },
+    "homeInitial": {
+      "rawBytes": 1004775,
+      "gzipBytes": 284783,
+      "files": [
+        "assets/LinkButton-DblW6ZXV.js",
+        "assets/accountTypes-CBfgh1_Z.js",
+        "assets/ai-C8jawuK2.js",
+        "assets/avatar-BfYSsIO0.js",
+        "assets/cart-y7CS5Dl1.js",
+        "assets/common-Dqex0tqO.js",
+        "assets/course-DuJ1qiz5.js",
+        "assets/dist-FTkF3YjC.js",
+        "assets/fa-BPQSxZp_.js",
+        "assets/footer-BFXq6LjY.js",
+        "assets/hi-DkxvWNLK.js",
+        "assets/home-DYnAeCt9.js",
+        "assets/hooks-xUr9xJQu.js",
+        "assets/httpClient-B-FDPDP8.js",
+        "assets/iconBase-CspdFgeK.js",
+        "assets/index-C1rayJwy.js",
+        "assets/jsx-runtime-KJkY8l8U.js",
+        "assets/learning-5vRzoZD0.js",
+        "assets/lib-CUHWgMOE.js",
+        "assets/react-redux-BshjH2cz.js",
+        "assets/redux-toolkit.modern-Dv3Qt6rz.js",
+        "assets/review-D-TEeBEk.js",
+        "assets/review-slider-CXU_1CZy.js",
+        "assets/rtk-query-react.modern-CTcsPBCi.js",
+        "assets/user-CBczfgfX.js"
+      ]
+    },
+    "homeIncrement": {
+      "rawBytes": 133791,
+      "gzipBytes": 41804,
+      "files": [
+        "assets/LinkButton-DblW6ZXV.js",
+        "assets/fa-BPQSxZp_.js",
+        "assets/footer-BFXq6LjY.js",
+        "assets/home-DYnAeCt9.js",
+        "assets/review-slider-CXU_1CZy.js"
+      ]
+    },
+    "catalog": {
+      "rawBytes": 18803,
+      "gzipBytes": 5874,
+      "files": ["assets/catalog-BL2h11Av.js", "assets/footer-BFXq6LjY.js"]
+    },
+    "course-details": {
+      "rawBytes": 149863,
+      "gzipBytes": 48216,
+      "files": [
+        "assets/ConfirmationModal-BW19Olhx.js",
+        "assets/bi-EY3AmE1y.js",
+        "assets/course-details-DeC2XJVU.js",
+        "assets/course-purchase-B4hGzNDO.js",
+        "assets/fa-BPQSxZp_.js",
+        "assets/footer-BFXq6LjY.js",
+        "assets/formatDate-CmMVYnDA.js",
+        "assets/not-found-BGn_TXQa.js",
+        "assets/ri-BJLwkGqw.js"
+      ]
+    },
+    "learning": {
+      "rawBytes": 16278,
+      "gzipBytes": 5473,
+      "files": ["assets/learning-Dw2CL8si.js", "assets/rx-TH6-G3M-.js"]
+    },
+    "instructor-dashboard": {
+      "rawBytes": 209514,
+      "gzipBytes": 70570,
+      "files": ["assets/instructor-dashboard-DMujnOrq.js"]
+    },
+    "neet-landing": {
+      "rawBytes": 47994,
+      "gzipBytes": 15997,
+      "files": [
+        "assets/heroCapabilities-T1lf9Y8s.js",
+        "assets/neet-landing-CUK31yNN.js",
+        "assets/neet-shell-CwUnJhFi.js"
+      ]
+    },
+    "neet-exam": {
+      "rawBytes": 100199,
+      "gzipBytes": 32887,
+      "files": [
+        "assets/neet-exam-C5NAHBQq.js",
+        "assets/neet-proctoring-d568dzxL.js",
+        "assets/neet-shell-CwUnJhFi.js"
+      ]
+    },
+    "neet-onboarding": {
+      "rawBytes": 79374,
+      "gzipBytes": 26870,
+      "files": [
+        "assets/neet-onboarding-Bo6IvIqA.js",
+        "assets/neet-proctoring-d568dzxL.js",
+        "assets/neet-shell-CwUnJhFi.js"
+      ]
+    },
+    "neet-result": {
+      "rawBytes": 39544,
+      "gzipBytes": 12840,
+      "files": [
+        "assets/neet-result-C5-vh_um.js",
+        "assets/neet-shell-CwUnJhFi.js"
+      ]
+    },
+    "helix": {
+      "rawBytes": 531913,
+      "gzipBytes": 131046,
+      "files": ["assets/helixScene-CL4pZAD0.js"]
+    },
+    "initialCSS": {
+      "rawBytes": 97635,
+      "gzipBytes": 16802,
+      "files": [
+        "assets/index-poz0rLuE.css",
+        "assets/review-slider-DiQmTOt6.css"
+      ]
+    },
+    "helixInHome": false
+  },
+  "after": {
+    "shell": {
+      "rawBytes": 876117,
+      "gzipBytes": 241059,
+      "files": [
+        "assets/LearningIllustration-Dgu5bHUw.js",
+        "assets/accountTypes-CBfgh1_Z.js",
+        "assets/ai-C8jawuK2.js",
+        "assets/avatar-BfYSsIO0.js",
+        "assets/cart-y7CS5Dl1.js",
+        "assets/common-Dqex0tqO.js",
+        "assets/course-D5sozvVN.js",
+        "assets/dist-FTkF3YjC.js",
+        "assets/httpClient-B-FDPDP8.js",
+        "assets/iconBase-CspdFgeK.js",
+        "assets/index-C1XzkdGn.js",
+        "assets/jsx-runtime-KJkY8l8U.js",
+        "assets/learning-5vRzoZD0.js",
+        "assets/lib-BqhRcDDX.js",
+        "assets/react-redux-BshjH2cz.js",
+        "assets/redux-toolkit.modern-Dv3Qt6rz.js",
+        "assets/review-qD42qh4K.js",
+        "assets/rtk-query-react.modern-CTcsPBCi.js",
+        "assets/user-CBczfgfX.js"
+      ]
+    },
+    "homeInitial": {
+      "rawBytes": 981597,
+      "gzipBytes": 273177,
+      "files": [
+        "assets/LearningIllustration-Dgu5bHUw.js",
+        "assets/accountTypes-CBfgh1_Z.js",
+        "assets/ai-C8jawuK2.js",
+        "assets/avatar-BfYSsIO0.js",
+        "assets/cart-y7CS5Dl1.js",
+        "assets/common-Dqex0tqO.js",
+        "assets/course-D5sozvVN.js",
+        "assets/dist-FTkF3YjC.js",
+        "assets/footer-9sWox5o6.js",
+        "assets/home-sUln3FEt.js",
+        "assets/httpClient-B-FDPDP8.js",
+        "assets/iconBase-CspdFgeK.js",
+        "assets/index-C1XzkdGn.js",
+        "assets/jsx-runtime-KJkY8l8U.js",
+        "assets/learning-5vRzoZD0.js",
+        "assets/lib-BqhRcDDX.js",
+        "assets/react-redux-BshjH2cz.js",
+        "assets/redux-toolkit.modern-Dv3Qt6rz.js",
+        "assets/review-qD42qh4K.js",
+        "assets/review-slider-j-JoLPYW.js",
+        "assets/rtk-query-react.modern-CTcsPBCi.js",
+        "assets/user-CBczfgfX.js"
+      ]
+    },
+    "homeIncrement": {
+      "rawBytes": 105480,
+      "gzipBytes": 32118,
+      "files": [
+        "assets/footer-9sWox5o6.js",
+        "assets/home-sUln3FEt.js",
+        "assets/review-slider-j-JoLPYW.js"
+      ]
+    },
+    "catalog": {
+      "rawBytes": 19017,
+      "gzipBytes": 6085,
+      "files": ["assets/catalog-Cpo5va1F.js", "assets/footer-9sWox5o6.js"]
+    },
+    "course-details": {
+      "rawBytes": 150479,
+      "gzipBytes": 48616,
+      "files": [
+        "assets/ConfirmationModal-BQo8I-m2.js",
+        "assets/PageIntro-CmlYl1bq.js",
+        "assets/bi-EY3AmE1y.js",
+        "assets/course-details-Ch6N6hSz.js",
+        "assets/course-purchase-BWdFGWsQ.js",
+        "assets/fa-0MJDVlO8.js",
+        "assets/footer-9sWox5o6.js",
+        "assets/formatDate-CmMVYnDA.js",
+        "assets/not-found-DPsS0SgV.js",
+        "assets/ri-BJLwkGqw.js"
+      ]
+    },
+    "learning": {
+      "rawBytes": 16299,
+      "gzipBytes": 5446,
+      "files": ["assets/learning-DUFo-VJz.js", "assets/rx-TH6-G3M-.js"]
+    },
+    "instructor-dashboard": {
+      "rawBytes": 210213,
+      "gzipBytes": 70963,
+      "files": [
+        "assets/PageIntro-CmlYl1bq.js",
+        "assets/instructor-dashboard-Uoijpcc2.js"
+      ]
+    },
+    "neet-landing": {
+      "rawBytes": 48694,
+      "gzipBytes": 16128,
+      "files": [
+        "assets/heroCapabilities-T1lf9Y8s.js",
+        "assets/neet-landing-BSBq3xIL.js",
+        "assets/neet-shell-DxVRGZ00.js"
+      ]
+    },
+    "neet-exam": {
+      "rawBytes": 100812,
+      "gzipBytes": 33287,
+      "files": [
+        "assets/AccessibleDialog-Bk2PNgVC.js",
+        "assets/neet-exam-CH0nU3oK.js",
+        "assets/neet-proctoring-CIgfLi_O.js",
+        "assets/neet-shell-DxVRGZ00.js"
+      ]
+    },
+    "neet-onboarding": {
+      "rawBytes": 79967,
+      "gzipBytes": 27255,
+      "files": [
+        "assets/AccessibleDialog-Bk2PNgVC.js",
+        "assets/neet-onboarding-DjZGq4XQ.js",
+        "assets/neet-proctoring-CIgfLi_O.js",
+        "assets/neet-shell-DxVRGZ00.js"
+      ]
+    },
+    "neet-result": {
+      "rawBytes": 39986,
+      "gzipBytes": 12898,
+      "files": [
+        "assets/neet-result-Dsti5fdz.js",
+        "assets/neet-shell-DxVRGZ00.js"
+      ]
+    },
+    "helix": {
+      "rawBytes": 531913,
+      "gzipBytes": 131046,
+      "files": ["assets/helixScene-CL4pZAD0.js"]
+    },
+    "initialCSS": {
+      "rawBytes": 97558,
+      "gzipBytes": 18113,
+      "files": [
+        "assets/index-CP6M4mAH.css",
+        "assets/review-slider-DiQmTOt6.css"
+      ]
+    },
+    "helixInHome": false
+  }
+}

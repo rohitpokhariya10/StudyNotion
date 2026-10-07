@@ -1,0 +1,24 @@
+.sn-brand-logo {
+  display: block;
+  flex: none;
+  width: auto;
+  height: 60px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.sn-brand-logo-auth,
+.sn-brand-logo-panel {
+  width: 140px;
+  height: auto;
+}
+.sn-brand-logo-footer {
+  width: 124px;
+  height: auto;
+}
+@media (max-width: 639px) {
+  .sn-brand-logo-nav,
+  .sn-brand-logo-dashboard {
+    height: 48px;
+  }
+}

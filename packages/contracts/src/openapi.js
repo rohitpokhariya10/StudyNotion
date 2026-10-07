@@ -46,6 +46,229 @@ const learningErrorResponses = () => ({
   500: errorResponse("The learning state could not be read or updated."),
 })
 
+const neetErrorResponses = ({ authenticated = true } = {}) => ({
+  400: errorResponse("The Project NEET request is invalid."),
+  ...(authenticated
+    ? {
+        401: errorResponse(
+          "Authentication is required or the session is invalid."
+        ),
+        403: errorResponse("Project NEET attempts require a student account."),
+      }
+    : {}),
+  404: errorResponse("The test or attempt does not exist for this student."),
+  ...(authenticated
+    ? {
+        409: errorResponse(
+          "The attempt state or exam session does not allow this operation."
+        ),
+        413: errorResponse("The request payload is too large."),
+        415: errorResponse("The request media type is not supported."),
+        423: errorResponse("Account deletion is pending."),
+        428: errorResponse("Current policies must be accepted."),
+      }
+    : {}),
+  429: errorResponse("A Project NEET rate limit was exceeded."),
+  500: errorResponse("The Project NEET request could not be completed."),
+})
+
+const neetPathParameter = (name, description) => ({
+  name,
+  in: "path",
+  required: true,
+  description,
+  schema: { $ref: "#/components/schemas/ObjectId" },
+})
+
+const neetAttemptParameter = neetPathParameter(
+  "attemptId",
+  "Project NEET attempt ObjectId owned by the current student."
+)
+
+const neetOperation = ({
+  authenticated = true,
+  description,
+  operationId,
+  parameters = [],
+  requestRef,
+  responseRef,
+  status = 200,
+  summary,
+}) => ({
+  operationId,
+  summary,
+  ...(authenticated ? { security: [{ SessionCookie: [] }] } : {}),
+  parameters: [{ $ref: "#/components/parameters/RequestId" }, ...parameters],
+  ...(requestRef
+    ? {
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: `#/components/schemas/${requestRef}` },
+            },
+          },
+        },
+      }
+    : {}),
+  responses: {
+    [status]: withRequestIdResponseHeader({
+      description,
+      content: {
+        "application/json": {
+          schema: { $ref: `#/components/schemas/${responseRef}` },
+        },
+      },
+    }),
+    ...neetErrorResponses({ authenticated }),
+  },
+})
+
+const createNeetPaths = () => ({
+  "/api/v2/project-neet/tests": {
+    get: neetOperation({
+      authenticated: false,
+      operationId: "listNeetTests",
+      summary: "List published Project NEET mock tests",
+      description: "Published, student-safe mock test summaries.",
+      responseRef: "NeetTestListResponse",
+    }),
+  },
+  "/api/v2/project-neet/tests/{testId}": {
+    get: neetOperation({
+      authenticated: false,
+      operationId: "getNeetTest",
+      summary: "Get a published Project NEET mock test",
+      description: "Instructions, pattern, and disclosed proctor policy.",
+      parameters: [neetPathParameter("testId", "Published mock ObjectId.")],
+      responseRef: "NeetTestDetailResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts": {
+    get: {
+      ...neetOperation({
+        operationId: "listNeetAttempts",
+        summary: "List the current student's recent Project NEET attempts",
+        description: "Recent attempts, newest first.",
+        responseRef: "NeetAttemptListResponse",
+      }),
+      parameters: [
+        { $ref: "#/components/parameters/RequestId" },
+        {
+          name: "testId",
+          in: "query",
+          required: false,
+          description: "Optional mock test ObjectId filter.",
+          schema: { $ref: "#/components/schemas/ObjectId" },
+        },
+      ],
+    },
+    post: neetOperation({
+      operationId: "registerNeetAttempt",
+      summary: "Register a candidate attempt or return the open attempt",
+      description: "The registered or already open attempt.",
+      requestRef: "NeetCreateAttemptRequest",
+      responseRef: "NeetAttemptResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}": {
+    get: neetOperation({
+      operationId: "getNeetAttempt",
+      summary: "Get an owned attempt and finalize it if time has expired",
+      description: "The authoritative attempt state and server time.",
+      parameters: [neetAttemptParameter],
+      responseRef: "NeetAttemptResponse",
+    }),
+    patch: neetOperation({
+      operationId: "updateNeetAttempt",
+      summary: "Edit candidate details or exam mode before the exam starts",
+      description: "The updated attempt.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetUpdateAttemptRequest",
+      responseRef: "NeetAttemptResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/ready": {
+    post: neetOperation({
+      operationId: "markNeetAttemptReady",
+      summary: "Record instructions, proctor consent, and system check",
+      description: "The ready attempt.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetReadyRequest",
+      responseRef: "NeetAttemptResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/start": {
+    post: neetOperation({
+      operationId: "startNeetAttempt",
+      summary: "Idempotently start a ready attempt and claim the exam session",
+      description: "The student-safe paper, saved responses, and timer.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetSessionRequest",
+      responseRef: "NeetExamSessionResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/session": {
+    post: neetOperation({
+      operationId: "resumeNeetAttempt",
+      summary: "Resume an in-progress attempt and claim the exam session",
+      description: "The student-safe paper, saved responses, and timer.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetSessionRequest",
+      responseRef: "NeetExamSessionResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/responses": {
+    put: neetOperation({
+      operationId: "saveNeetResponses",
+      summary: "Autosave sequenced responses; stale writes are ignored",
+      description: "The authoritative state of the written questions.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetSaveResponsesRequest",
+      responseRef: "NeetSaveResponsesResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/heartbeat": {
+    post: neetOperation({
+      operationId: "neetAttemptHeartbeat",
+      summary: "Report session liveness and read authoritative time",
+      description: "Server time, expiry, and session ownership.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetSessionRequest",
+      responseRef: "NeetHeartbeatResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/proctor-events": {
+    post: neetOperation({
+      operationId: "recordNeetProctorEvents",
+      summary: "Record proctor signals and apply the server warning policy",
+      description: "Accepted events, new warnings, and attempt status.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetProctorEventBatchRequest",
+      responseRef: "NeetProctorEventResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/submit": {
+    post: neetOperation({
+      operationId: "submitNeetAttempt",
+      summary: "Idempotently submit and score an attempt",
+      description: "The final, server-scored result.",
+      parameters: [neetAttemptParameter],
+      requestRef: "NeetSubmitRequest",
+      responseRef: "NeetResultResponse",
+    }),
+  },
+  "/api/v2/project-neet/attempts/{attemptId}/result": {
+    get: neetOperation({
+      operationId: "getNeetResult",
+      summary: "Get the immutable result of a finalized attempt",
+      description: "The final, server-scored result.",
+      parameters: [neetAttemptParameter],
+      responseRef: "NeetResultResponse",
+    }),
+  },
+})
+
 const createOpenApiDocument = () => {
   const queryShape = catalogQueryOpenApiSchema.shape
   const descriptions = {
@@ -223,6 +446,7 @@ const createOpenApiDocument = () => {
           },
         },
       },
+      ...createNeetPaths(),
     },
     components: {
       securitySchemes: {

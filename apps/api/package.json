@@ -13,6 +13,7 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "seed": "node scripts/seed.js",
+    "seed:project-neet": "node scripts/seed-project-neet.js",
     "preflight:production": "node scripts/preflight-production.js",
     "enrollment:audit": "node scripts/audit-enrollment-consistency.js",
     "entitlement:recover": "node scripts/reconcile-entitlements.js",

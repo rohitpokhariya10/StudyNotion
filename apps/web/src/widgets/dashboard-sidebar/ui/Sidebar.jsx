@@ -1,5 +1,8 @@
+import { getAvatarSource, setInitialsAvatarOnError } from "@/entities/user"
 import { logout } from "@/features/authentication"
+import AccessibleDialog from "@/shared/ui/AccessibleDialog"
 import ConfirmationModal from "@/shared/ui/ConfirmationModal"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { sidebarLinks } from "@/widgets/dashboard-sidebar/model/links"
 import SidebarLink from "@/widgets/dashboard-sidebar/ui/SidebarLink"
 import { useState } from "react"
@@ -8,7 +11,13 @@ import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router"
 
 const sidebarClasses =
-  "h-full w-[min(85vw,280px)] shrink-0 flex-col border-r border-r-richblack-700 bg-richblack-800 py-8 md:h-[calc(100vh-3.5rem)] md:w-[220px] md:min-w-[220px] md:py-10"
+  "h-full w-[min(85vw,280px)] shrink-0 flex-col border-r border-r-border-default bg-white py-6 md:min-h-[calc(100dvh-var(--sn-header-height))] md:w-[256px] md:min-w-[256px] md:py-8"
+
+const ROLE_LABELS = {
+  Admin: "Administrator",
+  Instructor: "Instructor",
+  Student: "Learner",
+}
 
 export default function Sidebar({ mobileOpen = false, onClose }) {
   const { user, loading: profileLoading } = useSelector(
@@ -22,19 +31,37 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
   const renderSidebarContent = () => {
     if (profileLoading || authLoading) {
       return (
-        <div className="grid flex-1 place-items-center">
-          <div
-            className="spinner"
-            role="status"
-            aria-label="Loading navigation"
-          />
+        <div className="grid flex-1 place-items-center" aria-busy="true">
+          <FlaskLoader accessibleLabel="Loading navigation" />
         </div>
       )
     }
 
     return (
       <>
-        <nav className="flex flex-col" aria-label="Dashboard navigation">
+        {user && (
+          <div className="mx-4 mb-6 flex items-center gap-3 rounded-2xl border border-border-default bg-brand-soft p-3">
+            <img
+              src={getAvatarSource(user)}
+              alt=""
+              onError={(event) => setInitialsAvatarOnError(event, user)}
+              className="h-11 w-11 flex-none rounded-full object-cover ring-2 ring-white"
+            />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-text-primary">
+                {[user.firstName, user.lastName].filter(Boolean).join(" ") ||
+                  "Your account"}
+              </p>
+              <p className="text-xs text-text-secondary">
+                {ROLE_LABELS[user.accountType] || "Member"}
+              </p>
+            </div>
+          </div>
+        )}
+        <p className="mb-2 px-6 text-xs font-semibold tracking-[0.12em] text-text-secondary uppercase">
+          Workspace
+        </p>
+        <nav className="flex flex-col gap-1" aria-label="Dashboard navigation">
           {sidebarLinks.map((link) => {
             if (link.type && user?.accountType !== link.type) return null
             return (
@@ -47,8 +74,11 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
             )
           })}
         </nav>
-        <div className="mx-auto mt-6 mb-6 h-px w-10/12 bg-richblack-700" />
-        <div className="flex flex-col">
+        <div className="mx-auto mt-6 mb-4 h-px w-10/12 bg-border-default" />
+        <p className="mb-2 px-6 text-xs font-semibold tracking-[0.12em] text-text-secondary uppercase">
+          Account
+        </p>
+        <div className="flex flex-col gap-1">
           <SidebarLink
             link={{ name: "Settings", path: "/dashboard/settings" }}
             iconName="VscSettingsGear"
@@ -66,7 +96,7 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
                 btn2Handler: () => setConfirmationModal(null),
               })
             }
-            className="px-8 py-2 text-left text-sm font-medium text-richblack-300"
+            className="mx-3 flex min-h-11 items-center rounded-xl px-5 text-left text-sm font-medium text-text-secondary transition-colors hover:bg-brand-soft hover:text-danger"
           >
             <span className="flex items-center gap-x-2">
               <VscSignOut className="text-lg" aria-hidden="true" />
@@ -81,23 +111,30 @@ export default function Sidebar({ mobileOpen = false, onClose }) {
   return (
     <>
       {mobileOpen && (
-        <>
-          <button
-            type="button"
-            className="fixed inset-x-0 top-14 bottom-0 z-30 bg-richblack-900/70 md:hidden"
-            onClick={onClose}
-            aria-label="Close dashboard navigation"
-          />
-          <aside
-            id="dashboard-mobile-navigation"
-            className={`${sidebarClasses} fixed top-14 bottom-0 left-0 z-40 flex shadow-2xl md:hidden`}
-          >
+        <AccessibleDialog
+          title="Your workspace"
+          titleClassName="sr-only"
+          onClose={onClose}
+          overlayClassName="bg-black/30 p-0! place-items-start! md:hidden"
+          className={`${sidebarClasses} flex max-h-dvh min-h-dvh overflow-y-auto shadow-2xl`}
+        >
+          <div id="dashboard-mobile-navigation">
+            <button
+              type="button"
+              className="sn-btn sn-btn-ghost mx-3 mb-5"
+              onClick={onClose}
+              aria-label="Close dashboard navigation"
+            >
+              ← Close menu
+            </button>
             {renderSidebarContent()}
-          </aside>
-        </>
+          </div>
+        </AccessibleDialog>
       )}
 
-      <aside className={`${sidebarClasses} hidden md:flex`}>
+      <aside
+        className={`${sidebarClasses} hidden md:flex md:h-auto md:self-stretch`}
+      >
         {renderSidebarContent()}
       </aside>
 

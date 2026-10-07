@@ -1,0 +1,37 @@
+[WebServer] (node:50766) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:50808) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 3 workers
+
+(node:50809) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50811) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50810) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [ui-desktop] › e2e/ui-transformation.spec.js:258:5 › course discovery and journal controls navigate to real destinations (2.6s)
+(node:50871) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [ui-desktop] › e2e/ui-transformation.spec.js:298:5 › 360px public layouts and modal navigation remain usable (5.4s)
+(node:50892) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [ui-mobile] › e2e/ui-transformation.spec.js:258:5 › course discovery and journal controls navigate to real destinations (2.4s)
+  ✓  2 [ui-desktop] › e2e/ui-transformation.spec.js:123:5 › public pages have readable responsive layouts and landmarks (15.8s)
+  ✓  6 [ui-mobile] › e2e/ui-transformation.spec.js:298:5 › 360px public layouts and modal navigation remain usable (7.6s)
+(node:51075) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:51076) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  8 [ui-tablet] › e2e/ui-transformation.spec.js:258:5 › course discovery and journal controls navigate to real destinations (2.1s)
+  ✓  4 [ui-mobile] › e2e/ui-transformation.spec.js:123:5 › public pages have readable responsive layouts and landmarks (17.7s)
+  ✓  9 [ui-tablet] › e2e/ui-transformation.spec.js:298:5 › 360px public layouts and modal navigation remain usable (5.8s)
+  ✓  7 [ui-tablet] › e2e/ui-transformation.spec.js:123:5 › public pages have readable responsive layouts and landmarks (17.0s)
+
+  9 passed (34.9s)

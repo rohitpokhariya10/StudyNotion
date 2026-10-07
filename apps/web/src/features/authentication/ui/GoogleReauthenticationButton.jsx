@@ -63,7 +63,7 @@ export default function GoogleReauthenticationButton({
 
   if (!isConfigured) {
     return (
-      <p className="text-sm text-pink-100" role="alert">
+      <p className="text-sm text-danger" role="alert">
         Google re-authentication is not configured. Contact support before
         attempting account deletion.
       </p>
@@ -72,7 +72,7 @@ export default function GoogleReauthenticationButton({
 
   if (disabled) {
     return (
-      <p className="text-sm text-richblack-300">
+      <p className="text-sm text-text-secondary">
         Confirm your account email above to enable Google re-authentication.
       </p>
     )
@@ -86,7 +86,7 @@ export default function GoogleReauthenticationButton({
         aria-label="Re-authenticate with Google"
       />
       {loadError && (
-        <p className="mt-2 text-sm text-pink-100" role="alert">
+        <p className="mt-2 text-sm text-danger" role="alert">
           Google re-authentication is temporarily unavailable. No account
           changes were made.
         </p>

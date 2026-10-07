@@ -2,32 +2,32 @@ export const PAYMENT_STATUS = {
   fulfilled: {
     label: "Access active",
     description: "Payment verified and course access granted.",
-    classes: "bg-caribbeangreen-800 text-caribbeangreen-100",
+    classes: "bg-mint text-success",
   },
   paid: {
     label: "Finalizing access",
     description: "Payment verified while enrollment finishes.",
-    classes: "bg-yellow-800 text-yellow-50",
+    classes: "bg-[#fff5d6] text-warning",
   },
   payment_review: {
     label: "Support review",
     description: "Payment is safe and awaiting manual reconciliation.",
-    classes: "bg-yellow-800 text-yellow-50",
+    classes: "bg-[#fff5d6] text-warning",
   },
   refund_requested: {
     label: "Refund requested",
     description: "Your request is waiting for an administrator review.",
-    classes: "bg-blue-900 text-blue-100",
+    classes: "bg-brand-soft text-brand-primary",
   },
   refund_pending: {
     label: "Refund processing",
     description: "Razorpay is processing the refund to the original method.",
-    classes: "bg-blue-900 text-blue-100",
+    classes: "bg-brand-soft text-brand-primary",
   },
   refunded: {
     label: "Refunded",
     description: "The refund was completed and this purchase is closed.",
-    classes: "bg-richblack-600 text-richblack-100",
+    classes: "bg-surface-elevated text-text-secondary",
   },
 }
 
@@ -35,7 +35,7 @@ export const getPaymentStatus = (status) =>
   PAYMENT_STATUS[status] || {
     label: String(status || "Unknown").replaceAll("_", " "),
     description: "Contact support if this status does not change.",
-    classes: "bg-richblack-600 text-richblack-100",
+    classes: "bg-surface-elevated text-text-secondary",
   }
 
 export const formatPaymentMoney = (amount, currency = "INR") => {

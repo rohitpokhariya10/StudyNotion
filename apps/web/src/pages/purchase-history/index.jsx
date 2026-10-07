@@ -7,6 +7,7 @@ import {
   fetchPurchaseHistory,
   requestPurchaseRefund,
 } from "@/features/course-purchase"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Link } from "react-router"
@@ -79,35 +80,31 @@ export default function PurchaseHistory() {
         <div>
           <h1
             id="purchase-history-title"
-            className="text-3xl font-medium text-richblack-5"
+            className="text-3xl font-medium text-text-primary"
           >
             Purchases &amp; refunds
           </h1>
-          <p className="mt-2 text-sm text-richblack-300">
+          <p className="mt-2 text-sm text-text-secondary">
             Track verified payments, course access, and refund requests.
           </p>
         </div>
-        <p className="rounded-full bg-richblack-700 px-3 py-1 text-sm text-richblack-100">
-          {pagination.total} purchases
+        <p className="rounded-full bg-surface-elevated px-3 py-1 text-sm text-text-secondary">
+          {pagination.total} purchase{pagination.total === 1 ? "" : "s"}
         </p>
       </div>
 
       {loading ? (
-        <div className="grid min-h-64 place-items-center">
-          <div
-            className="spinner"
-            role="status"
-            aria-label="Loading purchases"
-          />
+        <div className="grid min-h-64 place-items-center" aria-busy="true">
+          <FlaskLoader accessibleLabel="Loading purchases" />
         </div>
       ) : loadError ? (
-        <div className="rounded-lg border border-pink-700 bg-richblack-800 p-6">
-          <p className="text-pink-100" role="alert">
+        <div className="rounded-lg border border-danger/30 bg-surface-secondary p-6">
+          <p className="text-danger" role="alert">
             {loadError}
           </p>
           <button
             type="button"
-            className="mt-4 rounded-md bg-yellow-50 px-4 py-2 font-medium text-richblack-900"
+            className="mt-4 rounded-md bg-brand-primary px-4 py-2 font-medium text-white"
             onClick={() => {
               setLoading(true)
               setLoadError("")
@@ -118,16 +115,16 @@ export default function PurchaseHistory() {
           </button>
         </div>
       ) : purchases.length === 0 ? (
-        <div className="rounded-lg border border-richblack-700 bg-richblack-800 p-10 text-center">
-          <p className="text-lg font-medium text-richblack-25">
+        <div className="rounded-lg border border-border-default bg-surface-secondary p-10 text-center">
+          <p className="text-lg font-medium text-text-primary">
             No verified purchases yet.
           </p>
-          <p className="mt-2 text-sm text-richblack-300">
+          <p className="mt-2 text-sm text-text-secondary">
             Completed course payments will appear here.
           </p>
           <Link
             to="/"
-            className="mt-5 inline-flex rounded-md bg-yellow-50 px-4 py-2 font-medium text-richblack-900"
+            className="mt-5 inline-flex rounded-md bg-brand-primary px-4 py-2 font-medium text-white"
           >
             Browse courses
           </Link>
@@ -140,7 +137,7 @@ export default function PurchaseHistory() {
                   label: "Refund not approved",
                   description:
                     "The reviewed request was not approved. Contact support to appeal.",
-                  classes: "bg-richblack-600 text-richblack-100",
+                  classes: "bg-surface-elevated text-text-secondary",
                 }
               : purchase.status === "refund_pending" &&
                   purchase.refundProviderStatus === "failed"
@@ -148,7 +145,7 @@ export default function PurchaseHistory() {
                     label: "Refund needs support",
                     description:
                       "The provider marked the attempt failed; support will reconcile it.",
-                    classes: "bg-pink-900 text-pink-100",
+                    classes: "bg-peach text-danger",
                   }
                 : getPaymentStatus(purchase.status)
             const refundFormOpen = refundPurchaseId === purchase._id
@@ -156,14 +153,14 @@ export default function PurchaseHistory() {
             return (
               <article
                 key={purchase._id}
-                className="rounded-lg border border-richblack-700 bg-richblack-800 p-5"
+                className="rounded-lg border border-border-default bg-surface-secondary p-5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-xl font-semibold text-richblack-5">
+                    <p className="text-xl font-semibold text-text-primary">
                       {formatPaymentMoney(purchase.amount, purchase.currency)}
                     </p>
-                    <p className="mt-1 text-xs text-richblack-400">
+                    <p className="mt-1 text-xs text-text-secondary">
                       Purchased{" "}
                       {formatPaymentDate(purchase.paidAt || purchase.createdAt)}
                     </p>
@@ -174,13 +171,13 @@ export default function PurchaseHistory() {
                     >
                       {status.label}
                     </span>
-                    <p className="mt-2 text-xs leading-5 text-richblack-300">
+                    <p className="mt-2 text-xs leading-5 text-text-secondary">
                       {status.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-5 divide-y divide-richblack-700 rounded-md border border-richblack-700">
+                <div className="mt-5 divide-y divide-richblack-700 rounded-md border border-border-default">
                   {(purchase.lineItems || []).map((lineItem, index) => (
                     <div
                       key={String(
@@ -188,26 +185,26 @@ export default function PurchaseHistory() {
                       )}
                       className="flex items-center justify-between gap-4 px-4 py-3 text-sm"
                     >
-                      <span className="min-w-0 truncate text-richblack-100">
+                      <span className="min-w-0 truncate text-text-secondary">
                         {lineItem.courseName || "Course"}
                       </span>
-                      <span className="shrink-0 text-richblack-300">
+                      <span className="shrink-0 text-text-secondary">
                         {formatPaymentMoney(lineItem.amount, purchase.currency)}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <dl className="mt-4 grid gap-3 text-xs text-richblack-300 sm:grid-cols-2">
+                <dl className="mt-4 grid gap-3 text-xs text-text-secondary sm:grid-cols-2">
                   <div>
-                    <dt className="text-richblack-400">Order ID</dt>
-                    <dd className="mt-1 font-mono break-all text-richblack-100">
+                    <dt className="text-text-secondary">Order ID</dt>
+                    <dd className="mt-1 font-mono break-all text-text-secondary">
                       {purchase.razorpayOrderId || "Not recorded"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-richblack-400">Policy at checkout</dt>
-                    <dd className="mt-1 text-richblack-100">
+                    <dt className="text-text-secondary">Policy at checkout</dt>
+                    <dd className="mt-1 text-text-secondary">
                       Terms {purchase.checkoutTermsVersion || "—"} · Refunds{" "}
                       {purchase.refundPolicyVersion || "—"}
                     </dd>
@@ -215,14 +212,14 @@ export default function PurchaseHistory() {
                 </dl>
 
                 {purchase.refundEligible && !refundFormOpen && (
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-richblack-700 pt-4">
-                    <p className="text-xs text-richblack-300">
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-4">
+                    <p className="text-xs text-text-secondary">
                       Request by{" "}
                       {formatPaymentDate(purchase.refundEligibleUntil)}
                     </p>
                     <button
                       type="button"
-                      className="rounded-md border border-yellow-100 px-4 py-2 text-sm font-medium text-yellow-50"
+                      className="rounded-md border border-brand-primary px-4 py-2 text-sm font-medium text-brand-primary"
                       onClick={() => {
                         setRefundPurchaseId(purchase._id)
                         setRefundReason("")
@@ -234,7 +231,7 @@ export default function PurchaseHistory() {
                 )}
 
                 {purchase.refundRejectedAt && (
-                  <p className="mt-4 border-t border-richblack-700 pt-4 text-xs text-richblack-300">
+                  <p className="mt-4 border-t border-border-default pt-4 text-xs text-text-secondary">
                     Reviewed {formatPaymentDate(purchase.refundRejectedAt)}.
                     Your course access remains active; contact support if you
                     need to appeal this decision.
@@ -244,7 +241,7 @@ export default function PurchaseHistory() {
                 {!purchase.refundRejectedAt &&
                   purchase.status === "fulfilled" &&
                   !purchase.refundEligible && (
-                    <p className="mt-4 border-t border-richblack-700 pt-4 text-xs text-richblack-400">
+                    <p className="mt-4 border-t border-border-default pt-4 text-xs text-text-secondary">
                       The recorded {purchase.refundWindowDays ?? "—"}-day refund
                       request window has closed. Statutory rights are
                       unaffected.
@@ -253,13 +250,13 @@ export default function PurchaseHistory() {
 
                 {refundFormOpen && (
                   <form
-                    className="mt-5 border-t border-richblack-700 pt-4"
+                    className="mt-5 border-t border-border-default pt-4"
                     onSubmit={(event) =>
                       void submitRefundRequest(event, purchase._id)
                     }
                   >
                     <label htmlFor={`refund-reason-${purchase._id}`}>
-                      <span className="mb-2 block text-sm font-medium text-richblack-50">
+                      <span className="mb-2 block text-sm font-medium text-text-primary">
                         Why are you requesting a refund?
                       </span>
                       <textarea
@@ -277,7 +274,7 @@ export default function PurchaseHistory() {
                         placeholder="Describe the issue so support can review it (10–1000 characters)."
                       />
                     </label>
-                    <p className="mt-2 text-xs text-richblack-300">
+                    <p className="mt-2 text-xs text-text-secondary">
                       This submits a review request; approval and provider
                       processing are separate steps.
                     </p>
@@ -285,7 +282,7 @@ export default function PurchaseHistory() {
                       <button
                         type="button"
                         disabled={submittingRefund}
-                        className="rounded-md bg-richblack-600 px-4 py-2 text-sm text-richblack-50 disabled:opacity-50"
+                        className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-50"
                         onClick={closeRefundForm}
                       >
                         Cancel
@@ -293,7 +290,7 @@ export default function PurchaseHistory() {
                       <button
                         type="submit"
                         disabled={submittingRefund}
-                        className="rounded-md bg-yellow-50 px-4 py-2 text-sm font-medium text-richblack-900 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {submittingRefund
                           ? "Submitting…"
@@ -316,7 +313,7 @@ export default function PurchaseHistory() {
           <button
             type="button"
             disabled={page <= 1 || loading}
-            className="rounded-md bg-richblack-700 px-4 py-2 text-sm text-richblack-25 disabled:opacity-40"
+            className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-40"
             onClick={() => {
               setLoading(true)
               setLoadError("")
@@ -325,13 +322,13 @@ export default function PurchaseHistory() {
           >
             Previous
           </button>
-          <span className="text-sm text-richblack-300">
+          <span className="text-sm text-text-secondary">
             Page {pagination.page} of {pagination.pages}
           </span>
           <button
             type="button"
             disabled={page >= pagination.pages || loading}
-            className="rounded-md bg-richblack-700 px-4 py-2 text-sm text-richblack-25 disabled:opacity-40"
+            className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-40"
             onClick={() => {
               setLoading(true)
               setLoadError("")

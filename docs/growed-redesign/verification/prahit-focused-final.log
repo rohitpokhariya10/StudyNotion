@@ -1,0 +1,17 @@
+
+> studynotion@0.1.0 test:frontend
+> npm run test --workspace studynotion-web src/widgets/footer/ui/Footer.test.jsx src/pages/legal/Legal.test.jsx src/shared/config/publicContact.test.js
+
+
+> studynotion-web@0.1.0 test
+> vitest run src/widgets/footer/ui/Footer.test.jsx src/pages/legal/Legal.test.jsx src/shared/config/publicContact.test.js
+
+
+ RUN  v4.1.10 /Users/rohitpokhariya/Documents/Prahit/apps/web
+
+
+ Test Files  3 passed (3)
+      Tests  10 passed (10)
+   Start at  10:44:12
+   Duration  997ms (transform 92ms, setup 182ms, import 259ms, tests 418ms, environment 1.38s)
+

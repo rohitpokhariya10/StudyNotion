@@ -1,4 +1,6 @@
 import { resetPassword } from "@/features/authentication"
+import AuthLayout from "@/shared/ui/AuthLayout"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { useEffect, useState } from "react"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { BiArrowBack } from "react-icons/bi"
@@ -53,15 +55,15 @@ function UpdatePassword() {
   }
 
   return (
-    <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
+    <AuthLayout variant="recovery">
       {loading ? (
-        <div className="spinner"></div>
+        <div className="grid min-h-80 place-items-center" aria-busy="true">
+          <FlaskLoader replacesLoadingToast label="Resetting password" />
+        </div>
       ) : (
-        <div className="max-w-[500px] p-4 lg:p-8">
-          <h1 className="text-[1.875rem] leading-[2.375rem] font-semibold text-richblack-5">
-            Choose new password
-          </h1>
-          <p className="my-4 text-[1.125rem] leading-[1.625rem] text-richblack-100">
+        <div>
+          <h1 className="sn-heading">Choose new password</h1>
+          <p className="mt-3 mb-8 text-[0.9375rem] leading-relaxed text-text-secondary">
             {resetToken
               ? "Almost done. Enter your new password and you're all set."
               : "This password reset link is invalid or incomplete. Request a new link to continue."}
@@ -69,8 +71,8 @@ function UpdatePassword() {
           {resetToken ? (
             <form onSubmit={handleOnSubmit}>
               <label className="relative">
-                <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
-                  New Password <sup className="text-pink-200">*</sup>
+                <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
+                  New Password <sup className="text-danger">*</sup>
                 </p>
                 <input
                   required
@@ -96,8 +98,8 @@ function UpdatePassword() {
                 </button>
               </label>
               <label className="relative mt-3 block">
-                <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
-                  Confirm New Password <sup className="text-pink-200">*</sup>
+                <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
+                  Confirm New Password <sup className="text-danger">*</sup>
                 </p>
                 <input
                   required
@@ -129,7 +131,7 @@ function UpdatePassword() {
 
               <button
                 type="submit"
-                className="mt-6 w-full rounded-[8px] bg-yellow-50 px-[12px] py-[12px] font-medium text-richblack-900"
+                className="sn-btn sn-btn-primary sn-btn-lg sn-btn-block mt-6"
               >
                 Reset Password
               </button>
@@ -137,21 +139,21 @@ function UpdatePassword() {
           ) : (
             <Link
               to="/forgot-password"
-              className="mt-6 block w-full rounded-[8px] bg-yellow-50 px-[12px] py-[12px] text-center font-medium text-richblack-900"
+              className="sn-btn sn-btn-primary sn-btn-lg sn-btn-block mt-6"
             >
               Request a new link
             </Link>
           )}
           <div className="mt-6 flex items-center justify-between">
             <Link to="/login">
-              <p className="flex items-center gap-x-2 text-richblack-5">
+              <p className="flex items-center gap-x-2 text-text-primary">
                 <BiArrowBack /> Back To Login
               </p>
             </Link>
           </div>
         </div>
       )}
-    </div>
+    </AuthLayout>
   )
 }
 

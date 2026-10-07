@@ -1,10 +1,5 @@
 const HighlightText = ({ text }) => {
-  return (
-    <span className="bg-linear-to-b/srgb from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text font-bold text-transparent">
-      {" "}
-      {text}
-    </span>
-  )
+  return <span className="font-bold text-brand-primary"> {text}</span>
 }
 
 export default HighlightText

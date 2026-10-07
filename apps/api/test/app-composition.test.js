@@ -12,13 +12,17 @@ process.env.RAZORPAY_SECRET = "app-composition-razorpay-secret"
 process.env.RAZORPAY_WEBHOOK_SECRET = "app-composition-webhook-secret"
 
 const api = require("../index")
-const { registerRoutes } = require("../app/registerRoutes")
+const { registerRoutes, v2ApiLimiter } = require("../app/registerRoutes")
 const { createServerLifecycle } = require("../bootstrap")
 const { razorpayWebhook } = require("../controllers/payments")
 const legacyCatalogErrors = require("../domains/catalog/catalogErrors")
 const { apiLimiter, webhookLimiter } = require("../middleware/rateLimiters")
 const { requireTrustedBrowserOrigin } = require("../middleware/trustedOrigin")
 const catalogV2Routes = require("../routes/CatalogV2")
+const {
+  isProjectNeetAttemptPath,
+  projectNeetRoutes,
+} = require("../modules/project-neet")
 const learningV2Routes = require("../routes/LearningV2")
 const {
   createErrorHandler,
@@ -84,6 +88,7 @@ test("route registration preserves webhook, parser, limiter, and route order", (
       ["use", "/api/v1"],
       ["use", "/api/v2"],
       ["use", "/api/v2/learning"],
+      ["use", "/api/v2/project-neet"],
       ["use", "/api/v2"],
       ["use", "/api/v1/auth"],
       ["use", "/api/v1/admin"],
@@ -99,11 +104,33 @@ test("route registration preserves webhook, parser, limiter, and route order", (
   assert.equal(calls[0].args[3], razorpayWebhook)
   assert.equal(calls[1].args[1], apiLimiter)
   assert.equal(calls[2].args[1], sharedV2Errors.normalizeV2ErrorEnvelope)
-  assert.equal(calls[2].args[2], apiLimiter)
+  assert.equal(calls[2].args[2], v2ApiLimiter)
   assert.equal(calls[6].args[1], requireTrustedBrowserOrigin)
   assert.equal(calls[7].args[1], requireTrustedBrowserOrigin)
   assert.equal(calls[8].args[1], learningV2Routes)
-  assert.equal(calls[9].args[1], catalogV2Routes)
+  assert.equal(calls[9].args[1], projectNeetRoutes)
+  assert.equal(calls[10].args[1], catalogV2Routes)
+})
+
+test("the shared v2 limiter exemption is limited to Project NEET attempt paths", () => {
+  for (const path of [
+    "/courses",
+    "/learning/courses/64b000000000000000000001",
+    "/project-neet/tests",
+    "/project-neet/tests/64b000000000000000000001",
+    "/project-neet",
+    "/project-neet/attemptsx",
+    "/project-neetx/attempts",
+  ]) {
+    assert.equal(isProjectNeetAttemptPath(path), false, path)
+  }
+  for (const path of [
+    "/project-neet/attempts",
+    "/project-neet/attempts/64b000000000000000000001/responses",
+    "/Project-NEET/Attempts/64b000000000000000000001/heartbeat",
+  ]) {
+    assert.equal(isProjectNeetAttemptPath(path), true, path)
+  }
 })
 
 test("catalog error imports remain adapters to shared HTTP behavior", () => {

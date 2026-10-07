@@ -38,7 +38,7 @@ export default function SafeMarkdown({ children }) {
               href={safeHref}
               target="_blank"
               rel="nofollow noreferrer noopener"
-              className="text-yellow-100 underline underline-offset-2"
+              className="text-brand-primary underline underline-offset-2"
             >
               {linkText}
             </a>

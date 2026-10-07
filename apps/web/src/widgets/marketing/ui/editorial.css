@@ -1,0 +1,173 @@
+/* Editorial public pages (About, Services): GrowEd-matched type, sketched
+   underlines, yellow-ruled descriptions and blue rounded actions. */
+.sn-ed-hero {
+  padding: 80px 0 40px;
+  background: #fff;
+}
+/* About: the tall collage starts just below the navbar, as on the reference. */
+.sn-ed-hero-tight {
+  padding: 32px 0 24px;
+}
+.sn-ed-shell {
+  width: min(calc(100% - 64px), 1104px);
+  margin-inline: auto;
+}
+.sn-ed-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 48px;
+}
+.sn-ed-intro {
+  min-width: 0;
+}
+.sn-ed-title {
+  margin: 0;
+  color: #090909;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: initial;
+}
+.sn-ed-title span {
+  color: var(--sn-brand);
+}
+.sn-ed-underline {
+  width: 100%;
+  height: 14px;
+  margin: 22px 0 16px;
+  color: var(--sn-brand);
+}
+.sn-ed-description {
+  margin: 0;
+  border-left: 2px solid #ffdc4a;
+  padding: 0 0 0 16px;
+  color: #202020;
+  font-size: 16px;
+  line-height: 1.5;
+  text-wrap: initial;
+}
+.sn-ed-description strong {
+  color: #d23d3d;
+  font-weight: 700;
+}
+.sn-ed-cta {
+  width: min(100%, 288px);
+  min-height: 44px;
+  margin-top: 32px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.sn-ed-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sn-ed-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.sn-ed-heading-title {
+  margin: 0;
+  color: var(--sn-brand);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.sn-ed-heading-lg .sn-ed-heading-title {
+  font-size: 48px;
+}
+.sn-ed-heading-underline {
+  width: min(400px, 80%);
+  height: 12px;
+  margin-top: 14px;
+  color: var(--sn-brand);
+}
+.sn-ed-heading-intro {
+  max-width: 600px;
+  margin: 28px 0 0;
+  color: #202020;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.sn-ed-heading-inverse .sn-ed-heading-title,
+.sn-ed-heading-inverse .sn-ed-heading-underline,
+.sn-ed-heading-inverse .sn-ed-heading-intro {
+  color: #fff;
+}
+
+@media (min-width: 1600px) {
+  .sn-ed-shell {
+    width: min(calc(100% - 160px), 1536px);
+  }
+  .sn-ed-title {
+    font-size: 64px;
+  }
+  .sn-ed-description {
+    font-size: 20px;
+  }
+  .sn-ed-hero-grid {
+    gap: 64px;
+  }
+  .sn-ed-cta {
+    width: 384px;
+    min-height: 48px;
+    font-size: 18px;
+  }
+}
+@media (max-width: 1023px) {
+  .sn-ed-hero {
+    padding-top: 56px;
+  }
+  .sn-ed-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  /* Stacked, as on the reference: artwork first, then a centred intro. */
+  .sn-ed-art {
+    order: -1;
+    width: min(100%, 520px);
+    margin-inline: auto;
+  }
+  .sn-ed-intro {
+    max-width: 640px;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .sn-ed-description {
+    border-left: 0;
+    padding-left: 0;
+  }
+  .sn-ed-cta {
+    margin-inline: auto;
+  }
+}
+@media (max-width: 639px) {
+  .sn-ed-hero {
+    padding: 40px 0 24px;
+  }
+  .sn-ed-shell {
+    width: calc(100% - 40px);
+  }
+  .sn-ed-title {
+    font-size: clamp(30px, 7.9vw, 44px);
+  }
+  .sn-ed-description {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .sn-ed-cta {
+    width: 100%;
+    margin-top: 28px;
+  }
+  .sn-ed-heading-title {
+    font-size: 26px;
+  }
+  .sn-ed-heading-lg .sn-ed-heading-title {
+    font-size: 32px;
+  }
+}

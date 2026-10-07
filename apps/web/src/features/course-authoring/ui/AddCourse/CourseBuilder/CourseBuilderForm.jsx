@@ -97,12 +97,12 @@ export default function CourseBuilderForm() {
   }
 
   return (
-    <div className="space-y-8 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-6">
-      <p className="text-2xl font-semibold text-richblack-5">Course Builder</p>
+    <div className="space-y-8 rounded-md border-[1px] border-border-default bg-surface-secondary p-6">
+      <p className="text-2xl font-semibold text-text-primary">Course Builder</p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex flex-col space-y-2">
-          <label className="text-sm text-richblack-5" htmlFor="sectionName">
-            Section Name <sup className="text-pink-200">*</sup>
+          <label className="text-sm text-text-primary" htmlFor="sectionName">
+            Section Name <sup className="text-danger">*</sup>
           </label>
           <input
             id="sectionName"
@@ -112,7 +112,7 @@ export default function CourseBuilderForm() {
             className="form-style w-full"
           />
           {errors.sectionName && (
-            <span className="ml-2 text-xs tracking-wide text-pink-200">
+            <span className="ml-2 text-xs tracking-wide text-danger">
               Section name is required
             </span>
           )}
@@ -124,13 +124,13 @@ export default function CourseBuilderForm() {
             text={editSectionName ? "Edit Section Name" : "Create Section"}
             outline={true}
           >
-            <IoAddCircleOutline size={20} className="text-yellow-50" />
+            <IoAddCircleOutline size={20} className="text-brand-primary" />
           </IconBtn>
           {editSectionName && (
             <button
               type="button"
               onClick={cancelEdit}
-              className="text-sm text-richblack-300 underline"
+              className="text-sm text-text-secondary underline"
             >
               Cancel Edit
             </button>
@@ -145,7 +145,7 @@ export default function CourseBuilderForm() {
         <button
           type="button"
           onClick={goBack}
-          className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 px-[20px] py-[8px] font-semibold text-richblack-900`}
+          className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-surface-elevated px-[20px] py-[8px] font-semibold text-text-primary`}
         >
           Back
         </button>

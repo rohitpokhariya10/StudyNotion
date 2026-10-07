@@ -1,20 +1,18 @@
-import { useEffect, useState } from "react"
-import { FaCheck } from "react-icons/fa"
-import { FiEdit2 } from "react-icons/fi"
-import { HiClock } from "react-icons/hi"
-import { RiArchiveLine, RiDeleteBin6Line } from "react-icons/ri"
-import { useSelector } from "react-redux"
-import { useNavigate } from "react-router"
-import { Table, Tbody, Td, Th, Thead, Tr } from "react-super-responsive-table"
-
-import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css"
-
 import {
   COURSE_STATUS,
   deleteCourse,
   fetchInstructorCourses,
 } from "@/entities/course"
 import { formatDate } from "@/shared/lib/formatDate"
+import AccessibleDialog from "@/shared/ui/AccessibleDialog"
+import CourseImage from "@/shared/ui/CourseImage"
+import { useState } from "react"
+import { FaCheck } from "react-icons/fa"
+import { FiEdit2 } from "react-icons/fi"
+import { HiClock } from "react-icons/hi"
+import { RiArchiveLine, RiDeleteBin6Line } from "react-icons/ri"
+import { useSelector } from "react-redux"
+import { useNavigate } from "react-router"
 
 const TRUNCATE_LENGTH = 30
 
@@ -26,83 +24,57 @@ function CourseDeletionDialog({
   onChange,
   onConfirm,
 }) {
-  useEffect(() => {
-    if (!course || loading) return undefined
-    const handleEscape = (event) => {
-      if (event.key === "Escape") onCancel()
-    }
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
-  }, [course, loading, onCancel])
-
   if (!course) return null
 
   const confirmed = confirmationName === course.courseName
 
   return (
-    <div
-      className="fixed inset-0 z-[1000] grid place-items-center overflow-y-auto bg-richblack-900/80 p-4 backdrop-blur-xs"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !loading) onCancel()
-      }}
+    <AccessibleDialog
+      title="Archive or delete course"
+      description="Courses with learners or payment history are archived so existing learners keep access. Unsold courses are permanently deleted."
+      onClose={onCancel}
+      closeOnEscape={!loading}
+      closeOnBackdrop={!loading}
+      className="w-full max-w-md rounded-xl border border-border-default bg-white p-6"
+      overlayClassName="bg-black/40"
+      titleClassName="text-2xl font-semibold text-text-primary"
+      descriptionClassName="mt-3 mb-5 leading-6 text-text-secondary"
     >
-      <div
-        className="w-full max-w-md rounded-lg border border-richblack-500 bg-richblack-800 p-6"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="delete-course-title"
-        aria-describedby="delete-course-description"
+      <label
+        htmlFor="confirmationCourseName"
+        className="mb-2 block text-sm text-text-secondary"
       >
-        <h2
-          id="delete-course-title"
-          className="text-2xl font-semibold text-richblack-5"
+        Type <strong className="text-text-primary">{course.courseName}</strong>{" "}
+        to confirm
+      </label>
+      <input
+        id="confirmationCourseName"
+        type="text"
+        value={confirmationName}
+        onChange={(event) => onChange(event.target.value)}
+        className="form-style w-full"
+        autoComplete="off"
+        disabled={loading}
+      />
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button
+          type="button"
+          disabled={!confirmed || loading}
+          onClick={onConfirm}
+          className="sn-btn bg-danger text-white"
         >
-          Archive or delete course
-        </h2>
-        <p
-          id="delete-course-description"
-          className="mt-3 mb-5 leading-6 text-richblack-200"
-        >
-          Courses with learners or payment history are archived so existing
-          learners keep access. Unsold courses are permanently deleted.
-        </p>
-        <label
-          htmlFor="confirmationCourseName"
-          className="mb-2 block text-sm text-richblack-100"
-        >
-          Type <strong className="text-richblack-5">{course.courseName}</strong>{" "}
-          to confirm
-        </label>
-        <input
-          id="confirmationCourseName"
-          type="text"
-          value={confirmationName}
-          onChange={(event) => onChange(event.target.value)}
-          className="form-style w-full"
-          autoComplete="off"
+          {loading ? "Processing..." : "Confirm"}
+        </button>
+        <button
+          type="button"
           disabled={loading}
-          autoFocus
-        />
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            type="button"
-            disabled={!confirmed || loading}
-            onClick={onConfirm}
-            className="rounded-md bg-pink-600 px-5 py-2 font-semibold text-richblack-5 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? "Processing..." : "Confirm"}
-          </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={onCancel}
-            className="rounded-md bg-richblack-200 px-5 py-2 font-semibold text-richblack-900 disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
+          onClick={onCancel}
+          className="sn-btn sn-btn-secondary"
+        >
+          Cancel
+        </button>
       </div>
-    </div>
+    </AccessibleDialog>
   )
 }
 
@@ -140,126 +112,99 @@ export default function CoursesTable({ courses, setCourses }) {
 
   return (
     <>
-      <Table className="rounded-xl border border-richblack-800">
-        <Thead>
-          <Tr className="flex gap-x-10 rounded-t-md border-b border-b-richblack-800 px-6 py-2">
-            <Th className="flex-1 text-left text-sm font-medium text-richblack-100 uppercase">
-              Courses
-            </Th>
-            <Th className="text-left text-sm font-medium text-richblack-100 uppercase">
-              Duration
-            </Th>
-            <Th className="text-left text-sm font-medium text-richblack-100 uppercase">
-              Price
-            </Th>
-            <Th className="text-left text-sm font-medium text-richblack-100 uppercase">
-              Actions
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {courses?.length === 0 ? (
-            <Tr>
-              <Td className="py-10 text-center text-2xl font-medium text-richblack-100">
-                No courses found
-              </Td>
-            </Tr>
-          ) : (
-            courses?.map((course) => {
-              const description = String(course.courseDescription || "")
-              const isArchived = course.status === "Archived"
-
-              return (
-                <Tr
-                  key={course._id}
-                  className="flex gap-x-10 border-b border-richblack-800 px-6 py-8"
-                >
-                  <Td className="flex flex-1 gap-x-4">
-                    <img
-                      src={course.thumbnail}
-                      alt=""
-                      className="h-[148px] w-[220px] rounded-lg object-cover"
-                    />
-                    <div className="flex flex-col justify-between">
-                      <p className="text-lg font-semibold text-richblack-5">
-                        {course.courseName}
-                      </p>
-                      <p className="text-xs text-richblack-300">
-                        {description.split(" ").length > TRUNCATE_LENGTH
-                          ? `${description
-                              .split(" ")
-                              .slice(0, TRUNCATE_LENGTH)
-                              .join(" ")}...`
-                          : description}
-                      </p>
-                      <p className="text-xs text-white">
-                        Created: {formatDate(course.createdAt)}
-                      </p>
+      <div className="grid gap-5">
+        {courses?.length === 0 ? (
+          <p className="sn-card text-center text-text-secondary">
+            No courses found
+          </p>
+        ) : (
+          courses?.map((course) => {
+            const description = String(course.courseDescription || "")
+            const isArchived = course.status === "Archived"
+            return (
+              <article
+                key={course._id}
+                className="sn-card grid gap-5 p-5 lg:grid-cols-[180px_1fr]"
+              >
+                <CourseImage
+                  src={course.thumbnail}
+                  alt=""
+                  className="aspect-video w-full rounded-xl object-cover"
+                />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <h2 className="text-xl font-bold">{course.courseName}</h2>
+                    <span className="sn-pill text-xs">
                       {course.status === COURSE_STATUS.DRAFT ? (
-                        <p className="flex w-fit items-center gap-2 rounded-full bg-richblack-700 px-2 py-0.5 text-xs font-medium text-pink-100">
-                          <HiClock size={14} /> Draft
-                        </p>
+                        <>
+                          <HiClock aria-hidden="true" /> Draft
+                        </>
                       ) : isArchived ? (
-                        <p className="flex w-fit items-center gap-2 rounded-full bg-richblack-700 px-2 py-0.5 text-xs font-medium text-richblack-200">
-                          <RiArchiveLine size={14} /> Archived
-                        </p>
+                        <>
+                          <RiArchiveLine aria-hidden="true" /> Archived
+                        </>
                       ) : (
-                        <p className="flex w-fit items-center gap-2 rounded-full bg-richblack-700 px-2 py-0.5 text-xs font-medium text-yellow-100">
-                          <span className="flex h-3 w-3 items-center justify-center rounded-full bg-yellow-100 text-richblack-700">
-                            <FaCheck size={8} />
-                          </span>
-                          Published
-                        </p>
+                        <>
+                          <FaCheck aria-hidden="true" /> Published
+                        </>
                       )}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-text-secondary">
+                    {description.split(" ").length > TRUNCATE_LENGTH
+                      ? `${description.split(" ").slice(0, TRUNCATE_LENGTH).join(" ")}...`
+                      : description}
+                  </p>
+                  <p className="mt-3 text-xs text-text-secondary">
+                    Created: {formatDate(course.createdAt)}
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-border-default pt-4">
+                    <div className="flex gap-5 text-sm">
+                      <span>{course.totalDuration || "—"}</span>
+                      <strong>₹{course.price}</strong>
                     </div>
-                  </Td>
-                  <Td className="text-sm font-medium text-richblack-100">
-                    {course.totalDuration || "—"}
-                  </Td>
-                  <Td className="text-sm font-medium text-richblack-100">
-                    ₹{course.price}
-                  </Td>
-                  <Td className="text-sm font-medium text-richblack-100">
-                    <button
-                      type="button"
-                      disabled={loading || isArchived}
-                      onClick={() =>
-                        navigate(`/dashboard/edit-course/${course._id}`)
-                      }
-                      title={
-                        isArchived
-                          ? "Archived courses cannot be edited"
-                          : "Edit"
-                      }
-                      aria-label={`Edit ${course.courseName}`}
-                      className="px-2 transition-all duration-200 enabled:hover:scale-110 enabled:hover:text-caribbeangreen-300 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <FiEdit2 size={20} />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={loading || isArchived}
-                      onClick={() => {
-                        setCourseToDelete(course)
-                        setConfirmationName("")
-                      }}
-                      title={
-                        isArchived
-                          ? "This course is retained for existing learners"
-                          : "Archive or delete"
-                      }
-                      aria-label={`Archive or delete ${course.courseName}`}
-                      className="px-1 transition-all duration-200 enabled:hover:scale-110 enabled:hover:text-pink-200 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <RiDeleteBin6Line size={20} />
-                    </button>
-                  </Td>
-                </Tr>
-              )
-            })
-          )}
-        </Tbody>
-      </Table>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={loading || isArchived}
+                        onClick={() =>
+                          navigate(`/dashboard/edit-course/${course._id}`)
+                        }
+                        title={
+                          isArchived
+                            ? "Archived courses cannot be edited"
+                            : "Edit"
+                        }
+                        aria-label={`Edit ${course.courseName}`}
+                        className="sn-btn sn-btn-secondary min-h-11 px-4 text-sm"
+                      >
+                        <FiEdit2 aria-hidden="true" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loading || isArchived}
+                        onClick={() => {
+                          setCourseToDelete(course)
+                          setConfirmationName("")
+                        }}
+                        title={
+                          isArchived
+                            ? "This course is retained for existing learners"
+                            : "Archive or delete"
+                        }
+                        aria-label={`Archive or delete ${course.courseName}`}
+                        className="sn-btn sn-btn-outline min-h-11 px-4 text-danger"
+                      >
+                        <RiDeleteBin6Line aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )
+          })
+        )}
+      </div>
 
       <CourseDeletionDialog
         course={courseToDelete}

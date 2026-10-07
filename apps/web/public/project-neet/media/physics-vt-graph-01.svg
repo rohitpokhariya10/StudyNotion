@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" width="480" height="300" role="img" aria-labelledby="title desc">
+  <title id="title">Velocity–time graph</title>
+  <desc id="desc">A straight line rises from 0 metres per second at time 0 seconds to 20 metres per second at 10 seconds.</desc>
+  <rect width="480" height="300" fill="#ffffff"/>
+  <g stroke="#d5ddda" stroke-width="1">
+    <path d="M80 50 H440 M80 100 H440 M80 150 H440 M80 200 H440"/>
+    <path d="M152 30 V250 M224 30 V250 M296 30 V250 M368 30 V250 M440 30 V250"/>
+  </g>
+  <g fill="none" stroke="#13201f" stroke-width="2.5" stroke-linecap="round">
+    <path d="M80 30 V250 H455"/>
+    <path d="M74 38 L80 26 L86 38" />
+    <path d="M447 244 L459 250 L447 256" />
+  </g>
+  <path d="M80 250 L440 50" fill="none" stroke="#0f766e" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M440 50 V250" fill="none" stroke="#0f766e" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <g font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" fill="#13201f">
+    <text x="70" y="255" text-anchor="end">0</text>
+    <text x="70" y="155" text-anchor="end">10</text>
+    <text x="70" y="55" text-anchor="end">20</text>
+    <text x="224" y="272" text-anchor="middle">4</text>
+    <text x="368" y="272" text-anchor="middle">8</text>
+    <text x="440" y="272" text-anchor="middle">10</text>
+    <text x="268" y="294" text-anchor="middle">time t (s)</text>
+    <text x="22" y="150" text-anchor="middle" transform="rotate(-90 22 150)">velocity v (m s⁻¹)</text>
+  </g>
+</svg>

@@ -26,13 +26,13 @@ export default function PolicyAcceptance() {
   }
 
   return (
-    <main className="mx-auto grid min-h-[calc(100vh-3.5rem)] w-11/12 max-w-xl place-items-center py-12 text-richblack-5">
+    <main className="mx-auto grid min-h-[calc(100dvh-var(--sn-header-height))] w-11/12 max-w-xl place-items-center py-12 text-text-primary">
       <form
-        className="w-full rounded-xl border border-richblack-600 bg-richblack-800 p-6 sm:p-8"
+        className="w-full rounded-xl border border-border-default bg-surface-secondary p-6 sm:p-8"
         onSubmit={handleSubmit}
       >
-        <h1 className="text-3xl font-semibold">Review the current policies</h1>
-        <p className="mt-3 mb-6 leading-6 text-richblack-200">
+        <h1 className="sn-heading">Review the current policies</h1>
+        <p className="mt-3 mb-6 leading-6 text-text-secondary">
           We updated the account agreement. Your learning data remains
           available, but you need to review these items before using
           authenticated features.

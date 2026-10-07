@@ -6,11 +6,11 @@ export default function PolicyAcknowledgement({
   onChange,
 }) {
   const update = (field, checked) => onChange({ ...value, [field]: checked })
-  const linkClass = "text-yellow-100 underline underline-offset-2"
+  const linkClass = "text-brand-primary underline underline-offset-2"
 
   return (
-    <fieldset className="space-y-3 rounded-md border border-richblack-600 bg-richblack-800/60 p-4 text-sm leading-5 text-richblack-100">
-      <legend className="px-1 font-medium text-richblack-25">
+    <fieldset className="space-y-3 rounded-md border border-border-default bg-surface-secondary/60 p-4 text-sm leading-5 text-text-secondary">
+      <legend className="px-1 font-medium text-text-primary">
         Account agreement
       </legend>
 
@@ -21,7 +21,7 @@ export default function PolicyAcknowledgement({
           required
           checked={Boolean(value?.acceptTerms)}
           onChange={(event) => update("acceptTerms", event.target.checked)}
-          className="mt-1 h-4 w-4 accent-yellow-50"
+          className="mt-1 h-4 w-4 accent-brand-primary"
         />
         <span>
           I agree to the{" "}
@@ -46,7 +46,7 @@ export default function PolicyAcknowledgement({
           onChange={(event) =>
             update("acknowledgePrivacy", event.target.checked)
           }
-          className="mt-1 h-4 w-4 accent-yellow-50"
+          className="mt-1 h-4 w-4 accent-brand-primary"
         />
         <span>
           I have read the{" "}
@@ -75,7 +75,7 @@ export default function PolicyAcknowledgement({
           onChange={(event) =>
             update("confirmEligibility", event.target.checked)
           }
-          className="mt-1 h-4 w-4 accent-yellow-50"
+          className="mt-1 h-4 w-4 accent-brand-primary"
         />
         <span>
           I can lawfully use this service in my location, or my parent or

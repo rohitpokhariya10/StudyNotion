@@ -1,97 +1,83 @@
-import Logo from "@/shared/assets/Logo/Logo-Full-Light.png"
+import { legalAddress, supportEmail } from "@/shared/config/publicContact"
+import BrandLogo from "@/shared/ui/BrandLogo"
 import { FooterLink2 } from "@/widgets/footer/model/links"
+import FooterLandscape from "@/widgets/footer/ui/FooterLandscape"
+import FooterSignup from "@/widgets/footer/ui/FooterSignup"
+import { FiMail, FiMapPin, FiMessageCircle } from "react-icons/fi"
 import { Link } from "react-router"
 
-const configuredSupportEmail = import.meta.env.VITE_SUPPORT_EMAIL?.trim()
-const supportEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-  configuredSupportEmail || ""
-)
-  ? configuredSupportEmail
-  : "support@studynotion.local"
+import "./footer.css"
 
-const Footer = () => {
-  const year = new Date().getFullYear()
-
+// Contact details come only from deployment configuration; anything that is
+// not configured (phone, social profiles) is left out rather than invented.
+export default function Footer() {
   return (
-    <footer className="bg-richblack-800 text-richblack-400">
-      <div className="mx-auto grid w-11/12 max-w-maxContent gap-10 py-14 md:grid-cols-2 lg:grid-cols-3">
-        <div className="flex flex-col gap-4">
-          <img
-            src={Logo}
-            alt="StudyNotion"
-            className="w-[160px] object-contain"
-          />
-          <p className="max-w-[360px] text-sm text-richblack-300">
-            Practical, instructor-led online courses that help learners build
-            durable skills and move their careers forward at their own pace.
-          </p>
-        </div>
-
-        <nav className="grid grid-cols-2 gap-8" aria-label="Footer navigation">
+    <footer className="sn-footer">
+      <FooterLandscape />
+      <div className="sn-footer-inner">
+        <FooterSignup />
+        <hr className="sn-footer-divider" />
+        <div className="sn-footer-grid">
+          <div className="sn-footer-identity">
+            <Link to="/" aria-label="Prahit home" className="sn-footer-brand">
+              <BrandLogo size="footer" decorative />
+            </Link>
+            <p className="sn-footer-tagline">
+              Practical, instructor-led courses that help learners build lasting
+              skills at their own pace.
+            </p>
+            <p className="sn-footer-copyright">
+              © {new Date().getFullYear()} Prahit. All rights reserved.
+            </p>
+          </div>
           {FooterLink2.map((section) => (
-            <div key={section.title}>
-              <h2 className="mb-3 text-base font-semibold text-richblack-50">
-                {section.title}
-              </h2>
-              <ul className="flex flex-col gap-2">
+            <nav
+              key={section.title}
+              aria-label={`${section.title} links`}
+              className="sn-footer-column"
+            >
+              <h2 className="sn-footer-heading">{section.title}</h2>
+              <ul className="sn-footer-links">
                 {section.links.map((link) => (
-                  <li key={link.title} className="text-sm">
-                    <Link
-                      to={link.link}
-                      className="transition-colors hover:text-richblack-50"
-                    >
+                  <li key={link.title}>
+                    <Link to={link.link} className="sn-footer-link">
                       {link.title}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           ))}
-        </nav>
-
-        <div>
-          <h2 className="mb-3 text-base font-semibold text-richblack-50">
-            Support
-          </h2>
-          <p className="mb-3 text-sm text-richblack-300">
-            Need help with your account, enrollment, or a course?
-          </p>
-          <a
-            href={`mailto:${supportEmail}`}
-            className="text-sm break-all text-yellow-50 transition-colors hover:text-yellow-100"
-          >
-            {supportEmail}
-          </a>
-        </div>
-      </div>
-
-      <div className="border-t border-richblack-700">
-        <div className="mx-auto flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-4 py-6 text-center text-sm text-richblack-400 lg:flex-row lg:text-left">
-          <nav
-            className="flex flex-wrap justify-center gap-x-5 gap-y-2 lg:justify-start"
-            aria-label="Legal and support"
-          >
-            <Link to="/contact" className="hover:text-richblack-50">
-              Contact support
-            </Link>
-            <Link to="/privacy-policy" className="hover:text-richblack-50">
-              Privacy policy
-            </Link>
-            <Link to="/cookie-policy" className="hover:text-richblack-50">
-              Cookie policy
-            </Link>
-            <Link to="/terms" className="hover:text-richblack-50">
-              Terms
-            </Link>
-            <Link to="/refund-policy" className="hover:text-richblack-50">
-              Refunds &amp; cancellations
-            </Link>
-          </nav>
-          <span>© {year} StudyNotion. All rights reserved.</span>
+          <div className="sn-footer-column sn-footer-contact-column">
+            <h2 className="sn-footer-heading">Contact us</h2>
+            <ul className="sn-footer-contact">
+              {legalAddress && (
+                <li>
+                  <FiMapPin aria-hidden="true" className="sn-footer-icon" />
+                  <span>{legalAddress}</span>
+                </li>
+              )}
+              {supportEmail && (
+                <li>
+                  <FiMail aria-hidden="true" className="sn-footer-icon" />
+                  <a href={`mailto:${supportEmail}`} className="sn-footer-link">
+                    {supportEmail}
+                  </a>
+                </li>
+              )}
+              <li>
+                <FiMessageCircle
+                  aria-hidden="true"
+                  className="sn-footer-icon"
+                />
+                <Link to="/contact" className="sn-footer-link">
+                  Send us a message
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </footer>
   )
 }
-
-export default Footer

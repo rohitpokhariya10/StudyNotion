@@ -1,0 +1,2884 @@
+{
+  "baseURL": "http://localhost:3000",
+  "apiMocking": false,
+  "checks": [
+    {
+      "engine": "chromium",
+      "width": 1920,
+      "route": "/",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1920,
+        "height": 673.671875
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 226.390625,
+          "width": 1920,
+          "height": 680,
+          "right": 1920,
+          "bottom": 906.390625
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1920,
+      "route": "/about",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1920,
+        "height": 673.671875
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 226.03125,
+          "width": 1920,
+          "height": 680,
+          "right": 1920,
+          "bottom": 906.03125
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1920,
+      "route": "/privacy-policy",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1920,
+        "height": 673.671875
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 226,
+          "width": 1920,
+          "height": 680,
+          "right": 1920,
+          "bottom": 906
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "route": "/",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1440,
+        "height": 611.75
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 288.203125,
+          "width": 1440,
+          "height": 600,
+          "right": 1440,
+          "bottom": 888.203125
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "route": "/about",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1440,
+        "height": 611.75
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 287.90625,
+          "width": 1440,
+          "height": 600,
+          "right": 1440,
+          "bottom": 887.90625
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "route": "/privacy-policy",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1440,
+        "height": 611.75
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 288,
+          "width": 1440,
+          "height": 600,
+          "right": 1440,
+          "bottom": 888
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1024,
+      "route": "/",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1024,
+        "height": 558.09375
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 342.328125,
+          "width": 1024,
+          "height": 426.65625,
+          "right": 1024,
+          "bottom": 768.984375
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1024,
+      "route": "/about",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1024,
+        "height": 558.09375
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 341.84375,
+          "width": 1024,
+          "height": 426.65625,
+          "right": 1024,
+          "bottom": 768.5
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1024,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1024,
+        "height": 558.09375
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 341.703125,
+          "width": 1024,
+          "height": 426.65625,
+          "right": 1024,
+          "bottom": 768.359375
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1024,
+      "route": "/privacy-policy",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1024,
+        "height": 558.09375
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 342,
+          "width": 1024,
+          "height": 426.65625,
+          "right": 1024,
+          "bottom": 768.65625
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 768,
+      "route": "/",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 768,
+        "height": 723.953125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -116,
+          "y": 176.171875,
+          "width": 1000,
+          "height": 416.65625,
+          "right": 884,
+          "bottom": 592.828125
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 768,
+      "route": "/about",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 768,
+        "height": 723.953125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -116,
+          "y": 175.5625,
+          "width": 1000,
+          "height": 416.65625,
+          "right": 884,
+          "bottom": 592.21875
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 768,
+      "route": "/privacy-policy",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 768,
+        "height": 723.953125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -116,
+          "y": 176,
+          "width": 1000,
+          "height": 416.65625,
+          "right": 884,
+          "bottom": 592.65625
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "route": "/",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 390,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -345,
+          "y": -64.328125,
+          "width": 1080,
+          "height": 450,
+          "right": 735,
+          "bottom": 385.671875
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "route": "/about",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 390,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -345,
+          "y": -64.359375,
+          "width": 1080,
+          "height": 450,
+          "right": 735,
+          "bottom": 385.640625
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "route": "/privacy-policy",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 390,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -345,
+          "y": -64,
+          "width": 1080,
+          "height": 450,
+          "right": 735,
+          "bottom": 386
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "route": "/",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 360,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -360,
+          "y": -64.328125,
+          "width": 1080,
+          "height": 450,
+          "right": 720,
+          "bottom": 385.671875
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "route": "/about",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 360,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -360,
+          "y": -64.75,
+          "width": 1080,
+          "height": 450,
+          "right": 720,
+          "bottom": 385.25
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 360,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -360,
+          "y": -64.0625,
+          "width": 1080,
+          "height": 450,
+          "right": 720,
+          "bottom": 385.9375
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 360,
+      "route": "/privacy-policy",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 360,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -360,
+          "y": -64,
+          "width": 1080,
+          "height": 450,
+          "right": 720,
+          "bottom": 386
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "route": "/",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 320,
+        "height": 1298.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -380,
+          "y": -199.703125,
+          "width": 1080,
+          "height": 450,
+          "right": 700,
+          "bottom": 250.296875
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "route": "/about",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 320,
+        "height": 1298.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -380,
+          "y": -199.515625,
+          "width": 1080,
+          "height": 450,
+          "right": 700,
+          "bottom": 250.484375
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 320,
+        "height": 1298.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -380,
+          "y": -199.8125,
+          "width": 1080,
+          "height": 450,
+          "right": 700,
+          "bottom": 250.1875
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "route": "/privacy-policy",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 320,
+        "height": 1298.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -380,
+          "y": -199,
+          "width": 1080,
+          "height": 450,
+          "right": 700,
+          "bottom": 251
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0
+    },
+    {
+      "engine": "chromium",
+      "width": 1920,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1920,
+        "height": 673.671875
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 226.34375,
+          "width": 1920,
+          "height": 680,
+          "right": 1920,
+          "bottom": 906.34375
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0,
+      "screenshot": "/Users/rohitpokhariya/Documents/Prahit/docs/growed-redesign/screenshots/footer-localhost-1920.png",
+      "verifiedAt": "2026-10-06T19:45:43.511Z"
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1440,
+        "height": 611.75
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": 0,
+          "y": 288.125,
+          "width": 1440,
+          "height": 600,
+          "right": 1440,
+          "bottom": 888.125
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0,
+      "keyboardNavigation": "Tab",
+      "focus": {
+        "text": "Explore courses",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px"
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      "screenshot": "/Users/rohitpokhariya/Documents/Prahit/docs/growed-redesign/screenshots/footer-localhost-1440.png",
+      "verifiedAt": "2026-10-06T19:45:45.075Z"
+    },
+    {
+      "engine": "chromium",
+      "width": 768,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 768,
+        "height": 723.953125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -116,
+          "y": 175.65625,
+          "width": 1000,
+          "height": 416.65625,
+          "right": 884,
+          "bottom": 592.3125
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 36,
+      "inputs": 0,
+      "screenshot": "/Users/rohitpokhariya/Documents/Prahit/docs/growed-redesign/screenshots/footer-localhost-768.png",
+      "verifiedAt": "2026-10-06T19:45:46.085Z"
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 390,
+        "height": 1028.828125
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -345,
+          "y": -64,
+          "width": 1080,
+          "height": 450,
+          "right": 735,
+          "bottom": 386
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0,
+      "keyboardNavigation": "Tab",
+      "focus": {
+        "text": "Explore courses",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px"
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      "screenshot": "/Users/rohitpokhariya/Documents/Prahit/docs/growed-redesign/screenshots/footer-localhost-390.png",
+      "verifiedAt": "2026-10-06T19:45:47.596Z"
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "route": "/services",
+      "fallback": true,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 1440,
+        "height": 611.75
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": null,
+      "ctaMinHeight": 36,
+      "inputs": 0,
+      "keyboardNavigation": "Tab",
+      "focus": {
+        "text": "Explore courses",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px"
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      "screenshot": "/Users/rohitpokhariya/Documents/Prahit/docs/growed-redesign/screenshots/footer-localhost-fallback-1440.png",
+      "verifiedAt": "2026-10-06T19:45:49.081Z"
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "route": "/services",
+      "fallback": false,
+      "overflow": 0,
+      "clipped": [],
+      "footer": {
+        "width": 384,
+        "height": 1028.21875
+      },
+      "links": [
+        {
+          "label": "Create an account",
+          "href": "/signup"
+        },
+        {
+          "label": "Explore courses",
+          "href": "/services"
+        },
+        {
+          "label": "Prahit home",
+          "href": "/"
+        },
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Services",
+          "href": "/services"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        },
+        {
+          "label": "Blogs",
+          "href": "/blogs"
+        },
+        {
+          "label": "Project NEET",
+          "href": "/project-neet"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "label": "Terms of Use",
+          "href": "/terms"
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "href": "/refund-policy"
+        },
+        {
+          "label": "Cookie Policy",
+          "href": "/cookie-policy"
+        },
+        {
+          "label": "Send us a message",
+          "href": "/contact"
+        }
+      ],
+      "scene": {
+        "ariaHidden": "true",
+        "pointerEvents": "none"
+      },
+      "art": {
+        "src": "/assets/footer-landscape-C3Be7JlL.svg",
+        "natural": [
+          1440,
+          600
+        ],
+        "rendered": {
+          "x": -348,
+          "y": -64.890625,
+          "width": 1080,
+          "height": 450,
+          "right": 732,
+          "bottom": 385.109375
+        },
+        "fit": "cover"
+      },
+      "ctaMinHeight": 44,
+      "inputs": 0,
+      "keyboardNavigation": "Option+Tab (macOS link navigation)",
+      "focus": {
+        "text": "Explore courses",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px"
+      },
+      "axe": {
+        "violations": [],
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      "verifiedAt": "2026-10-06T19:45:51.743Z"
+    }
+  ],
+  "pageErrors": [],
+  "apiResponses": [
+    {
+      "method": "GET",
+      "url": "http://localhost:4000/api/v1/profile/getUserDetails",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:4000/api/v1/course/showAllCategories",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:4000/api/v1/course/getReviews",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:4000/api/v2/courses?sort=newest&limit=12",
+      "status": 200
+    }
+  ],
+  "failures": [],
+  "linkRoutes": [
+    {
+      "href": "/signup",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/services",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/about",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/careers",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/blogs",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/project-neet",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/privacy-policy",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/terms",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/refund-policy",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/cookie-policy",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    },
+    {
+      "href": "/contact",
+      "heading": "Learn from\nAnywhere Around\nthe Globe."
+    }
+  ]
+}

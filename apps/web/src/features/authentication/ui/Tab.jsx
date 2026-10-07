@@ -4,7 +4,7 @@ export default function Tab({ tabData, field, setField }) {
       style={{
         boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
       }}
-      className="my-6 flex max-w-max gap-x-1 rounded-full bg-richblack-800 p-1"
+      className="my-6 flex max-w-max gap-x-1 rounded-full bg-surface-secondary p-1"
       aria-label="Account type"
       role="group"
     >
@@ -16,8 +16,8 @@ export default function Tab({ tabData, field, setField }) {
           aria-pressed={field === tab.type}
           className={`${
             field === tab.type
-              ? "bg-richblack-900 text-richblack-5"
-              : "bg-transparent text-richblack-200"
+              ? "bg-surface-primary text-text-primary"
+              : "bg-transparent text-text-secondary"
           } rounded-full px-5 py-2 transition-all duration-200`}
         >
           {tab?.tabName}

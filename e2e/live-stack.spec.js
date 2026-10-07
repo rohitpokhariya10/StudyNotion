@@ -63,7 +63,7 @@ test("live public home, catalog, and course detail are connected", async ({
   await page.goto("/signup")
   await expect(
     page.getByRole("heading", {
-      name: "Build practical skills with StudyNotion",
+      name: "Build practical skills with Prahit",
       level: 1,
     })
   ).toBeVisible()

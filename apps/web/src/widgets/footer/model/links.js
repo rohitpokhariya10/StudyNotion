@@ -1,20 +1,25 @@
-// Only routes that are implemented in App.jsx belong here. Add new footer
-// destinations alongside their real page and route so the footer never sends
-// learners to placeholder 404s.
+// Only routes that are implemented in the router belong here, so the footer
+// never sends learners to placeholder 404s. The contact page is linked from
+// the footer's contact column.
 export const FooterLink2 = [
   {
-    title: "Platform",
+    title: "Website",
     links: [
       { title: "Home", link: "/" },
       { title: "About Us", link: "/about" },
-      { title: "Contact Us", link: "/contact" },
+      { title: "Services", link: "/services" },
+      { title: "Careers", link: "/careers" },
+      { title: "Blogs", link: "/blogs" },
+      { title: "Project NEET", link: "/project-neet" },
     ],
   },
   {
-    title: "Account",
+    title: "Company",
     links: [
-      { title: "Log in", link: "/login" },
-      { title: "Sign up", link: "/signup" },
+      { title: "Privacy Policy", link: "/privacy-policy" },
+      { title: "Terms of Use", link: "/terms" },
+      { title: "Refunds & Cancellations", link: "/refund-policy" },
+      { title: "Cookie Policy", link: "/cookie-policy" },
     ],
   },
 ]

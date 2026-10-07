@@ -1,0 +1,17 @@
+
+> studynotion@0.1.0 test:frontend
+> npm run test --workspace studynotion-web src/widgets/footer/ui/Footer.test.jsx src/pages/legal/Legal.test.jsx
+
+
+> studynotion-web@0.1.0 test
+> vitest run src/widgets/footer/ui/Footer.test.jsx src/pages/legal/Legal.test.jsx
+
+
+ RUN  v4.1.10 /Users/rohitpokhariya/Documents/Prahit/apps/web
+
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  01:07:51
+   Duration  1.57s (transform 145ms, setup 187ms, import 437ms, tests 868ms, environment 1.17s)
+

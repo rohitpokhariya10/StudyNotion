@@ -1,12 +1,14 @@
-function PageLoadingFallback() {
+import FlaskLoader from "@/shared/ui/FlaskLoader"
+
+// Full content-area loading state (lazy routes, session and page loads). The
+// navbar and app shell stay rendered around it.
+function PageLoadingFallback({ accessibleLabel = "Loading page", label }) {
   return (
-    <div
-      className="grid min-h-[calc(100vh-3.5rem)] place-items-center"
-      role="status"
-      aria-label="Loading page"
-    >
-      <div className="spinner" />
-    </div>
+    <FlaskLoader
+      variant="page"
+      accessibleLabel={accessibleLabel}
+      label={label}
+    />
   )
 }
 

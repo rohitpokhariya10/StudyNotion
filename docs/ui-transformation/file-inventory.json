@@ -1,0 +1,455 @@
+{
+  "comparison": "Pre-redesign working-tree snapshot, not HEAD",
+  "frontendFiles": 88,
+  "frontendLinesAdded": 2628,
+  "frontendLinesRemoved": 1637,
+  "files": [
+    {
+      "path": "apps/web/src/entities/course/ui/CourseAccordionBar.jsx",
+      "added": 3,
+      "removed": 3
+    },
+    {
+      "path": "apps/web/src/entities/course/ui/CourseCard.jsx",
+      "added": 3,
+      "removed": 3
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/DeleteAccount.jsx",
+      "added": 13,
+      "removed": 13
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/GoogleReauthenticationButton.jsx",
+      "added": 3,
+      "removed": 3
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/GoogleSignInButton.jsx",
+      "added": 2,
+      "removed": 2
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/LoginForm.jsx",
+      "added": 6,
+      "removed": 6
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/PolicyAcknowledgement.jsx",
+      "added": 3,
+      "removed": 3
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/ProfileDropdown.jsx",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/SignupForm.jsx",
+      "added": 13,
+      "removed": 13
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/Tab.jsx",
+      "added": 3,
+      "removed": 3
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/Template.jsx",
+      "added": 25,
+      "removed": 30
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/UpdatePassword.jsx",
+      "added": 5,
+      "removed": 5
+    },
+    {
+      "path": "apps/web/src/features/authentication/ui/VerificationCodeInput.jsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "apps/web/src/features/contact-support/ui/ContactUsForm.jsx",
+      "added": 6,
+      "removed": 6
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/CourseBuilder/CourseBuilderForm.jsx",
+      "added": 8,
+      "removed": 8
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/CourseBuilder/NestedView.jsx",
+      "added": 14,
+      "removed": 14
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/CourseBuilder/SubSectionModal.jsx",
+      "added": 10,
+      "removed": 10
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/CourseInformation/ChipInput.jsx",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/CourseInformation/CourseInformationForm.jsx",
+      "added": 18,
+      "removed": 18
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/CourseInformation/RequirementsField.jsx",
+      "added": 5,
+      "removed": 5
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/PublishCourse/index.jsx",
+      "added": 5,
+      "removed": 5
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/RenderSteps.jsx",
+      "added": 10,
+      "removed": 8
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/Upload.jsx",
+      "added": 11,
+      "removed": 11
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/AddCourse/index.jsx",
+      "added": 12,
+      "removed": 7
+    },
+    {
+      "path": "apps/web/src/features/course-authoring/ui/EditCourse/index.jsx",
+      "added": 2,
+      "removed": 2
+    },
+    {
+      "path": "apps/web/src/features/course-purchase/ui/Cart.jsx",
+      "added": 16,
+      "removed": 5
+    },
+    {
+      "path": "apps/web/src/features/course-purchase/ui/CheckoutPolicyAcknowledgement.jsx",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/features/course-purchase/ui/RenderCartCourses.jsx",
+      "added": 8,
+      "removed": 7
+    },
+    {
+      "path": "apps/web/src/features/course-purchase/ui/RenderTotalAmount.jsx",
+      "added": 6,
+      "removed": 6
+    },
+    {
+      "path": "apps/web/src/features/course-review/ui/CourseReviewModal.jsx",
+      "added": 11,
+      "removed": 11
+    },
+    {
+      "path": "apps/web/src/features/course-review/ui/RatingInput.jsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "apps/web/src/features/instructor-approval/ui/InstructorApprovals.jsx",
+      "added": 22,
+      "removed": 22
+    },
+    {
+      "path": "apps/web/src/features/lesson-playback/ui/VideoDetails.jsx",
+      "added": 20,
+      "removed": 22
+    },
+    {
+      "path": "apps/web/src/features/payment-reconciliation/ui/PaymentReconciliation.jsx",
+      "added": 55,
+      "removed": 55
+    },
+    {
+      "path": "apps/web/src/features/profile-settings/ui/ChangeProfilePicture.jsx",
+      "added": 3,
+      "removed": 5
+    },
+    {
+      "path": "apps/web/src/features/profile-settings/ui/EditProfile.jsx",
+      "added": 9,
+      "removed": 9
+    },
+    {
+      "path": "apps/web/src/pages/about/index.jsx",
+      "added": 113,
+      "removed": 98
+    },
+    {
+      "path": "apps/web/src/pages/about/ui/ContactFormSection.jsx",
+      "added": 2,
+      "removed": 2
+    },
+    {
+      "path": "apps/web/src/pages/about/ui/LearningGrid.jsx",
+      "added": 51,
+      "removed": 87
+    },
+    {
+      "path": "apps/web/src/pages/about/ui/Quote.jsx",
+      "added": 4,
+      "removed": 7
+    },
+    {
+      "path": "apps/web/src/pages/about/ui/Stats.jsx",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/pages/catalog/index.jsx",
+      "added": 6,
+      "removed": 6
+    },
+    {
+      "path": "apps/web/src/pages/contact/index.jsx",
+      "added": 24,
+      "removed": 22
+    },
+    {
+      "path": "apps/web/src/pages/contact/ui/ContactDetails.jsx",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/pages/contact/ui/ContactForm.jsx",
+      "added": 5,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/pages/course-details/index.jsx",
+      "added": 182,
+      "removed": 181
+    },
+    {
+      "path": "apps/web/src/pages/course-details/ui/CourseDetailsCard.jsx",
+      "added": 8,
+      "removed": 10
+    },
+    {
+      "path": "apps/web/src/pages/dashboard/index.jsx",
+      "added": 5,
+      "removed": 5
+    },
+    {
+      "path": "apps/web/src/pages/enrolled-courses/index.jsx",
+      "added": 64,
+      "removed": 73
+    },
+    {
+      "path": "apps/web/src/pages/forgot-password/index.jsx",
+      "added": 9,
+      "removed": 9
+    },
+    {
+      "path": "apps/web/src/pages/home/index.jsx",
+      "added": 304,
+      "removed": 208
+    },
+    {
+      "path": "apps/web/src/pages/instructor-courses/index.jsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "apps/web/src/pages/instructor-courses/ui/CoursesTable.jsx",
+      "added": 104,
+      "removed": 134
+    },
+    {
+      "path": "apps/web/src/pages/instructor-dashboard/index.jsx",
+      "added": 37,
+      "removed": 30
+    },
+    {
+      "path": "apps/web/src/pages/instructor-dashboard/ui/InstructorChart.jsx",
+      "added": 11,
+      "removed": 10
+    },
+    {
+      "path": "apps/web/src/pages/learning/index.jsx",
+      "added": 13,
+      "removed": 13
+    },
+    {
+      "path": "apps/web/src/pages/legal/Legal.test.jsx",
+      "added": 4,
+      "removed": 0
+    },
+    {
+      "path": "apps/web/src/pages/legal/index.jsx",
+      "added": 8,
+      "removed": 8
+    },
+    {
+      "path": "apps/web/src/pages/neet-mocks/index.jsx",
+      "added": 14,
+      "removed": 8
+    },
+    {
+      "path": "apps/web/src/pages/neet-onboarding/index.jsx",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "apps/web/src/pages/not-found/index.jsx",
+      "added": 6,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/pages/policy-acceptance/index.jsx",
+      "added": 3,
+      "removed": 3
+    },
+    {
+      "path": "apps/web/src/pages/profile/index.jsx",
+      "added": 51,
+      "removed": 27
+    },
+    {
+      "path": "apps/web/src/pages/purchase-history/index.jsx",
+      "added": 37,
+      "removed": 37
+    },
+    {
+      "path": "apps/web/src/pages/settings/index.jsx",
+      "added": 8,
+      "removed": 5
+    },
+    {
+      "path": "apps/web/src/pages/update-password/index.jsx",
+      "added": 12,
+      "removed": 12
+    },
+    {
+      "path": "apps/web/src/pages/verify-email/index.jsx",
+      "added": 8,
+      "removed": 8
+    },
+    {
+      "path": "apps/web/src/shared/styles/education.css",
+      "added": 469,
+      "removed": 0
+    },
+    {
+      "path": "apps/web/src/shared/styles/globals.css",
+      "added": 39,
+      "removed": 34
+    },
+    {
+      "path": "apps/web/src/shared/ui/BrandMark.jsx",
+      "added": 28,
+      "removed": 0
+    },
+    {
+      "path": "apps/web/src/shared/ui/Button.jsx",
+      "added": 7,
+      "removed": 7
+    },
+    {
+      "path": "apps/web/src/shared/ui/ConfirmationModal.jsx",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/shared/ui/ErrorBoundary.jsx",
+      "added": 9,
+      "removed": 9
+    },
+    {
+      "path": "apps/web/src/shared/ui/HighlightText.jsx",
+      "added": 1,
+      "removed": 6
+    },
+    {
+      "path": "apps/web/src/shared/ui/IconBtn.jsx",
+      "added": 2,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/shared/ui/LearningIllustration.jsx",
+      "added": 323,
+      "removed": 0
+    },
+    {
+      "path": "apps/web/src/shared/ui/LinkButton.jsx",
+      "added": 5,
+      "removed": 8
+    },
+    {
+      "path": "apps/web/src/shared/ui/PageIntro.jsx",
+      "added": 20,
+      "removed": 0
+    },
+    {
+      "path": "apps/web/src/widgets/app-shell/AppShell.jsx",
+      "added": 4,
+      "removed": 1
+    },
+    {
+      "path": "apps/web/src/widgets/curriculum-panel/ui/VideoDetailsSidebar.jsx",
+      "added": 21,
+      "removed": 18
+    },
+    {
+      "path": "apps/web/src/widgets/dashboard-sidebar/ui/Sidebar.jsx",
+      "added": 24,
+      "removed": 17
+    },
+    {
+      "path": "apps/web/src/widgets/dashboard-sidebar/ui/SidebarLink.jsx",
+      "added": 4,
+      "removed": 4
+    },
+    {
+      "path": "apps/web/src/widgets/footer/ui/Footer.jsx",
+      "added": 81,
+      "removed": 63
+    },
+    {
+      "path": "apps/web/src/widgets/navbar/ui/Navbar.jsx",
+      "added": 59,
+      "removed": 51
+    },
+    {
+      "path": "apps/web/src/widgets/neet-hero/ui/NeetHero.jsx",
+      "added": 14,
+      "removed": 7
+    },
+    {
+      "path": "apps/web/src/widgets/neet-shell/styles/projectNeet.css",
+      "added": 30,
+      "removed": 30
+    },
+    {
+      "path": "apps/web/src/widgets/neet-shell/ui/ProjectNeetShell.jsx",
+      "added": 15,
+      "removed": 0
+    },
+    {
+      "path": "apps/web/src/widgets/review-slider/ui/ReviewSlider.jsx",
+      "added": 22,
+      "removed": 19
+    }
+  ],
+  "verificationFiles": [
+    "e2e/catalog.spec.js",
+    "e2e/learning.spec.js",
+    "e2e/project-neet.spec.js",
+    "e2e/ui-transformation.spec.js",
+    "playwright.ui.config.mjs"
+  ]
+}

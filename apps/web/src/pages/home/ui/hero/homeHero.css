@@ -1,0 +1,209 @@
+/* Homepage hero: display headline beside two glossy 3D capsule characters.
+   Scoped to the home page. Scene geometry comes from capsuleLayout.js:
+   the scene box keeps FRAME_WIDTH / FRAME_HEIGHT (2.35 / 2.4), and the
+   fractions below locate the capsules and the tall capsule's eyes in it. */
+.sn-capsule-hero {
+  --sn-hero-canvas: #f2f1ed;
+  --sn-hero-ink: #0d0d12;
+  --sn-hero-muted: #55544f;
+  --sn-hero-electric: #2b3bff;
+  --sn-hero-electric-hover: #1d29d9;
+  --capsule-aspect: 0.9792;
+  /* Scene box width; height follows the frame aspect. */
+  --scene-w: min(100%, 22rem);
+  --scene-h: calc(var(--scene-w) / var(--capsule-aspect));
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  padding-bottom: 3rem;
+  background: var(--sn-hero-canvas);
+  color: var(--sn-hero-ink);
+}
+.sn-capsule-stage {
+  position: relative;
+}
+.sn-capsule-scene {
+  position: relative;
+  width: var(--scene-w);
+  aspect-ratio: var(--capsule-aspect);
+  margin-inline: auto;
+  pointer-events: none;
+}
+.sn-capsule-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sn-capsule-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Headline: a dominant sans line and an electric-blue italic serif line. */
+.sn-capsule-title {
+  margin: 0.25rem 0 0;
+  font-size: clamp(2.75rem, 12.6vw, 5rem);
+  line-height: 0.94;
+  font-weight: 500;
+  text-wrap: initial;
+}
+.sn-capsule-title-sans {
+  display: block;
+  font-family: "Inter Tight Variable", "Inter Tight", var(--sn-font-display);
+  letter-spacing: -0.045em;
+  color: var(--sn-hero-ink);
+}
+.sn-capsule-title-serif {
+  display: block;
+  margin-top: 0.04em;
+  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+  color: var(--sn-hero-electric);
+}
+
+.sn-capsule-intro {
+  margin-top: 1.75rem;
+  max-width: 30rem;
+  color: var(--sn-hero-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+.sn-capsule-actions {
+  margin-top: 1.5rem;
+}
+.sn-capsule-cta {
+  min-height: 3rem;
+  padding-inline: 1.5rem;
+  border-radius: 999px;
+  background: var(--sn-hero-electric);
+  color: #ffffff;
+  font-weight: 500;
+}
+.sn-capsule-cta:hover {
+  background: var(--sn-hero-electric-hover);
+  box-shadow: 0 10px 24px rgb(43 59 255 / 0.24);
+}
+.sn-capsule-cta:focus-visible {
+  outline-color: var(--sn-hero-electric);
+}
+
+.sn-capsule-points {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  max-width: 30rem;
+}
+.sn-capsule-points li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  column-gap: 0.625rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--sn-hero-muted);
+}
+.sn-capsule-points svg {
+  grid-row: span 2;
+  margin-top: 0.1rem;
+  font-size: 1.25rem;
+  color: var(--sn-hero-electric);
+}
+.sn-capsule-points .font-semibold {
+  color: var(--sn-hero-ink);
+  font-size: 0.9375rem;
+}
+
+/* Course finder as a full-width bar below the composition. */
+.sn-capsule-finder {
+  position: relative;
+  z-index: 1;
+  margin-top: 2.5rem;
+}
+.sn-capsule-finder .sn-finder {
+  max-width: none;
+  border-color: rgb(13 13 18 / 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 50px rgb(13 13 18 / 0.08);
+}
+
+@media (max-width: 479px) {
+  .sn-capsule-points {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+}
+@media (min-width: 640px) {
+  .sn-capsule-hero {
+    --scene-w: min(100%, 30rem);
+  }
+}
+
+/* Tablet: characters above the headline, which tucks under their bases. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sn-capsule-hero {
+    --scene-w: min(100%, 33rem);
+    padding-bottom: 4rem;
+  }
+  .sn-capsule-title {
+    margin-top: calc(var(--scene-h) * -0.06);
+  }
+}
+
+/* Desktop: headline on the left, characters to the right. The headline's
+   first line starts just below the tall capsule's eyes and runs across it. */
+@media (min-width: 1024px) {
+  .sn-capsule-hero {
+    --scene-w: clamp(30rem, 52vw, 47.5rem);
+    --scene-top: calc(4rem - var(--scene-h) * 0.146);
+    --scene-right: max(1rem, calc(50% - var(--sn-content) / 2 - 9rem));
+    padding-bottom: 4.5rem;
+  }
+  .sn-capsule-stage {
+    /* Room for the characters when the copy is shorter than they are. */
+    min-height: calc(4rem + var(--scene-h) * 0.854 + 1.5rem);
+  }
+  .sn-capsule-scene {
+    position: absolute;
+    top: var(--scene-top);
+    right: var(--scene-right);
+    margin: 0;
+  }
+  .sn-capsule-content {
+    padding-top: calc(4rem + var(--scene-h) * 0.33);
+  }
+  .sn-capsule-title {
+    margin: 0;
+    font-size: clamp(4.25rem, 7.5vw, 8rem);
+    line-height: 0.92;
+  }
+  .sn-capsule-title-serif {
+    padding-left: 0.5em;
+  }
+  .sn-capsule-title-serif > span {
+    display: block;
+  }
+  /* CTA and the two points share one row, below the capsule bases. */
+  .sn-capsule-actions {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    margin-top: 1.75rem;
+  }
+  .sn-capsule-cta {
+    flex: none;
+  }
+  .sn-capsule-points {
+    grid-template-columns: repeat(2, minmax(0, 15rem));
+    gap: 2rem;
+    max-width: none;
+    margin: 0;
+  }
+  .sn-capsule-finder {
+    margin-top: 3rem;
+  }
+}

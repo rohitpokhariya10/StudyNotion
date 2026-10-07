@@ -41,7 +41,7 @@ const capture = async (page, testInfo, state) => {
   if (!captureScreenshots) return
   const viewport = testInfo.project.name.replace("catalog-", "")
   await page.screenshot({
-    path: `docs/audits/screenshots/catalog/${state}-${viewport}.png`,
+    path: testInfo.outputPath(`catalog-${state}-${viewport}.png`),
     fullPage: true,
     animations: "disabled",
   })
@@ -163,11 +163,19 @@ test("catalog reaches the existing public course-detail route", async ({
   await expect(courseLink).toBeFocused()
   await expect
     .poll(() =>
-      courseLink
-        .locator("xpath=..")
-        .evaluate((element) => window.getComputedStyle(element).borderColor)
+      courseLink.locator("xpath=..").evaluate((element) => {
+        const style = window.getComputedStyle(element)
+        const focus = style
+          .getPropertyValue("--catalog-focus")
+          .trim()
+          .split(/\s+/)
+          .join(", ")
+        return (
+          style.borderColor === `rgb(${focus})` && style.boxShadow !== "none"
+        )
+      })
     )
-    .toContain("14, 116, 144")
+    .toBe(true)
 
   const accessibility = await new AxeBuilder({ page }).include("main").analyze()
   expect(accessibility.violations).toEqual([])
@@ -181,6 +189,27 @@ test("catalog reaches the existing public course-detail route", async ({
     page.getByText("Production React", { exact: true }).first()
   ).toBeVisible()
   await capture(page, testInfo, "course-detail-destination")
+  const detailAccessibility = await new AxeBuilder({ page }).analyze()
+  expect(detailAccessibility.violations).toEqual([])
+  await expect(
+    page.getByRole("button", { name: "Buy Now", exact: true })
+  ).toBeDisabled()
+  await page.getByRole("checkbox").check()
+  await expect(
+    page.getByRole("button", { name: "Buy Now", exact: true })
+  ).toBeEnabled()
+  await page.getByRole("button", { name: "Buy Now", exact: true }).click()
+  await expect(
+    page.getByRole("dialog", { name: "You are not logged in!" })
+  ).toBeVisible()
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Login", exact: true })
+    .click()
+  await expect(page).toHaveURL("/login")
+  await expect(
+    page.getByRole("heading", { name: "Welcome Back" })
+  ).toBeVisible()
 })
 
 test("catalog retains cards while loading the next cursor page", async ({

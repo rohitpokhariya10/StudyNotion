@@ -43,6 +43,7 @@
 *.tar.gz
 *.tgz
 *.zip
+doc
 
 # Local Codex orchestration and reproducible audit artifacts
 /StudyNotion_Codex_Master_Prompt.md

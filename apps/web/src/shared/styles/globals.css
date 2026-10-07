@@ -1,4 +1,5 @@
 @import "tailwindcss" source("../../");
+@import "./education.css";
 
 /*
  * Keep the Tailwind 3 replacement semantics: StudyNotion owns the color and
@@ -116,7 +117,7 @@
   --color-pure-greys-900: #141414;
 
   --font-*: initial;
-  --font-inter: ui-sans-serif, system-ui, sans-serif;
+  --font-inter: var(--sn-font-body);
   --font-edu-sa: Georgia, ui-serif, serif;
   --font-mono: ui-monospace, SFMono-Regular, monospace;
   --default-font-family:
@@ -129,6 +130,11 @@
 
 /* Catalog tokens retain their scoped runtime values and alpha modifiers. */
 @theme inline {
+  --color-brand-soft: var(--sn-blue-soft);
+  --color-brand-hover: var(--sn-brand-hover);
+  --color-mint: var(--sn-mint);
+  --color-peach: var(--sn-peach);
+  --color-sun: var(--sn-sun);
   --color-catalog-canvas: rgb(var(--catalog-canvas));
   --color-catalog-surface: rgb(var(--catalog-surface));
   --color-catalog-surface-muted: rgb(var(--catalog-surface-muted));
@@ -145,20 +151,51 @@
   --radius-product-lg: var(--catalog-radius-lg);
   --shadow-product: var(--catalog-shadow);
 
-  /* Shared semantic aliases are intentionally mapped to the existing palette. */
-  --color-brand-primary: var(--color-yellow-50);
-  --color-surface-primary: var(--color-richblack-900);
-  --color-surface-secondary: var(--color-richblack-800);
-  --color-surface-elevated: var(--color-richblack-700);
-  --color-text-primary: var(--color-richblack-5);
-  --color-text-secondary: var(--color-richblack-100);
-  --color-text-muted: var(--color-richblack-300);
-  --color-border-default: var(--color-richblack-600);
-  --color-border-subtle: var(--color-richblack-700);
-  --color-focus: var(--color-yellow-25);
-  --color-success: var(--color-caribbeangreen-100);
-  --color-warning: var(--color-yellow-50);
-  --color-danger: var(--color-pink-200);
+  --color-brand-primary: var(--sn-action);
+  --color-surface-primary: var(--sn-canvas);
+  --color-surface-secondary: var(--sn-surface);
+  --color-surface-elevated: var(--sn-muted-surface);
+  --color-text-primary: var(--sn-ink);
+  --color-text-secondary: var(--sn-muted);
+  --color-text-muted: var(--sn-muted);
+  --color-border-default: var(--sn-border);
+  --color-border-subtle: var(--sn-border);
+  --color-focus: var(--sn-brand);
+  --color-success: var(--sn-success);
+  --color-warning: var(--sn-warning);
+  --color-danger: var(--sn-danger);
+
+  /*
+   * Project NEET semantic tokens. Values are scoped runtime variables defined
+   * by the code-split Project NEET stylesheet: `.pn-experience` (immersive)
+   * and `.pn-exam` (calm focus mode) provide two palettes for the same names.
+   */
+  --color-neet-canvas: rgb(var(--pn-canvas));
+  --color-neet-canvas-raised: rgb(var(--pn-canvas-raised));
+  --color-neet-surface: rgb(var(--pn-surface));
+  --color-neet-surface-muted: rgb(var(--pn-surface-muted));
+  --color-neet-ink: rgb(var(--pn-ink));
+  --color-neet-muted: rgb(var(--pn-muted));
+  --color-neet-line: rgb(var(--pn-line));
+  --color-neet-accent: rgb(var(--pn-accent));
+  --color-neet-accent-ink: rgb(var(--pn-accent-ink));
+  --color-neet-accent-soft: rgb(var(--pn-accent-soft));
+  --color-neet-pulse: rgb(var(--pn-pulse));
+  --color-neet-sun: rgb(var(--pn-sun));
+  --color-neet-cell: rgb(var(--pn-cell));
+  --color-neet-success: rgb(var(--pn-success));
+  --color-neet-warning: rgb(var(--pn-warning));
+  --color-neet-danger: rgb(var(--pn-danger));
+  --color-neet-review: rgb(var(--pn-review));
+  --color-neet-focus: rgb(var(--pn-focus));
+  --color-neet-physics: rgb(var(--pn-physics));
+  --color-neet-chemistry: rgb(var(--pn-chemistry));
+  --color-neet-botany: rgb(var(--pn-botany));
+  --color-neet-zoology: rgb(var(--pn-zoology));
+  --font-neet-display: var(--pn-font-display);
+  --font-neet-body: var(--pn-font-body);
+  --radius-neet: var(--pn-radius);
+  --radius-neet-lg: var(--pn-radius-lg);
 }
 
 /* Preserve the Tailwind 3 Preflight defaults that Tailwind 4 intentionally changed. */
@@ -176,21 +213,22 @@
 }
 
 .catalog-theme {
-  --catalog-canvas: 247 243 234;
-  --catalog-surface: 255 252 247;
-  --catalog-surface-muted: 239 234 223;
-  --catalog-text: 24 32 44;
-  --catalog-muted: 93 102 116;
-  --catalog-border: 217 210 197;
-  --catalog-action: 27 39 56;
-  --catalog-brand: 180 83 9;
-  --catalog-brand-soft: 254 243 199;
-  --catalog-info: 7 89 133;
-  --catalog-danger: 180 35 24;
-  --catalog-focus: 14 116 144;
+  /* Mirrors the shared StudyNotion palette (see education.css). */
+  --catalog-canvas: 255 255 255;
+  --catalog-surface: 255 255 255;
+  --catalog-surface-muted: 242 247 255;
+  --catalog-text: 16 16 16;
+  --catalog-muted: 89 89 89;
+  --catalog-border: 227 232 239;
+  --catalog-action: 20 99 181;
+  --catalog-brand: 20 99 181;
+  --catalog-brand-soft: 242 247 255;
+  --catalog-info: 25 113 205;
+  --catalog-danger: 180 35 53;
+  --catalog-focus: 25 113 205;
   --catalog-radius: 0.625rem;
-  --catalog-radius-lg: 0.75rem;
-  --catalog-shadow: 0 12px 32px rgb(24 32 44 / 0.08);
+  --catalog-radius-lg: 1rem;
+  --catalog-shadow: 0 8px 30px rgb(16 24 40 / 0.06);
   color-scheme: light;
 }
 
@@ -200,7 +238,7 @@
 }
 
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid #ffe83d;
+  outline: 3px solid var(--sn-brand);
   outline-offset: 3px;
 }
 
@@ -247,25 +285,20 @@
   }
 }
 
-html,
-body {
-  overflow-x: hidden;
-}
-
 /* ===== Scrollbar CSS ===== */
 /* Firefox */
 * {
   scrollbar-width: auto;
-  scrollbar-color: #afb2bf;
+  scrollbar-color: #a8bfd7 #f3f8fd;
 }
 
 /* Chrome, Edge, and Safari */
 *::-webkit-scrollbar {
-  width: 3px;
+  width: 6px;
 }
 
 *::-webkit-scrollbar-track {
-  background: #000814;
+  background: #f3f8fd;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -288,167 +321,10 @@ details > summary::-webkit-details-marker {
   display: none;
 }
 
-/* https://10015.io/tools/css-loader-generator */
-.spinner {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 9px solid #f1f2ff;
-  animation:
-    spinner-bulqg1 0.8s infinite linear alternate,
-    spinner-oaa3wk 1.6s infinite linear;
-}
-
-.codeblock1 {
-  width: 372.95px;
-  height: 257.05px;
-  border-radius: 100%;
-  left: calc(50% - 372.95px / 2 - 76.53px);
-  top: calc(50% - 257.05px / 2 - 47.47px);
-  background: linear-gradient(
-    123.77deg,
-    #8a2be2 -6.46%,
-    #ffa500 59.04%,
-    #f8f8ff 124.53%
-  );
-  opacity: 0.2;
-  filter: blur(34px);
-  transform: matrix(1, 0, -0.03, 1, 0, 0);
-}
-.codeblock2 {
-  position: absolute;
-  width: 372.95px;
-  height: 257.05px;
-  left: calc(50% - 372.95px / 2 - 76.53px);
-  top: calc(50% - 257.05px / 2 - 47.47px);
-  border-radius: 100%;
-  background: linear-gradient(
-    118.19deg,
-    #1fa2ff -3.62%,
-    #12d8fa 50.44%,
-    #a6ffcb 104.51%
-  );
-  opacity: 0.2;
-  filter: blur(34px);
-  transform: matrix(1, 0, -0.03, 1, 0, 0);
-}
-.code-border {
-  border: 2px solid;
-  border-image-slice: 1;
-  border-width: 2px;
-  border-image-source: linear-gradient(to right bottom, #ffffff38, #ffffff00);
-  background: linear-gradient(
-    111.93deg,
-    rgba(14, 26, 45, 0.24) -1.4%,
-    rgba(17, 30, 50, 0.38) 104.96%
-  );
-  /* backdrop-filter: blur(26px); */
-}
-.homepage_bg {
-  background: url("../assets/Images/bghome.svg");
-  /* background-size: contain; */
-}
-
-@keyframes spinner-bulqg1 {
-  0% {
-    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
-  }
-
-  12.5% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 0%,
-      100% 0%,
-      100% 0%
-    );
-  }
-
-  25% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 100%,
-      100% 100%,
-      100% 100%
-    );
-  }
-
-  50% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-
-  62.5% {
-    clip-path: polygon(
-      50% 50%,
-      100% 0,
-      100% 0%,
-      100% 0%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-
-  75% {
-    clip-path: polygon(
-      50% 50%,
-      100% 100%,
-      100% 100%,
-      100% 100%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-
-  100% {
-    clip-path: polygon(
-      50% 50%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-}
-
-@keyframes spinner-oaa3wk {
-  0% {
-    transform: scaleY(1) rotate(0deg);
-  }
-
-  49.99% {
-    transform: scaleY(1) rotate(135deg);
-  }
-
-  50% {
-    transform: scaleY(-1) rotate(0deg);
-  }
-
-  100% {
-    transform: scaleY(-1) rotate(-135deg);
-  }
-}
-
 /* For conditional coloring of icons in dashboard sidebar */
 .active-icon {
-  fill: #ffd60a !important;
-  color: #ffd60a !important;
+  fill: var(--sn-brand) !important;
+  color: var(--sn-brand) !important;
 }
 
 .inactive-icon {
@@ -458,7 +334,7 @@ details > summary::-webkit-details-marker {
 
 /* Buttons */
 .yellowButton {
-  @apply cursor-pointer rounded-md bg-yellow-50 px-[20px] py-[8px] font-semibold text-richblack-900;
+  @apply min-h-12 cursor-pointer rounded-lg bg-brand-primary px-5 py-3 font-medium text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-55;
 }
 
 /* Swiper CSS Starts */
@@ -479,14 +355,14 @@ details > summary::-webkit-details-marker {
 /* Swiper CSS Ends */
 
 .blackButton {
-  @apply cursor-pointer rounded-md bg-richblack-800 px-[20px] py-[8px] font-semibold text-richblack-5;
+  @apply min-h-12 cursor-pointer rounded-lg border border-border-default bg-white px-5 py-3 font-medium text-text-primary transition-colors hover:border-brand-primary hover:bg-brand-soft;
 }
 .lable-style {
-  @apply text-[14px] text-richblack-5;
+  @apply text-sm font-medium text-text-primary;
 }
 .form-style {
-  @apply rounded-lg bg-richblack-700 p-3 text-[16px] leading-[24px] text-richblack-5 shadow-[0_1px_0_0] shadow-white/50 placeholder:text-richblack-400;
+  @apply min-h-11 rounded-lg border border-border-default bg-surface-secondary p-3 text-base leading-6 text-text-primary placeholder:text-text-muted;
 }
 .section_heading {
-  @apply text-2xl font-bold text-richblack-5 lg:text-4xl;
+  @apply text-2xl font-bold text-text-primary lg:text-4xl;
 }

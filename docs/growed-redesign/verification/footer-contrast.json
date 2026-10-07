@@ -1,0 +1,858 @@
+{
+  "method": "Minimum contrast across text bounding boxes, using actual rendered background pixels with the foreground temporarily hidden; alpha-composited text colour. No altered screenshots retained.",
+  "results": [
+    {
+      "width": 1920,
+      "fallback": false,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 4.31,
+          "required": 3
+        },
+        {
+          "label": "A little curiosity. A world of possibility.",
+          "minimum": 5.29,
+          "required": 4.5
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 6.47,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 9.9,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 5.28,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 8.55,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 8.18,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 9.3,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 9.9,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 11.26,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.44,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 5.48,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 6.07,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 8.04,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 9.16,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 9.77,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 5.3,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 7.07,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1440,
+      "fallback": false,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 4.3,
+          "required": 3
+        },
+        {
+          "label": "A little curiosity. A world of possibility.",
+          "minimum": 8.45,
+          "required": 4.5
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 7.9,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.52,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 7.37,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 9.17,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 9.8,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.33,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.59,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 6.05,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 8.78,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 9.8,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.21,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.59,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 7.39,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 10.62,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1024,
+      "fallback": false,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 4.31,
+          "required": 3
+        },
+        {
+          "label": "A little curiosity. A world of possibility.",
+          "minimum": 10.75,
+          "required": 4.5
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 9.24,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 9.33,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 11.44,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 11.63,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 9.49,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 11.44,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 11.63,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.63,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 11.11,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 12.5,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 768,
+      "fallback": false,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 4.31,
+          "required": 3
+        },
+        {
+          "label": "A little curiosity. A world of possibility.",
+          "minimum": 10.37,
+          "required": 4.5
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 9.22,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 11.98,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 11.82,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.82,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.82,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 11.98,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.81,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 11.66,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 11.93,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 390,
+      "fallback": false,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 4.37,
+          "required": 3
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 9.36,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 11.88,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 11.82,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.87,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.88,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 12.02,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.79,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 11.61,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 360,
+      "fallback": false,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 4.36,
+          "required": 3
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 9.38,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 11.98,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 11.82,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.82,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.84,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 12.01,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.79,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 11.64,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 320,
+      "fallback": false,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 4.37,
+          "required": 3
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 9.36,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 11.85,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.81,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.81,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 11.98,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 11.61,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1440,
+      "fallback": true,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 6.48,
+          "required": 3
+        },
+        {
+          "label": "A little curiosity. A world of possibility.",
+          "minimum": 9.81,
+          "required": 4.5
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 8.58,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.67,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 9.16,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 10.06,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 10.75,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.59,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 9.16,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 10.06,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 10.75,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.42,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.78,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 9.18,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 10.25,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 390,
+      "fallback": true,
+      "samples": [
+        {
+          "label": "MAKE ROOM FOR YOUR NEXT CHAPTER",
+          "minimum": 7.06,
+          "required": 3
+        },
+        {
+          "label": "Practical, instructor-led courses that help learners build lasting skills at their own pace.",
+          "minimum": 9.36,
+          "required": 4.5
+        },
+        {
+          "label": "© 2026 Prahit. All rights reserved.",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "WEBSITE",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Home",
+          "minimum": 11.88,
+          "required": 4.5
+        },
+        {
+          "label": "About Us",
+          "minimum": 11.82,
+          "required": 4.5
+        },
+        {
+          "label": "Services",
+          "minimum": 11.87,
+          "required": 4.5
+        },
+        {
+          "label": "Careers",
+          "minimum": 11.88,
+          "required": 4.5
+        },
+        {
+          "label": "Blogs",
+          "minimum": 12.02,
+          "required": 4.5
+        },
+        {
+          "label": "Project NEET",
+          "minimum": 11.79,
+          "required": 4.5
+        },
+        {
+          "label": "COMPANY",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Privacy Policy",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Terms of Use",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Refunds & Cancellations",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "Cookie Policy",
+          "minimum": 11.64,
+          "required": 4.5
+        },
+        {
+          "label": "CONTACT US",
+          "minimum": 11.61,
+          "required": 4.5
+        },
+        {
+          "label": "Send us a message",
+          "minimum": 11.61,
+          "required": 4.5
+        }
+      ],
+      "failures": []
+    }
+  ]
+}

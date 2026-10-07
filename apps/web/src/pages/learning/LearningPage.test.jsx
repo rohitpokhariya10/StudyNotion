@@ -1,4 +1,5 @@
 import ViewCourse from "@/pages/learning"
+import AccessibleDialog from "@/shared/ui/AccessibleDialog"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes, useLocation } from "react-router"
@@ -14,9 +15,16 @@ vi.mock("@/entities/learning", async (importOriginal) => ({
 }))
 
 vi.mock("@/widgets/curriculum-panel", () => ({
-  default: ({ learningCourse, mobileOpen, setReviewModal }) => (
+  default: ({ learningCourse, mobileOpen, setReviewModal, onClose }) => (
     <aside aria-label="Test course sidebar">
       <span>{learningCourse.course.name}</span>
+      {mobileOpen && (
+        <AccessibleDialog title="Course content" onClose={onClose}>
+          <button type="button" onClick={onClose}>
+            Close course content
+          </button>
+        </AccessibleDialog>
+      )}
       <output aria-label="Mobile sidebar state">
         {mobileOpen ? "open" : "closed"}
       </output>
@@ -115,7 +123,7 @@ describe("ViewCourse", () => {
     expect(
       screen.getByRole("status", { name: "Loading course learning state" })
     ).toBeVisible()
-    expect(screen.getByText("Preparing your course…")).toBeVisible()
+    expect(screen.getByText("Preparing your course")).toBeVisible()
     expect(learningMocks.query).toHaveBeenCalledWith(COURSE_ID, { skip: false })
   })
 

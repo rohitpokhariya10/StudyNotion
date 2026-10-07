@@ -1,0 +1,363 @@
+/* Shared marketing footer: landscape scene with the CTA row, a divider and
+   four columns laid over its lower forest. The scene is sized from the
+   footer's width, so the skyline, the content offset and the navy base stay
+   aligned at every viewport; nothing is stretched. */
+/* The navy base lives on the footer itself (not on the click-through scene),
+   so it is also what accessibility tools find behind the text. It is a
+   readable stand-in until the lazy image arrives: transparent above the
+   lowest point of the skyline, the art's bottom colour below it. */
+.sn-footer {
+  --sn-footer-base-w: max(100vw, 1000px);
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  overflow: hidden;
+  margin-top: 2rem;
+  background: linear-gradient(
+    180deg,
+    rgb(18 54 111 / 0) calc(var(--sn-footer-base-w) * 0.125),
+    #3d70ba calc(var(--sn-footer-base-w) * 0.16),
+    #1f509d calc(var(--sn-footer-base-w) * 0.23),
+    #12366f calc(var(--sn-footer-base-w) * 0.34)
+  );
+  color: #ffffff;
+  font-family: var(--sn-font-body);
+}
+.sn-footer-scene,
+.sn-footer-inner {
+  /* The art is never narrower than 1000px (it is cropped at the sides on
+     small screens instead of shrinking) and never taller than 680px. */
+  --sn-footer-art-w: max(100cqi, 1000px);
+  --sn-footer-art-h: min(calc(var(--sn-footer-art-w) * 0.41667), 680px);
+}
+
+.sn-footer-scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.sn-footer-scene-fallback {
+  background: linear-gradient(
+    180deg,
+    rgb(18 54 111 / 0),
+    #3d70ba calc(var(--sn-footer-art-w) * 0.07),
+    #1f509d calc(var(--sn-footer-art-w) * 0.17),
+    #12366f calc(var(--sn-footer-art-w) * 0.3)
+  );
+}
+.sn-footer-art {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: block;
+  width: var(--sn-footer-art-w);
+  max-width: none;
+  height: var(--sn-footer-art-h);
+  transform: translateX(-50%);
+  object-fit: cover;
+  object-position: 50% 0;
+  user-select: none;
+}
+/* Gentle side vignette over the lower forest and the base. */
+.sn-footer-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgb(27 49 92 / 0.55),
+    rgb(27 49 92 / 0) 32%,
+    rgb(9 33 80 / 0) 66%,
+    rgb(9 33 80 / 0.6)
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent calc(var(--sn-footer-art-w) * 0.2),
+    #000000 calc(var(--sn-footer-art-w) * 0.36)
+  );
+}
+
+.sn-footer-inner {
+  width: min(calc(100% - 64px), 1216px);
+  margin-inline: auto;
+  padding-top: calc(var(--sn-footer-art-w) * 0.129);
+  padding-bottom: 72px;
+}
+
+/* CTA row */
+.sn-footer-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  width: min(100%, 784px);
+  margin-inline: auto;
+}
+.sn-footer-title {
+  max-width: 330px;
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--sn-font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow: 0 1px 14px rgb(10 32 74 / 0.35);
+  text-wrap: balance;
+}
+.sn-footer-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  padding: 2px;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgb(8 26 64 / 0.2);
+}
+.sn-footer-action {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding-inline: 16px 14px;
+  color: var(--sn-action);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.sn-footer-action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sn-footer-action-primary {
+  padding-inline: 18px;
+  background: var(--sn-brand);
+  color: #ffffff;
+  transition: background-color 150ms ease;
+}
+.sn-footer-action-primary:hover {
+  background: var(--sn-brand-hover);
+  text-decoration: none;
+}
+
+.sn-footer-divider {
+  height: 2px;
+  margin: 28px 0 32px;
+  border: 0;
+  background: #ffffff;
+}
+
+/* Columns */
+.sn-footer-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 422fr) minmax(0, 264fr) minmax(0, 244fr)
+    minmax(0, 286fr);
+  align-items: start;
+}
+.sn-footer-identity {
+  width: min(100%, 288px);
+  text-align: center;
+}
+.sn-footer-brand {
+  display: inline-flex;
+  border-radius: 10px;
+}
+.sn-footer .sn-brand {
+  color: #ffffff;
+}
+.sn-footer .sn-brand > span {
+  color: #ffffff;
+  font-size: 1.25rem;
+}
+.sn-footer .sn-brand > span > span {
+  color: #a9cbff;
+}
+.sn-footer .sn-brand small {
+  color: #ffffff;
+}
+.sn-footer-tagline {
+  margin: 14px 0 0;
+  color: rgb(255 255 255 / 0.88);
+  font-size: 14px;
+  line-height: 22px;
+}
+.sn-footer-copyright {
+  margin: 14px 0 0;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 16px;
+}
+.sn-footer-heading {
+  margin: 0 0 18px;
+  color: #ffffff;
+  font-family: var(--sn-font-body);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.sn-footer-heading::after {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  margin-top: 4px;
+  background: var(--sn-sun);
+}
+.sn-footer-links,
+.sn-footer-contact {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  line-height: 20px;
+  list-style: none;
+}
+.sn-footer-link {
+  display: inline-block;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  text-underline-offset: 4px;
+}
+.sn-footer-link:hover {
+  text-decoration: underline;
+}
+.sn-footer-contact {
+  gap: 16px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.sn-footer-contact li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+.sn-footer-contact :is(span, a) {
+  overflow-wrap: anywhere;
+}
+.sn-footer-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.5;
+}
+
+.sn-footer :focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.sn-footer-actions :focus-visible {
+  outline-color: var(--sn-brand-deep);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
+
+/* Tablet: CTA row kept, identity centred above three columns. */
+@media (max-width: 1023px) {
+  .sn-footer-title {
+    max-width: 300px;
+    font-size: 26px;
+    line-height: 32px;
+  }
+  .sn-footer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 40px;
+    column-gap: 24px;
+    padding-inline: 8%;
+  }
+  .sn-footer-identity {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 360px);
+  }
+}
+
+/* Mobile: stacked CTA, two short link columns, larger tap targets. The
+   bottom padding keeps the last links clear of the floating support link. */
+@media (max-width: 639px) {
+  /* A closer crop keeps the peak and flock prominent on narrow screens. */
+  .sn-footer {
+    --sn-footer-base-w: 1080px;
+  }
+  .sn-footer-scene,
+  .sn-footer-inner {
+    --sn-footer-art-w: 1080px;
+  }
+  .sn-footer-inner {
+    width: calc(100% - 40px);
+    padding-top: calc(var(--sn-footer-art-w) * 0.148);
+    padding-bottom: 96px;
+  }
+  .sn-footer-cta-row {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  .sn-footer-title {
+    max-width: 16em;
+    font-size: 22px;
+    line-height: 28px;
+  }
+  .sn-footer-actions {
+    width: min(100%, 420px);
+  }
+  .sn-footer-action {
+    flex: 1 1 auto;
+    min-height: 44px;
+    padding-inline: 12px;
+  }
+  .sn-footer-divider {
+    margin: 28px 0;
+  }
+  .sn-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 32px;
+    column-gap: 16px;
+    padding-inline: 0;
+  }
+  .sn-footer-contact-column {
+    grid-column: 1 / -1;
+  }
+  .sn-footer-links {
+    gap: 0;
+  }
+  .sn-footer-links .sn-footer-link,
+  .sn-footer-contact .sn-footer-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+  .sn-footer-links .sn-footer-link {
+    padding-block: 0;
+  }
+  .sn-footer-contact {
+    gap: 4px;
+  }
+  .sn-footer-contact li {
+    align-items: center;
+  }
+  .sn-footer-contact li > span {
+    padding-block: 10px;
+  }
+}
+@media (max-width: 359px) {
+  .sn-footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (forced-colors: active) {
+  .sn-footer-scene {
+    display: none;
+  }
+}

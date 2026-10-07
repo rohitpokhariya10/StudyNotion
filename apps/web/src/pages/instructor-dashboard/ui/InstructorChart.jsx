@@ -5,9 +5,9 @@ import { Pie } from "react-chartjs-2"
 Chart.register(...registerables)
 
 const CHART_COLORS = [
-  "#facc15",
-  "#06b6d4",
-  "#8b5cf6",
+  "#245ac5",
+  "#34866d",
+  "#8867b8",
   "#22c55e",
   "#f97316",
   "#ec4899",
@@ -64,18 +64,18 @@ export default function InstructorChart({ courses }) {
       : courses.map((course) => course.totalAmountGenerated)
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-y-4 rounded-md bg-richblack-800 p-6">
-      <p className="text-lg font-bold text-richblack-5">Visualize</p>
+    <div className="sn-card flex min-w-0 flex-1 flex-col gap-y-4 bg-surface-secondary p-6">
+      <p className="text-lg font-bold text-text-primary">Course overview</p>
       <div className="space-x-4 font-semibold">
         {/* Button to switch to the "students" chart */}
         <button
           type="button"
           onClick={() => setCurrChart("students")}
           aria-pressed={currChart === "students"}
-          className={`rounded-xs p-1 px-3 transition-all duration-200 ${
+          className={`min-h-11 rounded-lg p-1 px-3 transition-all duration-200 ${
             currChart === "students"
-              ? "bg-richblack-700 text-yellow-50"
-              : "text-yellow-400"
+              ? "bg-surface-elevated text-brand-primary"
+              : "text-brand-primary"
           }`}
         >
           Students
@@ -85,18 +85,18 @@ export default function InstructorChart({ courses }) {
           type="button"
           onClick={() => setCurrChart("income")}
           aria-pressed={currChart === "income"}
-          className={`rounded-xs p-1 px-3 transition-all duration-200 ${
+          className={`min-h-11 rounded-lg p-1 px-3 transition-all duration-200 ${
             currChart === "income"
-              ? "bg-richblack-700 text-yellow-50"
-              : "text-yellow-400"
+              ? "bg-surface-elevated text-brand-primary"
+              : "text-brand-primary"
           }`}
         >
-          Income
+          Revenue
         </button>
       </div>
       <ul
-        className="grid gap-2 text-xs text-richblack-200 sm:grid-cols-2"
-        aria-label={`${currChart === "students" ? "Student" : "Income"} chart legend`}
+        className="grid gap-2 text-xs text-text-secondary sm:grid-cols-2"
+        aria-label={`${currChart === "students" ? "Student" : "Revenue"} chart legend`}
       >
         {courses.map((course, index) => (
           <li
@@ -117,10 +117,11 @@ export default function InstructorChart({ courses }) {
       <div
         className="relative mx-auto h-72 w-full max-w-[420px] sm:h-80 lg:h-full"
         role="img"
-        aria-label={`${currChart === "students" ? "Students" : "Income"} by course pie chart`}
+        aria-label={`${currChart === "students" ? "Students" : "Revenue"} by course pie chart`}
       >
         {/* Render the Pie chart based on the selected chart */}
         <Pie
+          aria-label={`${currChart === "students" ? "Students" : "Revenue"} by course; values listed above`}
           data={currChart === "students" ? chartDataStudents : chartIncomeData}
           options={options}
         />

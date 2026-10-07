@@ -49,7 +49,7 @@ function VerificationCodeInput({ autoFocus = false, onChange, value }) {
   return (
     <div
       aria-label="Verification code"
-      className="flex justify-between gap-x-1.5"
+      className="grid grid-cols-6 gap-2"
       role="group"
     >
       {Array.from({ length: CODE_LENGTH }, (_, index) => (
@@ -60,7 +60,7 @@ function VerificationCodeInput({ autoFocus = false, onChange, value }) {
           }}
           aria-label={`Verification code digit ${index + 1}`}
           autoComplete={index === 0 ? "one-time-code" : "off"}
-          className="aspect-square w-[48px] rounded-[0.5rem] border-0 bg-richblack-800 text-center text-richblack-5 shadow-[inset_0_-1px_0_rgba(255,255,255,0.18)] focus:border-0 focus:outline-2 focus:outline-yellow-50 lg:w-[60px]"
+          className="aspect-square w-full min-w-0 rounded-[0.5rem] border-0 bg-surface-secondary text-center text-text-primary shadow-[inset_0_-1px_0_rgba(255,255,255,0.18)] focus:border-0 focus:outline-2 focus:outline-brand-primary"
           inputMode="numeric"
           maxLength={1}
           onChange={(event) => insertDigits(index, event.target.value)}

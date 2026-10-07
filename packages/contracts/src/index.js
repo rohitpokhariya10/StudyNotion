@@ -7,6 +7,7 @@ const contractModules = [
   require("./courses"),
   require("./errors"),
   require("./learning"),
+  require("./neet"),
   require("./pagination"),
   require("./registry"),
   require("./reviews"),

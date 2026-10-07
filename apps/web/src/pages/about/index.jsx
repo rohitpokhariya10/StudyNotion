@@ -1,126 +1,116 @@
-import ContactFormSection from "@/pages/about/ui/ContactFormSection"
-import LearningGrid from "@/pages/about/ui/LearningGrid"
-import Quote from "@/pages/about/ui/Quote"
-import StatsComponenet from "@/pages/about/ui/Stats"
-import BannerImage1 from "@/shared/assets/Images/aboutus1.webp"
-import BannerImage2 from "@/shared/assets/Images/aboutus2.webp"
-import BannerImage3 from "@/shared/assets/Images/aboutus3.webp"
-import FoundingStory from "@/shared/assets/Images/FoundingStory.png"
-import HighlightText from "@/shared/ui/HighlightText"
+import aboutLearners from "@/shared/assets/editorial/about-learners.svg"
+import inspirationScene from "@/shared/assets/editorial/inspiration-scene.svg"
+import missionScene from "@/shared/assets/editorial/mission-scene.svg"
+import storyScene from "@/shared/assets/editorial/story-scene.svg"
 import Footer from "@/widgets/footer"
-import ReviewSlider from "@/widgets/review-slider"
+import InstructorStrip from "@/widgets/instructor-strip"
+import { EditorialHero } from "@/widgets/marketing"
+import { Link } from "react-router"
 
-const About = () => {
+import StoryRow from "./ui/StoryRow"
+
+import "./about.css"
+
+export default function About() {
   return (
-    <div>
-      <section className="bg-richblack-700">
-        <div className="relative mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-center text-white">
-          <header className="mx-auto py-20 text-4xl font-semibold lg:w-[70%]">
-            Driving Innovation in Online Education for a
-            <HighlightText text={"Brighter Future"} />
-            <p className="mx-auto mt-3 text-center text-base font-medium text-richblack-300 lg:w-[95%]">
-              Studynotion is at the forefront of driving innovation in online
-              education. We're passionate about creating a brighter future by
-              offering cutting-edge courses, leveraging emerging technologies,
-              and giving learners a clear, self-paced path through practical
-              course material.
+    <>
+      <main className="sn-about">
+        <EditorialHero
+          className="sn-ed-hero-tight"
+          titleId="about-title"
+          title={
+            <>
+              A space to learn.
+              <br />
+              <span>Room to grow.</span>
+            </>
+          }
+          description="We bring instructor-created courses and curious learners together, with a clear path from the first lesson to the next skill."
+          action={
+            <Link to="/services" className="sn-btn sn-btn-primary sn-ed-cta">
+              Explore our courses
+            </Link>
+          }
+          art={
+            <img
+              src={aboutLearners}
+              width="512"
+              height="500"
+              alt="Illustration of learners on laptops and tablets, connected by messages"
+              decoding="async"
+              fetchPriority="high"
+            />
+          }
+        />
+        <StoryRow
+          title="Our Story"
+          image={storyScene}
+          imageAlt="Illustration of lesson cards pinned to a board and joined by a string"
+          summary={
+            <p>
+              Prahit is a place to discover recorded courses, explore their
+              curricula and learn at your own pace. Each course is organised
+              into sections and lessons, so you can see the path ahead before
+              you enrol.
             </p>
-          </header>
-          <div className="sm:h-[70px] lg:h-[150px]"></div>
-          <div className="absolute bottom-0 left-[50%] grid w-[100%] translate-x-[-50%] translate-y-[30%] grid-cols-3 gap-3 lg:gap-5">
-            <img src={BannerImage1} alt="about image 1" />
-            <img src={BannerImage2} alt="about image 2" />
-            <img src={BannerImage3} alt="about image 3" />
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-richblack-700">
-        <div className="mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-richblack-500">
-          <div className="h-[100px]"></div>
-          <Quote />
-        </div>
-      </section>
-
-      <section>
-        <div className="mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-richblack-500">
-          <div className="flex flex-col items-center justify-between gap-10 lg:flex-row">
-            <div className="my-24 flex flex-col gap-10 lg:w-[50%]">
-              <h1 className="bg-linear-to-br/srgb from-[#833AB4] via-[#FD1D1D] to-[#FCB045] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
-                Our Founding Story
-              </h1>
-              <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
-                Our e-learning platform was born out of a shared vision and
-                passion for transforming education. It all began with a group of
-                educators, technologists, and lifelong learners who recognized
-                the need for accessible, flexible, and high-quality learning
-                opportunities in a rapidly evolving digital world.
-              </p>
-              <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
-                As experienced educators ourselves, we witnessed firsthand the
-                limitations and challenges of traditional education systems. We
-                believed that education should not be confined to the walls of a
-                classroom or restricted by geographical boundaries. We
-                envisioned a platform that could bridge these gaps and empower
-                individuals from all walks of life to unlock their full
-                potential.
-              </p>
-            </div>
-
-            <div>
-              <img
-                src={FoundingStory}
-                alt="Founding story visual"
-                className="shadow-[0_0_20px_0] shadow-[#FC6767]"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-between lg:flex-row lg:gap-10">
-            <div className="my-24 flex flex-col gap-10 lg:w-[40%]">
-              <h1 className="bg-linear-to-b/srgb from-[#FF512F] to-[#F09819] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
-                Our Vision
-              </h1>
-              <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
-                With this vision in mind, we set out on a journey to create an
-                e-learning platform that would revolutionize the way people
-                learn. Our team of dedicated experts worked tirelessly to
-                develop a robust and intuitive platform that combines
-                cutting-edge technology with engaging content, fostering a
-                dynamic and interactive learning experience.
-              </p>
-            </div>
-            <div className="my-24 flex flex-col gap-10 lg:w-[40%]">
-              <h1 className="bg-linear-to-b/srgb from-[#1FA2FF] via-[#12D8FA] to-[#A6FFCB] bg-clip-text text-4xl font-semibold text-transparent lg:w-[70%]">
-                Our Mission
-              </h1>
-              <p className="text-base font-medium text-richblack-300 lg:w-[95%]">
-                Our mission goes beyond hosting videos. We give learners a
-                structured curriculum, secure access to purchased lessons,
-                progress tracking, and a way to share verified course feedback.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <StatsComponenet />
-      <section className="mx-auto mt-20 flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-white">
-        <LearningGrid />
-        <ContactFormSection />
-      </section>
-
-      <div className="relative mx-auto my-20 flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 bg-richblack-900 text-white">
-        {/* Reviews from Other Learners */}
-        <h1 className="mt-8 text-center text-4xl font-semibold">
-          Reviews from other learners
-        </h1>
-        <div className="mt-8 w-full">
-          <ReviewSlider />
-        </div>
-      </div>
+          }
+          more={
+            <p>
+              Your account brings your enrolled courses, completed lessons and
+              purchase history together. Instructors build courses with the
+              authoring tools, and approved courses become available in the
+              catalog.
+            </p>
+          }
+        />
+        <StoryRow
+          reverse
+          title="Our Mission"
+          image={missionScene}
+          imageAlt="Illustration of an arrow at the centre of a target"
+          summary={
+            <p>
+              Make the learning journey easier to follow: a curriculum you can
+              review, video lessons you can revisit, and completion progress
+              that stays with your account.
+            </p>
+          }
+          more={
+            <p>
+              Good tools should help you spend more time learning and less time
+              finding your way.
+            </p>
+          }
+        />
+        <StoryRow
+          title="Our Inspiration"
+          image={inspirationScene}
+          imageAlt="Illustration of a young plant beside a letterboard reading small steps, new possibilities"
+          summary={
+            <p>
+              A useful explanation can open up a subject. A thoughtful course
+              gives that explanation a home.
+            </p>
+          }
+          more={
+            <p>
+              Prahit gives approved instructors a place to organise their
+              knowledge into lessons and learners a way to work through it, one
+              step at a time.{" "}
+              <Link to="/careers" className="sn-inline-link">
+                Share what you know
+              </Link>
+              .
+            </p>
+          }
+        />
+        <InstructorStrip
+          headingId="about-instructors"
+          title="Meet Our Instructors"
+          intro="The people behind our courses: approved instructors who turn what they know into lessons you can follow at your own pace."
+        />
+      </main>
       <Footer />
-    </div>
+    </>
   )
 }
-
-export default About

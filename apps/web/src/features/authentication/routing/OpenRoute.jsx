@@ -1,5 +1,6 @@
 // This will prevent authenticated users from accessing this route
 import { sanitizeInternalRedirect } from "@/shared/lib/routing/internalRedirect"
+import PageLoadingFallback from "@/shared/ui/PageLoadingFallback"
 import { useSelector } from "react-redux"
 import { Navigate, useLocation } from "react-router"
 
@@ -10,15 +11,7 @@ function OpenRoute({ children }) {
   const location = useLocation()
 
   if (status === "checking") {
-    return (
-      <div
-        className="grid min-h-[calc(100vh-3.5rem)] place-items-center"
-        role="status"
-        aria-label="Checking your session"
-      >
-        <div className="spinner" />
-      </div>
-    )
+    return <PageLoadingFallback accessibleLabel="Checking your session" />
   }
 
   if (!isAuthenticated) return children

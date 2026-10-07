@@ -120,6 +120,22 @@ export const learningEndpoints = {
     )}/lessons/${encodeURIComponent(lessonId)}/progress`,
 }
 
+// ---------------- V2 PROJECT NEET API ----------------
+const NEET_API_BASE_URL = `${API_V2_BASE_URL}/project-neet`
+
+export const neetEndpoints = {
+  TESTS_API: `${NEET_API_BASE_URL}/tests`,
+  TEST_API: (testId) =>
+    `${NEET_API_BASE_URL}/tests/${encodeURIComponent(testId)}`,
+  ATTEMPTS_API: `${NEET_API_BASE_URL}/attempts`,
+  ATTEMPT_API: (attemptId) =>
+    `${NEET_API_BASE_URL}/attempts/${encodeURIComponent(attemptId)}`,
+  ATTEMPT_ACTION_API: (attemptId, action) =>
+    `${NEET_API_BASE_URL}/attempts/${encodeURIComponent(
+      attemptId
+    )}/${encodeURIComponent(action)}`,
+}
+
 // ---------------- CONTACT-US API ----------------
 export const contactusEndpoint = {
   CONTACT_US_API: BASE_URL + "/reach/contact",

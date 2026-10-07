@@ -192,5 +192,41 @@ exports.webhookLimiter = createLimiter({
   message: "Webhook rate limit exceeded.",
 })
 
+// Project NEET exam traffic is exempt from the shared per-IP API limiter
+// (see app/registerRoutes.js) because classrooms and coaching centres often
+// share one NAT address for a three-hour exam. These limiters replace it:
+// a coarse per-IP ceiling before authentication, then per-student budgets.
+exports.neetAttemptIpLimiter = createLimiter({
+  name: "neet-attempt-ip",
+  windowMs: 15 * 60 * 1000,
+  limit: 30_000,
+  message: "Too many exam requests from this network. Please retry shortly.",
+})
+
+exports.neetAttemptUserLimiter = createLimiter({
+  name: "neet-attempt-user",
+  windowMs: 60 * 1000,
+  limit: 240,
+  keyGenerator: authenticatedUserKey,
+  message: "Too many exam requests. Your answers are kept; please retry.",
+})
+
+exports.neetAttemptSessionLimiter = createLimiter({
+  name: "neet-attempt-session",
+  windowMs: 60 * 1000,
+  limit: 120,
+  keyGenerator: (request) =>
+    `${authenticatedUserKey(request)}:attempt:${String(request.path).split("/")[1]?.toLowerCase() || "list"}`,
+  message: "This attempt is sending too many requests. Please retry shortly.",
+})
+
+exports.neetRegistrationLimiter = createLimiter({
+  name: "neet-registration-user",
+  windowMs: 60 * 60 * 1000,
+  limit: 30,
+  keyGenerator: authenticatedUserKey,
+  message: "Too many mock registrations. Please try again later.",
+})
+
 exports.hashRateLimitIdentity = hashRateLimitIdentity
 exports._test = { DeferredRedisStore }

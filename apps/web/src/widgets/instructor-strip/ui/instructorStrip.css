@@ -1,0 +1,145 @@
+/* Instructor strip: blue band with portrait cards, after the reference's
+   team and tutor strips. */
+.sn-strip {
+  overflow: hidden;
+  padding: 64px 0 72px;
+  color: #fff;
+}
+.sn-strip-head {
+  width: min(calc(100% - 40px), 640px);
+  margin: 0 auto 40px;
+  text-align: center;
+}
+.sn-strip-head h2 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.sn-strip-head p {
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  opacity: 0.92;
+}
+.sn-strip-state {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  min-height: 256px;
+  align-content: center;
+  padding: 0 20px;
+  text-align: center;
+}
+.sn-strip-viewport {
+  overflow: hidden;
+  padding: 4px 0 8px;
+}
+.sn-strip-viewport:not(.is-moving):not(.is-centered) {
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 32px;
+}
+.sn-strip-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  margin: 0;
+  padding: 0 32px;
+  list-style: none;
+}
+.sn-strip-viewport.is-centered .sn-strip-track {
+  margin-inline: auto;
+}
+.sn-strip-viewport.is-moving .sn-strip-track {
+  padding: 0 0 0 24px;
+  animation: sn-strip-scroll var(--sn-strip-duration, 30s) linear infinite;
+}
+.sn-strip-viewport.is-moving:hover .sn-strip-track {
+  animation-play-state: paused;
+}
+@keyframes sn-strip-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.sn-strip-track li {
+  scroll-snap-align: start;
+}
+.sn-strip-card {
+  display: block;
+  width: 208px;
+  border-radius: 8px;
+  color: var(--sn-ink);
+}
+.sn-strip-card:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+}
+.sn-strip-photo {
+  display: block;
+  width: 208px;
+  height: 256px;
+  border-radius: 8px 8px 0 0;
+  object-fit: cover;
+  filter: grayscale(1);
+  transition: filter 0.3s ease;
+}
+.sn-strip-card:hover .sn-strip-photo,
+.sn-strip-card:focus-visible .sn-strip-photo {
+  filter: none;
+}
+.sn-strip-monogram {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, #eaf2fd, #cfe1fa);
+  color: var(--sn-brand);
+  filter: none;
+  font-size: 56px;
+  font-weight: 600;
+}
+.sn-strip-label {
+  display: block;
+  margin-top: -2px;
+  border-radius: 0 0 8px 8px;
+  background: #fff;
+  padding: 8px 12px 10px;
+}
+.sn-strip-label strong {
+  display: block;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sn-strip-label span {
+  display: block;
+  overflow: hidden;
+  color: #5b6474;
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  .sn-strip {
+    padding: 48px 0 56px;
+  }
+  .sn-strip-head h2 {
+    font-size: 24px;
+  }
+  .sn-strip-card,
+  .sn-strip-photo {
+    width: 176px;
+  }
+  .sn-strip-photo {
+    height: 216px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sn-strip-viewport.is-moving .sn-strip-track {
+    animation: none;
+  }
+}

@@ -1,0 +1,18 @@
+
+> studynotion@0.1.0 test:frontend
+> npm run test --workspace studynotion-web
+
+
+> studynotion-web@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 /Users/rohitpokhariya/Documents/Prahit/apps/web
+
+Not implemented: Window's scrollTo() method
+
+ Test Files  53 passed (53)
+      Tests  233 passed (233)
+   Start at  21:24:40
+   Duration  13.58s (transform 5.30s, setup 5.64s, import 18.60s, tests 31.81s, environment 54.17s)
+

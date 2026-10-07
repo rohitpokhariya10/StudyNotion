@@ -12,10 +12,22 @@ const catalogV2Routes = require("../routes/CatalogV2")
 const contactUsRoutes = require("../routes/Contact")
 const courseRoutes = require("../routes/Course")
 const learningV2Routes = require("../routes/LearningV2")
+const {
+  isProjectNeetAttemptPath,
+  projectNeetRoutes,
+} = require("../modules/project-neet")
 const paymentRoutes = require("../routes/Payments")
 const profileRoutes = require("../routes/profile")
 const userRoutes = require("../routes/user")
 const { normalizeV2ErrorEnvelope } = require("../shared/http/v2ErrorEnvelope")
+
+// Authenticated Project NEET exam traffic is exempt from the shared per-IP
+// limiter: a classroom behind one NAT address would otherwise exhaust it during
+// a three-hour exam and lose autosaves. The Project NEET router replaces it
+// with a coarse per-IP ceiling plus per-student limits, and terminates every
+// request under its prefix so nothing can fall through unlimited.
+const v2ApiLimiter = (req, res, next) =>
+  isProjectNeetAttemptPath(req.path) ? next() : apiLimiter(req, res, next)
 
 // This order is a security and compatibility contract. In particular, the
 // signed webhook receives raw bytes before the shared JSON parser, and v2
@@ -29,7 +41,7 @@ const registerRoutes = (app) => {
   )
 
   app.use("/api/v1", apiLimiter)
-  app.use("/api/v2", normalizeV2ErrorEnvelope, apiLimiter)
+  app.use("/api/v2", normalizeV2ErrorEnvelope, v2ApiLimiter)
 
   app.use(express.json({ limit: env.jsonBodyLimit, strict: true }))
   app.use(
@@ -46,6 +58,7 @@ const registerRoutes = (app) => {
   // The catalog router owns the generic v2 catch-all, so bounded v2 domains
   // must be mounted before it.
   app.use("/api/v2/learning", learningV2Routes)
+  app.use("/api/v2/project-neet", projectNeetRoutes)
   app.use("/api/v2", catalogV2Routes)
   app.use("/api/v1/auth", userRoutes)
   app.use("/api/v1/admin", adminRoutes)
@@ -55,4 +68,4 @@ const registerRoutes = (app) => {
   app.use("/api/v1/reach", contactUsRoutes)
 }
 
-module.exports = { registerRoutes }
+module.exports = { registerRoutes, v2ApiLimiter }

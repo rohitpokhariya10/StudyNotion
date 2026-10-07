@@ -3,6 +3,8 @@ import {
   signUp,
   VerificationCodeInput,
 } from "@/features/authentication"
+import AuthLayout from "@/shared/ui/AuthLayout"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { useEffect, useState } from "react"
 import { BiArrowBack } from "react-icons/bi"
 import { RxCountdownTimer } from "react-icons/rx"
@@ -47,15 +49,15 @@ function VerifyEmail() {
   if (!signupData) return null
 
   return (
-    <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
+    <AuthLayout variant="signup">
       {loading ? (
-        <div className="spinner" role="status" aria-label="Verifying email" />
+        <div className="grid min-h-80 place-items-center" aria-busy="true">
+          <FlaskLoader replacesLoadingToast label="Verifying email" />
+        </div>
       ) : (
-        <div className="max-w-[500px] p-4 lg:p-8">
-          <h1 className="text-[1.875rem] leading-[2.375rem] font-semibold text-richblack-5">
-            Verify Email
-          </h1>
-          <p className="my-4 text-[1.125rem] leading-[1.625rem] text-richblack-100">
+        <div>
+          <h1 className="sn-heading">Verify Email</h1>
+          <p className="mt-3 mb-8 text-[0.9375rem] leading-relaxed text-text-secondary">
             A verification code has been sent to you. Enter the code below.
           </p>
           <form onSubmit={handleVerifyAndSignup}>
@@ -67,21 +69,21 @@ function VerifyEmail() {
             <button
               type="submit"
               disabled={otp.length !== 6}
-              className="mt-6 w-full rounded-[8px] bg-yellow-50 px-[12px] py-[12px] font-medium text-richblack-900 disabled:cursor-not-allowed disabled:opacity-50"
+              className="sn-btn sn-btn-primary sn-btn-lg sn-btn-block mt-6"
             >
               Verify Email
             </button>
           </form>
           <div className="mt-6 flex items-center justify-between">
             <Link to="/signup">
-              <span className="flex items-center gap-x-2 text-richblack-5">
+              <span className="flex items-center gap-x-2 text-text-primary">
                 <BiArrowBack /> Back To Signup
               </span>
             </Link>
             <button
               type="button"
               disabled={resendIn > 0 || loading}
-              className="flex items-center gap-x-2 text-blue-100 disabled:cursor-not-allowed disabled:text-richblack-400"
+              className="flex items-center gap-x-2 text-brand-primary disabled:cursor-not-allowed disabled:text-text-secondary"
               onClick={handleResend}
             >
               <RxCountdownTimer />
@@ -90,7 +92,7 @@ function VerifyEmail() {
           </div>
         </div>
       )}
-    </div>
+    </AuthLayout>
   )
 }
 

@@ -4,6 +4,7 @@ import {
   fetchPendingInstructors,
   rejectInstructor,
 } from "@/features/instructor-approval/api/instructorApprovalApi"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 
@@ -88,37 +89,30 @@ export default function InstructorApprovals() {
     <section aria-labelledby="instructor-approvals-title">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1
-            id="instructor-approvals-title"
-            className="text-3xl font-medium text-richblack-5"
-          >
+          <h1 id="instructor-approvals-title" className="sn-heading">
             Instructor approvals
           </h1>
-          <p className="mt-2 text-sm text-richblack-300">
+          <p className="mt-2 text-sm text-text-secondary">
             Review instructor applications before granting publishing access.
           </p>
         </div>
-        <p className="rounded-full bg-richblack-700 px-3 py-1 text-sm text-richblack-100">
+        <p className="rounded-full bg-surface-elevated px-3 py-1 text-sm text-text-secondary">
           {pagination.total} pending
         </p>
       </div>
 
       {loading ? (
-        <div className="grid min-h-64 place-items-center">
-          <div
-            className="spinner"
-            role="status"
-            aria-label="Loading applications"
-          />
+        <div className="grid min-h-64 place-items-center" aria-busy="true">
+          <FlaskLoader accessibleLabel="Loading applications" />
         </div>
       ) : loadError ? (
-        <div className="rounded-lg border border-pink-700 bg-richblack-800 p-6">
-          <p className="text-pink-100" role="alert">
+        <div className="rounded-lg border border-danger/30 bg-surface-secondary p-6">
+          <p className="text-danger" role="alert">
             {loadError}
           </p>
           <button
             type="button"
-            className="mt-4 rounded-md bg-yellow-50 px-4 py-2 font-medium text-richblack-900"
+            className="mt-4 rounded-md bg-brand-primary px-4 py-2 font-medium text-white"
             onClick={() => {
               setLoading(true)
               setLoadError("")
@@ -129,12 +123,12 @@ export default function InstructorApprovals() {
           </button>
         </div>
       ) : instructors.length === 0 ? (
-        <div className="rounded-lg border border-richblack-700 bg-richblack-800 p-10 text-center">
-          <p className="text-lg font-medium text-richblack-25">
+        <div className="rounded-lg border border-border-default bg-surface-secondary p-10 text-center">
+          <p className="text-lg font-medium text-text-primary">
             No instructor applications are waiting.
           </p>
-          <p className="mt-2 text-sm text-richblack-300">
-            New applications will appear here automatically.
+          <p className="mt-2 text-sm text-text-secondary">
+            Return here to review new instructor applications.
           </p>
         </div>
       ) : (
@@ -148,7 +142,7 @@ export default function InstructorApprovals() {
             return (
               <article
                 key={instructor._id}
-                className="rounded-lg border border-richblack-700 bg-richblack-800 p-5"
+                className="rounded-lg border border-border-default bg-surface-secondary p-5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex min-w-0 items-center gap-4">
@@ -161,33 +155,33 @@ export default function InstructorApprovals() {
                       className="h-12 w-12 rounded-full object-cover"
                     />
                     <div className="min-w-0">
-                      <h2 className="truncate text-lg font-semibold text-richblack-5">
+                      <h2 className="truncate text-lg font-semibold text-text-primary">
                         {fullName || "Unnamed instructor"}
                       </h2>
-                      <p className="truncate text-sm text-richblack-200">
+                      <p className="truncate text-sm text-text-secondary">
                         {instructor.email}
                       </p>
                     </div>
                   </div>
-                  <p className="text-xs text-richblack-400">
+                  <p className="text-xs text-text-secondary">
                     Submitted {formatSubmittedAt(instructor.createdAt)}
                   </p>
                 </div>
 
-                <div className="mt-4 grid gap-3 text-sm text-richblack-200 md:grid-cols-2">
+                <div className="mt-4 grid gap-3 text-sm text-text-secondary md:grid-cols-2">
                   <p>
-                    <span className="text-richblack-400">About: </span>
+                    <span className="text-text-secondary">About: </span>
                     {instructor.additionalDetails?.about || "Not provided"}
                   </p>
                   <p>
-                    <span className="text-richblack-400">Contact: </span>
+                    <span className="text-text-secondary">Contact: </span>
                     {instructor.additionalDetails?.contactNumber ||
                       "Not provided"}
                   </p>
                 </div>
 
                 <label className="mt-5 block">
-                  <span className="mb-2 block text-sm text-richblack-100">
+                  <span className="mb-2 block text-sm text-text-secondary">
                     Rejection reason
                   </span>
                   <textarea
@@ -209,7 +203,7 @@ export default function InstructorApprovals() {
                   <button
                     type="button"
                     disabled={Boolean(activeInstructorId)}
-                    className="rounded-md border border-pink-300 px-4 py-2 text-sm font-medium text-pink-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md border border-danger/40 px-4 py-2 text-sm font-medium text-danger disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => void completeReview(instructor, "reject")}
                   >
                     Reject
@@ -217,7 +211,7 @@ export default function InstructorApprovals() {
                   <button
                     type="button"
                     disabled={Boolean(activeInstructorId)}
-                    className="rounded-md bg-yellow-50 px-4 py-2 text-sm font-medium text-richblack-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => void completeReview(instructor, "approve")}
                   >
                     {actionInProgress ? "Saving…" : "Approve"}
@@ -237,7 +231,7 @@ export default function InstructorApprovals() {
           <button
             type="button"
             disabled={page <= 1 || loading}
-            className="rounded-md bg-richblack-700 px-4 py-2 text-sm text-richblack-25 disabled:opacity-40"
+            className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-40"
             onClick={() => {
               setLoading(true)
               setLoadError("")
@@ -246,13 +240,13 @@ export default function InstructorApprovals() {
           >
             Previous
           </button>
-          <span className="text-sm text-richblack-300">
+          <span className="text-sm text-text-secondary">
             Page {pagination.page} of {pagination.pages}
           </span>
           <button
             type="button"
             disabled={page >= pagination.pages || loading}
-            className="rounded-md bg-richblack-700 px-4 py-2 text-sm text-richblack-25 disabled:opacity-40"
+            className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-40"
             onClick={() => {
               setLoading(true)
               setLoadError("")

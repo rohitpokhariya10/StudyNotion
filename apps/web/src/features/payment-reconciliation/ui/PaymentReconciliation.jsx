@@ -9,6 +9,7 @@ import {
   fetchPaymentReconciliation,
   resolvePaymentReconciliation,
 } from "@/features/payment-reconciliation/api/paymentReconciliationApi"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 
@@ -97,43 +98,36 @@ export default function PaymentReconciliation() {
     <section aria-labelledby="payment-reconciliation-title">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1
-            id="payment-reconciliation-title"
-            className="text-3xl font-medium text-richblack-5"
-          >
+          <h1 id="payment-reconciliation-title" className="sn-heading">
             Payment reconciliation
           </h1>
-          <p className="mt-2 text-sm text-richblack-300">
+          <p className="mt-2 text-sm text-text-secondary">
             Resolve captured-payment exceptions and learner refund requests.
           </p>
         </div>
-        <p className="rounded-full bg-richblack-700 px-3 py-1 text-sm text-richblack-100">
+        <p className="rounded-full bg-surface-elevated px-3 py-1 text-sm text-text-secondary">
           {pagination.total} require review
         </p>
       </div>
 
-      <div className="mb-6 rounded-lg border border-yellow-700 bg-richblack-800 p-4 text-sm leading-6 text-richblack-200">
+      <div className="mb-6 rounded-lg border border-brand-primary bg-surface-secondary p-4 text-sm leading-6 text-text-secondary">
         Provider IDs, account status, course snapshots, and the recorded policy
         window must be checked before resolving an item. Every action stores the
         signed-in administrator and audit note.
       </div>
 
       {loading ? (
-        <div className="grid min-h-64 place-items-center">
-          <div
-            className="spinner"
-            role="status"
-            aria-label="Loading payment reviews"
-          />
+        <div className="grid min-h-64 place-items-center" aria-busy="true">
+          <FlaskLoader accessibleLabel="Loading payment reviews" />
         </div>
       ) : loadError ? (
-        <div className="rounded-lg border border-pink-700 bg-richblack-800 p-6">
-          <p className="text-pink-100" role="alert">
+        <div className="rounded-lg border border-danger/30 bg-surface-secondary p-6">
+          <p className="text-danger" role="alert">
             {loadError}
           </p>
           <button
             type="button"
-            className="mt-4 rounded-md bg-yellow-50 px-4 py-2 font-medium text-richblack-900"
+            className="mt-4 rounded-md bg-brand-primary px-4 py-2 font-medium text-white"
             onClick={() => {
               setLoading(true)
               setLoadError("")
@@ -144,11 +138,11 @@ export default function PaymentReconciliation() {
           </button>
         </div>
       ) : purchases.length === 0 ? (
-        <div className="rounded-lg border border-richblack-700 bg-richblack-800 p-10 text-center">
-          <p className="text-lg font-medium text-richblack-25">
+        <div className="rounded-lg border border-border-default bg-surface-secondary p-10 text-center">
+          <p className="text-lg font-medium text-text-primary">
             Reconciliation queue is clear.
           </p>
-          <p className="mt-2 text-sm text-richblack-300">
+          <p className="mt-2 text-sm text-text-secondary">
             Held payments and refund requests will appear here.
           </p>
         </div>
@@ -161,7 +155,7 @@ export default function PaymentReconciliation() {
                 ? {
                     label: "Provider refund failed",
                     description: "An explicit audited retry is required.",
-                    classes: "bg-pink-900 text-pink-100",
+                    classes: "bg-peach text-danger",
                   }
                 : getPaymentStatus(purchase.status)
             const user = purchase.user
@@ -190,17 +184,17 @@ export default function PaymentReconciliation() {
             return (
               <article
                 key={purchase._id}
-                className="rounded-lg border border-richblack-700 bg-richblack-800 p-5"
+                className="rounded-lg border border-border-default bg-surface-secondary p-5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-xl font-semibold text-richblack-5">
+                    <p className="text-xl font-semibold text-text-primary">
                       {formatPaymentMoney(purchase.amount, purchase.currency)}
                     </p>
-                    <p className="mt-1 text-sm text-richblack-200">
+                    <p className="mt-1 text-sm text-text-secondary">
                       {fullName || "Unavailable learner"}
                     </p>
-                    <p className="text-xs text-richblack-400">
+                    <p className="text-xs text-text-secondary">
                       {user?.email || "User record unavailable"}
                     </p>
                   </div>
@@ -210,7 +204,7 @@ export default function PaymentReconciliation() {
                     >
                       {status.label}
                     </span>
-                    <p className="mt-2 text-xs text-richblack-300">
+                    <p className="mt-2 text-xs text-text-secondary">
                       Queued{" "}
                       {formatPaymentDate(purchase.reconciliationRequiredAt)}
                     </p>
@@ -218,37 +212,37 @@ export default function PaymentReconciliation() {
                 </div>
 
                 <div className="mt-5 grid gap-4 text-xs sm:grid-cols-2">
-                  <dl className="space-y-3 rounded-md border border-richblack-700 p-4">
+                  <dl className="space-y-3 rounded-md border border-border-default p-4">
                     <div>
-                      <dt className="text-richblack-400">Purchase ID</dt>
-                      <dd className="mt-1 font-mono break-all text-richblack-100">
+                      <dt className="text-text-secondary">Purchase ID</dt>
+                      <dd className="mt-1 font-mono break-all text-text-secondary">
                         {purchase._id}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-richblack-400">Razorpay order</dt>
-                      <dd className="mt-1 font-mono break-all text-richblack-100">
+                      <dt className="text-text-secondary">Razorpay order</dt>
+                      <dd className="mt-1 font-mono break-all text-text-secondary">
                         {purchase.razorpayOrderId || "Not recorded"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-richblack-400">Razorpay payment</dt>
-                      <dd className="mt-1 font-mono break-all text-richblack-100">
+                      <dt className="text-text-secondary">Razorpay payment</dt>
+                      <dd className="mt-1 font-mono break-all text-text-secondary">
                         {purchase.razorpayPaymentId || "Not recorded"}
                       </dd>
                     </div>
                     {purchase.refundId && (
                       <div>
-                        <dt className="text-richblack-400">Razorpay refund</dt>
-                        <dd className="mt-1 font-mono break-all text-richblack-100">
+                        <dt className="text-text-secondary">Razorpay refund</dt>
+                        <dd className="mt-1 font-mono break-all text-text-secondary">
                           {purchase.refundId}
                         </dd>
                       </div>
                     )}
                     {purchase.refundProviderStatus && (
                       <div>
-                        <dt className="text-richblack-400">Provider status</dt>
-                        <dd className="mt-1 text-richblack-100">
+                        <dt className="text-text-secondary">Provider status</dt>
+                        <dd className="mt-1 text-text-secondary">
                           {purchase.refundProviderStatus}
                           {purchase.refundLastCheckedAt
                             ? ` · checked ${formatPaymentDate(
@@ -260,10 +254,10 @@ export default function PaymentReconciliation() {
                     )}
                   </dl>
 
-                  <dl className="space-y-3 rounded-md border border-richblack-700 p-4">
+                  <dl className="space-y-3 rounded-md border border-border-default p-4">
                     <div>
-                      <dt className="text-richblack-400">Account state</dt>
-                      <dd className="mt-1 text-richblack-100">
+                      <dt className="text-text-secondary">Account state</dt>
+                      <dd className="mt-1 text-text-secondary">
                         {user
                           ? `${user.accountType} · ${
                               user.active ? "active" : "inactive"
@@ -272,22 +266,22 @@ export default function PaymentReconciliation() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-richblack-400">Recorded policies</dt>
-                      <dd className="mt-1 text-richblack-100">
+                      <dt className="text-text-secondary">Recorded policies</dt>
+                      <dd className="mt-1 text-text-secondary">
                         Terms {purchase.checkoutTermsVersion || "—"} · Refunds{" "}
                         {purchase.refundPolicyVersion || "—"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-richblack-400">Refund deadline</dt>
-                      <dd className="mt-1 text-richblack-100">
+                      <dt className="text-text-secondary">Refund deadline</dt>
+                      <dd className="mt-1 text-text-secondary">
                         {formatPaymentDate(refundDeadline)}
                       </dd>
                     </div>
                   </dl>
                 </div>
 
-                <div className="mt-5 divide-y divide-richblack-700 rounded-md border border-richblack-700">
+                <div className="mt-5 divide-y divide-richblack-700 rounded-md border border-border-default">
                   {(purchase.lineItems || []).map((lineItem, index) => (
                     <div
                       key={String(
@@ -295,10 +289,10 @@ export default function PaymentReconciliation() {
                       )}
                       className="flex items-center justify-between gap-4 px-4 py-3 text-sm"
                     >
-                      <span className="min-w-0 truncate text-richblack-100">
+                      <span className="min-w-0 truncate text-text-secondary">
                         {lineItem.courseName || "Course"}
                       </span>
-                      <span className="shrink-0 text-richblack-300">
+                      <span className="shrink-0 text-text-secondary">
                         {formatPaymentMoney(lineItem.amount, purchase.currency)}
                       </span>
                     </div>
@@ -306,22 +300,22 @@ export default function PaymentReconciliation() {
                 </div>
 
                 {purchase.refundRequestNote && (
-                  <div className="mt-4 rounded-md border border-blue-800 bg-richblack-900 p-4">
-                    <p className="text-xs font-medium tracking-wide text-blue-100 uppercase">
+                  <div className="mt-4 rounded-md border border-blue-800 bg-surface-primary p-4">
+                    <p className="text-xs font-medium tracking-wide text-brand-primary uppercase">
                       Learner refund reason
                     </p>
-                    <p className="mt-2 text-sm leading-6 whitespace-pre-wrap text-richblack-100">
+                    <p className="mt-2 text-sm leading-6 whitespace-pre-wrap text-text-secondary">
                       {purchase.refundRequestNote}
                     </p>
                   </div>
                 )}
 
                 {!actionOpen && (
-                  <div className="mt-5 flex flex-wrap justify-end gap-3 border-t border-richblack-700 pt-4">
+                  <div className="mt-5 flex flex-wrap justify-end gap-3 border-t border-border-default pt-4">
                     {canFulfill && (
                       <button
                         type="button"
-                        className="rounded-md border border-caribbeangreen-300 px-4 py-2 text-sm font-medium text-caribbeangreen-100"
+                        className="rounded-md border border-caribbeangreen-300 px-4 py-2 text-sm font-medium text-success"
                         onClick={() => openAction(purchase._id, "fulfill")}
                       >
                         Fulfill enrollment
@@ -329,7 +323,7 @@ export default function PaymentReconciliation() {
                     )}
                     <button
                       type="button"
-                      className="rounded-md border border-pink-300 px-4 py-2 text-sm font-medium text-pink-100"
+                      className="rounded-md border border-danger/40 px-4 py-2 text-sm font-medium text-danger"
                       onClick={() =>
                         openAction(
                           purchase._id,
@@ -351,7 +345,7 @@ export default function PaymentReconciliation() {
                     {purchase.status === "refund_requested" && (
                       <button
                         type="button"
-                        className="rounded-md border border-richblack-400 px-4 py-2 text-sm font-medium text-richblack-100"
+                        className="rounded-md border border-border-default px-4 py-2 text-sm font-medium text-text-secondary"
                         onClick={() =>
                           openAction(purchase._id, "reject_refund")
                         }
@@ -363,7 +357,7 @@ export default function PaymentReconciliation() {
                 )}
 
                 {purchase.status === "payment_review" && !canFulfill && (
-                  <p className="mt-3 text-right text-xs text-yellow-100">
+                  <p className="mt-3 text-right text-xs text-brand-primary">
                     Enrollment cannot be fulfilled for this account state;
                     validate and refund the captured payment.
                   </p>
@@ -371,10 +365,10 @@ export default function PaymentReconciliation() {
 
                 {actionOpen && (
                   <form
-                    className="mt-5 border-t border-richblack-700 pt-4"
+                    className="mt-5 border-t border-border-default pt-4"
                     onSubmit={(event) => void submitAction(event)}
                   >
-                    <h2 className="text-lg font-semibold text-richblack-25">
+                    <h2 className="text-lg font-semibold text-text-primary">
                       {rejectRefundActionOpen
                         ? "Reject learner refund request"
                         : retryRefundActionOpen
@@ -385,7 +379,7 @@ export default function PaymentReconciliation() {
                               : "Confirm full refund"
                             : "Confirm enrollment fulfillment"}
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-richblack-300">
+                    <p className="mt-2 text-sm leading-6 text-text-secondary">
                       {rejectRefundActionOpen
                         ? "The learner keeps course access. Record clear policy and evidence for the audited decision."
                         : retryRefundActionOpen
@@ -399,7 +393,7 @@ export default function PaymentReconciliation() {
                       className="mt-4 block"
                       htmlFor={`review-note-${purchase._id}`}
                     >
-                      <span className="mb-2 block text-sm text-richblack-100">
+                      <span className="mb-2 block text-sm text-text-secondary">
                         Audit note
                       </span>
                       <textarea
@@ -417,11 +411,11 @@ export default function PaymentReconciliation() {
                     </label>
 
                     {refundActionOpen && refundOverrideRequired && (
-                      <label className="mt-4 flex items-start gap-3 rounded-md border border-pink-700 p-3 text-sm text-richblack-100">
+                      <label className="mt-4 flex items-start gap-3 rounded-md border border-danger/30 p-3 text-sm text-text-secondary">
                         <input
                           type="checkbox"
                           checked={overrideRefundWindow}
-                          className="mt-1 h-4 w-4 accent-yellow-50"
+                          className="mt-1 h-4 w-4 accent-brand-primary"
                           onChange={(event) =>
                             setOverrideRefundWindow(event.target.checked)
                           }
@@ -437,7 +431,7 @@ export default function PaymentReconciliation() {
                       <button
                         type="button"
                         disabled={saving}
-                        className="rounded-md bg-richblack-600 px-4 py-2 text-sm text-richblack-50 disabled:opacity-50"
+                        className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-50"
                         onClick={closeAction}
                       >
                         Cancel
@@ -450,7 +444,7 @@ export default function PaymentReconciliation() {
                             refundOverrideRequired &&
                             !overrideRefundWindow)
                         }
-                        className="rounded-md bg-yellow-50 px-4 py-2 text-sm font-medium text-richblack-900 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-md bg-brand-primary px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {saving
                           ? "Saving…"
@@ -479,7 +473,7 @@ export default function PaymentReconciliation() {
           <button
             type="button"
             disabled={page <= 1 || loading}
-            className="rounded-md bg-richblack-700 px-4 py-2 text-sm text-richblack-25 disabled:opacity-40"
+            className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-40"
             onClick={() => {
               setLoading(true)
               setLoadError("")
@@ -488,13 +482,13 @@ export default function PaymentReconciliation() {
           >
             Previous
           </button>
-          <span className="text-sm text-richblack-300">
+          <span className="text-sm text-text-secondary">
             Page {pagination.page} of {pagination.pages}
           </span>
           <button
             type="button"
             disabled={page >= pagination.pages || loading}
-            className="rounded-md bg-richblack-700 px-4 py-2 text-sm text-richblack-25 disabled:opacity-40"
+            className="rounded-md bg-surface-elevated px-4 py-2 text-sm text-text-primary disabled:opacity-40"
             onClick={() => {
               setLoading(true)
               setLoadError("")

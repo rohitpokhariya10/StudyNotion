@@ -1,123 +1,75 @@
+import { fetchPublicReviews } from "@/entities/review"
+import StatusPanel from "@/shared/ui/StatusPanel"
 import { useEffect, useState } from "react"
-// Swiper
-import { Swiper, SwiperSlide } from "swiper/react"
 
-import "swiper/css"
-import "swiper/css/free-mode"
-import "swiper/css/pagination"
-import "@/shared/styles/globals.css"
+import ReviewCards from "./ReviewCards"
 
-import { fetchPublicReviews, RatingStars } from "@/entities/review"
-import { getAvatarSource, setInitialsAvatarOnError } from "@/entities/user"
-// Swiper modules
-import { Autoplay, FreeMode, Pagination } from "swiper/modules"
-
-function ReviewSlider() {
-  const [reviews, setReviews] = useState([])
-  const truncateWords = 15
-
+// `variant="spotlight"` renders white quote cards with page dots for the
+// blue review band; the default keeps the existing cards.
+export default function ReviewSlider({ variant = "default" }) {
+  const [attempt, setAttempt] = useState(0)
+  const [state, setState] = useState({ status: "loading", reviews: [] })
   useEffect(() => {
-    ;(async () => {
-      try {
-        setReviews(await fetchPublicReviews())
-      } catch {
-        setReviews([])
-      }
-    })()
-  }, [])
-
-  const safeTruncate = (text = "", words = truncateWords) => {
-    const toks = String(text).split(/\s+/).filter(Boolean)
-    if (toks.length <= words) return toks.join(" ")
-    return toks.slice(0, words).join(" ") + " ..."
-  }
-
-  return (
-    <div className="text-white">
-      {/* Outer spacing */}
-      <div className="mx-auto my-12 max-w-[1200px] px-4">
-        <Swiper
-          slidesPerView={4}
-          spaceBetween={20}
-          loop={reviews.length > 4}
-          freeMode={true}
-          autoplay={{
-            delay: 2500,
-            disableOnInteraction: false,
-          }}
-          modules={[FreeMode, Pagination, Autoplay]}
-          pagination={{ clickable: true }}
-          // Responsive breakpoints
-          breakpoints={{
-            320: { slidesPerView: 1, spaceBetween: 12 },
-            640: { slidesPerView: 2, spaceBetween: 16 },
-            1024: { slidesPerView: 3, spaceBetween: 20 },
-            1280: { slidesPerView: 4, spaceBetween: 24 },
-          }}
-          className="w-full"
-        >
-          {reviews.length === 0 ? (
-            <SwiperSlide>
-              <div className="flex h-40 items-center justify-center rounded-md bg-richblack-800 p-4 text-richblack-400">
-                No reviews yet
-              </div>
-            </SwiperSlide>
-          ) : (
-            reviews.map((review, i) => {
-              const user = review?.user || {}
-              const course = review?.course || {}
-              const name =
-                `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-                "Anonymous"
-              const imgSrc = getAvatarSource(user)
-
-              return (
-                <SwiperSlide key={review?._id || i}>
-                  <div className="flex h-full flex-col gap-3 rounded-xl bg-richblack-800 p-4 text-[14px] text-richblack-25 shadow-xs transition-shadow duration-200 hover:shadow-md">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={imgSrc}
-                        alt={name}
-                        onError={(event) =>
-                          setInitialsAvatarOnError(event, user)
-                        }
-                        className="h-10 w-10 shrink-0 rounded-full object-cover"
-                      />
-                      <div className="flex flex-col">
-                        <h3 className="text-sm font-semibold text-richblack-5">
-                          {name}
-                        </h3>
-                        <span className="text-[12px] font-medium text-richblack-500">
-                          {course.courseName || "Course"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="text-sm font-medium text-richblack-25">
-                      {safeTruncate(review?.review, truncateWords)}
-                    </p>
-
-                    <div className="mt-auto flex items-center gap-2">
-                      <h4 className="font-semibold text-yellow-100">
-                        {typeof review?.rating === "number"
-                          ? review.rating.toFixed(1)
-                          : "0.0"}
-                      </h4>
-
-                      <RatingStars
-                        Review_Count={Number(review?.rating) || 0}
-                        Star_Size={20}
-                      />
-                    </div>
-                  </div>
-                </SwiperSlide>
-              )
-            })
-          )}
-        </Swiper>
+    let active = true
+    fetchPublicReviews()
+      .then((reviews) => {
+        if (active) setState({ status: "ready", reviews })
+      })
+      .catch(() => {
+        if (active) setState({ status: "error", reviews: [] })
+      })
+    return () => {
+      active = false
+    }
+  }, [attempt])
+  if (state.status === "loading")
+    return (
+      <div
+        className="mt-10 grid gap-6 sm:grid-cols-3"
+        role="status"
+        aria-label="Loading learner reviews"
+      >
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className={`h-64 animate-pulse rounded-xl ${
+              variant === "spotlight" ? "bg-white/20" : "bg-brand-soft"
+            }`}
+            aria-hidden="true"
+          />
+        ))}
       </div>
-    </div>
-  )
+    )
+  if (state.status === "error")
+    return (
+      <div className="mt-10">
+        <StatusPanel
+          tone="error"
+          title="Reviews are temporarily unavailable"
+          description="Please try again to hear from our learners."
+          action={
+            <button
+              type="button"
+              className="sn-btn sn-btn-secondary"
+              onClick={() => {
+                setState({ status: "loading", reviews: [] })
+                setAttempt((value) => value + 1)
+              }}
+            >
+              Retry reviews
+            </button>
+          }
+        />
+      </div>
+    )
+  if (!state.reviews.length)
+    return (
+      <div className="mt-10">
+        <StatusPanel
+          title="Every learning story starts somewhere"
+          description="No reviews yet. Learner reviews will appear here when they are shared."
+        />
+      </div>
+    )
+  return <ReviewCards reviews={state.reviews} variant={variant} />
 }
-
-export default ReviewSlider

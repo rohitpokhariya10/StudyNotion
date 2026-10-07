@@ -158,12 +158,12 @@ export default function CourseInformationForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-6"
+      className="space-y-8 rounded-md border-[1px] border-border-default bg-surface-secondary p-6"
     >
       {/* Course Title */}
       <div className="flex flex-col space-y-2">
-        <label className="text-sm text-richblack-5" htmlFor="courseTitle">
-          Course Title <sup className="text-pink-200">*</sup>
+        <label className="text-sm text-text-primary" htmlFor="courseTitle">
+          Course Title <sup className="text-danger">*</sup>
         </label>
         <input
           id="courseTitle"
@@ -172,15 +172,15 @@ export default function CourseInformationForm() {
           className="form-style w-full"
         />
         {errors.courseTitle && (
-          <span className="ml-2 text-xs tracking-wide text-pink-200">
+          <span className="ml-2 text-xs tracking-wide text-danger">
             Course title is required
           </span>
         )}
       </div>
       {/* Course Short Description */}
       <div className="flex flex-col space-y-2">
-        <label className="text-sm text-richblack-5" htmlFor="courseShortDesc">
-          Course Short Description <sup className="text-pink-200">*</sup>
+        <label className="text-sm text-text-primary" htmlFor="courseShortDesc">
+          Course Short Description <sup className="text-danger">*</sup>
         </label>
         <textarea
           id="courseShortDesc"
@@ -189,15 +189,15 @@ export default function CourseInformationForm() {
           className="form-style resize-x-none min-h-[130px] w-full"
         />
         {errors.courseShortDesc && (
-          <span className="ml-2 text-xs tracking-wide text-pink-200">
+          <span className="ml-2 text-xs tracking-wide text-danger">
             Course Description is required
           </span>
         )}
       </div>
       {/* Course Price */}
       <div className="flex flex-col space-y-2">
-        <label className="text-sm text-richblack-5" htmlFor="coursePrice">
-          Course Price <sup className="text-pink-200">*</sup>
+        <label className="text-sm text-text-primary" htmlFor="coursePrice">
+          Course Price <sup className="text-danger">*</sup>
         </label>
         <div className="relative">
           <input
@@ -212,18 +212,18 @@ export default function CourseInformationForm() {
             })}
             className="form-style w-full pl-12!"
           />
-          <HiOutlineCurrencyRupee className="absolute top-1/2 left-3 inline-block -translate-y-1/2 text-2xl text-richblack-400" />
+          <HiOutlineCurrencyRupee className="absolute top-1/2 left-3 inline-block -translate-y-1/2 text-2xl text-text-secondary" />
         </div>
         {errors.coursePrice && (
-          <span className="ml-2 text-xs tracking-wide text-pink-200">
+          <span className="ml-2 text-xs tracking-wide text-danger">
             Course Price is required
           </span>
         )}
       </div>
       {/* Course Category */}
       <div className="flex flex-col space-y-2">
-        <label className="text-sm text-richblack-5" htmlFor="courseCategory">
-          Course Category <sup className="text-pink-200">*</sup>
+        <label className="text-sm text-text-primary" htmlFor="courseCategory">
+          Course Category <sup className="text-danger">*</sup>
         </label>
         <select
           {...register("courseCategory", { required: true })}
@@ -242,7 +242,7 @@ export default function CourseInformationForm() {
             ))}
         </select>
         {errors.courseCategory && (
-          <span className="ml-2 text-xs tracking-wide text-pink-200">
+          <span className="ml-2 text-xs tracking-wide text-danger">
             Course Category is required
           </span>
         )}
@@ -268,8 +268,8 @@ export default function CourseInformationForm() {
       />
       {/* Benefits of the course */}
       <div className="flex flex-col space-y-2">
-        <label className="text-sm text-richblack-5" htmlFor="courseBenefits">
-          Benefits of the course <sup className="text-pink-200">*</sup>
+        <label className="text-sm text-text-primary" htmlFor="courseBenefits">
+          Benefits of the course <sup className="text-danger">*</sup>
         </label>
         <textarea
           id="courseBenefits"
@@ -278,7 +278,7 @@ export default function CourseInformationForm() {
           className="form-style resize-x-none min-h-[130px] w-full"
         />
         {errors.courseBenefits && (
-          <span className="ml-2 text-xs tracking-wide text-pink-200">
+          <span className="ml-2 text-xs tracking-wide text-danger">
             Benefits of the course is required
           </span>
         )}
@@ -293,15 +293,15 @@ export default function CourseInformationForm() {
         getValues={getValues}
       />
       {/* Next Button */}
-      <div className="flex justify-end gap-x-2">
+      <div className="flex flex-wrap justify-end gap-3">
         {editCourse && (
           <button
             type="button"
             onClick={() => dispatch(setStep(2))}
             disabled={loading}
-            className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 px-[20px] py-[8px] font-semibold text-richblack-900`}
+            className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-surface-elevated px-[20px] py-[8px] font-semibold text-text-primary`}
           >
-            Continue Wihout Saving
+            Continue Without Saving
           </button>
         )}
         <IconBtn

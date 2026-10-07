@@ -22,6 +22,7 @@ const models = [
   require("../models/Purchase"),
   require("../models/Entitlement"),
   require("../models/EntitlementOperationAudit"),
+  ...require("../modules/project-neet/models"),
 ]
 
 const INDEX_CONFIRMATION = "create-indexes"

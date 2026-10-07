@@ -2,14 +2,11 @@ import { Link } from "react-router"
 
 const Button = ({ children, active, linkto }) => {
   return (
-    <Link to={linkto}>
-      <div
-        className={`rounded-md px-6 py-3 text-center text-[13px] font-bold shadow-[2px_2px_0px_0px_rgba(255,255,255,0.18)] sm:text-[16px] ${
-          active ? "bg-yellow-50 text-black " : "bg-richblack-800"
-        } transition-all duration-200 hover:scale-95 hover:shadow-none`}
-      >
-        {children}
-      </div>
+    <Link
+      to={linkto}
+      className={`sn-btn ${active ? "sn-btn-primary" : "sn-btn-secondary"}`}
+    >
+      {children}
     </Link>
   )
 }

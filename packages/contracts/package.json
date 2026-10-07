@@ -18,6 +18,7 @@
     "./courses": "./src/courses.js",
     "./errors": "./src/errors.js",
     "./learning": "./src/learning.js",
+    "./neet": "./src/neet.js",
     "./pagination": "./src/pagination.js",
     "./reviews": "./src/reviews.js",
     "./users": "./src/users.js",

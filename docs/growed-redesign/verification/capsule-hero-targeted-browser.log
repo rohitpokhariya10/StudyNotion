@@ -1,0 +1,21 @@
+[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+Running 11 tests using 3 workers
+
+  ✓   1 [neet-chromium] › e2e/project-neet.spec.js:479:5 › normal StudyNotion entry remains separate from NEET heavy scripts (2.2s)
+  ✓   2 [neet-mobile] › e2e/project-neet.spec.js:479:5 › normal StudyNotion entry remains separate from NEET heavy scripts (2.3s)
+  ✓   4 [ui-desktop] › e2e/ui-transformation.spec.js:298:5 › 360px public layouts and modal navigation remain usable (5.5s)
+  ✓   5 [ui-desktop] › e2e/ui-transformation.spec.js:681:5 › public composition scales across remaining target viewport widths (6.3s)
+  ✓   7 [ui-mobile] › e2e/ui-transformation.spec.js:298:5 › 360px public layouts and modal navigation remain usable (5.8s)
+  ✓   3 [ui-desktop] › e2e/ui-transformation.spec.js:123:5 › public pages have readable responsive layouts and landmarks (16.7s)
+  ✓   6 [ui-mobile] › e2e/ui-transformation.spec.js:123:5 › public pages have readable responsive layouts and landmarks (18.2s)
+  ✓   8 [ui-mobile] › e2e/ui-transformation.spec.js:681:5 › public composition scales across remaining target viewport widths (12.7s)
+  ✓   9 [ui-tablet] › e2e/ui-transformation.spec.js:123:5 › public pages have readable responsive layouts and landmarks (15.7s)
+  ✓  10 [ui-tablet] › e2e/ui-transformation.spec.js:298:5 › 360px public layouts and modal navigation remain usable (5.0s)
+  ✓  11 [ui-tablet] › e2e/ui-transformation.spec.js:681:5 › public composition scales across remaining target viewport widths (6.2s)
+
+  11 passed (36.8s)

@@ -84,13 +84,15 @@ export default function Upload({
 
   return (
     <div className="flex flex-col space-y-2">
-      <label className="text-sm text-richblack-5" htmlFor={name}>
-        {label} {!viewData && <sup className="text-pink-200">*</sup>}
+      <label className="text-sm text-text-primary" htmlFor={name}>
+        {label} {!viewData && <sup className="text-danger">*</sup>}
       </label>
       <div
         className={`${
-          isDragActive ? "bg-richblack-600" : "bg-richblack-700"
-        } flex min-h-[250px] cursor-pointer items-center justify-center rounded-md border-2 border-dotted border-richblack-500`}
+          isDragActive
+            ? "border-brand-primary bg-brand-soft"
+            : "bg-surface-elevated"
+        } flex min-h-[250px] cursor-pointer items-center justify-center rounded-md border-2 border-dotted border-border-default`}
       >
         {previewSource ? (
           <div className="flex w-full flex-col p-6">
@@ -123,7 +125,7 @@ export default function Upload({
                     objectUrlRef.current = null
                   }
                 }}
-                className="mt-3 text-richblack-400 underline"
+                className="mt-3 text-text-secondary underline"
               >
                 Cancel
               </button>
@@ -132,19 +134,28 @@ export default function Upload({
         ) : (
           <div
             className="flex w-full flex-col items-center p-6"
-            {...getRootProps()}
+            {...getRootProps({
+              role: "button",
+              "aria-label": `Choose ${label.toLowerCase()}`,
+            })}
           >
-            <input {...getInputProps()} />
-            <div className="grid aspect-square w-14 place-items-center rounded-full bg-pure-greys-800">
-              <FiUploadCloud className="text-2xl text-yellow-50" />
+            <input
+              {...getInputProps({
+                "aria-label": label,
+                id: name,
+                style: { display: "none" },
+              })}
+            />
+            <div className="grid aspect-square w-14 place-items-center rounded-full bg-brand-soft">
+              <FiUploadCloud className="text-2xl text-brand-primary" />
             </div>
-            <p className="mt-2 max-w-[200px] text-center text-sm text-richblack-200">
+            <p className="mt-2 max-w-[200px] text-center text-sm text-text-secondary">
               Drag and drop an {!video ? "image" : "video"}, or click to{" "}
-              <span className="font-semibold text-yellow-50">browse</span> a
+              <span className="font-semibold text-brand-primary">browse</span> a
               file
             </p>
 
-            <ul className="mt-10 flex list-disc justify-between space-x-12 text-center text-xs text-richblack-200">
+            <ul className="mt-6 flex list-disc flex-wrap justify-center gap-x-8 gap-y-2 text-center text-xs text-text-secondary">
               <li>Aspect ratio 16:9</li>
               <li>Recommended size 1024x576</li>
             </ul>
@@ -152,7 +163,7 @@ export default function Upload({
         )}
       </div>
       {errors[name] && (
-        <span className="ml-2 text-xs tracking-wide text-pink-200">
+        <span className="ml-2 text-xs tracking-wide text-danger">
           {label} is required
         </span>
       )}

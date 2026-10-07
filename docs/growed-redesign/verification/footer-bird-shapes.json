@@ -1,0 +1,70 @@
+{
+  "method": "Rasterized each original single-perimeter filled path at 5x; counted connected opaque regions and enclosed transparent holes.",
+  "results": [
+    {
+      "name": "raised",
+      "moveCount": 1,
+      "closures": 1,
+      "components": [
+        {
+          "size": 15612,
+          "edge": false,
+          "at": [
+            344,
+            20
+          ]
+        }
+      ],
+      "holes": []
+    },
+    {
+      "name": "glide",
+      "moveCount": 1,
+      "closures": 1,
+      "components": [
+        {
+          "size": 11087,
+          "edge": false,
+          "at": [
+            201,
+            126
+          ]
+        }
+      ],
+      "holes": []
+    },
+    {
+      "name": "lowered",
+      "moveCount": 1,
+      "closures": 1,
+      "components": [
+        {
+          "size": 13340,
+          "edge": false,
+          "at": [
+            196,
+            126
+          ]
+        }
+      ],
+      "holes": []
+    },
+    {
+      "name": "banked",
+      "moveCount": 1,
+      "closures": 1,
+      "components": [
+        {
+          "size": 13297,
+          "edge": false,
+          "at": [
+            66,
+            41
+          ]
+        }
+      ],
+      "holes": []
+    }
+  ],
+  "flockSize": 29
+}

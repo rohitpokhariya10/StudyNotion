@@ -1,0 +1,9 @@
+
+> studynotion@0.1.0 lint
+> eslint . && npm run architecture:check
+
+
+> studynotion@0.1.0 architecture:check
+> node scripts/check-architecture.mjs
+
+Architecture check passed (342 frontend and 55 bounded backend source files; six frontend layers enforced)

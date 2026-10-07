@@ -3,6 +3,7 @@ import {
   getLearningErrorPresentation,
   useMarkLessonCompleteMutation,
 } from "@/entities/learning"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { useEffect, useRef, useState } from "react"
 import { Link, useOutletContext, useParams } from "react-router"
 
@@ -137,15 +138,15 @@ const VideoDetails = () => {
 
   if (!lesson) {
     return (
-      <section className="grid min-h-[60vh] place-items-center text-center text-richblack-5">
+      <section className="grid min-h-[60vh] place-items-center text-center text-text-primary">
         <div className="max-w-md" role="alert">
-          <p className="text-sm font-semibold tracking-wide text-yellow-50 uppercase">
+          <p className="text-sm font-semibold tracking-wide text-brand-primary uppercase">
             Lesson not found
           </p>
           <h1 className="mt-2 text-2xl font-semibold">
             This lesson is not part of the current course.
           </h1>
-          <p className="mt-3 text-richblack-200">
+          <p className="mt-3 text-text-secondary">
             Choose an available lesson from the course content panel.
           </p>
         </div>
@@ -162,9 +163,9 @@ const VideoDetails = () => {
     completionNotice.lessonId === subSectionId ? completionNotice.message : ""
 
   return (
-    <article className="text-richblack-5">
+    <article className="text-text-primary">
       <header className="mb-5">
-        <p className="text-sm font-medium text-richblack-300">
+        <p className="text-sm font-medium text-text-secondary">
           {completed ? "Completed" : "In progress"}
           {duration ? ` · ${duration}` : ""}
         </p>
@@ -176,21 +177,22 @@ const VideoDetails = () => {
       <section aria-label="Secure lesson video">
         {playbackLoading || (!playbackError && !activePlayback) ? (
           <div
-            className="grid aspect-video place-items-center rounded-md border border-richblack-700 bg-black"
+            className="grid aspect-video place-items-center rounded-md border border-border-default bg-black"
             aria-busy="true"
           >
-            <div role="status" aria-label="Loading lesson video">
-              <div className="spinner" aria-hidden="true" />
-            </div>
+            <FlaskLoader
+              tone="inverse"
+              accessibleLabel="Loading lesson video"
+            />
           </div>
         ) : playbackError || !activePlayback?.url ? (
-          <div className="grid aspect-video place-items-center rounded-md border border-richblack-700 bg-black px-6 text-center">
+          <div className="grid aspect-video place-items-center rounded-md border border-border-default bg-black px-6 text-center">
             <div className="max-w-md">
-              <h2 className="text-lg font-semibold text-richblack-25">
+              <h2 className="text-lg font-semibold text-white">
                 This lesson video could not be loaded.
               </h2>
               {playbackError && (
-                <p className="mt-2 text-sm text-richblack-300" role="alert">
+                <p className="mt-2 text-sm text-white/85" role="alert">
                   {playbackError}
                 </p>
               )}
@@ -204,7 +206,7 @@ const VideoDetails = () => {
             </div>
           </div>
         ) : (
-          <div className="relative aspect-video overflow-hidden rounded-md border border-richblack-700 bg-black">
+          <div className="relative aspect-video overflow-hidden rounded-md border border-border-default bg-black">
             <video
               key={`${lesson.id}:${activePlayback.url}`}
               ref={playerRef}
@@ -224,7 +226,7 @@ const VideoDetails = () => {
 
             {videoEnded && (
               <div className="absolute inset-0 z-10 grid place-content-center bg-black/85 px-5 text-center">
-                <p className="font-medium text-richblack-25">
+                <p className="font-medium text-white">
                   You’ve reached the end of this lesson.
                 </p>
                 {!completed && (
@@ -240,7 +242,7 @@ const VideoDetails = () => {
                   </button>
                 )}
                 {completed && (
-                  <p className="mt-3 font-semibold text-caribbeangreen-100">
+                  <p className="mt-3 font-semibold text-caribbeangreen-50">
                     Completed
                   </p>
                 )}
@@ -253,7 +255,7 @@ const VideoDetails = () => {
                     playerRef.current.play().catch(() => undefined)
                     setEndedVideoId(null)
                   }}
-                  className="mx-auto mt-3 min-h-11 rounded-md border border-richblack-500 px-5 py-2 font-semibold text-richblack-5 hover:border-richblack-300"
+                  className="mx-auto mt-3 min-h-11 rounded-md border border-border-default px-5 py-2 font-semibold text-white hover:border-border-default"
                 >
                   Rewatch
                 </button>
@@ -263,18 +265,18 @@ const VideoDetails = () => {
         )}
       </section>
 
-      <div className="mt-5 flex flex-col gap-4 border-b border-richblack-700 pb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-5 flex flex-col gap-4 border-b border-border-default pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-medium text-richblack-50">
+          <p className="font-medium text-text-primary">
             {completed ? "Lesson completed" : "Lesson not completed"}
           </p>
           {!completed && !videoEnded && (
-            <p className="mt-1 text-sm text-richblack-300">
+            <p className="mt-1 text-sm text-text-secondary">
               Finish the video to mark this lesson complete.
             </p>
           )}
           <p
-            className="mt-1 text-sm text-richblack-200"
+            className="mt-1 text-sm text-text-secondary"
             aria-live="polite"
             role={completion.isError ? "alert" : "status"}
           >
@@ -285,7 +287,7 @@ const VideoDetails = () => {
         <nav className="flex flex-wrap gap-3" aria-label="Lesson navigation">
           {previousItem && (
             <Link
-              className="flex min-h-11 items-center rounded-md border border-richblack-600 px-4 py-2 text-sm font-semibold text-richblack-50 hover:border-richblack-400"
+              className="flex min-h-11 items-center rounded-md border border-border-default px-4 py-2 text-sm font-semibold text-text-primary hover:border-border-default"
               to={lessonPath(learningCourse.course.id, previousItem)}
             >
               Previous lesson
@@ -293,7 +295,7 @@ const VideoDetails = () => {
           )}
           {nextItem && (
             <Link
-              className="flex min-h-11 items-center rounded-md bg-yellow-50 px-4 py-2 text-sm font-semibold text-richblack-900 hover:bg-yellow-100"
+              className="flex min-h-11 items-center rounded-md bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-primary"
               to={lessonPath(learningCourse.course.id, nextItem)}
             >
               Next lesson
@@ -307,7 +309,7 @@ const VideoDetails = () => {
           <h2 id="lesson-about-heading" className="text-lg font-semibold">
             About this lesson
           </h2>
-          <p className="mt-2 max-w-3xl leading-7 whitespace-pre-wrap text-richblack-200">
+          <p className="mt-2 max-w-3xl leading-7 whitespace-pre-wrap text-text-secondary">
             {lesson.description}
           </p>
         </section>

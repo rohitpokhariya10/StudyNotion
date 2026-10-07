@@ -1,10 +1,10 @@
 const variants = {
-  primary:
-    "border-catalog-action bg-catalog-action text-white hover:bg-catalog-text",
-  secondary:
-    "border-catalog-border bg-catalog-surface text-catalog-text hover:bg-catalog-surface-muted",
-  quiet:
-    "border-transparent bg-transparent text-catalog-info hover:bg-catalog-surface-muted",
+  primary: "sn-btn-primary",
+  secondary: "sn-btn-secondary",
+  outline: "sn-btn-outline",
+  quiet: "sn-btn-ghost",
+  ghost: "sn-btn-ghost",
+  destructive: "sn-btn-destructive",
 }
 
 function Button({
@@ -17,7 +17,7 @@ function Button({
   return (
     <button
       type={type === "submit" ? "submit" : "button"}
-      className={`inline-flex min-h-11 items-center justify-center rounded-product border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${
+      className={`sn-btn text-sm disabled:cursor-not-allowed disabled:opacity-55 ${
         variants[variant] || variants.primary
       } ${className}`}
       {...props}

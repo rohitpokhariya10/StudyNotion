@@ -48,14 +48,14 @@ function Course_Card({ course, Height, priority = false }) {
   const imageFailed = Boolean(thumbnailUrl && failedImageUrl === thumbnailUrl)
 
   return (
-    <article className="catalog-theme catalog-course-card h-full overflow-hidden rounded-product-lg border border-catalog-border bg-catalog-surface shadow-xs transition-[border-color,box-shadow,translate] hover:-translate-y-0.5 hover:border-catalog-brand/50 hover:shadow-product">
+    <article className="catalog-theme catalog-course-card h-full overflow-hidden rounded-2xl border border-catalog-border bg-white transition-[border-color,box-shadow,translate] duration-200 hover:-translate-y-1 hover:border-catalog-brand/40 hover:shadow-product">
       <Link
         to={`/courses/${id}`}
         aria-label={`View ${name} course details`}
         className="group flex h-full flex-col"
       >
         <div
-          className={`${Height || "aspect-video"} overflow-hidden bg-catalog-surface-muted`}
+          className={`${Height || "aspect-[16/10]"} overflow-hidden bg-catalog-surface-muted`}
         >
           {thumbnailUrl && !imageFailed ? (
             <img
@@ -79,13 +79,13 @@ function Course_Card({ course, Height, priority = false }) {
           )}
         </div>
 
-        <div className="flex flex-1 flex-col p-5">
+        <div className="flex flex-1 flex-col p-6">
           {category?.name && (
-            <p className="text-xs font-semibold tracking-[0.12em] text-catalog-brand uppercase">
+            <p className="self-start rounded-full bg-catalog-brand-soft px-3 py-1 text-xs font-medium text-catalog-brand">
               {category.name}
             </p>
           )}
-          <h2 className="mt-2 text-lg leading-6 font-semibold text-catalog-text group-hover:text-catalog-info">
+          <h2 className="mt-3 text-lg leading-snug font-semibold text-catalog-text group-hover:text-catalog-brand">
             {name}
           </h2>
           {instructor?.name && (
@@ -122,15 +122,27 @@ function Course_Card({ course, Height, priority = false }) {
             </p>
           )}
 
-          <div className="mt-auto flex items-end justify-between gap-4 pt-5">
-            <p className="text-xl font-semibold text-catalog-text">
-              {formatCatalogPrice(price, currency)}
-            </p>
-            {Number(enrollmentCount) > 0 && (
-              <p className="text-xs text-catalog-muted">
-                {Number(enrollmentCount).toLocaleString("en-IN")} learners
+          <div className="mt-auto flex items-end justify-between gap-4 border-t border-catalog-border pt-5">
+            <div>
+              <p className="text-xl font-semibold text-catalog-text">
+                {formatCatalogPrice(price, currency)}
               </p>
-            )}
+              {Number(enrollmentCount) > 0 && (
+                <p className="mt-0.5 text-xs text-catalog-muted">
+                  {Number(enrollmentCount).toLocaleString("en-IN")} learner
+                  {Number(enrollmentCount) === 1 ? "" : "s"}
+                </p>
+              )}
+            </div>
+            <span
+              aria-hidden="true"
+              className="inline-flex items-center gap-1 text-sm font-medium text-catalog-brand"
+            >
+              View course
+              <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+                →
+              </span>
+            </span>
           </div>
         </div>
       </Link>

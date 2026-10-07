@@ -1,4 +1,5 @@
 import { addToCart } from "@/entities/cart"
+import { formatCatalogLanguage } from "@/entities/catalog"
 import { CourseAccordionBar, fetchCourseDetails } from "@/entities/course"
 import {
   getAverageRating as GetAvgRating,
@@ -9,23 +10,22 @@ import {
   getAvatarSource,
   setInitialsAvatarOnError,
 } from "@/entities/user"
-import {
-  BuyCourse,
-  CheckoutPolicyAcknowledgement,
-  fetchCheckoutConfig,
-} from "@/features/course-purchase"
-import CourseDetailsCard from "@/pages/course-details/ui/CourseDetailsCard"
+import { BuyCourse, fetchCheckoutConfig } from "@/features/course-purchase"
 import Error from "@/pages/not-found"
 import { formatDate } from "@/shared/lib/formatDate"
 import ConfirmationModal from "@/shared/ui/ConfirmationModal"
+import PageLoadingFallback from "@/shared/ui/PageLoadingFallback"
 import SafeMarkdown from "@/shared/ui/SafeMarkdown"
 import Footer from "@/widgets/footer"
+import { ReviewCards } from "@/widgets/review-slider"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
-import { BiInfoCircle } from "react-icons/bi"
-import { HiOutlineGlobeAlt } from "react-icons/hi"
+import { FiCalendar, FiGlobe, FiStar, FiUsers } from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useParams } from "react-router"
+import { Link, useNavigate, useParams } from "react-router"
+
+import CourseGlance from "./ui/CourseGlance"
+import PurchaseCard from "./ui/PurchaseCard"
 
 function CourseDetails() {
   const { user } = useSelector((state) => state.profile)
@@ -113,8 +113,23 @@ function CourseDetails() {
 
   if (loading || !response) {
     return (
-      <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
-        <div className="spinner"></div>
+      <div
+        className="sn-hero min-h-[calc(100dvh-var(--sn-header-height))]"
+        role="status"
+        aria-label="Loading course"
+      >
+        <div className="sn-container grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem]">
+          <div className="space-y-5" aria-hidden="true">
+            <div className="h-4 w-40 animate-pulse rounded bg-white" />
+            <div className="h-12 w-3/4 animate-pulse rounded-lg bg-white" />
+            <div className="h-5 w-full animate-pulse rounded bg-white" />
+            <div className="h-5 w-2/3 animate-pulse rounded bg-white" />
+          </div>
+          <div
+            aria-hidden="true"
+            className="h-96 animate-pulse rounded-2xl bg-white"
+          />
+        </div>
       </div>
     )
   }
@@ -125,8 +140,6 @@ function CourseDetails() {
   const {
     courseName,
     courseDescription,
-    thumbnail,
-    price,
     whatYouWillLearn,
     courseContent,
     ratingAndReviews,
@@ -191,120 +204,111 @@ function CourseDetails() {
   if (paymentLoading) {
     // console.log("payment loading")
     return (
-      <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
-        <div className="spinner"></div>
-      </div>
+      <PageLoadingFallback
+        label="Processing checkout"
+        accessibleLabel="Processing checkout"
+      />
     )
   }
 
+  const instructorName = [instructor?.firstName, instructor?.lastName]
+    .filter(Boolean)
+    .join(" ")
+  const reviewCount = ratingAndReviews?.length || 0
+  const metadata = [
+    reviewCount > 0
+      ? {
+          icon: FiStar,
+          label: (
+            <span className="flex items-center gap-2">
+              <span className="font-semibold text-brand-primary">
+                {avgReviewCount}
+              </span>
+              <RatingStars Review_Count={avgReviewCount} Star_Size={16} />
+              <span>
+                ({reviewCount} review{reviewCount === 1 ? "" : "s"})
+              </span>
+            </span>
+          ),
+        }
+      : { icon: FiStar, label: "Not yet rated" },
+    {
+      icon: FiUsers,
+      label: `${totalStudentsEnrolled ?? 0} student${totalStudentsEnrolled === 1 ? "" : "s"} enrolled`,
+    },
+    { icon: FiCalendar, label: `Created ${formatDate(createdAt)}` },
+    ...(courseDetails.language
+      ? [
+          {
+            icon: FiGlobe,
+            label: formatCatalogLanguage(courseDetails.language),
+          },
+        ]
+      : []),
+  ]
+
   return (
     <>
-      <div className={`relative w-full bg-richblack-800`}>
-        {/* Hero Section */}
-        <div className="mx-auto box-content px-4 lg:w-[1260px] 2xl:relative">
-          <div className="mx-auto grid min-h-[450px] max-w-maxContentTab justify-items-center py-8 lg:mx-0 lg:justify-items-start lg:py-0 xl:max-w-[810px]">
-            <div className="relative block max-h-[30rem] lg:hidden">
-              <div className="absolute bottom-0 left-0 h-full w-full shadow-[0_-64px_36px_-28px_#161D29_inset]"></div>
-              <img
-                src={thumbnail}
-                alt="course thumbnail"
-                className="aspect-auto w-full"
-              />
-            </div>
-            <div
-              className={`z-30 my-5 flex flex-col justify-center gap-4 py-5 text-lg text-richblack-5`}
-            >
-              <div>
-                <p className="text-4xl leading-10 font-bold text-richblack-5 sm:text-[42px]">
-                  {courseName}
-                </p>
-              </div>
-              <p className={`text-richblack-200`}>{courseDescription}</p>
-              <div className="text-md flex flex-wrap items-center gap-2">
-                <span className="text-yellow-25">{avgReviewCount}</span>
-                <RatingStars Review_Count={avgReviewCount} Star_Size={24} />
-                <span>{`(${ratingAndReviews.length} reviews)`}</span>
-                <span>{`${totalStudentsEnrolled ?? 0} students enrolled`}</span>
-              </div>
-              <div>
-                <p className="">
-                  Created By {`${instructor.firstName} ${instructor.lastName}`}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-5 text-lg">
-                <p className="flex items-center gap-2">
-                  {" "}
-                  <BiInfoCircle /> Created at {formatDate(createdAt)}
-                </p>
-                <p className="flex items-center gap-2">
-                  {" "}
-                  <HiOutlineGlobeAlt /> English
-                </p>
-              </div>
-            </div>
-            <div className="flex w-full flex-col gap-4 border-y border-y-richblack-500 py-4 lg:hidden">
-              <p className="space-x-3 pb-4 text-3xl font-semibold text-richblack-5">
-                Rs. {price}
+      <main>
+        <section className="sn-hero" aria-labelledby="course-title">
+          <div className="sn-container grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-14">
+            <div className="max-w-2xl lg:pt-4">
+              <nav aria-label="Breadcrumb">
+                <ol className="flex flex-wrap items-center gap-2 text-sm text-text-secondary">
+                  <li>
+                    <Link
+                      to="/"
+                      className="inline-flex min-h-11 items-center hover:text-brand-primary"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li aria-hidden="true">/</li>
+                  <li>Course</li>
+                </ol>
+              </nav>
+              <h1 id="course-title" className="sn-display mt-3">
+                {courseName}
+              </h1>
+              <p className="sn-lead mt-5 text-[1.0625rem]">
+                {courseDescription}
               </p>
-              <button
-                type="button"
-                className="yellowButton"
-                disabled={
-                  !isEnrolled &&
-                  (!checkoutPolicyAccepted || !policyConfig || policyLoading)
-                }
-                onClick={
-                  isEnrolled
-                    ? () => navigate("/dashboard/enrolled-courses")
-                    : handleBuyCourse
-                }
-              >
-                {isEnrolled ? "Go To Course" : "Buy Now"}
-              </button>
-              {!isEnrolled && (
-                <>
-                  <CheckoutPolicyAcknowledgement
-                    checked={checkoutPolicyAccepted}
-                    disabled={policyLoading}
-                    id="mobile-checkout-policy"
-                    onChange={setCheckoutPolicyAccepted}
-                    policyConfig={policyConfig}
-                  />
-                  {policyLoading && (
-                    <p className="text-xs text-richblack-300" role="status">
-                      Loading current checkout policies…
-                    </p>
-                  )}
-                  {policyError && (
-                    <div className="text-xs text-pink-100" role="alert">
-                      <p>{policyError}</p>
-                      <button
-                        type="button"
-                        className="mt-1 font-medium text-yellow-100 underline"
-                        onClick={reloadPolicyConfig}
-                      >
-                        Try again
-                      </button>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="blackButton"
-                    onClick={handleAddToCart}
+              <ul className="mt-7 flex flex-wrap gap-3 text-sm">
+                {metadata.map(({ icon: Icon, label }, index) => (
+                  <li
+                    key={index}
+                    className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border-default bg-white px-4"
                   >
-                    Add to Cart
-                  </button>
-                </>
+                    <Icon aria-hidden="true" className="text-brand-primary" />
+                    {label}
+                  </li>
+                ))}
+              </ul>
+              {instructorName && (
+                <div className="mt-8 flex items-center gap-3">
+                  <img
+                    src={getAvatarSource(instructor)}
+                    alt=""
+                    onError={(event) =>
+                      setInitialsAvatarOnError(event, instructor)
+                    }
+                    className="h-12 w-12 rounded-full object-cover ring-4 ring-white"
+                  />
+                  <p className="text-[0.9375rem]">
+                    <span className="block text-text-secondary">
+                      Created by
+                    </span>
+                    <span className="font-semibold">{instructorName}</span>
+                  </p>
+                </div>
               )}
             </div>
-          </div>
-          {/* Courses Card */}
-          <div className="top-[60px] right-[1rem] mx-auto hidden min-h-[600px] w-1/3 max-w-[410px] translate-y-24 md:translate-y-0 lg:absolute lg:block">
-            <CourseDetailsCard
+            <PurchaseCard
               course={courseDetails}
               isEnrolled={isEnrolled}
               handleBuyCourse={handleBuyCourse}
               handleAddToCart={handleAddToCart}
+              onGoToCourse={() => navigate("/dashboard/enrolled-courses")}
               checkoutPolicyAccepted={checkoutPolicyAccepted}
               policyConfig={policyConfig}
               policyError={policyError}
@@ -313,77 +317,107 @@ function CourseDetails() {
               setCheckoutPolicyAccepted={setCheckoutPolicyAccepted}
             />
           </div>
-        </div>
-      </div>
-      <div className="mx-auto box-content px-4 text-start text-richblack-5 lg:w-[1260px]">
-        <div className="mx-auto max-w-maxContentTab lg:mx-0 xl:max-w-[810px]">
-          {/* What will you learn section */}
-          <div className="my-8 border border-richblack-600 p-8">
-            <p className="text-3xl font-semibold">What you'll learn</p>
-            <div className="mt-5">
-              <SafeMarkdown>{whatYouWillLearn}</SafeMarkdown>
-            </div>
-          </div>
+        </section>
 
-          {/* Course Content Section */}
-          <div className="max-w-[830px]">
-            <div className="flex flex-col gap-3">
-              <p className="text-[28px] font-semibold">Course Content</p>
-              <div className="flex flex-wrap justify-between gap-2">
-                <div className="flex gap-2">
-                  <span>
-                    {courseContent.length} {`section(s)`}
-                  </span>
-                  <span>
-                    {totalNoOfLectures} {`lecture(s)`}
-                  </span>
-                  <span>{response.data?.totalDuration} total length</span>
-                </div>
-                <div>
-                  <button
-                    type="button"
-                    className="text-yellow-25"
-                    onClick={() => setIsActive([])}
-                  >
-                    Collapse all sections
-                  </button>
-                </div>
+        <div className="sn-container grid items-start gap-10 py-14 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-14 lg:py-20">
+          <div className="min-w-0 space-y-14">
+            <section
+              aria-labelledby="learn-title"
+              className="sn-card sn-card-tint rounded-2xl p-7 sm:p-9"
+            >
+              <h2 id="learn-title" className="sn-subheading">
+                What you'll learn
+              </h2>
+              <div className="sn-prose mt-5 text-text-primary">
+                <SafeMarkdown>{whatYouWillLearn}</SafeMarkdown>
               </div>
-            </div>
+            </section>
 
-            {/* Course Details Accordion */}
-            <div className="py-4">
-              {courseContent?.map((course, index) => (
-                <CourseAccordionBar
-                  course={course}
-                  key={index}
-                  isActive={isActive}
-                  handleActive={handleActive}
-                />
-              ))}
-            </div>
+            <section aria-labelledby="curriculum-title">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h2 id="curriculum-title" className="sn-subheading">
+                    Course Content
+                  </h2>
+                  <p className="mt-2 text-sm text-text-secondary">
+                    {courseContent.length} section
+                    {courseContent.length === 1 ? "" : "s"} ·{" "}
+                    {totalNoOfLectures} lecture
+                    {totalNoOfLectures === 1 ? "" : "s"}
+                    {response.data?.totalDuration
+                      ? ` · ${response.data.totalDuration} total length`
+                      : ""}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="sn-btn sn-btn-ghost"
+                  onClick={() => setIsActive([])}
+                >
+                  Collapse all sections
+                </button>
+              </div>
+              <div className="mt-6 overflow-hidden rounded-2xl border border-border-default">
+                {courseContent?.map((course, index) => (
+                  <CourseAccordionBar
+                    course={course}
+                    key={index}
+                    isActive={isActive}
+                    handleActive={handleActive}
+                  />
+                ))}
+              </div>
+            </section>
 
-            {/* Author Details */}
-            <div className="mb-12 py-4">
-              <p className="text-[28px] font-semibold">Author</p>
-              <div className="flex items-center gap-4 py-4">
+            <section aria-labelledby="course-reviews-title">
+              <h2 id="course-reviews-title" className="sn-subheading">
+                Learner reviews
+              </h2>
+              {ratingAndReviews?.length ? (
+                <ReviewCards reviews={ratingAndReviews} />
+              ) : (
+                <p className="sn-card mt-5 text-text-secondary">
+                  No learner reviews have been shared for this course yet.
+                </p>
+              )}
+            </section>
+            <section
+              aria-labelledby="author-title"
+              className="sn-card rounded-2xl p-7 sm:p-9"
+            >
+              <h2 id="author-title" className="sn-subheading">
+                Author
+              </h2>
+              <div className="mt-6 flex items-center gap-4">
                 <img
                   src={getAvatarSource(instructor)}
-                  alt="Author"
+                  alt=""
                   onError={(event) =>
                     setInitialsAvatarOnError(event, instructor)
                   }
-                  className="h-14 w-14 rounded-full object-cover"
+                  className="h-16 w-16 rounded-full object-cover"
                 />
-                <p className="text-lg">{`${instructor.firstName} ${instructor.lastName}`}</p>
+                <div>
+                  <p className="text-lg font-semibold">{instructorName}</p>
+                  <p className="text-sm text-text-secondary">
+                    Course instructor
+                  </p>
+                </div>
               </div>
-              <p className="text-richblack-50">
-                {instructor?.additionalDetails?.about}
-              </p>
-            </div>
+              {instructor?.additionalDetails?.about && (
+                <p className="mt-5 leading-relaxed text-text-secondary">
+                  {instructor.additionalDetails.about}
+                </p>
+              )}
+            </section>
           </div>
+          <CourseGlance
+            course={courseDetails}
+            lectureCount={totalNoOfLectures}
+            totalDuration={response.data?.totalDuration}
+          />
         </div>
-      </div>
+      </main>
       <Footer />
       {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
     </>

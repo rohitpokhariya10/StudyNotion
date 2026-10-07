@@ -1,93 +1,57 @@
-import HighlightText from "@/shared/ui/HighlightText"
-import CTAButton from "@/shared/ui/LinkButton"
+import { FiBookOpen, FiCompass, FiLayers, FiTrendingUp } from "react-icons/fi"
+import { Link } from "react-router"
 
-const LearningGridArray = [
-  {
-    order: -1,
-    heading: "World-Class Learning for",
-    highliteText: "Anyone, Anywhere",
-    description:
-      "Studynotion partners with more than 275+ leading universities and companies to bring flexible, affordable, job-relevant online learning to individuals and organizations worldwide.",
-    BtnText: "Learn More",
-    BtnLink: "/",
-  },
-  {
-    order: 1,
-    heading: "Curriculum Based on Industry Needs",
-    description:
-      "Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs.",
-  },
-  {
-    order: 2,
-    heading: "Our Learning Methods",
-    description:
-      "Studynotion partners with more than 275+ leading universities and companies to bring",
-  },
-  {
-    order: 3,
-    heading: "Certification",
-    description:
-      "Studynotion partners with more than 275+ leading universities and companies to bring",
-  },
-  {
-    order: 4,
-    heading: `Rating "Auto-grading"`,
-    description:
-      "Studynotion partners with more than 275+ leading universities and companies to bring",
-  },
-  {
-    order: 5,
-    heading: "Ready to Work",
-    description:
-      "Studynotion partners with more than 275+ leading universities and companies to bring",
-  },
+const capabilities = [
+  [
+    FiCompass,
+    "Follow your curiosity",
+    "Browse course categories and find a subject you want to explore.",
+  ],
+  [
+    FiLayers,
+    "A structured path",
+    "See the course curriculum before you enroll. Move through lessons at your pace.",
+  ],
+  [
+    FiBookOpen,
+    "Room to revisit",
+    "Return to your enrolled lessons when you want to practise or refresh an idea.",
+  ],
+  [
+    FiTrendingUp,
+    "Your progress, together",
+    "Keep track of completed lessons in your personal learning workspace.",
+  ],
 ]
 
-const LearningGrid = () => {
+export default function LearningGrid() {
   return (
-    <div className="mx-auto mb-12 grid w-[350px] grid-cols-1 xl:w-fit xl:grid-cols-4">
-      {LearningGridArray.map((card, i) => {
-        return (
-          <div
-            key={i}
-            className={`${i === 0 && "xl:col-span-2 xl:h-[294px]"} ${
-              card.order % 2 === 1
-                ? "h-[294px] bg-richblack-700"
-                : card.order % 2 === 0
-                  ? "h-[294px] bg-richblack-800"
-                  : "bg-transparent"
-            } ${card.order === 3 && "xl:col-start-2"} `}
-          >
-            {card.order < 0 ? (
-              <div className="flex flex-col gap-3 pb-10 xl:w-[90%] xl:pb-0">
-                <div className="text-4xl font-semibold">
-                  {card.heading}
-                  <HighlightText text={card.highliteText} />
-                </div>
-                <p className="font-medium text-richblack-300">
-                  {card.description}
-                </p>
-
-                <div className="mt-2 w-fit">
-                  <CTAButton active={true} linkto={card.BtnLink}>
-                    {card.BtnText}
-                  </CTAButton>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-8 p-8">
-                <h1 className="text-lg text-richblack-5">{card.heading}</h1>
-
-                <p className="font-medium text-richblack-300">
-                  {card.description}
-                </p>
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
+    <section className="sn-card mb-12 grid gap-8 bg-brand-soft p-6 sm:p-10 lg:grid-cols-[1fr_1.5fr]">
+      <div>
+        <p className="sn-eyebrow">Made for your learning</p>
+        <h2 className="sn-heading">
+          A little structure.
+          <br />A world to explore.
+        </h2>
+        <p className="sn-lead my-5">
+          Make space for practical skills, fresh ideas, and your own pace.
+        </p>
+        <Link to="/#discover" className="sn-btn sn-btn-primary">
+          Explore courses →
+        </Link>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {capabilities.map(([Icon, title, copy]) => (
+          <article key={title} className="sn-card p-5">
+            <Icon
+              className="mb-4 text-2xl text-brand-primary"
+              aria-hidden="true"
+            />
+            <h3 className="text-xl font-bold">{title}</h3>
+            <p className="mt-3 text-sm leading-6 text-text-secondary">{copy}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   )
 }
-
-export default LearningGrid

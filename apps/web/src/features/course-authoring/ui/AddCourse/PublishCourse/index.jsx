@@ -65,8 +65,8 @@ export default function PublishCourse() {
   }
 
   return (
-    <div className="rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-6">
-      <p className="text-2xl font-semibold text-richblack-5">
+    <div className="rounded-md border-[1px] border-border-default bg-surface-secondary p-6">
+      <p className="text-2xl font-semibold text-text-primary">
         Publish Settings
       </p>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -77,21 +77,21 @@ export default function PublishCourse() {
               type="checkbox"
               id="public"
               {...register("public")}
-              className="border-gray-300 h-4 w-4 rounded-sm bg-richblack-500 text-richblack-400 focus:ring-2 focus:ring-richblack-5"
+              className="h-4 w-4 rounded-sm accent-brand-primary"
             />
-            <span className="ml-2 text-richblack-400">
+            <span className="ml-2 text-text-secondary">
               Make this course as public
             </span>
           </label>
         </div>
 
         {/* Next Prev Button */}
-        <div className="ml-auto flex max-w-max items-center gap-x-4">
+        <div className="ml-auto flex max-w-max flex-wrap items-center gap-3">
           <button
             disabled={loading}
             type="button"
             onClick={goBack}
-            className="flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 px-[20px] py-[8px] font-semibold text-richblack-900"
+            className="flex cursor-pointer items-center gap-x-2 rounded-md bg-surface-elevated px-[20px] py-[8px] font-semibold text-text-primary"
           >
             Back
           </button>

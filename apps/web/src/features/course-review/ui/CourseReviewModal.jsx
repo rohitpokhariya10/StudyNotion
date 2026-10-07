@@ -1,5 +1,7 @@
 import { createRating } from "@/entities/course"
+import { getAvatarSource, setInitialsAvatarOnError } from "@/entities/user"
 import RatingInput from "@/features/course-review/ui/RatingInput"
+import AccessibleDialog from "@/shared/ui/AccessibleDialog"
 import IconBtn from "@/shared/ui/IconBtn"
 import { useForm, useWatch } from "react-hook-form"
 import { RxCross2 } from "react-icons/rx"
@@ -14,7 +16,7 @@ export default function CourseReviewModal({ courseId, setReviewModal }) {
     handleSubmit,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: { courseExperience: "", courseRating: 0 },
   })
@@ -34,101 +36,112 @@ export default function CourseReviewModal({ courseId, setReviewModal }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] mt-0! grid h-screen w-screen place-items-center overflow-auto bg-white/10 backdrop-blur-xs">
-      <div
-        className="my-10 w-11/12 max-w-[700px] rounded-lg border border-richblack-400 bg-richblack-800"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="review-dialog-title"
-      >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between rounded-t-lg bg-richblack-700 p-5">
-          <p
-            id="review-dialog-title"
-            className="text-xl font-semibold text-richblack-5"
-          >
-            Add Review
-          </p>
-          <button
-            type="button"
-            aria-label="Close review dialog"
-            onClick={() => setReviewModal(false)}
-          >
-            <RxCross2 className="text-2xl text-richblack-5" />
-          </button>
-        </div>
-        {/* Modal Body */}
-        <div className="p-6">
-          <div className="flex items-center justify-center gap-x-4">
-            <img
-              src={user?.image}
-              alt={user?.firstName + "profile"}
-              className="aspect-square w-[50px] rounded-full object-cover"
-            />
-            <div className="">
-              <p className="font-semibold text-richblack-5">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-sm text-richblack-5">Posting Publicly</p>
-            </div>
+    <AccessibleDialog
+      title="Add Review"
+      titleClassName="sr-only"
+      onClose={() => {
+        if (!isSubmitting) setReviewModal(false)
+      }}
+      closeOnEscape={!isSubmitting}
+      className="my-4 w-full max-w-[640px] rounded-xl border border-border-default bg-white"
+      overlayClassName="bg-black/40"
+    >
+      {/* Modal Header */}
+      <div className="flex items-center justify-between rounded-t-lg bg-surface-elevated p-5">
+        <p
+          id="review-dialog-title"
+          className="text-xl font-semibold text-text-primary"
+        >
+          Add Review
+        </p>
+        <button
+          type="button"
+          aria-label="Close review dialog"
+          disabled={isSubmitting}
+          className="sn-btn sn-btn-icon"
+          onClick={() => setReviewModal(false)}
+        >
+          <RxCross2 className="text-2xl text-text-primary" />
+        </button>
+      </div>
+      {/* Modal Body */}
+      <div className="p-6">
+        <div className="flex items-center justify-center gap-x-4">
+          <img
+            src={getAvatarSource(user)}
+            onError={(event) => setInitialsAvatarOnError(event, user)}
+            alt=""
+            className="aspect-square w-[50px] rounded-full object-cover"
+          />
+          <div className="">
+            <p className="font-semibold text-text-primary">
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p className="text-sm text-text-primary">Posting Publicly</p>
           </div>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="mt-6 flex flex-col items-center"
-          >
-            <RatingInput
-              value={selectedRating}
-              onChange={(rating) =>
-                setValue("courseRating", rating, {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                })
-              }
+        </div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="mt-6 flex flex-col items-center"
+        >
+          <RatingInput
+            value={selectedRating}
+            disabled={isSubmitting}
+            onChange={(rating) =>
+              setValue("courseRating", rating, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+          />
+          <input
+            type="hidden"
+            {...register("courseRating", {
+              min: { value: 1, message: "Please select a rating" },
+              required: "Please select a rating",
+            })}
+          />
+          {errors.courseRating && (
+            <span className="mt-1 text-xs text-danger" role="alert">
+              {errors.courseRating.message}
+            </span>
+          )}
+          <div className="flex w-11/12 flex-col space-y-2">
+            <label
+              className="text-sm text-text-primary"
+              htmlFor="courseExperience"
+            >
+              Add Your Experience <sup className="text-danger">*</sup>
+            </label>
+            <textarea
+              id="courseExperience"
+              placeholder="Add Your Experience"
+              {...register("courseExperience", { required: true })}
+              className="form-style min-h-[130px] w-full resize-y"
             />
-            <input
-              type="hidden"
-              {...register("courseRating", {
-                min: { value: 1, message: "Please select a rating" },
-                required: "Please select a rating",
-              })}
-            />
-            {errors.courseRating && (
-              <span className="mt-1 text-xs text-pink-200" role="alert">
-                {errors.courseRating.message}
+            {errors.courseExperience && (
+              <span className="ml-2 text-xs tracking-wide text-danger">
+                Please Add Your Experience
               </span>
             )}
-            <div className="flex w-11/12 flex-col space-y-2">
-              <label
-                className="text-sm text-richblack-5"
-                htmlFor="courseExperience"
-              >
-                Add Your Experience <sup className="text-pink-200">*</sup>
-              </label>
-              <textarea
-                id="courseExperience"
-                placeholder="Add Your Experience"
-                {...register("courseExperience", { required: true })}
-                className="form-style resize-x-none min-h-[130px] w-full"
-              />
-              {errors.courseExperience && (
-                <span className="ml-2 text-xs tracking-wide text-pink-200">
-                  Please Add Your Experience
-                </span>
-              )}
-            </div>
-            <div className="mt-6 flex w-11/12 justify-end gap-x-2">
-              <button
-                type="button"
-                onClick={() => setReviewModal(false)}
-                className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-richblack-300 px-[20px] py-[8px] font-semibold text-richblack-900`}
-              >
-                Cancel
-              </button>
-              <IconBtn type="submit" text="Save" />
-            </div>
-          </form>
-        </div>
+          </div>
+          <div className="mt-6 flex w-11/12 justify-end gap-x-2">
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => setReviewModal(false)}
+              className={`flex cursor-pointer items-center gap-x-2 rounded-md bg-surface-elevated px-[20px] py-[8px] font-semibold text-text-primary`}
+            >
+              Cancel
+            </button>
+            <IconBtn
+              type="submit"
+              disabled={isSubmitting}
+              text={isSubmitting ? "Saving…" : "Save"}
+            />
+          </div>
+        </form>
       </div>
-    </div>
+    </AccessibleDialog>
   )
 }

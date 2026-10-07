@@ -50,9 +50,9 @@ export default function RenderTotalAmount() {
   }
 
   return (
-    <div className="min-w-[280px] rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-6">
-      <p className="mb-1 text-sm font-medium text-richblack-300">Total:</p>
-      <p className="mb-6 text-3xl font-medium text-yellow-100">₹ {total}</p>
+    <div className="w-full min-w-0 rounded-xl border-[1px] border-border-default bg-surface-secondary p-6 lg:max-w-[340px]">
+      <p className="mb-1 text-sm font-medium text-text-secondary">Total:</p>
+      <p className="mb-6 text-3xl font-medium text-brand-primary">₹ {total}</p>
       <CheckoutPolicyAcknowledgement
         checked={checkoutPolicyAccepted}
         disabled={policyLoading}
@@ -61,16 +61,16 @@ export default function RenderTotalAmount() {
         policyConfig={policyConfig}
       />
       {policyLoading && (
-        <p className="mt-2 text-xs text-richblack-300" role="status">
+        <p className="mt-2 text-xs text-text-secondary" role="status">
           Loading current checkout policies…
         </p>
       )}
       {policyError && (
-        <div className="mt-2 text-xs text-pink-100" role="alert">
+        <div className="mt-2 text-xs text-danger" role="alert">
           <p>{policyError}</p>
           <button
             type="button"
-            className="mt-1 font-medium text-yellow-100 underline"
+            className="mt-1 font-medium text-brand-primary underline"
             onClick={() => {
               setPolicyLoading(true)
               setPolicyError("")

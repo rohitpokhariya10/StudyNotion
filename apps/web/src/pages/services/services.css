@@ -1,0 +1,376 @@
+/* Services page sections, after the GrowEd services reference. The hero
+   typography is shared (widgets/marketing/ui/editorial.css). */
+.sn-services-map img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Facts panel under the hero. */
+.sn-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 64px 40px 0;
+  padding: 32px 16px;
+  list-style: none;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 18px -6px rgb(0 0 0 / 0.16);
+}
+.sn-stats li {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.sn-stats strong {
+  color: var(--sn-brand);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.sn-stats span {
+  color: #202020;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sn-stats .sn-stats-pending {
+  width: 64px;
+  height: 31px;
+  border-radius: 8px;
+  background: #e8eef7;
+  animation: catalog-pulse 1.5s ease-in-out infinite;
+}
+
+/* Differentiators: four illustrated items, staggered on desktop. */
+.sn-diff {
+  position: relative;
+  padding: 88px 20px 72px;
+}
+.sn-diff-dot {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.sn-diff-dot-coral {
+  top: 40px;
+  left: max(16px, calc(50% - 680px));
+  width: 40px;
+  height: 40px;
+  background: #f4604f;
+}
+.sn-diff-dot-sun {
+  top: 160px;
+  right: max(16px, calc(50% - 680px));
+  width: 32px;
+  height: 32px;
+  background: #fbd645;
+}
+.sn-diff-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  width: min(100%, 1104px);
+  margin: 56px auto 0;
+  list-style: none;
+}
+.sn-diff-grid li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.sn-diff-grid li:nth-child(even) {
+  transform: translateY(52px);
+}
+.sn-diff-icon {
+  width: 96px;
+  height: 96px;
+}
+.sn-diff-grid h3 {
+  margin: 24px 0 8px;
+  color: #090909;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.sn-diff-grid p {
+  max-width: 200px;
+  color: #6b6f78;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* Learner reviews on the blue band. */
+.sn-reviews-band {
+  padding: 64px 0 56px;
+  margin-top: 52px;
+  background: linear-gradient(180deg, #2492ea 0%, #1b6fd2 100%);
+  color: #fff;
+}
+.sn-reviews-band .sn-carousel {
+  padding-top: 40px;
+}
+
+/* Learning workspace showcase. */
+.sn-showcase {
+  position: relative;
+  overflow-x: clip;
+  padding: 88px 20px 96px;
+}
+.sn-showcase-cloud {
+  position: absolute;
+  width: 224px;
+}
+.sn-showcase-cloud-top {
+  top: 4px;
+  right: -40px;
+}
+.sn-showcase-cloud-bottom {
+  bottom: -30px;
+  left: -40px;
+}
+.sn-showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 800fr) minmax(0, 360fr);
+  align-items: center;
+  gap: 56px;
+  width: min(100%, 1200px);
+  margin: 48px auto 0;
+}
+.sn-showcase-visual {
+  overflow: hidden;
+  border: 1px solid #edf1f6;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 18px 44px rgb(16 24 40 / 0.1);
+}
+.sn-showcase-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sn-showcase-copy ul {
+  display: grid;
+  gap: 24px;
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+}
+.sn-showcase-copy li::marker {
+  color: #090909;
+}
+.sn-showcase-copy strong {
+  display: block;
+  color: #090909;
+  font-size: 16px;
+  font-weight: 700;
+}
+.sn-showcase-copy span {
+  display: block;
+  color: #202020;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.sn-showcase-cta {
+  width: min(100%, 280px);
+  min-height: 44px;
+  margin-top: 36px;
+  border-radius: 8px;
+}
+
+/* Three learning steps on a pale-blue fade. */
+.sn-steps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 20px 88px;
+  background: linear-gradient(180deg, #d0eaff 0%, #ffffff 100%);
+}
+.sn-steps-title,
+.sn-faq-title {
+  margin: 0;
+  color: var(--sn-brand);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+}
+.sn-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  width: min(100%, 1040px);
+  margin: 56px 0 0;
+  list-style: none;
+}
+.sn-steps-grid li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.sn-steps-art {
+  position: relative;
+  width: 200px;
+  display: flex;
+  justify-content: center;
+}
+.sn-steps-art img {
+  width: 160px;
+  height: 160px;
+}
+.sn-steps-number {
+  position: absolute;
+  top: -6px;
+  left: 0;
+}
+.sn-steps-grid h3 {
+  margin: 24px 0 6px;
+  color: #090909;
+  font-size: 16px;
+  font-weight: 600;
+}
+.sn-steps-grid p {
+  max-width: 220px;
+  color: #202020;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.sn-steps-cta {
+  width: min(100%, 320px);
+  min-height: 44px;
+  margin-top: 48px;
+  border-radius: 8px;
+}
+
+/* FAQ accordion. */
+.sn-faq {
+  padding: 72px 20px 96px;
+}
+.sn-faq-subtitle {
+  margin: 12px 0 48px;
+  color: #202020;
+  font-size: 18px;
+  text-align: center;
+}
+.sn-faq-list {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 800px);
+  margin-inline: auto;
+}
+.sn-faq-item {
+  border: 1px solid #e3e3e3;
+  border-radius: 6px;
+  background: #fafafa;
+}
+.sn-faq-item h3 {
+  margin: 0;
+}
+.sn-faq-item button {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  color: #090909;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.sn-faq-item button svg {
+  flex: none;
+  color: #6b6f78;
+  transition: transform 0.2s ease;
+}
+.sn-faq-item.is-open button svg {
+  transform: rotate(180deg);
+}
+.sn-faq-item button:focus-visible {
+  outline: 3px solid var(--sn-brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.sn-faq-answer {
+  padding: 0 16px 16px;
+  color: #3a3d44;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1023px) {
+  .sn-stats {
+    margin: 40px 0 0;
+  }
+  .sn-stats strong {
+    font-size: 20px;
+  }
+  .sn-diff-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 48px;
+  }
+  .sn-diff-grid li:nth-child(even) {
+    transform: none;
+  }
+  .sn-showcase-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    width: min(100%, 720px);
+  }
+}
+@media (max-width: 639px) {
+  .sn-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    width: min(100%, 280px);
+    margin-inline: auto;
+    padding: 28px 16px;
+  }
+  .sn-stats strong {
+    font-size: 21px;
+  }
+  .sn-stats span {
+    font-size: 13px;
+  }
+  .sn-diff {
+    padding: 64px 20px 48px;
+  }
+  .sn-diff-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .sn-reviews-band {
+    margin-top: 0;
+  }
+  .sn-showcase {
+    padding: 64px 20px 72px;
+  }
+  .sn-showcase-cloud {
+    width: 150px;
+  }
+  .sn-showcase-cta,
+  .sn-steps-cta {
+    width: 100%;
+  }
+  .sn-steps {
+    padding: 64px 20px 72px;
+  }
+  .sn-steps-title,
+  .sn-faq-title {
+    font-size: 26px;
+  }
+  .sn-steps-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+  .sn-faq {
+    padding: 56px 20px 72px;
+  }
+}

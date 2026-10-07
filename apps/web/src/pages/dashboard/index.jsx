@@ -1,3 +1,4 @@
+import PageLoadingFallback from "@/shared/ui/PageLoadingFallback"
 import Sidebar from "@/widgets/dashboard-sidebar"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AiOutlineMenu } from "react-icons/ai"
@@ -22,36 +23,19 @@ function Dashboard() {
     return () => window.clearTimeout(timeoutId)
   }, [closeSidebar, location.key])
 
-  useEffect(() => {
-    if (!sidebarOpen) return undefined
-
-    const handleEscape = (event) => {
-      if (event.key !== "Escape") return
-      closeSidebar()
-      menuButtonRef.current?.focus()
-    }
-
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
-  }, [closeSidebar, sidebarOpen])
-
   if (profileLoading || authLoading) {
-    return (
-      <div className="grid min-h-[calc(100vh-3.5rem)] place-items-center">
-        <div className="spinner" role="status" aria-label="Loading dashboard" />
-      </div>
-    )
+    return <PageLoadingFallback accessibleLabel="Loading dashboard" />
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-3.5rem)]">
+    <div className="sn-workspace relative flex min-h-[calc(100dvh-var(--sn-header-height))] bg-[#f7f9fc]">
       <Sidebar mobileOpen={sidebarOpen} onClose={closeSidebar} />
-      <main className="h-[calc(100vh-3.5rem)] min-w-0 flex-1 overflow-auto">
-        <div className="mx-auto w-11/12 max-w-[1000px] py-6 sm:py-10">
+      <main className="min-h-[calc(100dvh-var(--sn-header-height))] min-w-0 flex-1 overflow-auto">
+        <div className="mx-auto w-full max-w-[1120px] px-4 py-6 sm:px-8 sm:py-10">
           <button
             ref={menuButtonRef}
             type="button"
-            className="mb-6 flex items-center gap-2 rounded-md border border-richblack-600 bg-richblack-800 px-3 py-2 text-sm font-medium text-richblack-50 md:hidden"
+            className="sn-btn sn-btn-secondary mb-6 md:hidden"
             onClick={() =>
               sidebarOpen ? closeSidebar() : setSidebarLocationKey(location.key)
             }

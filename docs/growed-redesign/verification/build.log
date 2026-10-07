@@ -1,0 +1,132 @@
+
+> studynotion@0.1.0 build:local
+> npm run build:local --workspace studynotion-web
+
+
+> studynotion-web@0.1.0 build:local
+> vite build
+
+vite v8.1.5 building client environment for production...
+[2Ktransforming...✓ 685 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                                2.31 kB │ gzip:   0.75 kB
+dist/assets/poppins-latin-ext-700-normal-cby-RkWa.woff2                        5.43 kB
+dist/assets/poppins-latin-ext-500-normal-CK-6C4Hw.woff2                        5.48 kB
+dist/assets/poppins-latin-ext-600-normal-CAhIAdZj.woff2                        5.52 kB
+dist/assets/poppins-latin-ext-400-normal-by3JarPu.woff2                        5.64 kB
+dist/assets/poppins-latin-ext-700-normal-DctTR6Tg.woff                         7.32 kB
+dist/assets/poppins-latin-ext-500-normal-CgAe2rWW.woff                         7.37 kB
+dist/assets/poppins-latin-ext-600-normal-Df5ffKXP.woff                         7.43 kB
+dist/assets/poppins-latin-ext-400-normal-DaBSavcJ.woff                         7.46 kB
+dist/assets/poppins-latin-500-normal-C8OXljZJ.woff2                            7.74 kB
+dist/assets/poppins-latin-700-normal-Qrb0O0WB.woff2                            7.81 kB
+dist/assets/poppins-latin-400-normal-cpxAROuN.woff2                            7.88 kB
+dist/assets/poppins-latin-600-normal-zEkxB9Mr.woff2                            8.00 kB
+dist/assets/poppins-latin-500-normal-DGXqpDMm.woff                            10.37 kB
+dist/assets/poppins-latin-700-normal-BVuQR_eA.woff                            10.43 kB
+dist/assets/poppins-latin-400-normal-BOb3E3N0.woff                            10.53 kB
+dist/assets/poppins-latin-600-normal-BJdTmd5m.woff                            10.60 kB
+dist/assets/atkinson-hyperlegible-next-latin-ext-wght-normal-C6vrW8VD.woff2   19.09 kB
+dist/assets/login-PGMsBj5-.webp                                               19.18 kB
+dist/assets/signup-BDvUTCZ1.webp                                              24.77 kB
+dist/assets/atkinson-hyperlegible-next-latin-wght-normal-BcXVPD7q.woff2       33.99 kB
+dist/assets/poppins-devanagari-500-normal-BIdkeU1p.woff2                      39.08 kB
+dist/assets/poppins-devanagari-700-normal-O-jipLrW.woff2                      39.25 kB
+dist/assets/poppins-devanagari-600-normal-STEjXBNN.woff2                      39.29 kB
+dist/assets/poppins-devanagari-400-normal-CJDn6rn8.woff2                      39.66 kB
+dist/assets/poppins-devanagari-700-normal-fHs-vx92.woff                       52.24 kB
+dist/assets/poppins-devanagari-500-normal-DMPDjHtT.woff                       52.42 kB
+dist/assets/poppins-devanagari-600-normal-ClASKHrr.woff                       52.56 kB
+dist/assets/poppins-devanagari-400-normal-CqVvlrh5.woff                       52.98 kB
+dist/assets/rzp_logo-IOUG20i7.png                                             65.63 kB
+dist/assets/neet-shell-CaLYSHBu.css                                           10.14 kB │ gzip:   3.18 kB
+dist/assets/index-D98651CH.css                                               105.16 kB │ gzip:  19.15 kB
+dist/assets/cart-6PV1Za5g.js                                                   0.07 kB │ gzip:   0.08 kB
+dist/assets/course-create-CygZdD4o.js                                          0.07 kB │ gzip:   0.08 kB
+dist/assets/course-edit-BrHtEQs-.js                                            0.07 kB │ gzip:   0.08 kB
+dist/assets/accountTypes-CBfgh1_Z.js                                           0.07 kB │ gzip:   0.09 kB
+dist/assets/bi-CE9l7EWS.js                                                     0.24 kB │ gzip:   0.20 kB
+dist/assets/formatDate-CmMVYnDA.js                                             0.24 kB │ gzip:   0.21 kB
+dist/assets/contact-zpEtushL.js                                                0.27 kB │ gzip:   0.21 kB
+dist/assets/CourseImage-BYo31MMy.js                                            0.30 kB │ gzip:   0.25 kB
+dist/assets/login-9oLYu_Q5.js                                                  0.34 kB │ gzip:   0.27 kB
+dist/assets/signup-B0U7Thwc.js                                                 0.37 kB │ gzip:   0.28 kB
+dist/assets/PageIntro-CmlYl1bq.js                                              0.49 kB │ gzip:   0.27 kB
+dist/assets/ConfirmationModal-C1REP_7I.js                                      0.79 kB │ gzip:   0.47 kB
+dist/assets/StatusPanel-4FS1KjVy.js                                            0.79 kB │ gzip:   0.46 kB
+dist/assets/fa-SYjeL4bF.js                                                     0.84 kB │ gzip:   0.42 kB
+dist/assets/not-found-BBqeBqE3.js                                              0.94 kB │ gzip:   0.51 kB
+dist/assets/heroCapabilities-T1lf9Y8s.js                                       0.95 kB │ gzip:   0.55 kB
+dist/assets/ri-BJLwkGqw.js                                                     1.10 kB │ gzip:   0.52 kB
+dist/assets/policy-acceptance-Q2Qr7JfX.js                                      1.24 kB │ gzip:   0.73 kB
+dist/assets/avatar-BfYSsIO0.js                                                 1.26 kB │ gzip:   0.78 kB
+dist/assets/cart-y7CS5Dl1.js                                                   1.30 kB │ gzip:   0.62 kB
+dist/assets/CardCarousel-eFREaoV2.js                                           1.36 kB │ gzip:   0.69 kB
+dist/assets/course-D_U-k7ja.js                                                 1.46 kB │ gzip:   0.55 kB
+dist/assets/user-ZbxkZrII.js                                                   1.74 kB │ gzip:   0.75 kB
+dist/assets/forgot-password-CA0R39ri.js                                        1.75 kB │ gzip:   0.86 kB
+dist/assets/rx-Bj2RL-MO.js                                                     1.85 kB │ gzip:   0.85 kB
+dist/assets/verify-email-c_2Gh8a1.js                                           1.88 kB │ gzip:   0.95 kB
+dist/assets/paymentPresentation-CQp4PBpP.js                                    2.03 kB │ gzip:   0.92 kB
+dist/assets/iconBase-CspdFgeK.js                                               2.48 kB │ gzip:   1.08 kB
+dist/assets/course-finder-Bn4tJ0-n.js                                          2.56 kB │ gzip:   1.16 kB
+dist/assets/review-slider-BJHXJ6Ws.js                                          2.65 kB │ gzip:   1.21 kB
+dist/assets/neet-mocks-F-u1rlnC.js                                             2.76 kB │ gzip:   1.25 kB
+dist/assets/about-DBn6_fbJ.js                                                  3.18 kB │ gzip:   1.25 kB
+dist/assets/ai-CEMAyrxA.js                                                     3.28 kB │ gzip:   1.07 kB
+dist/assets/update-password-C8Xb-lJp.js                                        3.35 kB │ gzip:   1.27 kB
+dist/assets/react-redux-BshjH2cz.js                                            3.78 kB │ gzip:   1.65 kB
+dist/assets/httpClient-CbrbZSql.js                                             3.84 kB │ gzip:   1.67 kB
+dist/assets/blog-article-DFI8AsVw.js                                           3.99 kB │ gzip:   1.41 kB
+dist/assets/blogs-CNWNJWNH.js                                                  4.04 kB │ gzip:   1.50 kB
+dist/assets/careers-BrsslaCO.js                                                4.10 kB │ gzip:   1.47 kB
+dist/assets/profile-63ZZclP2.js                                                4.54 kB │ gzip:   1.28 kB
+dist/assets/instructor-courses-BA0r-j6I.js                                     4.90 kB │ gzip:   1.87 kB
+dist/assets/learning-B93Gw9wW.js                                               5.35 kB │ gzip:   1.93 kB
+dist/assets/enrolled-courses-qura9ard.js                                       5.42 kB │ gzip:   2.09 kB
+dist/assets/instructor-approvals-frbhBfmW.js                                   6.42 kB │ gzip:   2.18 kB
+dist/assets/dashboard-DZEGS5DA.js                                              6.47 kB │ gzip:   2.44 kB
+dist/assets/lesson-l69cGDxG.js                                                 6.53 kB │ gzip:   2.42 kB
+dist/assets/course-purchase-Bgis1Mp6.js                                        7.46 kB │ gzip:   2.86 kB
+dist/assets/purchase-history-DgnsDGN9.js                                       7.89 kB │ gzip:   2.55 kB
+dist/assets/neet-result-B4qmS_W-.js                                            8.02 kB │ gzip:   2.79 kB
+dist/assets/settings-BmT6iex5.js                                               8.17 kB │ gzip:   2.65 kB
+dist/assets/PersonFigure-CUMak-R7.js                                           8.36 kB │ gzip:   2.53 kB
+dist/assets/services-BffQYOLQ.js                                               8.42 kB │ gzip:   2.93 kB
+dist/assets/jsx-runtime-KJkY8l8U.js                                            8.53 kB │ gzip:   3.26 kB
+dist/assets/footer-CRtzoHCQ.js                                                 9.14 kB │ gzip:   3.54 kB
+dist/assets/editorial-DwDTnAze.js                                              9.78 kB │ gzip:   3.57 kB
+dist/assets/legal-DoYA8Vm-.js                                                 10.38 kB │ gzip:   4.06 kB
+dist/assets/ProductCollage-stlpEyOQ.js                                        10.74 kB │ gzip:   2.99 kB
+dist/assets/dist-FTkF3YjC.js                                                  11.86 kB │ gzip:   4.71 kB
+dist/assets/review-7g-Uh0V1.js                                                12.40 kB │ gzip:   4.39 kB
+dist/assets/course-hGcDR7rs.js                                                12.69 kB │ gzip:   4.06 kB
+dist/assets/payment-reconciliation-Dm5SZmph.js                                12.78 kB │ gzip:   3.78 kB
+dist/assets/learning-gh0YorSr.js                                              12.80 kB │ gzip:   4.16 kB
+dist/assets/neet-onboarding-xH95yUsF.js                                       13.67 kB │ gzip:   4.83 kB
+dist/assets/fi-BIx6mrdZ.js                                                    14.63 kB │ gzip:   2.12 kB
+dist/assets/marketing-DTjM1mAi.js                                             14.82 kB │ gzip:   4.38 kB
+dist/assets/course-details-DGfxfGfy.js                                        15.11 kB │ gzip:   5.26 kB
+dist/assets/neet-landing-CD6i85ZJ.js                                          15.76 kB │ gzip:   5.48 kB
+dist/assets/catalog-DEZjNaDf.js                                               15.77 kB │ gzip:   4.83 kB
+dist/assets/home-DfxX83_q.js                                                  21.04 kB │ gzip:   5.94 kB
+dist/assets/redux-toolkit.modern-Dv3Qt6rz.js                                  25.98 kB │ gzip:   9.72 kB
+dist/assets/neet-shell-C7fUXf_v.js                                            31.93 kB │ gzip:  10.22 kB
+dist/assets/neet-proctoring-jRws1aAk.js                                       32.75 kB │ gzip:  11.55 kB
+dist/assets/neet-exam-DKfwKKzh.js                                             34.50 kB │ gzip:  10.95 kB
+dist/assets/lib-BqhRcDDX.js                                                   40.83 kB │ gzip:  14.62 kB
+dist/assets/rtk-query-react.modern-CTcsPBCi.js                                45.25 kB │ gzip:  15.12 kB
+dist/assets/course-authoring-DJfsUro8.js                                      89.31 kB │ gzip:  23.86 kB
+dist/assets/SafeMarkdown-CBc-OPVx.js                                         115.97 kB │ gzip:  35.12 kB
+dist/assets/instructor-dashboard-C9_mCgaO.js                                 209.86 kB │ gzip:  71.75 kB
+dist/assets/index-BewmdL10.js                                                284.64 kB │ gzip:  92.12 kB
+dist/assets/common-Dqex0tqO.js                                               351.42 kB │ gzip:  67.33 kB
+dist/assets/helixScene-BQiPHiWr.js                                           531.91 kB │ gzip: 132.99 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 352ms

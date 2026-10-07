@@ -91,7 +91,7 @@ export default function GoogleSignInButton({
 
   if (!isConfigured) {
     return import.meta.env.DEV ? (
-      <p className="text-center text-xs text-richblack-300" role="status">
+      <p className="text-center text-xs text-text-secondary" role="status">
         Set VITE_GOOGLE_CLIENT_ID to enable Google sign-in.
       </p>
     ) : null
@@ -105,7 +105,7 @@ export default function GoogleSignInButton({
         aria-label="Continue with Google"
       />
       {loadError && (
-        <p className="mt-2 text-center text-xs text-pink-200" role="alert">
+        <p className="mt-2 text-center text-xs text-danger" role="alert">
           Google sign-in is temporarily unavailable. You can still use email.
         </p>
       )}

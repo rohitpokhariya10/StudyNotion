@@ -23,13 +23,18 @@ export default function RenderSteps() {
               <span
                 aria-current={step === item.id ? "step" : undefined}
                 className={`grid aspect-square w-[34px] cursor-default place-items-center rounded-full border-[1px] ${
-                  step === item.id
-                    ? "border-yellow-50 bg-yellow-900 text-yellow-50"
-                    : "border-richblack-700 bg-richblack-800 text-richblack-300"
-                } ${step > item.id && "bg-yellow-50 text-yellow-50"}} `}
+                  step > item.id
+                    ? "border-brand-primary bg-brand-primary text-white"
+                    : step === item.id
+                      ? "border-brand-primary bg-brand-soft text-brand-primary"
+                      : "border-border-default bg-surface-secondary text-text-secondary"
+                } `}
               >
                 {step > item.id ? (
-                  <FaCheck className="font-bold text-richblack-900" />
+                  <>
+                    <FaCheck aria-hidden="true" />
+                    <span className="sr-only">{item.title} complete</span>
+                  </>
                 ) : (
                   item.id
                 )}
@@ -39,7 +44,9 @@ export default function RenderSteps() {
             {item.id !== steps.length && (
               <div
                 className={`h-[calc(34px/2)] w-[33%] border-b-2 border-dashed ${
-                  step > item.id ? "border-yellow-50" : "border-richblack-500"
+                  step > item.id
+                    ? "border-brand-primary"
+                    : "border-border-default"
                 } `}
               ></div>
             )}
@@ -47,13 +54,13 @@ export default function RenderSteps() {
         ))}
       </div>
 
-      <div className="relative mb-16 flex w-full justify-between select-none">
+      <div className="relative mb-8 grid w-full grid-cols-3 gap-2 select-none">
         {steps.map((item) => (
           <React.Fragment key={item.id}>
-            <div className="flex min-w-[130px] flex-col items-center gap-y-2">
+            <div className="flex min-w-0 flex-col items-center gap-y-2 text-center">
               <p
                 className={`text-sm ${
-                  step >= item.id ? "text-richblack-5" : "text-richblack-500"
+                  step >= item.id ? "text-text-primary" : "text-text-secondary"
                 }`}
               >
                 {item.title}

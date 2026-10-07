@@ -1,380 +1,338 @@
 import { useGetCatalogCategoriesQuery } from "@/entities/catalog"
-import {
-  ACCOUNT_TYPE,
-  getAvatarSource,
-  setInitialsAvatarOnError,
-} from "@/entities/user"
+import { ACCOUNT_TYPE } from "@/entities/user"
 import { logout, ProfileDropdown } from "@/features/authentication"
-import logo from "@/shared/assets/Logo/Logo-Full-Light.png"
+import { categoryPathSlug } from "@/features/course-filter"
 import useOnClickOutside from "@/shared/hooks/useOnClickOutside"
+import AccessibleDialog from "@/shared/ui/AccessibleDialog"
+import BrandLogo from "@/shared/ui/BrandLogo"
+import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { NavbarLinks } from "@/widgets/navbar/model/links"
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
-  AiOutlineClose,
-  AiOutlineMenu,
-  AiOutlineShoppingCart,
-} from "react-icons/ai"
-import { BsChevronDown } from "react-icons/bs"
+  FiChevronDown,
+  FiMenu,
+  FiShoppingCart,
+  FiUser,
+  FiX,
+} from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
-import { Link, matchPath, useLocation, useNavigate } from "react-router"
+import { Link, NavLink, useLocation, useNavigate } from "react-router"
 
-function Navbar() {
+export default function Navbar() {
   const { isAuthenticated, status } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.profile)
   const { totalItems } = useSelector((state) => state.cart)
   const dispatch = useDispatch()
-  const location = useLocation()
   const navigate = useNavigate()
-
-  const { data: subLinks = [], isLoading: catalogLinksLoading } =
-    useGetCatalogCategoriesQuery()
-  const [mobileMenuLocationKey, setMobileMenuLocationKey] = useState(null)
-  const [mobileCatalogOpen, setMobileCatalogOpen] = useState(false)
-  const mobileMenuRef = useRef(null)
-  const mobileToggleRef = useRef(null)
-  const previousLocationKeyRef = useRef(location.key)
-
-  const closeMobileMenu = useCallback(() => {
-    setMobileMenuLocationKey(null)
-    setMobileCatalogOpen(false)
+  const location = useLocation()
+  const [mobileLocation, setMobileLocation] = useState(null)
+  const [catalogOpen, setCatalogOpen] = useState(false)
+  const [mobileCatalog, setMobileCatalog] = useState(false)
+  const catalogRef = useRef(null)
+  const catalogTrigger = useRef(null)
+  const mobileTrigger = useRef(null)
+  const closeCatalog = useCallback(() => setCatalogOpen(false), [])
+  useOnClickOutside(catalogRef, closeCatalog)
+  const closeMobile = useCallback(() => {
+    setMobileLocation(null)
+    setMobileCatalog(false)
   }, [])
-
-  const mobileOpen = mobileMenuLocationKey === location.key
-
-  useOnClickOutside(mobileMenuRef, closeMobileMenu)
-
-  useEffect(() => {
-    if (previousLocationKeyRef.current === location.key) return undefined
-    previousLocationKeyRef.current = location.key
-    const timeoutId = window.setTimeout(closeMobileMenu, 0)
-    return () => window.clearTimeout(timeoutId)
-  }, [closeMobileMenu, location.key])
-
-  useEffect(() => {
-    if (!mobileOpen) return undefined
-
-    const handleEscape = (event) => {
-      if (event.key !== "Escape") return
-      closeMobileMenu()
-      mobileToggleRef.current?.focus()
-    }
-
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
-  }, [closeMobileMenu, mobileOpen])
-
-  const matchRoute = (route) =>
-    Boolean(route && matchPath({ path: route }, location.pathname))
-
-  const catalogLinks = subLinks.filter(
-    (subLink) =>
-      typeof subLink?.name === "string" &&
-      Number(subLink?.publishedCourseCount) > 0
+  const mobileOpen = mobileLocation === location.key
+  const {
+    data: categories = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetCatalogCategoriesQuery()
+  const available = categories.filter(
+    (item) =>
+      typeof item?.name === "string" && Number(item.publishedCourseCount) > 0
   )
-
-  const catalogPath = (name) =>
-    `/catalog/${name.split(" ").join("-").toLowerCase()}`
-
+  const inverse =
+    location.pathname === "/careers"
+      ? "sn-navbar-blue"
+      : location.pathname === "/blogs"
+        ? "sn-navbar-dark"
+        : ""
+  useEffect(() => {
+    if (!catalogOpen) return undefined
+    const close = (event) => {
+      if (event.key === "Escape") {
+        closeCatalog()
+        catalogTrigger.current?.focus()
+      }
+    }
+    document.addEventListener("keydown", close)
+    return () => document.removeEventListener("keydown", close)
+  }, [catalogOpen, closeCatalog])
   const handleLogout = () => {
-    closeMobileMenu()
+    closeMobile()
     dispatch(logout(navigate))
   }
-
+  const categoryLinks = (onNavigate) => (
+    <>
+      <Link
+        to="/services"
+        onClick={onNavigate}
+        className="sn-menu-link font-semibold"
+      >
+        Explore all subjects →
+      </Link>
+      {isLoading ? (
+        <FlaskLoader
+          variant="compact"
+          label="Loading catalog"
+          className="p-3"
+        />
+      ) : isError ? (
+        <div role="alert" className="p-3 text-sm">
+          <p>Catalog is temporarily unavailable.</p>
+          <button
+            className="sn-btn sn-btn-secondary mt-2"
+            type="button"
+            onClick={refetch}
+          >
+            Retry catalog
+          </button>
+        </div>
+      ) : available.length ? (
+        available.map((item) => (
+          <Link
+            className="sn-menu-link"
+            key={item.id || item.name}
+            to={`/catalog/${categoryPathSlug(item.name)}`}
+            onClick={onNavigate}
+          >
+            {item.name}
+          </Link>
+        ))
+      ) : (
+        <p className="p-3 text-sm text-text-secondary">No Courses Found</p>
+      )}
+      <Link
+        className="sn-menu-link border-t border-border-default"
+        to="/project-neet"
+        onClick={onNavigate}
+      >
+        Project NEET
+      </Link>
+    </>
+  )
   return (
-    <header
-      className={`relative z-50 flex h-14 shrink-0 items-center justify-center border-b border-b-richblack-700 ${
-        location.pathname !== "/" ? "bg-richblack-800" : ""
-      } transition-all duration-200`}
-    >
-      <div className="flex w-11/12 max-w-maxContent items-center justify-between">
-        <Link to="/" aria-label="StudyNotion home">
-          <img src={logo} alt="StudyNotion" width={160} height={32} />
+    <header className={`sn-navbar relative z-50 ${inverse}`}>
+      <a href="#main-content" className="sn-skip-link">
+        Skip to content
+      </a>
+      <div className="sn-container flex min-h-[var(--sn-header-height)] items-center justify-between gap-3">
+        <Link to="/" aria-label="Prahit home">
+          <BrandLogo decorative />
         </Link>
-
-        <nav className="hidden md:block" aria-label="Primary navigation">
-          <ul className="flex gap-x-6 text-richblack-25">
-            {NavbarLinks.map((link) => (
-              <li key={link.title}>
-                {link.title === "Catalog" ? (
-                  <div
-                    className={`group relative flex items-center gap-1 ${
-                      matchRoute("/catalog/:catalogName")
-                        ? "text-yellow-25"
-                        : "text-richblack-25"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      className="flex items-center gap-1"
-                      aria-haspopup="true"
-                    >
-                      <span>{link.title}</span>
-                      <BsChevronDown aria-hidden="true" />
-                    </button>
-                    <div className="invisible absolute top-1/2 left-1/2 z-[1000] flex w-[200px] -translate-x-1/2 translate-y-[3em] flex-col rounded-lg bg-richblack-5 p-4 text-richblack-900 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:translate-y-[1.65em] group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-[1.65em] group-hover:opacity-100 lg:w-[300px]">
-                      <div className="absolute top-0 left-1/2 -z-10 h-6 w-6 translate-x-[80%] -translate-y-[40%] rotate-45 rounded-sm bg-richblack-5 select-none" />
-                      {catalogLinksLoading ? (
-                        <p className="text-center">Loading...</p>
-                      ) : catalogLinks.length ? (
-                        catalogLinks.map((subLink) => (
-                          <Link
-                            to={catalogPath(subLink.name)}
-                            className="rounded-lg bg-transparent py-4 pl-4 hover:bg-richblack-50 focus-visible:bg-richblack-50"
-                            key={subLink.id || subLink.name}
-                          >
-                            {subLink.name}
-                          </Link>
-                        ))
-                      ) : (
-                        <p className="text-center">No Courses Found</p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    to={link.path}
-                    className={
-                      matchRoute(link.path)
-                        ? "text-yellow-25"
-                        : "text-richblack-25"
-                    }
-                  >
-                    {link.title}
-                  </Link>
-                )}
+        <nav className="hidden lg:block" aria-label="Primary navigation">
+          <ul className="flex items-center gap-5">
+            {NavbarLinks.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  end={item.path !== "/blogs"}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `sn-nav-link ${isActive ? "sn-nav-active" : ""}`
+                  }
+                >
+                  {item.title}
+                </NavLink>
               </li>
             ))}
           </ul>
         </nav>
-
-        <div className="hidden items-center gap-x-4 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
+          <div ref={catalogRef} className="relative">
+            <button
+              ref={catalogTrigger}
+              type="button"
+              className="sn-nav-link flex items-center gap-1 px-2"
+              aria-expanded={catalogOpen}
+              aria-controls="desktop-catalog"
+              onClick={() => setCatalogOpen(!catalogOpen)}
+            >
+              Catalog <FiChevronDown aria-hidden="true" />
+            </button>
+            {catalogOpen && (
+              <nav
+                id="desktop-catalog"
+                aria-label="Course categories"
+                className="absolute top-full right-0 z-50 mt-3 max-h-[60vh] w-72 overflow-y-auto rounded-xl border border-border-default bg-white p-3 text-text-primary shadow-education"
+              >
+                {categoryLinks(closeCatalog)}
+              </nav>
+            )}
+          </div>
           {isAuthenticated && user?.accountType === ACCOUNT_TYPE.STUDENT && (
             <Link
               to="/dashboard/cart"
-              className="relative"
-              aria-label={`Shopping cart with ${totalItems} item${
-                totalItems === 1 ? "" : "s"
-              }`}
+              className="sn-nav-link relative grid h-11 w-11 place-items-center"
+              aria-label={`Shopping cart with ${totalItems} item${totalItems === 1 ? "" : "s"}`}
             >
-              <AiOutlineShoppingCart className="text-2xl text-richblack-100" />
+              <FiShoppingCart size={21} aria-hidden="true" />
               {totalItems > 0 && (
-                <span className="absolute -right-2 -bottom-2 grid h-5 w-5 place-items-center overflow-hidden rounded-full bg-richblack-600 text-center text-xs font-bold text-yellow-100">
+                <span className="absolute top-0 right-0 rounded-full bg-brand-primary px-1.5 text-xs text-white">
                   {totalItems}
                 </span>
               )}
             </Link>
           )}
           {status !== "checking" && !isAuthenticated && (
-            <Link
-              to="/login"
-              className="rounded-lg border border-richblack-700 bg-richblack-800 px-3 py-2 text-richblack-100"
-            >
-              Log in
-            </Link>
-          )}
-          {status !== "checking" && !isAuthenticated && (
-            <Link
-              to="/signup"
-              className="rounded-lg border border-richblack-700 bg-richblack-800 px-3 py-2 text-richblack-100"
-            >
-              Sign up
-            </Link>
+            <>
+              <Link to="/login" className="sn-nav-link px-2">
+                Log in
+              </Link>
+              <Link
+                to="/signup"
+                className={`sn-btn ${inverse ? "sn-btn-light" : "sn-btn-primary"}`}
+              >
+                Sign up
+              </Link>
+            </>
           )}
           {isAuthenticated && user && <ProfileDropdown />}
         </div>
-
-        <div className="relative md:hidden" ref={mobileMenuRef}>
-          <button
-            ref={mobileToggleRef}
-            type="button"
-            className="grid h-10 w-10 place-items-center rounded-md text-richblack-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-yellow-50"
-            onClick={() => {
-              if (mobileOpen) closeMobileMenu()
-              else setMobileMenuLocationKey(location.key)
-            }}
-            aria-controls="mobile-navigation"
-            aria-expanded={mobileOpen}
-            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
-          >
-            {mobileOpen ? (
-              <AiOutlineClose fontSize={24} aria-hidden="true" />
-            ) : (
-              <AiOutlineMenu fontSize={24} aria-hidden="true" />
-            )}
-          </button>
-
-          {mobileOpen && (
-            <>
-              <button
-                type="button"
-                className="fixed inset-x-0 top-14 bottom-0 z-40 cursor-default bg-richblack-900/70"
-                aria-label="Close navigation"
-                onClick={closeMobileMenu}
-              />
-              <nav
-                id="mobile-navigation"
-                className="fixed inset-x-0 top-14 z-50 max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-b border-richblack-700 bg-richblack-800 px-[4.5%] py-5 shadow-2xl"
-                aria-label="Mobile navigation"
-              >
-                <ul className="space-y-1 text-richblack-25">
-                  {NavbarLinks.map((link) => (
-                    <li key={link.title}>
-                      {link.title === "Catalog" ? (
-                        <>
-                          <button
-                            type="button"
-                            className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left ${
-                              matchRoute("/catalog/:catalogName")
-                                ? "text-yellow-25"
-                                : "hover:bg-richblack-700"
-                            }`}
-                            onClick={() =>
-                              setMobileCatalogOpen((open) => !open)
-                            }
-                            aria-controls="mobile-catalog-links"
-                            aria-expanded={mobileCatalogOpen}
-                          >
-                            <span>Catalog</span>
-                            <BsChevronDown
-                              className={`transition-transform ${
-                                mobileCatalogOpen ? "rotate-180" : ""
-                              }`}
-                              aria-hidden="true"
-                            />
-                          </button>
-                          {mobileCatalogOpen && (
-                            <div
-                              id="mobile-catalog-links"
-                              className="ml-3 border-l border-richblack-600 pl-3"
-                            >
-                              {catalogLinksLoading ? (
-                                <p className="px-3 py-3 text-richblack-300">
-                                  Loading catalog...
-                                </p>
-                              ) : catalogLinks.length ? (
-                                catalogLinks.map((subLink) => (
-                                  <Link
-                                    key={subLink.id || subLink.name}
-                                    to={catalogPath(subLink.name)}
-                                    onClick={closeMobileMenu}
-                                    className="block rounded-md px-3 py-3 hover:bg-richblack-700"
-                                  >
-                                    {subLink.name}
-                                  </Link>
-                                ))
-                              ) : (
-                                <p className="px-3 py-3 text-richblack-300">
-                                  No courses available yet
-                                </p>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <Link
-                          to={link.path}
-                          onClick={closeMobileMenu}
-                          className={`block rounded-md px-3 py-3 ${
-                            matchRoute(link.path)
-                              ? "text-yellow-25"
-                              : "hover:bg-richblack-700"
-                          }`}
-                        >
-                          {link.title}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-4 border-t border-richblack-700 pt-4">
-                  {status === "checking" ? (
-                    <p
-                      className="px-3 py-2 text-sm text-richblack-300"
-                      role="status"
-                    >
-                      Checking your session...
-                    </p>
-                  ) : isAuthenticated && user ? (
-                    <div className="space-y-2">
-                      <Link
-                        to="/dashboard/my-profile"
-                        onClick={closeMobileMenu}
-                        className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-richblack-700"
-                      >
-                        <img
-                          src={getAvatarSource(user)}
-                          alt=""
-                          className="h-9 w-9 rounded-full object-cover"
-                          onError={(event) =>
-                            setInitialsAvatarOnError(event, user)
-                          }
-                        />
-                        <span className="min-w-0">
-                          <span className="block truncate font-medium text-richblack-5">
-                            {[user.firstName, user.lastName]
-                              .filter(Boolean)
-                              .join(" ") || "My account"}
-                          </span>
-                          <span className="block text-xs text-richblack-300">
-                            Dashboard
-                          </span>
-                        </span>
-                      </Link>
-                      {user.accountType === ACCOUNT_TYPE.STUDENT && (
-                        <Link
-                          to="/dashboard/cart"
-                          onClick={closeMobileMenu}
-                          className="flex items-center justify-between rounded-md px-3 py-3 hover:bg-richblack-700"
-                        >
-                          <span className="flex items-center gap-2">
-                            <AiOutlineShoppingCart
-                              className="text-xl"
-                              aria-hidden="true"
-                            />
-                            Cart
-                          </span>
-                          {totalItems > 0 && (
-                            <span className="rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-bold text-richblack-900">
-                              {totalItems}
-                            </span>
-                          )}
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        className="w-full rounded-md px-3 py-3 text-left text-pink-100 hover:bg-richblack-700"
-                        onClick={handleLogout}
-                      >
-                        Log out
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-3">
-                      <Link
-                        to="/login"
-                        onClick={closeMobileMenu}
-                        className="rounded-md border border-richblack-600 px-3 py-2 text-center text-richblack-50"
-                      >
-                        Log in
-                      </Link>
-                      <Link
-                        to="/signup"
-                        onClick={closeMobileMenu}
-                        className="rounded-md bg-yellow-50 px-3 py-2 text-center font-medium text-richblack-900"
-                      >
-                        Sign up
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </nav>
-            </>
+        <div className="flex items-center gap-1 lg:hidden">
+          {status !== "checking" && (
+            <Link
+              className="sn-nav-link grid h-11 w-11 place-items-center"
+              to={isAuthenticated ? "/dashboard" : "/login"}
+              aria-label={isAuthenticated ? "My account" : "Log in"}
+            >
+              <FiUser size={21} aria-hidden="true" />
+            </Link>
           )}
+          <button
+            ref={mobileTrigger}
+            type="button"
+            className="sn-nav-link grid h-11 w-11 place-items-center"
+            aria-label="Open navigation"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMobileLocation(location.key)}
+          >
+            <FiMenu size={25} aria-hidden="true" />
+          </button>
         </div>
       </div>
+      {mobileOpen && (
+        <AccessibleDialog
+          title="Explore Prahit"
+          onClose={closeMobile}
+          titleClassName="text-lg font-semibold"
+          className="sn-mobile-nav"
+          overlayClassName="bg-black/40 items-start! justify-items-end! p-0!"
+        >
+          <button
+            type="button"
+            className="sn-btn sn-btn-icon sn-btn-secondary absolute top-4 right-4"
+            onClick={closeMobile}
+            aria-label="Close navigation"
+          >
+            <FiX aria-hidden="true" />
+          </button>
+          <nav
+            id="mobile-navigation"
+            aria-label="Mobile navigation"
+            className="mt-7"
+          >
+            <ul className="space-y-1">
+              {NavbarLinks.map((item) => (
+                <li key={item.path}>
+                  <NavLink
+                    end={item.path !== "/blogs"}
+                    to={item.path}
+                    onClick={closeMobile}
+                    className={({ isActive }) =>
+                      `sn-menu-link ${isActive ? "bg-brand-soft text-brand-primary" : ""}`
+                    }
+                  >
+                    {item.title}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <button
+              className="sn-menu-link mt-2 flex w-full items-center justify-between"
+              type="button"
+              aria-expanded={mobileCatalog}
+              aria-controls="mobile-catalog"
+              onClick={() => setMobileCatalog(!mobileCatalog)}
+            >
+              Catalog <FiChevronDown aria-hidden="true" />
+            </button>
+            {mobileCatalog && (
+              <div
+                id="mobile-catalog"
+                className="ml-3 border-l border-border-default pl-3"
+              >
+                {categoryLinks(closeMobile)}
+              </div>
+            )}
+            <Link to="/contact" className="sn-menu-link" onClick={closeMobile}>
+              Contact us
+            </Link>
+            <div className="mt-5 border-t border-border-default pt-5">
+              {status === "checking" ? (
+                <FlaskLoader variant="compact" label="Checking your session" />
+              ) : isAuthenticated && user ? (
+                <>
+                  <Link
+                    className="sn-menu-link"
+                    to="/dashboard/my-profile"
+                    onClick={closeMobile}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    className="sn-menu-link"
+                    to="/dashboard/settings"
+                    onClick={closeMobile}
+                  >
+                    Settings
+                  </Link>
+                  {user.accountType === ACCOUNT_TYPE.STUDENT && (
+                    <Link
+                      className="sn-menu-link"
+                      to="/dashboard/cart"
+                      onClick={closeMobile}
+                    >
+                      Cart ({totalItems})
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    className="sn-menu-link w-full text-left text-danger"
+                    onClick={handleLogout}
+                  >
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    to="/login"
+                    className="sn-btn sn-btn-secondary"
+                    onClick={closeMobile}
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="sn-btn sn-btn-primary"
+                    onClick={closeMobile}
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </nav>
+        </AccessibleDialog>
+      )}
     </header>
   )
 }
-
-export default Navbar

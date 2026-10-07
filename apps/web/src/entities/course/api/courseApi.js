@@ -46,9 +46,9 @@ export const getLessonPlaybackUrl = async (courseId, subSectionId) => {
   }
 }
 
+// Public course read. The course-details page renders its own accessible
+// loading skeleton, so no global loading toast is raised here.
 export const fetchCourseDetails = async (courseId) => {
-  const toastId = toast.loading("Loading...")
-  //   dispatch(setLoading(true));
   let result = null
   try {
     const response = await apiConnector("POST", COURSE_DETAILS_API, {
@@ -64,8 +64,6 @@ export const fetchCourseDetails = async (courseId) => {
       message: error?.message || "Could not load course",
     }
   }
-  toast.dismiss(toastId)
-  //   dispatch(setLoading(false));
   return result
 }
 

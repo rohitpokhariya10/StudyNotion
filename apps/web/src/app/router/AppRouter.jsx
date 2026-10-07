@@ -3,7 +3,22 @@ import { OpenRoute, PrivateRoute, RoleRoute } from "@/features/authentication"
 import { lazy } from "react"
 import { Navigate, Route, Routes, useLocation } from "react-router"
 
+const NeetLanding = lazy(() => import("@/pages/neet-landing"))
+const NeetMocks = lazy(() => import("@/pages/neet-mocks"))
+const NeetOnboarding = lazy(() => import("@/pages/neet-onboarding"))
+const NeetExam = lazy(() => import("@/pages/neet-exam"))
+const NeetResult = lazy(() => import("@/pages/neet-result"))
+const studentPage = (page) => (
+  <PrivateRoute>
+    <RoleRoute allowedRoles={[ACCOUNT_TYPE.STUDENT]}>{page}</RoleRoute>
+  </PrivateRoute>
+)
+
 const About = lazy(() => import("@/pages/about"))
+const Services = lazy(() => import("@/pages/services"))
+const Careers = lazy(() => import("@/pages/careers"))
+const Blogs = lazy(() => import("@/pages/blogs"))
+const BlogArticle = lazy(() => import("@/pages/blog-article"))
 const AddCourse = lazy(() => import("@/pages/course-create"))
 const Cart = lazy(() => import("@/pages/cart"))
 const Catalog = lazy(() => import("@/pages/catalog"))
@@ -41,10 +56,35 @@ function LegacySettingsRedirect() {
   )
 }
 
+function MarketingAlias({ pathname }) {
+  const { search, hash } = useLocation()
+  return <Navigate to={{ pathname, search, hash }} replace />
+}
+
 function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/home" element={<MarketingAlias pathname="/" />} />
+      <Route path="/about-us" element={<MarketingAlias pathname="/about" />} />
+      <Route path="/services" element={<Services />} />
+      <Route path="/careers" element={<Careers />} />
+      <Route path="/blogs" element={<Blogs />} />
+      <Route path="/blogs/:slug" element={<BlogArticle />} />
+      <Route path="/project-neet" element={<NeetLanding />} />
+      <Route path="/project-neet/mocks" element={<NeetMocks />} />
+      <Route
+        path="/project-neet/mocks/:testId/start"
+        element={studentPage(<NeetOnboarding />)}
+      />
+      <Route
+        path="/project-neet/attempts/:attemptId"
+        element={studentPage(<NeetExam />)}
+      />
+      <Route
+        path="/project-neet/attempts/:attemptId/result"
+        element={studentPage(<NeetResult />)}
+      />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="courses/:courseId" element={<CourseDetails />} />

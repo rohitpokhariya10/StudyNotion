@@ -1,0 +1,84 @@
+{
+  "mode": "Actual localhost:3000 app; no mocked HTML, request interception or synthetic data",
+  "results": [
+    {
+      "url": "http://localhost:3000/services",
+      "width": 1920,
+      "heading": "Learn from\nAnywhere Around\nthe Globe.",
+      "background": "rgb(255, 255, 255)",
+      "mapLoaded": true,
+      "capabilities": 4,
+      "overflow": false,
+      "servicesScript": ["/assets/services-CYOtQira.js"],
+      "dialogOpenClose": true,
+      "consoleErrors": [],
+      "api": [
+        {
+          "path": "/api/v1/profile/getUserDetails",
+          "status": 401
+        },
+        {
+          "path": "/api/v1/course/showAllCategories",
+          "status": 200
+        },
+        {
+          "path": "/api/v1/course/getReviews",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:3000/services",
+      "width": 390,
+      "heading": "Learn from\nAnywhere Around\nthe Globe.",
+      "background": "rgb(255, 255, 255)",
+      "mapLoaded": true,
+      "capabilities": 4,
+      "overflow": false,
+      "servicesScript": ["/assets/services-CYOtQira.js"],
+      "dialogOpenClose": true,
+      "consoleErrors": [],
+      "api": [
+        {
+          "path": "/api/v1/profile/getUserDetails",
+          "status": 401
+        },
+        {
+          "path": "/api/v1/course/showAllCategories",
+          "status": 200
+        },
+        {
+          "path": "/api/v1/course/getReviews",
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "routeTree": [
+    "src/app/main.jsx",
+    "src/app/bootstrap.jsx: AppProviders / BrowserRouter",
+    "src/app/App.jsx: SessionBootstrap / AppShell",
+    "src/app/router/AppRouter.jsx: /services -> lazy(@/pages/services)",
+    "src/pages/services/index.jsx: Services / .sn-services-hero"
+  ],
+  "repository": {
+    "path": "/Users/rohitpokhariya/Documents/Prahit",
+    "branch": "project-neet",
+    "worktreeCount": 1
+  },
+  "runtime": {
+    "server": "Docker/Nginx static frontend; not a Vite dev server",
+    "container": "studynotion-local-web-1",
+    "oldEntry": "/assets/index-GyQh1aVM.js",
+    "oldServicesChunk": "/assets/services-z1EFDyMX.js",
+    "oldHeading": "A world of skills. Your place to start.",
+    "newEntry": "/assets/index-CQOdhT1d.js",
+    "newServicesChunk": "/assets/services-CYOtQira.js",
+    "sourceMounts": []
+  },
+  "commands": [
+    "docker compose --env-file compose.local.env -f compose.local.yml build web",
+    "docker compose --env-file compose.local.env -f compose.local.yml up -d --no-deps --no-build web"
+  ],
+  "runtimePreservationNote": "A concurrent stack recreation changed API/container start records before the web-only up command, which reported web Running. These commands targeted web only; do not infer unchanged backend runtime from the snapshots. No backend source/configuration or application data was edited by this task."
+}

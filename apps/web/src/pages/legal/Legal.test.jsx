@@ -3,6 +3,16 @@ import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { describe, expect, it, vi } from "vitest"
 
+vi.mock("@/shared/config/publicContact", () => ({
+  supportEmail: "support@example.test",
+  legalEntity: "Configured Operator",
+  legalAddress: "Configured office address",
+}))
+
+vi.mock("@/entities/catalog", () => ({
+  useGetCatalogCategoriesQuery: () => ({ data: [] }),
+}))
+
 vi.mock("@/features/course-purchase", () => ({
   fetchCheckoutConfig: vi.fn().mockResolvedValue({ refundWindowDays: 7 }),
 }))
