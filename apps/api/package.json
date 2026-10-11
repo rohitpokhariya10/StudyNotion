@@ -49,6 +49,6 @@
     "tldts": "^7.4.9"
   },
   "optionalDependencies": {
-    "gcp-metadata": "^7.0.1"
+    "gcp-metadata": "^9.0.3"
   }
 }
