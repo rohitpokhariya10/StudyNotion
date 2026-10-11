@@ -43,10 +43,10 @@ export function ProctorStatusBar({
           : "border-neet-warning text-neet-warning"
       }`}
       role="status"
-      aria-label={`Proctored mode. ${description}. Warnings ${warningCount ?? 0} of ${maxWarnings}.`}
+      aria-label={`Monitored mode. ${description}. Notices ${warningCount ?? 0} of ${maxWarnings}.`}
     >
       <FiShield aria-hidden="true" />
-      <span className="hidden lg:inline">Proctored</span>
+      <span className="hidden lg:inline">Monitored</span>
       <span aria-hidden="true" className="flex items-center gap-1">
         {items.map(([kind, state]) => (
           <span

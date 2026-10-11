@@ -1,0 +1,183 @@
+{
+  "before": {
+    "at": "2026-10-07T06:42:16.446802+00:00",
+    "services": {
+      "api": {
+        "id": "fdaed80ba018aaa670925883dadf5fa3384ce7bcde9cee97d2d2f8f4a377bf2d",
+        "created": "2026-10-07T06:34:49.754791338Z",
+        "startedAt": "2026-10-07T06:34:55.474098466Z",
+        "image": "sha256:389d2a522c1da6f85320aae828be1f22d3c13e81d1c4f1c06a6ec16c6a673add",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [],
+        "ports": {
+          "4000/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "4000"
+            }
+          ]
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      },
+      "mongo": {
+        "id": "d8d45288f3b803577a2cf0c85e186e9a9e3540351ed3f79ef224cd376685855e",
+        "created": "2026-10-05T17:11:43.998207506Z",
+        "startedAt": "2026-10-07T06:34:49.896366463Z",
+        "image": "sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [
+          {
+            "Type": "volume",
+            "Name": "39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085",
+            "Source": "/var/lib/docker/volumes/39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085/_data",
+            "Destination": "/data/configdb"
+          },
+          {
+            "Type": "volume",
+            "Name": "studynotion-local_mongo-data",
+            "Source": "/var/lib/docker/volumes/studynotion-local_mongo-data/_data",
+            "Destination": "/data/db"
+          }
+        ],
+        "ports": {
+          "27017/tcp": null
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      },
+      "redis": {
+        "id": "43801c125ac1e258fd59e7295bfc8369c2b76960440c13b006f5baa7210fb2e3",
+        "created": "2026-10-05T17:11:44.002168006Z",
+        "startedAt": "2026-10-07T06:34:49.896379172Z",
+        "image": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [],
+        "ports": {
+          "6379/tcp": null
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      },
+      "web": {
+        "id": "b3a9e05c5b2b651e7e6790e3e89a9d9c4c41fb5eed4a9fd1031f5d513391ea2f",
+        "created": "2026-10-07T06:34:49.803006797Z",
+        "startedAt": "2026-10-07T06:35:01.066839552Z",
+        "image": "sha256:bfb6778149aa4cc5bb1db0db86bdcd60c19981edfa61ffa2aff3135ca90093df",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [],
+        "ports": {
+          "8080/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "3000"
+            }
+          ]
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      }
+    }
+  },
+  "after": {
+    "at": "2026-10-07T06:42:23.926908+00:00",
+    "services": {
+      "api": {
+        "id": "fdaed80ba018aaa670925883dadf5fa3384ce7bcde9cee97d2d2f8f4a377bf2d",
+        "created": "2026-10-07T06:34:49.754791338Z",
+        "startedAt": "2026-10-07T06:34:55.474098466Z",
+        "image": "sha256:389d2a522c1da6f85320aae828be1f22d3c13e81d1c4f1c06a6ec16c6a673add",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [],
+        "ports": {
+          "4000/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "4000"
+            }
+          ]
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      },
+      "mongo": {
+        "id": "d8d45288f3b803577a2cf0c85e186e9a9e3540351ed3f79ef224cd376685855e",
+        "created": "2026-10-05T17:11:43.998207506Z",
+        "startedAt": "2026-10-07T06:34:49.896366463Z",
+        "image": "sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [
+          {
+            "Type": "volume",
+            "Name": "39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085",
+            "Source": "/var/lib/docker/volumes/39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085/_data",
+            "Destination": "/data/configdb"
+          },
+          {
+            "Type": "volume",
+            "Name": "studynotion-local_mongo-data",
+            "Source": "/var/lib/docker/volumes/studynotion-local_mongo-data/_data",
+            "Destination": "/data/db"
+          }
+        ],
+        "ports": {
+          "27017/tcp": null
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      },
+      "redis": {
+        "id": "43801c125ac1e258fd59e7295bfc8369c2b76960440c13b006f5baa7210fb2e3",
+        "created": "2026-10-05T17:11:44.002168006Z",
+        "startedAt": "2026-10-07T06:34:49.896379172Z",
+        "image": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [],
+        "ports": {
+          "6379/tcp": null
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      },
+      "web": {
+        "id": "049af56bc2d6a711128094f044ffa4dcd73b2aa77530be7e47bd8367d2363aeb",
+        "created": "2026-10-07T06:42:18.016474629Z",
+        "startedAt": "2026-10-07T06:42:18.268109046Z",
+        "image": "sha256:bbe3390fb778a8bfef15a790c2b2c4e7c9d0050ef14274be8e9430898f381feb",
+        "health": "healthy",
+        "restartCount": 0,
+        "mounts": [],
+        "ports": {
+          "8080/tcp": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "3000"
+            }
+          ]
+        },
+        "networks": [
+          "studynotion-local_default"
+        ]
+      }
+    }
+  },
+  "nonWebUnchangedDuringOurUpdate": {
+    "api": true,
+    "mongo": true,
+    "redis": true
+  }
+}

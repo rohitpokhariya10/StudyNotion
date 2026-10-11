@@ -27,6 +27,7 @@ const FINALIZE_PROJECTION = Object.freeze({
   userId: 1,
   status: 1,
   mode: 1,
+  paperVersionId: 1,
   paper: 1,
   responses: 1,
   startedAt: 1,
@@ -48,6 +49,7 @@ const PROCTOR_PROJECTION = Object.freeze({
   registrationExpiresAt: 1,
   isOpen: 1,
   proctoring: 1,
+  review: 1,
 })
 
 const LIST_PROJECTION = Object.freeze({
@@ -89,6 +91,41 @@ const listRecent = ({ limit = 20, testId, userId }) =>
     .limit(limit)
     .lean()
 
+// Open attempts past their deadline (or stuck mid-finalisation) that nobody
+// has read since. Served by the neet_attempt_sweep partial index.
+const findStaleOpen = ({ expiredBefore, limit }) =>
+  NeetAttempt.find({
+    isOpen: true,
+    $or: [
+      { status: "IN_PROGRESS", expiresAt: { $lt: expiredBefore } },
+      { status: "SUBMITTING", expiresAt: { $lt: expiredBefore } },
+    ],
+  })
+    .select({ _id: 1, status: 1, expiresAt: 1, registrationExpiresAt: 1 })
+    .limit(limit)
+    .lean()
+
+// Scored attempts on a paper whose result predates `answerKeyVersion`.
+const findScoredBelowKeyVersion = ({
+  answerKeyVersion,
+  limit,
+  paperVersionId,
+}) =>
+  NeetAttempt.find({
+    paperVersionId,
+    status: { $in: ["SUBMITTED", "AUTO_SUBMITTED"] },
+    $or: [
+      { "result.answerKeyVersion": { $lt: answerKeyVersion } },
+      { "result.answerKeyVersion": null },
+    ],
+  })
+    .select({ ...FINALIZE_PROJECTION, result: 1, endedAt: 1 })
+    .limit(limit)
+    .lean()
+
+const countByPaperVersion = ({ paperVersionId, status }) =>
+  NeetAttempt.countDocuments({ paperVersionId, status })
+
 const create = async (document) => {
   const created = await NeetAttempt.create(document)
   return findById({ attemptId: created._id })
@@ -116,8 +153,11 @@ module.exports = {
   SESSION_PROJECTION,
   STATE_PROJECTION,
   casUpdate,
+  countByPaperVersion,
   countForTest,
   create,
+  findScoredBelowKeyVersion,
+  findStaleOpen,
   findById,
   findOpen,
   findOwned,

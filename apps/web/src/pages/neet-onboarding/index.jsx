@@ -28,6 +28,9 @@ function OnboardingFlow({ test, existing }) {
   const [mode, setMode] = useState(existing?.mode || "NON_PROCTORED")
   const [accepted, setAccepted] = useState(false)
   const [grant, setGrant] = useState(null)
+  // Recorded self-declaration from the consent step; the server requires it
+  // for monitored mode.
+  const [adultConfirmed, setAdultConfirmed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const handoff = useRef(false)
@@ -60,7 +63,7 @@ function OnboardingFlow({ test, existing }) {
         <h2 className="text-2xl font-bold">Your attempt is already running</h2>
         <p>Resuming keeps the original deadline.</p>
         <Link
-          to={`/project-neet/attempts/${attempt.id}`}
+          to={`/neet/attempts/${attempt.id}`}
           className="pn-btn pn-btn-primary"
         >
           Resume attempt
@@ -175,7 +178,8 @@ function OnboardingFlow({ test, existing }) {
       {step === "consent" && (
         <ProctorConsentPanel
           policy={test.proctorPolicy}
-          onAccept={() => {
+          onAccept={(declaration) => {
+            setAdultConfirmed(declaration?.adultConfirmed === true)
             setGrant(
               grantProctorConsent({
                 attemptId: attempt.id,
@@ -210,12 +214,13 @@ function OnboardingFlow({ test, existing }) {
                       proctorConsent: {
                         accepted: true,
                         version: test.proctorPolicy.consentVersion,
+                        ...(adultConfirmed ? { adultConfirmed: true } : {}),
                       },
                     }
                   : {}),
               })
               handoff.current = true
-              navigate(`/project-neet/attempts/${attempt.id}`)
+              navigate(`/neet/attempts/${attempt.id}`)
             })
           }
         />
@@ -264,7 +269,7 @@ export default function NeetOnboarding() {
         <NeetResourceStatus resource={resource} />
         {resource.status === "success" && (
           <>
-            <Link to="/project-neet/mocks" className="text-sm text-neet-muted">
+            <Link to="/neet/mocks" className="text-sm text-neet-muted">
               ← Mock tests
             </Link>
             <h1 className="pn-display mt-5 mb-8 text-4xl font-bold">

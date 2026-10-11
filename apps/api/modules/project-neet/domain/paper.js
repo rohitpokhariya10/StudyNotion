@@ -151,6 +151,68 @@ const buildPaper = ({ questions, seed, test }) => {
   }
 }
 
+// Builds the per-attempt paper (ordering, numbering, marks) from an immutable
+// published paper version. Content stays in the version document; the attempt
+// stores references, so a later bank edit can never change a running paper.
+const buildPaperFromVersion = ({ paperVersion, seed, test }) => {
+  const sections = [...paperVersion.sections].sort(
+    (left, right) => (left.order || 0) - (right.order || 0)
+  )
+  const bySection = new Map(sections.map((section) => [section.key, []]))
+  for (const question of paperVersion.questions) {
+    const list = bySection.get(question.sectionKey)
+    if (!list) {
+      throw new NeetTestConfigurationError(
+        "A paper version question has an unknown section"
+      )
+    }
+    list.push(question)
+  }
+  const paperQuestions = []
+  let number = 0
+  for (const section of sections) {
+    let selected = bySection
+      .get(section.key)
+      .sort((left, right) => left.order - right.order)
+    if (selected.length !== section.questionCount) {
+      throw new NeetTestConfigurationError(
+        "A paper version section does not match its question count"
+      )
+    }
+    if (test?.ordering?.shuffleQuestionsWithinSection === true) {
+      selected = seededShuffle(selected, `${seed}:${section.key}`)
+    }
+    for (const question of selected) {
+      number += 1
+      paperQuestions.push({
+        questionId: question.questionId,
+        revision: question.revision,
+        sectionKey: section.key,
+        number,
+        marks: {
+          correct: question.marks.correct,
+          incorrect: question.marks.incorrect,
+          unanswered: question.marks.unanswered || 0,
+        },
+      })
+    }
+  }
+  if (!paperQuestions.length) {
+    throw new NeetTestConfigurationError("The paper version has no questions")
+  }
+  return {
+    testVersion: paperVersion.version,
+    seed: String(seed),
+    sections: sections.map((section) => ({
+      key: section.key,
+      title: section.title,
+      subjectKey: section.subjectKey,
+      subjectLabel: section.subjectLabel,
+    })),
+    questions: paperQuestions,
+  }
+}
+
 const initialResponses = (paper) =>
   paper.questions.map((question) => ({
     questionId: question.questionId,
@@ -172,8 +234,11 @@ const paperTotals = (paper) => ({
 
 module.exports = {
   NeetTestConfigurationError,
+  numberOr,
+  orderedSections,
   availabilityFor,
   buildPaper,
+  buildPaperFromVersion,
   computeTestTotals,
   initialResponses,
   paperTotals,

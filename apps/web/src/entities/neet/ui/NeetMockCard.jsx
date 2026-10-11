@@ -5,7 +5,7 @@ import {
 import { subjectStyle } from "@/entities/neet/lib/subjects"
 import { Link } from "react-router"
 
-const MODE_LABELS = { NON_PROCTORED: "Practice", PROCTORED: "Proctored" }
+const MODE_LABELS = { NON_PROCTORED: "Practice", PROCTORED: "Monitored (18+)" }
 
 export function NeetMockCard({ test }) {
   const open = test.availability.state === "OPEN"
@@ -78,7 +78,7 @@ export function NeetMockCard({ test }) {
       <div className="mt-auto pt-1">
         {open ? (
           <Link
-            to={`/project-neet/mocks/${test.id}/start`}
+            to={`/neet/mocks/${test.id}/start`}
             className="pn-btn pn-btn-primary"
           >
             Choose this mock <span aria-hidden="true">→</span>

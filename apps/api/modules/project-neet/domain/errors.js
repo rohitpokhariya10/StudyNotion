@@ -84,6 +84,12 @@ const neetErrors = Object.freeze({
       "Proctored mode requires consent to the current monitoring notice",
       409
     ),
+  adultConfirmationRequired: () =>
+    new NeetApiError(
+      "NEET_ADULT_CONFIRMATION_REQUIRED",
+      "Monitored mode is available only to candidates aged 18 or over. Practice mode is open to everyone.",
+      409
+    ),
   systemCheckIncomplete: () =>
     new NeetApiError(
       "NEET_SYSTEM_CHECK_INCOMPLETE",

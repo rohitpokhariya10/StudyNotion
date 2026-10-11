@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-// Minimal loader hook for Project NEET reads. Requests are aborted on unmount
+// Minimal loader hook for Prahit NEET Mocks reads. Requests are aborted on unmount
 // or when inputs change, so stale responses never overwrite newer state.
 export function useNeetResource(loader, dependencies) {
   const [state, setState] = useState({

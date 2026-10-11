@@ -230,13 +230,13 @@ export function SystemCheckPanel({
         detail:
           latency > 1500
             ? `Connected, but slow (${latency} ms). Answers will still save — just give each save a moment.`
-            : `Connected to Project NEET (${latency} ms).`,
+            : `Connected to Prahit NEET Mocks (${latency} ms).`,
       })
     } catch {
       setNetwork({
         status: "ACTION_REQUIRED",
         detail:
-          "We couldn't reach the Project NEET servers. Check your connection and try again.",
+          "We couldn't reach the Prahit NEET Mocks servers. Check your connection and try again.",
       })
     }
   }, [probeConnectivity])

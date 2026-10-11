@@ -25,7 +25,7 @@ export function NeetHero({
               aria-hidden="true"
               className="pn-breathe inline-block h-2 w-2 rounded-full bg-neet-accent"
             />
-            Prahit presents · Project NEET
+            Prahit NEET Mocks
           </p>
           <h1
             id="pn-hero-title"

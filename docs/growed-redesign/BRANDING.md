@@ -1,5 +1,7 @@
 # Prahit branding audit — 7 October 2026
 
+> Logo source superseded: the official two-character Glossy Blob Companions artwork is now specified in [the asset README](../../apps/web/src/shared/assets/brand/README.md). This audit records the preceding text rebrand; its old best_1/book-icon details are historical. The checkout image is also updated in the later logo-only task, while payment code remains unchanged.
+
 The frontend rebrand is complete within the authorized UI scope and is served on `http://localhost:3000`. **Protected checkout and backend-generated content still contain the old name.** This document does not claim an application-wide backend or persisted-data migration.
 
 ## Official artwork

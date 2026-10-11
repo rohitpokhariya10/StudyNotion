@@ -11,11 +11,84 @@ const round2 = (value) => Math.round(value * 100) / 100
 
 const idOf = (value) => String(value)
 
+// Answer-key statuses (NTA NEET UG 2026 rules):
+//   ACTIVE      one or more listed options are correct. When more than one
+//               option is correct, marking any of them earns full marks;
+//               any other option is incorrect.
+//   ALL_CORRECT every option is correct: any attempt earns full marks;
+//               an unanswered question earns the unanswered marks.
+//   DROPPED     the question is dropped or invalid: every appeared
+//               candidate earns full marks, attempted or not.
+const KEY_STATUS = Object.freeze({
+  ACTIVE: "ACTIVE",
+  ALL_CORRECT: "ALL_CORRECT",
+  DROPPED: "DROPPED",
+})
+
+const keyStatusOf = (key) => key?.status || KEY_STATUS.ACTIVE
+
+// Answer-key version entries -> Map(questionId -> key) for scoreAttempt.
+const keysToMap = (keys) =>
+  new Map(
+    (keys || []).map((key) => [
+      idOf(key.questionId),
+      {
+        status: keyStatusOf(key),
+        correctOptionKeys: [...(key.correctOptionKeys || [])],
+      },
+    ])
+  )
+
+const assertUsableKey = (key) => {
+  if (!key) {
+    throw new NeetScoringDataError("An answer key is missing for the paper")
+  }
+  const status = keyStatusOf(key)
+  if (!Object.values(KEY_STATUS).includes(status)) {
+    throw new NeetScoringDataError("An answer key has an unknown status")
+  }
+  if (
+    status === KEY_STATUS.ACTIVE &&
+    (!Array.isArray(key.correctOptionKeys) || !key.correctOptionKeys.length)
+  ) {
+    throw new NeetScoringDataError("An answer key is missing for the paper")
+  }
+  return status
+}
+
+// Pure per-question rule, exported for direct testing.
+const scoreQuestion = ({ key, marks, selectedOption }) => {
+  const status = assertUsableKey(key)
+  const correctMarks = Number(marks.correct)
+  const incorrectMarks = Number(marks.incorrect)
+  const unansweredMarks = Number(marks.unanswered || 0)
+  if (status === KEY_STATUS.DROPPED) {
+    return { outcome: "DROPPED", marksAwarded: correctMarks }
+  }
+  if (!selectedOption) {
+    return { outcome: "UNANSWERED", marksAwarded: unansweredMarks }
+  }
+  if (
+    status === KEY_STATUS.ALL_CORRECT ||
+    key.correctOptionKeys.includes(selectedOption)
+  ) {
+    return { outcome: "CORRECT", marksAwarded: correctMarks }
+  }
+  return { outcome: "INCORRECT", marksAwarded: incorrectMarks }
+}
+
 // Scores frozen responses against server-held answer keys. Every input comes
 // from the attempt snapshot or the database; nothing here trusts the client.
 // A question whose key is missing aborts scoring so an attempt can never be
 // finalized with a silently wrong result.
-const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
+const scoreAttempt = ({
+  answerKeyVersion = null,
+  answerKeys,
+  endedAt,
+  paper,
+  responses,
+  startedAt,
+}) => {
   const responseByQuestion = new Map(
     (responses || []).map((response) => [idOf(response.questionId), response])
   )
@@ -32,6 +105,7 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
         correct: 0,
         incorrect: 0,
         unanswered: 0,
+        dropped: 0,
         score: 0,
         maxScore: 0,
       },
@@ -46,6 +120,7 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
     correct: 0,
     incorrect: 0,
     unanswered: 0,
+    dropped: 0,
     markedForReview: 0,
     positiveMarks: 0,
     negativeMarks: 0,
@@ -55,13 +130,6 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
   for (const question of paper.questions) {
     const questionId = idOf(question.questionId)
     const key = answerKeys.get(questionId)
-    if (
-      !key ||
-      !Array.isArray(key.correctOptionKeys) ||
-      !key.correctOptionKeys.length
-    ) {
-      throw new NeetScoringDataError("An answer key is missing for the paper")
-    }
     const section = sectionTotals.get(question.sectionKey)
     if (!section) {
       throw new NeetScoringDataError("A paper question has an unknown section")
@@ -70,21 +138,11 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
     const selectedOption = response?.selectedOption || null
     const markedForReview = response?.markedForReview === true
     const correctMarks = Number(question.marks.correct)
-    const incorrectMarks = Number(question.marks.incorrect)
-    const unansweredMarks = Number(question.marks.unanswered || 0)
-
-    let outcome
-    let marksAwarded
-    if (!selectedOption) {
-      outcome = "UNANSWERED"
-      marksAwarded = unansweredMarks
-    } else if (key.correctOptionKeys.includes(selectedOption)) {
-      outcome = "CORRECT"
-      marksAwarded = correctMarks
-    } else {
-      outcome = "INCORRECT"
-      marksAwarded = incorrectMarks
-    }
+    const { outcome, marksAwarded } = scoreQuestion({
+      key,
+      marks: question.marks,
+      selectedOption,
+    })
 
     totals.questionCount += 1
     totals.maxScore += correctMarks
@@ -96,7 +154,12 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
     section.maxScore += correctMarks
     section.score += marksAwarded
 
-    if (outcome === "UNANSWERED") {
+    // Mutually exclusive buckets: attempted (= correct + incorrect),
+    // unanswered, and dropped.
+    if (outcome === "DROPPED") {
+      totals.dropped += 1
+      section.dropped += 1
+    } else if (outcome === "UNANSWERED") {
       totals.unanswered += 1
       section.unanswered += 1
     } else {
@@ -117,7 +180,8 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
       sectionKey: question.sectionKey,
       number: question.number,
       selectedOption,
-      correctOptionKeys: [...key.correctOptionKeys],
+      correctOptionKeys: [...(key.correctOptionKeys || [])],
+      keyStatus: keyStatusOf(key),
       outcome,
       marksAwarded: round2(marksAwarded),
       markedForReview,
@@ -135,6 +199,7 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
 
   return {
     scoringVersion: NEET_SCORING_VERSION,
+    answerKeyVersion,
     summary: {
       score: round2(totals.score),
       maxScore: round2(totals.maxScore),
@@ -143,6 +208,7 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
       correct: totals.correct,
       incorrect: totals.incorrect,
       unanswered: totals.unanswered,
+      dropped: totals.dropped,
       markedForReview: totals.markedForReview,
       accuracyPercent: totals.attempted
         ? round2((totals.correct / totals.attempted) * 100)
@@ -160,4 +226,10 @@ const scoreAttempt = ({ answerKeys, endedAt, paper, responses, startedAt }) => {
   }
 }
 
-module.exports = { NeetScoringDataError, scoreAttempt }
+module.exports = {
+  KEY_STATUS,
+  NeetScoringDataError,
+  keysToMap,
+  scoreAttempt,
+  scoreQuestion,
+}

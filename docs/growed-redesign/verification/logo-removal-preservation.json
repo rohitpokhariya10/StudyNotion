@@ -1,0 +1,14 @@
+{
+  "taskSourceChanges": [
+    "apps/web/src/features/authentication/ui/Template.jsx",
+    "apps/web/src/shared/ui/AuthLayout.jsx",
+    "apps/web/src/widgets/footer/ui/Footer.jsx",
+    "apps/web/src/widgets/footer/ui/Footer.test.jsx",
+    "apps/web/src/widgets/footer/ui/footer.css"
+  ],
+  "concurrentChangesNotTouched": [
+    "docs/growed-redesign/artwork/auth-mascot/creature.js"
+  ],
+  "allOtherExistingFilesUnchanged": true,
+  "originalRedesignBaselineRetained": true
+}

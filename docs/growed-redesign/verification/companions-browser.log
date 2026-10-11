@@ -1,0 +1,36 @@
+[WebServer] (node:8028) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [plugin builtin:vite-reporter] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] (node:8065) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 10 tests using 3 workers
+
+(node:8067) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:8068) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:8069) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   2 [ui-desktop] › e2e/ui-transformation.spec.js:156:5 › navigation and auth forms retain keyboard and consent controls (1.5s)
+  ✓   4 [ui-desktop] › e2e/ui-transformation.spec.js:326:5 › signup verification preserves the OTP flow at 360px (1.1s)
+  ✓   5 [ui-desktop] › e2e/ui-transformation.spec.js:838:5 › recovery, reset, and deletion-pending screens retain their supported states (1.8s)
+  ✓   1 [ui-desktop] › e2e/ui-transformation.spec.js:188:5 › student workspace preserves profile, enrollment, and checkout navigation (4.6s)
+(node:8119) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:8120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   3 [ui-desktop] › e2e/ui-transformation.spec.js:222:5 › instructor studio and existing admin routes remain usable (4.9s)
+(node:8127) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   6 [ui-mobile] › e2e/ui-transformation.spec.js:156:5 › navigation and auth forms retain keyboard and consent controls (2.2s)
+  ✓   9 [ui-mobile] › e2e/ui-transformation.spec.js:326:5 › signup verification preserves the OTP flow at 360px (1.2s)
+  ✓   7 [ui-mobile] › e2e/ui-transformation.spec.js:188:5 › student workspace preserves profile, enrollment, and checkout navigation (3.8s)
+  ✓  10 [ui-mobile] › e2e/ui-transformation.spec.js:838:5 › recovery, reset, and deletion-pending screens retain their supported states (1.6s)
+  ✓   8 [ui-mobile] › e2e/ui-transformation.spec.js:222:5 › instructor studio and existing admin routes remain usable (5.8s)
+
+  10 passed (12.6s)

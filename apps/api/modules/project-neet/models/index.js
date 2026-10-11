@@ -5,4 +5,6 @@ module.exports = [
   require("./NeetQuestion"),
   require("./NeetAttempt"),
   require("./NeetProctorEvent"),
+  require("./NeetPaperVersion"),
+  require("./NeetAnswerKeyVersion"),
 ]

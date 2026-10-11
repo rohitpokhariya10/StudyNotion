@@ -7,8 +7,8 @@ const HIDDEN_PATTERNS = [
   /^\/contact/i,
   /^\/dashboard/i,
   /^\/view-course/i,
-  /^\/project-neet\/attempts/i,
-  /^\/project-neet\/mocks\/[^/]+\/start/i,
+  /^\/(?:neet|project-neet)\/attempts/i,
+  /^\/(?:neet|project-neet)\/mocks\/[^/]+\/start/i,
   /^\/(login|signup|verify-email|forgot-password|update-password|accept-terms)/i,
 ]
 

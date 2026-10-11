@@ -5,9 +5,9 @@
 //
 // Look: a dark and a violet dielectric with a rough base layer (soft,
 // frosted silhouettes) under a smooth clear coat (crisp softbox strips), lit
-// only by a small studio environment. The environment's walls match the hero
-// canvas colour, so grazing-angle reflections dissolve each silhouette into
-// the page; two tall softboxes and an overhead bar give the vertical
+// only by a small studio environment. The environment's walls take the hero's
+// studio colour, a soft warm tone the grazing-angle reflections settle into
+// at each silhouette; two tall softboxes and an overhead bar give the vertical
 // highlight strips and the arch over each dome; a violet panel low behind the
 // characters gives the bounce light along their bases.
 import {
@@ -64,10 +64,10 @@ const EYE_OFFSET = 0.004
 // Keep a little air between a jumping character and the hero's top edge.
 const JUMP_MARGIN = 0.025
 
-const readCanvasColor = (element) => {
+const readStudioColor = (element) => {
   try {
     const value = getComputedStyle(element)
-      .getPropertyValue("--sn-hero-canvas")
+      .getPropertyValue("--sn-hero-studio")
       .trim()
     if (value) return new Color(value)
   } catch {
@@ -76,7 +76,7 @@ const readCanvasColor = (element) => {
   return new Color("#f2f1ed")
 }
 
-const buildEnvironment = (renderer, canvasColor) => {
+const buildEnvironment = (renderer, studioColor) => {
   const environment = new Scene()
   const disposables = []
   const add = (geometry, color, setup) => {
@@ -90,7 +90,7 @@ const buildEnvironment = (renderer, canvasColor) => {
 
   const roomGeometry = new BoxGeometry(24, 24, 24)
   const roomMaterial = new MeshBasicMaterial({
-    color: canvasColor,
+    color: studioColor,
     side: BackSide,
   })
   environment.add(new Mesh(roomGeometry, roomMaterial))
@@ -233,7 +233,7 @@ export function createCapsuleScene({ canvas, onContextLost, reducedMotion }) {
   renderer.toneMapping = NoToneMapping
 
   const scene = new Scene()
-  const environment = buildEnvironment(renderer, readCanvasColor(canvas))
+  const environment = buildEnvironment(renderer, readStudioColor(canvas))
   scene.environment = environment.texture
 
   const camera = new PerspectiveCamera(CAMERA_FOV, 1, 0.1, 60)

@@ -15,7 +15,7 @@ const { neetErrors } = require("../domain/errors")
 const {
   NeetTestConfigurationError,
   availabilityFor,
-  buildPaper,
+  buildPaperFromVersion,
   computeTestTotals,
   initialResponses,
   paperTotals,
@@ -53,6 +53,7 @@ const createAttemptService = ({
   clock,
   lifecycle,
   logger,
+  papers,
   proctor,
   tests,
 }) => {
@@ -77,20 +78,42 @@ const createAttemptService = ({
     return test
   }
 
-  const assertTestHasQuestions = async (test) => {
-    const counts = await tests.countActiveQuestionsBySection(test._id)
-    const ready = test.sections.every(
-      (section) => (counts.get(section.key) || 0) >= section.questionCount
-    )
-    if (!ready) {
-      logger.error("neet.test.misconfigured", { testId: String(test._id) })
+  // New attempts need a published, immutable paper version.
+  const loadCurrentPaperVersion = async (test) => {
+    const paperVersion = test.currentPaperVersionId
+      ? await papers.findPaperVersion(test.currentPaperVersionId)
+      : null
+    if (!paperVersion) {
+      logger.error("neet.test.misconfigured", {
+        testId: String(test._id),
+        reason: "no_published_paper_version",
+      })
       throw neetErrors.testNotReady()
     }
+    return paperVersion
+  }
+
+  // Content comes from the pinned paper version, never the live bank, so an
+  // edit after start cannot change what the student sees on resume.
+  const sessionQuestions = async (attempt) => {
+    if (attempt.paperVersionId) {
+      const paperVersion = await papers.findPaperVersion(attempt.paperVersionId)
+      if (!paperVersion) throw new Error("A pinned paper version is missing")
+      return paperVersion.questions.map((question) => ({
+        _id: question.questionId,
+        text: question.text,
+        options: question.options,
+        media: question.media,
+      }))
+    }
+    // Legacy attempt started before paper versions existed.
+    return tests.findStudentQuestions(
+      attempt.paper.questions.map((entry) => entry.questionId)
+    )
   }
 
   const buildSession = async ({ attempt, sessionId }) => {
-    const questionIds = attempt.paper.questions.map((entry) => entry.questionId)
-    const questions = await tests.findStudentQuestions(questionIds)
+    const questions = await sessionQuestions(attempt)
     return toExamSession({
       attempt,
       heartbeatIntervalSeconds: NEET_TIMING_DEFAULTS.heartbeatIntervalSeconds,
@@ -102,7 +125,7 @@ const createAttemptService = ({
 
   const register = async ({ candidate, testId, userId }) => {
     const test = await loadPublishedOpenTest(testId)
-    await assertTestHasQuestions(test)
+    await loadCurrentPaperVersion(test)
     const normalizedCandidate = normalizeCandidate(candidate)
 
     const existing = await lifecycle.ensureFresh(
@@ -258,6 +281,11 @@ const createAttemptService = ({
       if (!proctorConsent || proctorConsent.version !== policy.consentVersion) {
         throw neetErrors.consentRequired()
       }
+      // Monitored mode is adults-only until a legally reviewed approach for
+      // minors exists. This is a recorded self-declaration, not verification.
+      if (proctorConsent.adultConfirmed !== true) {
+        throw neetErrors.adultConfirmationRequired()
+      }
       // System checks are client observations; the server only requires that
       // every device the policy needs was reported ready.
       const incomplete = Object.entries(REQUIRED_DEVICE_CHECKS).some(
@@ -266,7 +294,11 @@ const createAttemptService = ({
           systemCheck?.[checkKey] !== "READY"
       )
       if (incomplete) throw neetErrors.systemCheckIncomplete()
-      set.proctorConsent = { version: policy.consentVersion, acceptedAt: now }
+      set.proctorConsent = {
+        version: policy.consentVersion,
+        acceptedAt: now,
+        adultDeclaredAt: now,
+      }
     }
 
     const updated = await attempts.casUpdate({
@@ -368,10 +400,11 @@ const createAttemptService = ({
       throw neetErrors.consentRequired()
     }
 
+    const paperVersion = await loadCurrentPaperVersion(test)
     let paper
     try {
-      paper = buildPaper({
-        questions: await tests.findPaperCandidates(test._id),
+      paper = buildPaperFromVersion({
+        paperVersion,
         seed: String(attempt._id),
         test,
       })
@@ -385,7 +418,9 @@ const createAttemptService = ({
 
     const now = clock()
     const networkGraceSeconds = 0
-    const expiresAt = new Date(now.getTime() + test.durationSeconds * 1000)
+    // The duration is frozen with the published paper version.
+    const durationSeconds = paperVersion.durationSeconds
+    const expiresAt = new Date(now.getTime() + durationSeconds * 1000)
     const totals = paperTotals(paper)
     const started = await attempts.casUpdate({
       filter: { _id: attempt._id, userId, status: ATTEMPT_STATUS.READY },
@@ -402,12 +437,13 @@ const createAttemptService = ({
           sessionClaimedAt: now,
           sessionClaims: 1,
           lastActivityAt: now,
+          paperVersionId: paperVersion._id,
           paper,
           responses: initialResponses(paper),
           lastSeq: 0,
           "testSnapshot.title": test.title,
           "testSnapshot.version": test.version || 1,
-          "testSnapshot.durationSeconds": test.durationSeconds,
+          "testSnapshot.durationSeconds": durationSeconds,
           "testSnapshot.questionCount": totals.questionCount,
           "testSnapshot.totalMarks": totals.totalMarks,
           "testSnapshot.isSample": test.isSample === true,
@@ -441,7 +477,8 @@ const createAttemptService = ({
     logger.info("neet.attempt.started", {
       attemptId: String(attempt._id),
       mode: attempt.mode,
-      durationSeconds: test.durationSeconds,
+      durationSeconds,
+      paperVersion: paperVersion.version,
     })
     return buildSession({ attempt: started, sessionId })
   }
@@ -484,7 +521,19 @@ const createAttemptService = ({
       },
       update: { $set: set, $max: { lastSeq: maxSeq } },
       arrayFilters,
-      projection: { responses: 1, lastSeq: 1, expiresAt: 1, status: 1 },
+      // Return only the written questions, not the whole paper's responses.
+      projection: {
+        lastSeq: 1,
+        expiresAt: 1,
+        status: 1,
+        responses: {
+          $filter: {
+            input: "$responses",
+            as: "response",
+            cond: { $in: ["$$response.questionId", questionIds] },
+          },
+        },
+      },
     })
 
     if (!updated) {

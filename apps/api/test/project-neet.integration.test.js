@@ -31,6 +31,9 @@ test(
     const NeetMockTest = require("../modules/project-neet/models/NeetMockTest")
     const NeetQuestion = require("../modules/project-neet/models/NeetQuestion")
     const NeetProctorEvent = require("../modules/project-neet/models/NeetProctorEvent")
+    const NeetPaperVersion = require("../modules/project-neet/models/NeetPaperVersion")
+    const NeetAnswerKeyVersion = require("../modules/project-neet/models/NeetAnswerKeyVersion")
+    const jwt = require("jsonwebtoken")
     const { createNeetServices } = require("../modules/project-neet/services")
     const {
       createNeetController,
@@ -70,9 +73,14 @@ test(
       await mongoose.disconnect()
     })
     await Promise.all(
-      [NeetAttempt, NeetMockTest, NeetQuestion, NeetProctorEvent].map((model) =>
-        model.createIndexes()
-      )
+      [
+        NeetAttempt,
+        NeetMockTest,
+        NeetQuestion,
+        NeetProctorEvent,
+        NeetPaperVersion,
+        NeetAnswerKeyVersion,
+      ].map((model) => model.createIndexes())
     )
     const testDoc = await NeetMockTest.create({
       slug: "integration-physics",
@@ -110,6 +118,18 @@ test(
         status: "ACTIVE",
       }))
     )
+    // New attempts start only on a published, immutable paper version.
+    const published = await services.papers.publishCurrentPaper({
+      testId: testDoc._id,
+    })
+    assert.equal(published.created, true)
+    assert.equal(
+      (await services.papers.publishCurrentPaper({ testId: testDoc._id }))
+        .created,
+      false,
+      "republishing unchanged content is a no-op"
+    )
+    const paperVersionId = published.paperVersion._id
     const userId = new mongoose.Types.ObjectId()
     const otherId = new mongoose.Types.ObjectId()
     const users = await User.insertMany(
@@ -158,11 +178,9 @@ test(
       })
       return { status: response.status, payload: await response.json() }
     }
-    const candidate = {
-      fullName: "Test Student",
-      email: "candidate@example.test",
-      phone: "+919876543210",
-    }
+    const candidate = { fullName: "Test Student" }
+    // Field names, not the harmless "answerKeyVersion" number.
+    const secretPattern = /"answerKey"|correctOption|explanation|Private answer/
     const start = async () => {
       const user = String(userId)
       const { attempt } = await services.attempts.register({
@@ -215,15 +233,21 @@ test(
           body: { sessionId: a.sessionId },
         })
         assert.equal(resumed.status, 200)
-        assert.doesNotMatch(
-          JSON.stringify(resumed.payload),
-          /answerKey|correctOption|explanation|Private answer/
-        )
+        assert.doesNotMatch(JSON.stringify(resumed.payload), secretPattern)
+        // D-1: only a display name is stored; ownership is the user ID.
+        const stored = await NeetAttempt.findById(a.attemptId).lean()
+        assert.deepEqual(Object.keys(stored.candidate), ["fullName"])
+        assert.equal(String(stored.paperVersionId), String(paperVersionId))
         const save = (responses) =>
           request(`/attempts/${a.attemptId}/responses`, {
             method: "PUT",
             body: { sessionId: a.sessionId, responses },
           })
+        // A-6: the acknowledgement carries exactly the written questions.
+        const single = await save([{ ...writes(5, "C")[0] }])
+        assert.equal(single.status, 200)
+        assert.equal(single.payload.data.responses.length, 1)
+        assert.doesNotMatch(JSON.stringify(single.payload), secretPattern)
         assert.equal((await save(writes(11, "C"))).status, 200)
         const stale = await save(writes(10, "B"))
         assert.equal(stale.status, 200)
@@ -241,6 +265,8 @@ test(
         assert.equal(two.status, 200)
         assert.deepEqual(one.payload.data.summary, two.payload.data.summary)
         assert.equal(one.payload.data.summary.score, -2)
+        assert.equal(one.payload.data.answerKeyVersion, 1)
+        assert.doesNotMatch(JSON.stringify(one.payload), secretPattern)
         assert.equal((await save(writes(12))).status, 409)
         assert.equal((await submit()).payload.data.summary.score, -2)
       }
@@ -347,9 +373,21 @@ test(
         const test = await services.tests.getTest({
           testId: String(testDoc._id),
         })
+        // P-2: monitored mode is adults-only (recorded self-declaration).
+        await assert.rejects(
+          services.attempts.markReady({
+            ...a,
+            proctorConsent: {
+              version: test.proctorPolicy.consentVersion,
+              accepted: true,
+            },
+          }),
+          { code: "NEET_ADULT_CONFIRMATION_REQUIRED" }
+        )
         const consent = {
           version: test.proctorPolicy.consentVersion,
           accepted: true,
+          adultConfirmed: true,
         }
         await assert.rejects(
           services.attempts.markReady({ ...a, proctorConsent: consent }),
@@ -367,7 +405,9 @@ test(
             network: "READY",
           },
         })
-        await services.attempts.start(a)
+        const started = await services.attempts.start(a)
+        assert.ok(started.attempt.proctorConsent.adultDeclaredAt)
+        assert.equal(started.attempt.proctoring.autoSubmitEnabled, false)
         const events = [
           {
             clientEventId: randomUUID(),
@@ -394,6 +434,369 @@ test(
         assert.equal(result.proctoring.warningCount, 0)
       }
     )
+    const startProctored = async () => {
+      const user = String(userId)
+      const { attempt } = await services.attempts.register({
+        testId: String(testDoc._id),
+        candidate,
+        userId: user,
+      })
+      const a = { attemptId: attempt.id, userId: user, sessionId: randomUUID() }
+      await services.attempts.update({ ...a, mode: "PROCTORED" })
+      const test = await services.tests.getTest({ testId: String(testDoc._id) })
+      await services.attempts.markReady({
+        ...a,
+        proctorConsent: {
+          version: test.proctorPolicy.consentVersion,
+          accepted: true,
+          adultConfirmed: true,
+        },
+        systemCheck: {
+          camera: "READY",
+          microphone: "READY",
+          fullscreen: "READY",
+          screenShare: "NOT_REQUIRED",
+          browser: "READY",
+          network: "READY",
+        },
+      })
+      const session = await services.attempts.start(a)
+      return { ...a, session }
+    }
+
+    await t.test(
+      "published paper and key versions are frozen for attempts (K-1)",
+      async () => {
+        now = new Date()
+        const a = await start()
+        // Edit the live bank after start: text and key both change.
+        await NeetQuestion.updateMany(
+          { testId: testDoc._id },
+          {
+            $set: {
+              text: "Edited after start",
+              answerKey: { correctOptionKeys: ["B"] },
+            },
+            $inc: { revision: 1 },
+          }
+        )
+        const resumed = await services.attempts.resume(a)
+        assert.ok(
+          resumed.paper.questions.every((q) => q.text.startsWith("Question ")),
+          "resumed content must come from the pinned paper version"
+        )
+        await services.attempts.saveResponses({
+          ...a,
+          responses: writes(1, "A"),
+        })
+        const result = await services.attempts.submit({
+          ...a,
+          reason: "MANUAL_SUBMIT",
+        })
+        // Frozen key is A: two correct answers. The edited bank key (B)
+        // would have produced -2.
+        assert.equal(result.summary.score, 8)
+        assert.equal(result.answerKeyVersion, 1)
+        // Restore the bank for later subtests.
+        await NeetQuestion.updateMany(
+          { testId: testDoc._id },
+          { $set: { answerKey: { correctOptionKeys: ["A"] } } }
+        )
+        await NeetQuestion.updateOne(
+          { _id: questions[0]._id },
+          { $set: { text: "Question 1" } }
+        )
+        await NeetQuestion.updateOne(
+          { _id: questions[1]._id },
+          { $set: { text: "Question 2" } }
+        )
+      }
+    )
+
+    await t.test(
+      "answer-key correction rescoring is versioned and idempotent (K-3)",
+      async () => {
+        now = new Date()
+        const answered = await start()
+        await services.attempts.saveResponses({
+          ...answered,
+          responses: writes(1, "C"),
+        })
+        await services.attempts.submit({ ...answered, reason: "MANUAL_SUBMIT" })
+        const skipped = await start()
+        await services.attempts.submit({ ...skipped, reason: "MANUAL_SUBMIT" })
+
+        // Final key: question 1 dropped (+4 to every appeared candidate),
+        // question 2 accepts both A and C.
+        const corrected = await services.papers.correctAnswerKey({
+          paperVersionId,
+          reason: "Final answer key published",
+          changes: [
+            { questionId: String(questions[0]._id), status: "DROPPED" },
+            {
+              questionId: String(questions[1]._id),
+              status: "ACTIVE",
+              correctOptionKeys: ["A", "C"],
+            },
+          ],
+        })
+        assert.equal(corrected.created, true)
+        const version = corrected.answerKey.version
+        const first = await services.papers.rescorePaper({ paperVersionId })
+        assert.equal(first.answerKeyVersion, version)
+        assert.ok(first.rescored >= 2)
+        const again = await services.papers.rescorePaper({ paperVersionId })
+        assert.equal(again.rescored, 0, "a second run changes nothing")
+
+        const answeredResult = await services.attempts.getResult(answered)
+        // Q1 dropped: +4; Q2 answered C, now correct: +4.
+        assert.equal(answeredResult.summary.score, 8)
+        assert.equal(answeredResult.summary.dropped, 1)
+        assert.equal(answeredResult.answerKeyVersion, version)
+        const skippedResult = await services.attempts.getResult(skipped)
+        // Unattempted dropped question still earns +4.
+        assert.equal(skippedResult.summary.score, 4)
+        assert.equal(skippedResult.summary.unanswered, 1)
+        const history = await NeetAttempt.findById(answered.attemptId).lean()
+        assert.equal(history.resultHistory.length, 1)
+        assert.equal(history.resultHistory[0].score, -2)
+
+        // Attempts finalised after the correction use it directly.
+        const later = await start()
+        const laterResult = await services.attempts.submit({
+          ...later,
+          reason: "MANUAL_SUBMIT",
+        })
+        assert.equal(laterResult.answerKeyVersion, version)
+        assert.equal(laterResult.summary.score, 4)
+      }
+    )
+
+    await t.test(
+      "sweeper finalises abandoned expired attempts exactly once (T-1)",
+      async () => {
+        now = new Date()
+        const a = await start()
+        await services.attempts.saveResponses({
+          ...a,
+          responses: writes(1, "C"),
+        })
+        now = new Date(Date.parse(a.session.attempt.expiresAt) + 31_000)
+        const [one, two, manual] = await Promise.allSettled([
+          services.lifecycle.sweep(),
+          services.lifecycle.sweep(),
+          services.attempts.submit({ ...a, reason: "MANUAL_SUBMIT" }),
+        ])
+        assert.equal(one.status, "fulfilled")
+        assert.equal(two.status, "fulfilled")
+        assert.equal(manual.status, "fulfilled")
+        const stored = await NeetAttempt.findById(a.attemptId).lean()
+        assert.equal(stored.status, "AUTO_SUBMITTED")
+        assert.equal(stored.submissionReason, "TIME_EXPIRED")
+        assert.equal(stored.isOpen, undefined)
+        assert.equal(stored.resultHistory.length, 0)
+        // Both saved answers count: question 1 was dropped by the K-3
+        // correction (awarded to everyone), question 2 is graded.
+        assert.equal(
+          manual.value.summary.attempted + manual.value.summary.dropped,
+          2
+        )
+        assert.equal(manual.value.summary.unanswered, 0)
+        // A later sweep finds nothing left to do.
+        assert.equal((await services.lifecycle.sweep()).finalized, 0)
+      }
+    )
+
+    await t.test(
+      "resume with the same session is not a takeover (R-a)",
+      async () => {
+        now = new Date()
+        const a = await startProctored()
+        await services.attempts.resume(a)
+        await services.attempts.resume(a)
+        let stored = await NeetAttempt.findById(a.attemptId).lean()
+        assert.equal(stored.sessionClaims, 1)
+        assert.equal(
+          await NeetProctorEvent.countDocuments({
+            attemptId: a.attemptId,
+            type: "DUPLICATE_SESSION",
+          }),
+          0
+        )
+        // A genuinely different live session is still recorded.
+        await services.attempts.resume({ ...a, sessionId: randomUUID() })
+        stored = await NeetAttempt.findById(a.attemptId).lean()
+        assert.equal(stored.sessionClaims, 2)
+        assert.equal(stored.status, "IN_PROGRESS")
+        assert.equal(
+          await NeetProctorEvent.countDocuments({
+            attemptId: a.attemptId,
+            type: "DUPLICATE_SESSION",
+          }),
+          1
+        )
+        const latest = stored.activeSessionId
+        await services.attempts.submit({
+          ...a,
+          sessionId: latest,
+          reason: "MANUAL_SUBMIT",
+        })
+      }
+    )
+
+    await t.test(
+      "threshold flags for human review without submitting (P-1)",
+      async () => {
+        now = new Date()
+        const a = await startProctored()
+        // Cooldowns are per signal type: two counted types per batch, one
+        // cooldown apart, reach 4 counted warnings (> 3) inside the paper.
+        let last
+        for (const offset of [1_000, 22_000]) {
+          now = new Date(Date.parse(a.session.attempt.startedAt) + offset)
+          last = await services.proctor.recordEvents({
+            ...a,
+            events: ["TAB_HIDDEN", "FULLSCREEN_EXIT"].map((type) => ({
+              clientEventId: randomUUID(),
+              type,
+              occurredAt: now.toISOString(),
+            })),
+          })
+          assert.equal(last.autoSubmitted, false)
+          assert.equal(last.status, "IN_PROGRESS")
+        }
+        assert.ok(last.warningCount > last.maxWarnings)
+        const stored = await NeetAttempt.findById(a.attemptId).lean()
+        assert.equal(stored.status, "IN_PROGRESS")
+        assert.equal(stored.review.status, "FLAGGED")
+        assert.ok(stored.review.flaggedAt)
+        assert.deepEqual([...stored.review.reasons].sort(), [
+          "FULLSCREEN_EXIT",
+          "TAB_HIDDEN",
+        ])
+        // The exam continues normally and is scored on its answers.
+        await services.attempts.saveResponses({
+          ...a,
+          responses: writes(1, "A"),
+        })
+        const result = await services.attempts.submit({
+          ...a,
+          reason: "MANUAL_SUBMIT",
+        })
+        assert.equal(result.attempt.status, "SUBMITTED")
+        assert.equal(result.attempt.submissionReason, "MANUAL_SUBMIT")
+        assert.equal(result.attempt.proctoring.reviewStatus, "FLAGGED")
+        assert.equal(result.summary.score, 8)
+      }
+    )
+
+    await t.test(
+      "exam start extends a short session; revocation and the policy gate still apply (T-2, T-3)",
+      async () => {
+        now = new Date()
+        const user = String(userId)
+        const { attempt } = await services.attempts.register({
+          testId: String(testDoc._id),
+          candidate,
+          userId: user,
+        })
+        await services.attempts.update({
+          attemptId: attempt.id,
+          userId: user,
+          mode: "NON_PROCTORED",
+        })
+        await services.attempts.markReady({
+          attemptId: attempt.id,
+          userId: user,
+        })
+        const shortToken = jwt.sign(
+          {
+            email: users[0].email,
+            id: user,
+            accountType: "Student",
+            sessionVersion: 0,
+          },
+          process.env.JWT_SECRET,
+          {
+            algorithm: "HS256",
+            audience: "studynotion-web",
+            issuer: "studynotion-api",
+            expiresIn: 600,
+          }
+        )
+        const shortCookie = `studynotion_session=${shortToken}`
+        const sessionId = randomUUID()
+        const response = await fetch(`${base}/attempts/${attempt.id}/start`, {
+          method: "POST",
+          headers: { cookie: shortCookie, "content-type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        })
+        assert.equal(response.status, 200)
+        const started = await response.json()
+        const setCookie = response.headers.get("set-cookie") || ""
+        const renewed = setCookie.match(/studynotion_session=([^;]+)/)?.[1]
+        assert.ok(renewed, "a short session is re-issued at exam start")
+        const decoded = jwt.decode(renewed)
+        assert.equal(decoded.sessionVersion, 0)
+        assert.ok(
+          decoded.exp * 1000 >=
+            Date.parse(started.data.attempt.expiresAt) + 30 * 60 * 1000
+        )
+
+        // T-3: a policy-version bump mid-exam does not block the exam...
+        // (Acceptance fields are immutable in the model, so the fixture uses
+        // the raw collection to simulate a stale acceptance.)
+        const originalAcceptances = (
+          await User.collection.findOne({ _id: userId })
+        ).policyAcceptances
+        await User.collection.updateOne(
+          { _id: userId },
+          {
+            $set: {
+              policyAcceptances: originalAcceptances.map((acceptance) => ({
+                ...acceptance,
+                termsVersion: "2000-01-01",
+              })),
+            },
+          }
+        )
+        const renewedCookie = `studynotion_session=${renewed}`
+        const save = await request(`/attempts/${attempt.id}/responses`, {
+          method: "PUT",
+          cookie: renewedCookie,
+          body: { sessionId, responses: writes(1, "A") },
+        })
+        assert.equal(save.status, 200)
+        // ...but registering a new attempt still requires acceptance.
+        const register = await request("/attempts", {
+          method: "POST",
+          cookie: renewedCookie,
+          body: { testId: String(testDoc._id), candidate },
+        })
+        assert.equal(register.status, 428)
+        await User.collection.updateOne(
+          { _id: userId },
+          { $set: { policyAcceptances: originalAcceptances } }
+        )
+
+        // Revocation still applies to the re-issued session.
+        await User.updateOne({ _id: userId }, { $inc: { sessionVersion: 1 } })
+        const revoked = await request(`/attempts/${attempt.id}/heartbeat`, {
+          method: "POST",
+          cookie: renewedCookie,
+          body: { sessionId },
+        })
+        assert.equal(revoked.status, 401)
+        await User.updateOne({ _id: userId }, { $inc: { sessionVersion: -1 } })
+        await services.attempts.submit({
+          attemptId: attempt.id,
+          userId: user,
+          sessionId,
+          reason: "MANUAL_SUBMIT",
+        })
+      }
+    )
+
     // Build the real app too: its auth and route composition are covered in the
     // final regression suite. This suite uses the same real default auth gates.
     assert.equal(typeof createApp, "function")

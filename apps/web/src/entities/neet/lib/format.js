@@ -54,12 +54,13 @@ export const NEET_DIFFICULTY_LABELS = Object.freeze({
 
 export const NEET_MODE_LABELS = Object.freeze({
   NON_PROCTORED: "Practice mode",
-  PROCTORED: "Proctored mode",
+  PROCTORED: "Monitored mode",
 })
 
 export const NEET_SUBMISSION_REASON_LABELS = Object.freeze({
   MANUAL_SUBMIT: "Submitted by you",
   TIME_EXPIRED: "Submitted when time ran out",
-  PROCTOR_POLICY: "Submitted under the proctoring policy",
+  // Historical records only: monitoring no longer submits attempts.
+  PROCTOR_POLICY: "Submitted under an earlier monitoring policy",
   ADMIN_RECOVERY: "Submitted by support",
 })

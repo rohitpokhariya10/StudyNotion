@@ -1,5 +1,4 @@
 import { legalAddress, supportEmail } from "@/shared/config/publicContact"
-import BrandLogo from "@/shared/ui/BrandLogo"
 import { FooterLink2 } from "@/widgets/footer/model/links"
 import FooterLandscape from "@/widgets/footer/ui/FooterLandscape"
 import FooterSignup from "@/widgets/footer/ui/FooterSignup"
@@ -19,9 +18,6 @@ export default function Footer() {
         <hr className="sn-footer-divider" />
         <div className="sn-footer-grid">
           <div className="sn-footer-identity">
-            <Link to="/" aria-label="Prahit home" className="sn-footer-brand">
-              <BrandLogo size="footer" decorative />
-            </Link>
             <p className="sn-footer-tagline">
               Practical, instructor-led courses that help learners build lasting
               skills at their own pace.

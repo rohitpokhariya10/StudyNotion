@@ -17,7 +17,12 @@ const TONES = [
   "from-[#ffe4d4] to-[#fff4ec] text-[#c2382e]",
   "from-[#e9e3fb] to-[#f6f3ff] text-[#5b3fc4]",
 ]
-const TILTS = ["-rotate-[4deg]", "rotate-[3deg]", "-rotate-[2deg]", "rotate-[4deg]"]
+const TILTS = [
+  "-rotate-[4deg]",
+  "rotate-[3deg]",
+  "-rotate-[2deg]",
+  "rotate-[4deg]",
+]
 const catalogPath = (name) =>
   `/catalog/${name.split(" ").join("-").toLowerCase()}`
 
@@ -164,7 +169,7 @@ export default function SubjectCarousel({
         <>
           <div
             ref={trackRef}
-            className="mt-6 snap-x snap-mandatory overflow-x-auto px-6 [scrollbar-width:none] lg:mt-8 [&::-webkit-scrollbar]:hidden"
+            className="mt-6 snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto px-6 lg:mt-8 [&::-webkit-scrollbar]:hidden"
           >
             <ul className="mx-auto flex w-max gap-10 py-10 lg:gap-24">
               {available.map((category, index) => (

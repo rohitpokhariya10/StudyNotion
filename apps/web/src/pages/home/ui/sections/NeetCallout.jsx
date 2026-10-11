@@ -79,7 +79,7 @@ function AnswerSheetSpot({ className = "" }) {
   )
 }
 
-// Bordered call-out between soft clouds, linking to the Project NEET space.
+// Bordered call-out between soft clouds, linking to the Prahit NEET Mocks space.
 export default function NeetCallout() {
   return (
     <section
@@ -98,10 +98,10 @@ export default function NeetCallout() {
               Preparing for NEET? Rehearse with full-length mock tests
             </h2>
             <Link
-              to="/project-neet"
+              to="/neet"
               className="sn-btn sn-btn-primary mt-6 w-full max-w-60"
             >
-              Explore Project NEET
+              Explore Prahit NEET Mocks
             </Link>
           </div>
           <AnswerSheetSpot className="order-first mx-auto w-60 md:order-none" />

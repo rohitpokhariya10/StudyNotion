@@ -9,6 +9,20 @@ const POLICY_PENDING_ALLOWED_PATHS = new Set([
   "/api/v1/profile/getUserDetails",
 ])
 
+// Operations on an exam that is already running stay available when a new
+// policy version is published mid-exam, so a student is not locked out of a
+// timed attempt; the acceptance prompt appears once the exam ends. These
+// paths act only on an attempt in progress (or return its final state).
+// Registering, readying, starting, listing and results still require
+// acceptance.
+const POLICY_PENDING_ALLOWED_PATTERNS = Object.freeze([
+  /^\/api\/v2\/project-neet\/attempts\/[0-9a-f]{24}\/(?:responses|heartbeat|session|submit|proctor-events)$/i,
+])
+
+const isPolicyPendingAllowed = (path) =>
+  POLICY_PENDING_ALLOWED_PATHS.has(path) ||
+  POLICY_PENDING_ALLOWED_PATTERNS.some((pattern) => pattern.test(path))
+
 const DELETION_PENDING_ALLOWED_PATHS = new Set([
   "/api/v1/profile/deleteProfile",
   "/api/v1/profile/getUserDetails",
@@ -65,6 +79,12 @@ exports.auth = async (req, res, next) => {
       deletionPending: user.deletionPending === true,
       requiresPolicyAcceptance,
     }
+    // Session metadata for handlers that may need to re-issue the same
+    // session (for example, a long exam). Not part of req.user.
+    req.sessionExpiresAt = Number.isFinite(decoded.exp)
+      ? new Date(decoded.exp * 1000)
+      : null
+    req.sessionVersion = currentSessionVersion
     res.setHeader("Cache-Control", "private, no-store, max-age=0")
     res.setHeader("Pragma", "no-cache")
 
@@ -80,10 +100,7 @@ exports.auth = async (req, res, next) => {
           "Account deletion is pending; retry deletion or contact support",
       })
     }
-    if (
-      requiresPolicyAcceptance &&
-      !POLICY_PENDING_ALLOWED_PATHS.has(requestPath)
-    ) {
+    if (requiresPolicyAcceptance && !isPolicyPendingAllowed(requestPath)) {
       return res.status(428).json({
         success: false,
         code: "POLICY_ACCEPTANCE_REQUIRED",

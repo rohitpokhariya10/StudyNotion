@@ -22,7 +22,7 @@ const FEATURES = [
   {
     Icon: FiRefreshCw,
     title: "Answers that hold on",
-    copy: "Every choice saves automatically. If Wi-Fi drops, answers wait safely on your device and sync the moment you reconnect.",
+    copy: "Every choice saves automatically. If Wi-Fi drops, answers are kept on this device and sync when you reconnect — answers that reach us after the timer ends can't count.",
     accent: "text-neet-sun",
   },
   {
@@ -33,8 +33,8 @@ const FEATURES = [
   },
   {
     Icon: FiShield,
-    title: "Optional proctored practice",
-    copy: "Rehearse disciplined conditions with consent-first monitoring. Signals are analysed on your device; nothing is recorded.",
+    title: "Optional monitored practice (18+)",
+    copy: "Rehearse disciplined conditions with consent-first monitoring. Signals are analysed on your device; nothing is recorded, and monitoring never submits your exam.",
     accent: "text-neet-pulse",
   },
 ]
@@ -98,9 +98,7 @@ export default function NeetLanding() {
     <ProjectNeetShell>
       <NeetHero
         primaryAction={{
-          to: firstOpen
-            ? `/project-neet/mocks/${firstOpen.id}/start`
-            : "/project-neet/mocks",
+          to: firstOpen ? `/neet/mocks/${firstOpen.id}/start` : "/neet/mocks",
           label: "Start a Mock",
         }}
         secondaryAction={{ href: "#mocks", label: "Explore Tests" }}
@@ -161,21 +159,23 @@ export default function NeetLanding() {
               </h3>
               <p className="mt-4 leading-7 text-neet-muted">
                 The full exam experience — server-kept timer, autosave, digital
-                OMR and a detailed result — with no monitoring and no devices to
-                set up. Works on laptops, tablets and phones.
+                OMR and a scored result with a subject breakdown — with no
+                monitoring and no devices to set up. Works on laptops, tablets
+                and phones.
               </p>
             </Reveal>
             <Reveal as="article" delay={120} className="pn-card p-7 sm:p-9">
-              <p className="pn-eyebrow text-neet-pulse">Proctored mode</p>
+              <p className="pn-eyebrow text-neet-pulse">Monitored mode · 18+</p>
               <h3 className="pn-display mt-3 text-3xl font-bold">
                 Rehearse the discipline.
               </h3>
               <p className="mt-4 leading-7 text-neet-muted">
                 Full screen, tab and focus monitoring, plus camera and
                 microphone signals analysed on your device. You see exactly what
-                is monitored and give consent first. Calm warnings come before
-                any policy-based submission, and no video or audio is ever
-                stored. Designed for laptops and desktops.
+                is monitored and give consent first. Repeated signals are
+                flagged for review by a person — monitoring never submits or
+                ends your exam, and no video or audio is ever stored. For
+                candidates aged 18 or over, on laptops and desktops.
               </p>
             </Reveal>
           </div>
@@ -193,7 +193,7 @@ export default function NeetLanding() {
             eyebrow="Available mocks"
             title="Pick today's sitting."
           />
-          <Link to="/project-neet/mocks" className="pn-btn pn-btn-secondary">
+          <Link to="/neet/mocks" className="pn-btn pn-btn-secondary">
             All mock tests and your attempts →
           </Link>
         </div>
@@ -291,9 +291,7 @@ export default function NeetLanding() {
             </p>
             <Link
               to={
-                firstOpen
-                  ? `/project-neet/mocks/${firstOpen.id}/start`
-                  : "/project-neet/mocks"
+                firstOpen ? `/neet/mocks/${firstOpen.id}/start` : "/neet/mocks"
               }
               className="pn-btn pn-btn-primary pn-btn-lg mt-8"
             >

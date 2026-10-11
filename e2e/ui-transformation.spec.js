@@ -92,7 +92,7 @@ async function inspect(page, testInfo, name, { axe = true } = {}) {
   await expect(page).toHaveTitle(/^Prahit \|/)
   const logo = page.locator('header a[aria-label="Prahit home"] img')
   await expect(logo).toBeVisible()
-  await expect(logo).toHaveJSProperty("naturalWidth", 632)
+  await expect(logo).toHaveJSProperty("naturalWidth", 640)
   await expect(logo).toHaveAttribute("alt", "")
   await expect(page.locator("body")).not.toContainText(/Study[ _-]?Notion/i)
   await expect(

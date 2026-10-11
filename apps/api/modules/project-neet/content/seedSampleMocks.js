@@ -1,5 +1,6 @@
 const NeetMockTest = require("../models/NeetMockTest")
 const NeetQuestion = require("../models/NeetQuestion")
+const { createNeetServices } = require("../services")
 const { buildSampleQuestionBank } = require("./sampleQuestionBank")
 const { SAMPLE_MOCKS, instructionsFor } = require("./sampleMocks")
 
@@ -30,7 +31,11 @@ const contentSignature = (document) =>
 // Idempotent, additive upsert of the sample mocks. Existing tests keep their
 // IDs; a changed question gets a new revision so attempt snapshots can tell
 // which revision they were scored against. Nothing is deleted.
-const seedSampleMocks = async ({ now = new Date(), write = () => {} } = {}) => {
+const seedSampleMocks = async ({
+  now = new Date(),
+  services = createNeetServices(),
+  write = () => {},
+} = {}) => {
   const bank = buildSampleQuestionBank()
   const summary = []
 
@@ -121,9 +126,21 @@ const seedSampleMocks = async ({ now = new Date(), write = () => {} } = {}) => {
         }
       }
     }
-    summary.push({ slug: mock.slug, created, revised })
+    // Attempts start only on a published, immutable paper version. Unchanged
+    // content republishes as a no-op; changed content becomes a new version
+    // while running attempts keep the version they pinned.
+    const published = await services.papers.publishCurrentPaper({
+      publishedBy: "sample-seed",
+      testId: test._id,
+    })
+    summary.push({
+      slug: mock.slug,
+      created,
+      revised,
+      paperVersion: published.paperVersion.version,
+    })
     write(
-      `Project NEET sample mock ready: ${mock.slug} (${created} created, ${revised} revised)`
+      `NEET sample mock ready: ${mock.slug} (${created} created, ${revised} revised, paper v${published.paperVersion.version})`
     )
   }
   return summary

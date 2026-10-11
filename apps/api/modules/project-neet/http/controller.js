@@ -11,6 +11,8 @@ const {
 } = require("@studynotion/contracts/neet")
 
 const { sendV2Error } = require("../../../shared/http/v2ErrorEnvelope")
+const { issueSession } = require("../../../utils/auth")
+const { NEET_SESSION_EXTENSION_MARGIN_MS } = require("../config/defaults")
 const { NeetApiError } = require("../domain/errors")
 
 const SLOW_REQUEST_MS = 1_000
@@ -19,9 +21,31 @@ const PUBLIC_CACHE = "public, max-age=30"
 const TRANSIENT_DATABASE_ERROR =
   /^(?:Mongo(?:ose)?ServerSelectionError|MongoNetworkError|MongoNetworkTimeoutError|MongoNotConnectedError|MongoWaitQueueTimeoutError|MongoServerClosedError)$/
 
+// Re-issues the session cookie (same sessionVersion, so revocation still
+// applies) when it would expire before the exam deadline plus a margin.
+const extendSessionForExam = ({ data, req, res }) => {
+  const deadline = Date.parse(data?.attempt?.expiresAt)
+  const sessionExpiresAt = req.sessionExpiresAt?.getTime?.()
+  if (!req.user || !Number.isFinite(deadline)) return
+  if (!Number.isFinite(sessionExpiresAt)) return
+  if (sessionExpiresAt >= deadline + NEET_SESSION_EXTENSION_MARGIN_MS) return
+  issueSession(res, {
+    _id: req.user.id,
+    email: req.user.email,
+    accountType: req.user.accountType,
+    sessionVersion: req.sessionVersion,
+  })
+}
+
 const createNeetController = ({ logger, services }) => {
   const execute =
-    ({ cacheControl = PRIVATE_CACHE, event, operation, schema }) =>
+    ({
+      afterSuccess,
+      cacheControl = PRIVATE_CACHE,
+      event,
+      operation,
+      schema,
+    }) =>
     async (req, res) => {
       const requestId = req.requestId || "unknown"
       const startedAt = performance.now()
@@ -50,6 +74,7 @@ const createNeetController = ({ logger, services }) => {
           logger.warn(`${event}.slow`, { requestId, durationMs })
         }
         res.setHeader("Cache-Control", cacheControl)
+        afterSuccess?.({ data, req, res })
         return res.status(statusCode).json(parsed.data)
       } catch (error) {
         if (error instanceof NeetApiError) {
@@ -160,6 +185,7 @@ const createNeetController = ({ logger, services }) => {
       }),
     }),
     start: execute({
+      afterSuccess: extendSessionForExam,
       event: "neet.attempts.start",
       schema: neetExamSessionResponseSchema,
       operation: async ({ input, userId }) => ({
@@ -169,6 +195,7 @@ const createNeetController = ({ logger, services }) => {
       }),
     }),
     resume: execute({
+      afterSuccess: extendSessionForExam,
       event: "neet.attempts.resume",
       schema: neetExamSessionResponseSchema,
       operation: async ({ input, userId }) => ({

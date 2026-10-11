@@ -1,0 +1,39 @@
+PASS  both pupils follow the pointer in 8 directions  — radius 172px, max error 0.3°, min travel 7.2px (0°: 0.3/0.3, 45°: 0.2/0.2, 90°: 0.0/0.0, 135°: 0.2/0.2, 180°: 0.3/0.3, 225°: 0.2/0.2, 270°: 0.0/0.0, 315°: 0.2/0.2)
+PASS  both eyes look the same way (no crossing)  — max disagreement 0.0°
+PASS  tracking continues over the form  — 23.1, 22.8
+PASS  neutral pose after the pointer leaves the card  — 0.01px from rest
+PASS  head returns to neutral  — translate(0%, 0%) rotate(0deg)
+PASS  head moves more than the body  — head 2.39°, body 0.55°
+PASS  eyes close while the password field has focus  — 1.00, 1.00
+PASS  eyes stay closed while the password is shown (toggle focused)  — 1.00, 1.00
+PASS  eyes stay closed while revealed even after blur  — 1.00, 1.00
+PASS  eyes reopen when no password field is focused or revealed
+PASS  email field focus keeps eyes open
+PASS  empty login is blocked by native validation  — 2 invalid field(s)
+PASS  forgot password link
+PASS  sign up link
+PASS  no page errors on login
+PASS  tracking is correct after scrolling  — max error 6.0° (scrollY 260)
+PASS  gaze re-aims when the page scrolls under a still pointer  — max error 1.6° (scrollY 60)
+PASS  tracking is correct after resizing  — max error 12.7°
+PASS  confirm password focus closes the eyes
+PASS  eyes reopen after leaving confirm password
+PASS  password mismatch keeps the existing error
+PASS  signup keeps 3 consent checkboxes and both roles
+PASS  role choice toggles
+PASS  sign in link
+PASS  no page errors on signup
+PASS  loading state shows the flask loader
+PASS  failure shows the server message and restores the form
+PASS  success redirects away from login  — /dashboard/my-profile
+PASS  signup sends the OTP and opens email verification
+PASS  reduced motion: static pose, no tracking  — pupil change 0.000px
+PASS  reduced motion: no animation loop while the pointer moves  — 0 rAF calls
+PASS  reduced motion: password focus still closes the eyes
+PASS  touch: stable pose (taps do not move the pupils)  — 0.000px; 4 eye clip shapes
+PASS  mobile login: no horizontal overflow  — 0px
+PASS  touch: password focus closes the eyes
+PASS  mobile keyboard: fields and submit stay reachable  — {"field":217,"button":313,"scrollable":true,"overflowY":"visible","width":0}
+PASS  mobile signup: no horizontal overflow
+
+37/37 checks passed

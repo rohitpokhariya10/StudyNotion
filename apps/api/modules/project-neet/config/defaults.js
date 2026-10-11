@@ -16,20 +16,35 @@ const NEET_TIMING_DEFAULTS = Object.freeze({
 // recently alive; resuming after a crash or sleep is not a policy event.
 const NEET_SESSION_LIVENESS_SECONDS = 120
 
+// Abandoned expired attempts are finalised within roughly one interval.
+const NEET_SWEEPER_DEFAULTS = Object.freeze({
+  intervalMs: 60_000,
+  jitterMs: 15_000,
+  graceMs: 30_000,
+  batchLimit: 100,
+})
+
+// Exam starts re-issue a session that would expire before the deadline plus
+// this margin, so a long mock is never cut off by the fixed session lifetime.
+const NEET_SESSION_EXTENSION_MARGIN_MS = 30 * 60 * 1000
+
 const NEET_PROCTOR_EVENT_RETENTION_DAYS = 180
 const NEET_MAX_STORED_PROCTOR_EVENTS = 3000
 const NEET_MAX_STORED_WARNINGS = 200
-const NEET_SCORING_VERSION = 1
+// 2: answer-key statuses (multiple correct, all correct, dropped) per the
+// NTA NEET UG 2026 rules, and versioned answer keys.
+const NEET_SCORING_VERSION = 2
 
-// The NEET (UG) 2026 Information Bulletin pattern as reported consistently by
-// secondary sources at implementation time. It is sample configuration only;
-// future official patterns are expressed by editing test documents.
+// The NEET (UG) 2026 pattern from the official NTA Information Bulletin:
+// 180 compulsory questions, 180 minutes, +4 / −1 / 0. Future official patterns
+// are expressed by editing test documents, not this constant.
 const NEET_PATTERN_NOTE_2026 =
-  "Sample mock following the publicly reported NEET (UG) 2026 pattern: 180 compulsory questions, 180 minutes, +4 / −1 marking. Always verify the current official NTA bulletin."
+  "Sample mock following the NTA NEET (UG) 2026 pattern: 180 compulsory questions, 180 minutes, +4 / −1 marking. Sample content is not expert-reviewed."
 
 const NEET_DEFAULT_PROCTOR_POLICY = Object.freeze({
   version: 1,
-  consentVersion: "2026-10-05",
+  // 2026-10-10: monitored mode is adults-only and never submits automatically.
+  consentVersion: "2026-10-10",
   requirements: Object.freeze({
     camera: true,
     microphone: true,
@@ -56,10 +71,11 @@ const NEET_DEFAULT_PROCTOR_POLICY = Object.freeze({
     maxWarnings: 3,
     cooldownSeconds: 20,
   }),
+  // Monitoring never submits or cancels an attempt. Crossing the warning
+  // threshold flags the attempt for human review instead. Deadline submission
+  // is a separate, server-authoritative timer rule.
   autoSubmit: Object.freeze({
-    enabled: true,
-    // Camera, face, head and audio signals are uncertain. By default they can
-    // warn but can never contribute to automatic submission.
+    enabled: false,
     softSignalsCanSubmit: false,
   }),
   mediaStorage: "NONE",
@@ -211,6 +227,8 @@ module.exports = {
   NEET_PATTERN_NOTE_2026,
   NEET_PROCTOR_EVENT_RETENTION_DAYS,
   NEET_SCORING_VERSION,
+  NEET_SESSION_EXTENSION_MARGIN_MS,
   NEET_SESSION_LIVENESS_SECONDS,
+  NEET_SWEEPER_DEFAULTS,
   NEET_TIMING_DEFAULTS,
 }

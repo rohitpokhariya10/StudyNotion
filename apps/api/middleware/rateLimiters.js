@@ -1,9 +1,10 @@
 const crypto = require("crypto")
 
-const { ipKeyGenerator, rateLimit } = require("express-rate-limit")
+const { ipKeyGenerator, MemoryStore, rateLimit } = require("express-rate-limit")
 const { RedisStore } = require("rate-limit-redis")
 
 const redis = require("../config/redis")
+const logger = require("../utils/logger")
 
 class DeferredRedisStore extends RedisStore {
   init(options) {
@@ -37,6 +38,66 @@ class DeferredRedisStore extends RedisStore {
   async get(key) {
     await this.ensureScripts()
     return super.get(key)
+  }
+}
+
+// Wraps the shared Redis store with a per-process fallback. Used only for
+// exam traffic: a Redis outage must not stop students saving answers, and
+// exam integrity is enforced by the attempt's own server-side predicates,
+// not by rate limits. While Redis is unavailable, limits still apply per
+// process. Security-sensitive limiters (login, OTP, payment) stay fail-closed.
+class FailOpenStore {
+  constructor({ name, primary, fallback = new MemoryStore() }) {
+    this.name = name
+    this.primary = primary
+    this.fallback = fallback
+    this.prefix = primary.prefix
+    this.localKeys = false
+    this.lastWarnedAt = 0
+  }
+
+  init(options) {
+    this.primary.init?.(options)
+    this.fallback.init?.(options)
+  }
+
+  report(error) {
+    const now = Date.now()
+    if (now - this.lastWarnedAt < 30_000) return
+    this.lastWarnedAt = now
+    logger.warn("rate_limit.store_fallback", {
+      limiter: this.name,
+      error: logger.errorMetadata(error),
+    })
+  }
+
+  async attempt(method, key) {
+    try {
+      return await this.primary[method](key)
+    } catch (error) {
+      this.report(error)
+      return this.fallback[method](key)
+    }
+  }
+
+  increment(key) {
+    return this.attempt("increment", key)
+  }
+
+  decrement(key) {
+    return this.attempt("decrement", key)
+  }
+
+  resetKey(key) {
+    return this.attempt("resetKey", key)
+  }
+
+  get(key) {
+    return this.attempt("get", key)
+  }
+
+  shutdown() {
+    return this.fallback.shutdown?.()
   }
 }
 
@@ -76,10 +137,13 @@ const createLimiter = ({
   limit,
   windowMs,
   message,
+  failOpen = false,
   keyGenerator = requestIpKey,
   skipSuccessfulRequests = false,
 }) => {
-  const store = sharedStore(name)
+  const shared = sharedStore(name)
+  const store =
+    shared && failOpen ? new FailOpenStore({ name, primary: shared }) : shared
   return rateLimit({
     windowMs,
     limit,
@@ -196,10 +260,14 @@ exports.webhookLimiter = createLimiter({
 // (see app/registerRoutes.js) because classrooms and coaching centres often
 // share one NAT address for a three-hour exam. These limiters replace it:
 // a coarse per-IP ceiling before authentication, then per-student budgets.
+// The per-IP ceiling is a flood guard sized for a whole centre behind one
+// NAT address (about 200 requests/second); the per-student budgets below are
+// the real controls.
 exports.neetAttemptIpLimiter = createLimiter({
   name: "neet-attempt-ip",
   windowMs: 15 * 60 * 1000,
-  limit: 30_000,
+  limit: 180_000,
+  failOpen: true,
   message: "Too many exam requests from this network. Please retry shortly.",
 })
 
@@ -207,6 +275,7 @@ exports.neetAttemptUserLimiter = createLimiter({
   name: "neet-attempt-user",
   windowMs: 60 * 1000,
   limit: 240,
+  failOpen: true,
   keyGenerator: authenticatedUserKey,
   message: "Too many exam requests. Your answers are kept; please retry.",
 })
@@ -215,6 +284,7 @@ exports.neetAttemptSessionLimiter = createLimiter({
   name: "neet-attempt-session",
   windowMs: 60 * 1000,
   limit: 120,
+  failOpen: true,
   keyGenerator: (request) =>
     `${authenticatedUserKey(request)}:attempt:${String(request.path).split("/")[1]?.toLowerCase() || "list"}`,
   message: "This attempt is sending too many requests. Please retry shortly.",
@@ -224,9 +294,10 @@ exports.neetRegistrationLimiter = createLimiter({
   name: "neet-registration-user",
   windowMs: 60 * 60 * 1000,
   limit: 30,
+  failOpen: true,
   keyGenerator: authenticatedUserKey,
   message: "Too many mock registrations. Please try again later.",
 })
 
 exports.hashRateLimitIdentity = hashRateLimitIdentity
-exports._test = { DeferredRedisStore }
+exports._test = { DeferredRedisStore, FailOpenStore, createLimiter }

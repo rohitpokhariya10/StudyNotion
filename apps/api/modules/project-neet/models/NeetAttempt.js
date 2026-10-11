@@ -5,6 +5,7 @@ const {
   NEET_OPTION_KEYS,
   NEET_PROCTOR_EVENT_TYPES,
   NEET_PROCTOR_SEVERITIES,
+  NEET_REVIEW_STATUSES,
   NEET_SUBMISSION_REASONS,
   NEET_SYSTEM_CHECK_STATES,
 } = require("@studynotion/contracts/neet")
@@ -81,6 +82,7 @@ const resultSectionSchema = new mongoose.Schema(
     correct: Number,
     incorrect: Number,
     unanswered: Number,
+    dropped: { type: Number, default: 0 },
     score: Number,
     maxScore: Number,
   },
@@ -95,7 +97,11 @@ const resultQuestionSchema = new mongoose.Schema(
     number: Number,
     selectedOption: { type: String, default: null },
     correctOptionKeys: [String],
-    outcome: { type: String, enum: ["CORRECT", "INCORRECT", "UNANSWERED"] },
+    keyStatus: { type: String, default: "ACTIVE" },
+    outcome: {
+      type: String,
+      enum: ["CORRECT", "INCORRECT", "UNANSWERED", "DROPPED"],
+    },
     marksAwarded: Number,
     markedForReview: Boolean,
     timeSpentMs: Number,
@@ -108,6 +114,8 @@ const resultQuestionSchema = new mongoose.Schema(
 const resultSchema = new mongoose.Schema(
   {
     scoringVersion: { type: Number, required: true },
+    // Answer-key version used; null for legacy results scored from live keys.
+    answerKeyVersion: { type: Number, default: null },
     scoredAt: { type: Date, required: true },
     summary: {
       score: Number,
@@ -117,6 +125,7 @@ const resultSchema = new mongoose.Schema(
       correct: Number,
       incorrect: Number,
       unanswered: Number,
+      dropped: { type: Number, default: 0 },
       markedForReview: Number,
       accuracyPercent: Number,
       durationUsedSeconds: Number,
@@ -125,6 +134,39 @@ const resultSchema = new mongoose.Schema(
     },
     sections: [resultSectionSchema],
     questions: [resultQuestionSchema],
+  },
+  { _id: false }
+)
+
+// Earlier results superseded by an answer-key correction, kept for audit.
+const resultHistorySchema = new mongoose.Schema(
+  {
+    answerKeyVersion: { type: Number, default: null },
+    scoringVersion: Number,
+    scoredAt: Date,
+    supersededAt: Date,
+    score: Number,
+    maxScore: Number,
+    correct: Number,
+    incorrect: Number,
+    unanswered: Number,
+    dropped: Number,
+  },
+  { _id: false }
+)
+
+// Human review of monitoring flags. It never changes lifecycle status or score.
+const reviewSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      enum: NEET_REVIEW_STATUSES,
+      default: "NONE",
+      required: true,
+    },
+    flaggedAt: { type: Date, default: null },
+    reasons: { type: [String], default: [] },
+    decidedAt: { type: Date, default: null },
   },
   { _id: false }
 )
@@ -199,10 +241,9 @@ const neetAttemptSchema = new mongoose.Schema(
       required: true,
     },
     mode: { type: String, enum: [...NEET_EXAM_MODES, null], default: null },
+    // Display name only. Ownership is userId; contact details are not copied.
     candidate: {
       fullName: { type: String, required: true, maxlength: 80 },
-      email: { type: String, required: true, lowercase: true, maxlength: 254 },
-      phone: { type: String, required: true, maxlength: 16 },
     },
     testSnapshot: {
       title: { type: String, required: true },
@@ -219,6 +260,7 @@ const neetAttemptSchema = new mongoose.Schema(
         {
           version: { type: String, required: true, maxlength: 40 },
           acceptedAt: { type: Date, required: true },
+          adultDeclaredAt: { type: Date, default: null },
         },
         { _id: false }
       ),
@@ -248,6 +290,9 @@ const neetAttemptSchema = new mongoose.Schema(
     sessionClaimedAt: { type: Date, default: null },
     sessionClaims: { type: Number, default: 0 },
     lastActivityAt: { type: Date, default: null },
+    // Immutable published content pinned at start. Null only for legacy
+    // attempts started before paper versions existed.
+    paperVersionId: { type: ObjectId, ref: "NeetPaperVersion", default: null },
     paper: { type: paperSchema, default: null },
     responses: { type: [responseSchema], default: [] },
     lastSeq: { type: Number, default: 0 },
@@ -260,6 +305,8 @@ const neetAttemptSchema = new mongoose.Schema(
     submittedAt: { type: Date, default: null },
     endedAt: { type: Date, default: null },
     result: { type: resultSchema, default: null },
+    resultHistory: { type: [resultHistorySchema], default: [] },
+    review: { type: reviewSchema, default: () => ({}) },
     proctoring: { type: proctoringSchema, default: null },
   },
   { timestamps: true }
@@ -276,6 +323,29 @@ neetAttemptSchema.index(
 neetAttemptSchema.index(
   { userId: 1, createdAt: -1 },
   { name: "neet_attempt_user_recent" }
+)
+// Expiry sweeper: open attempts past their deadline.
+neetAttemptSchema.index(
+  { status: 1, expiresAt: 1 },
+  { partialFilterExpression: { isOpen: true }, name: "neet_attempt_sweep" }
+)
+// Human review queue.
+neetAttemptSchema.index(
+  { "review.status": 1, updatedAt: -1 },
+  {
+    partialFilterExpression: {
+      "review.status": { $in: ["FLAGGED", "UNDER_REVIEW"] },
+    },
+    name: "neet_attempt_review_queue",
+  }
+)
+// Rescoring after an answer-key correction.
+neetAttemptSchema.index(
+  { paperVersionId: 1, status: 1 },
+  {
+    partialFilterExpression: { paperVersionId: { $type: "objectId" } },
+    name: "neet_attempt_paper_version",
+  }
 )
 
 module.exports = mongoose.model("NeetAttempt", neetAttemptSchema)

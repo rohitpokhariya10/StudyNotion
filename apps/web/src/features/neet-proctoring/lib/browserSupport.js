@@ -45,7 +45,7 @@ export const evaluateProctoredSupport = (
   if (!support.secureContext) {
     return {
       supported: false,
-      reason: "Proctored mode needs a secure (HTTPS) connection.",
+      reason: "Monitored mode needs a secure (HTTPS) connection.",
     }
   }
   if (
@@ -79,7 +79,7 @@ export const evaluateProctoredSupport = (
     return {
       supported: false,
       reason:
-        "Proctored mode is designed for laptops and desktops. Practice mode works on this device.",
+        "Monitored mode is designed for laptops and desktops. Practice mode works on this device.",
     }
   }
   return { supported: true, reason: null }

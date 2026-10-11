@@ -87,7 +87,10 @@ const createApp = ({ isShuttingDown = () => false } = {}) => {
       rateLimitStore: redis.isReady(),
       media: !env.isProduction || isCloudinaryConfigured(),
     }
-    const ready = !isShuttingDown() && Object.values(checks).every(Boolean)
+    // Redis holds only rate-limit counters; it is reported but does not gate
+    // readiness. Taking every replica out of service during a Redis blip
+    // would turn a degraded dependency into a full outage mid-exam.
+    const ready = !isShuttingDown() && checks.database && checks.media
     return res.status(ready ? 200 : 503).json({
       success: ready,
       status: ready ? "ready" : "not_ready",

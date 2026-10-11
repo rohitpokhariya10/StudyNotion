@@ -208,7 +208,7 @@ test("catalog reaches the existing public course-detail route", async ({
     .click()
   await expect(page).toHaveURL("/login")
   await expect(
-    page.getByRole("heading", { name: "Welcome Back" })
+    page.getByRole("heading", { name: "Welcome back" })
   ).toBeVisible()
 })
 

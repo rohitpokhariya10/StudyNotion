@@ -61,6 +61,21 @@ function MarketingAlias({ pathname }) {
   return <Navigate to={{ pathname, search, hash }} replace />
 }
 
+// Maps /project-neet/** to the same /neet/** path, keeping query and hash.
+function LegacyNeetRedirect() {
+  const { pathname, search, hash } = useLocation()
+  return (
+    <Navigate
+      to={{
+        pathname: pathname.replace(/^\/project-neet/i, "/neet"),
+        search,
+        hash,
+      }}
+      replace
+    />
+  )
+}
+
 function AppRouter() {
   return (
     <Routes>
@@ -71,20 +86,22 @@ function AppRouter() {
       <Route path="/careers" element={<Careers />} />
       <Route path="/blogs" element={<Blogs />} />
       <Route path="/blogs/:slug" element={<BlogArticle />} />
-      <Route path="/project-neet" element={<NeetLanding />} />
-      <Route path="/project-neet/mocks" element={<NeetMocks />} />
+      <Route path="/neet" element={<NeetLanding />} />
+      <Route path="/neet/mocks" element={<NeetMocks />} />
       <Route
-        path="/project-neet/mocks/:testId/start"
+        path="/neet/mocks/:testId/start"
         element={studentPage(<NeetOnboarding />)}
       />
       <Route
-        path="/project-neet/attempts/:attemptId"
+        path="/neet/attempts/:attemptId"
         element={studentPage(<NeetExam />)}
       />
       <Route
-        path="/project-neet/attempts/:attemptId/result"
+        path="/neet/attempts/:attemptId/result"
         element={studentPage(<NeetResult />)}
       />
+      {/* Compatibility: earlier links and bookmarks used /project-neet. */}
+      <Route path="/project-neet/*" element={<LegacyNeetRedirect />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="courses/:courseId" element={<CourseDetails />} />

@@ -31,7 +31,7 @@ const SUBJECT_SECTIONS = Object.freeze([
 ])
 
 const COMMON_INSTRUCTIONS = Object.freeze([
-  "This is a NEET-style practice mock created for StudyNotion. It is not an official NTA paper, and its screens are not a reproduction of any official exam interface.",
+  "This is a NEET-style practice mock from Prahit NEET Mocks. It is not an official NTA paper, and its screens are not a reproduction of any official exam interface.",
   "The timer is kept by our server. Refreshing, closing the tab, or changing your device clock does not pause or reset it.",
   "Each correct answer earns the marks shown with the question; each incorrect answer deducts the negative marks shown. Unanswered questions score zero.",
   "Answers save automatically as you work. A small status label tells you when everything is saved, or when you are offline and changes are queued.",
@@ -48,6 +48,33 @@ const sections = (count, startIndex = 0) =>
     questionCount: count,
     bankStart: startIndex,
   }))
+
+// One-subject sections for the 60-minute sprints. Each entry is
+// [subjectKey, questionCount]; questions come from the start of the bank.
+const subjectSections = (entries) =>
+  entries.map(([subjectKey, questionCount], index) => ({
+    ...SUBJECT_SECTIONS.find((section) => section.key === subjectKey),
+    order: index + 1,
+    questionCount,
+    bankStart: 0,
+  }))
+
+const SPRINT_NOTE =
+  "Prahit practice sprint: 45 questions in 60 minutes with NEET marking (+4 / −1). Not an official NEET format; sample content is not expert-reviewed."
+
+const sprint = ({ description, displayOrder, entries, slug, title }) => ({
+  slug,
+  title,
+  tagline: "45 questions · 60 minutes · NEET marking.",
+  description,
+  difficulty: "STANDARD",
+  durationSeconds: 60 * 60,
+  displayOrder,
+  modes: ["NON_PROCTORED", "PROCTORED"],
+  patternNote: SPRINT_NOTE,
+  sections: subjectSections(entries),
+  proctorPolicy: {},
+})
 
 const SAMPLE_MOCKS = Object.freeze([
   {
@@ -70,7 +97,7 @@ const SAMPLE_MOCKS = Object.freeze([
     title: "Full-Length NEET-Style Mock 01",
     tagline: "180 questions · 180 minutes · the complete three-hour stretch.",
     description:
-      "A full-length sample paper configured to the publicly reported NEET (UG) 2026 pattern: 45 questions each in Physics, Chemistry, Botany and Zoology, with +4 / −1 marking.",
+      "A full-length sample paper configured to the NTA NEET (UG) 2026 pattern: 45 questions each in Physics, Chemistry, Botany and Zoology, with +4 / −1 marking.",
     difficulty: "STANDARD",
     durationSeconds: 180 * 60,
     displayOrder: 20,
@@ -79,6 +106,33 @@ const SAMPLE_MOCKS = Object.freeze([
     sections: sections(45),
     proctorPolicy: {},
   },
+  sprint({
+    slug: "physics-sprint-60",
+    title: "Physics Sprint · 60 Minutes",
+    description:
+      "Forty-five Physics questions in one hour, marked like NEET, to build speed and accuracy in a single subject.",
+    displayOrder: 21,
+    entries: [["physics", 45]],
+  }),
+  sprint({
+    slug: "chemistry-sprint-60",
+    title: "Chemistry Sprint · 60 Minutes",
+    description:
+      "Forty-five Chemistry questions in one hour, marked like NEET, covering physical, organic and inorganic topics.",
+    displayOrder: 22,
+    entries: [["chemistry", 45]],
+  }),
+  sprint({
+    slug: "biology-sprint-60",
+    title: "Biology Sprint · 60 Minutes",
+    description:
+      "Forty-five Biology questions in one hour, balanced across Botany (23) and Zoology (22), marked like NEET.",
+    displayOrder: 23,
+    entries: [
+      ["botany", 23],
+      ["zoology", 22],
+    ],
+  }),
   {
     slug: "focus-sprint-proctored-drill",
     title: "Focus Sprint · Proctored Drill",

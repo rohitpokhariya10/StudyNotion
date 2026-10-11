@@ -4,16 +4,16 @@
   "description": "Practical, instructor-led online learning.",
   "icons": [
     {
-      "src": "/logo192.png",
+      "src": "/logo192.png?v=jelly-duo-2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/logo512.png",
+      "src": "/logo512.png?v=jelly-duo-2",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "start_url": "/",

@@ -6,28 +6,27 @@ const {
   createProjectNeetRouter,
   isProjectNeetAttemptPath,
 } = require("./http/routes")
-const NeetAttempt = require("./models/NeetAttempt")
-const NeetMockTest = require("./models/NeetMockTest")
-const NeetProctorEvent = require("./models/NeetProctorEvent")
-const NeetQuestion = require("./models/NeetQuestion")
+const projectNeetModels = require("./models")
 const { createNeetServices } = require("./services")
+const { createSweeper } = require("./services/sweeper")
 
+const projectNeetServices = createNeetServices()
 const projectNeetRoutes = createProjectNeetRouter({
-  controller: createNeetController({ logger, services: createNeetServices() }),
+  controller: createNeetController({ logger, services: projectNeetServices }),
 })
-
-const projectNeetModels = Object.freeze([
-  NeetMockTest,
-  NeetQuestion,
-  NeetAttempt,
-  NeetProctorEvent,
-])
+// Started by the server lifecycle after the API listens; stopped on shutdown.
+const projectNeetSweeper = createSweeper({
+  lifecycle: projectNeetServices.lifecycle,
+  logger,
+})
 
 module.exports = {
   createNeetController,
   createNeetServices,
   createProjectNeetRouter,
   isProjectNeetAttemptPath,
-  projectNeetModels,
+  projectNeetModels: Object.freeze([...projectNeetModels]),
   projectNeetRoutes,
+  projectNeetServices,
+  projectNeetSweeper,
 }

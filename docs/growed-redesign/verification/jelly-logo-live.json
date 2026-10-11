@@ -1,0 +1,72 @@
+[
+  {
+    "width": 1440,
+    "route": "/services",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 44,
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/login",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 44,
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/signup",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 44,
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/contact",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 44,
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "route": "/forgot-password",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 44,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/services",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 38,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/login",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 38,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/signup",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 38,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/contact",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 38,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/forgot-password",
+    "src": "http://localhost:3000/assets/prahit-jelly-duo-CDSDTYmW.webp",
+    "height": 38,
+    "overflow": false
+  }
+]

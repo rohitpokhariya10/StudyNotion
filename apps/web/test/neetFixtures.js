@@ -4,11 +4,7 @@ export const neetIds = {
   question: "507f1f77bcf86cd799439013",
   user: "507f1f77bcf86cd799439014",
 }
-export const candidate = {
-  fullName: "Asha Rao",
-  email: "asha@example.test",
-  phone: "+919876543210",
-}
+export const candidate = { fullName: "Asha Rao" }
 export function neetFixture({
   now = Date.now(),
   duration = 600,
@@ -18,7 +14,7 @@ export function neetFixture({
   const iso = (value) => new Date(value).toISOString()
   const policy = {
     version: 1,
-    consentVersion: "2026-10-05",
+    consentVersion: "2026-10-10",
     requirements: {
       camera: true,
       microphone: true,
@@ -42,7 +38,7 @@ export function neetFixture({
       sampleIntervalMs: 1000,
     },
     warnings: { maxWarnings: 3, cooldownSeconds: 20 },
-    autoSubmit: { enabled: true, softSignalsCanSubmit: false },
+    autoSubmit: { enabled: false, softSignalsCanSubmit: false },
     mediaStorage: "NONE",
   }
   const test = {
@@ -90,7 +86,11 @@ export function neetFixture({
     instructionsAcceptedAt: iso(now),
     proctorConsent:
       mode === "PROCTORED"
-        ? { version: policy.consentVersion, acceptedAt: iso(now) }
+        ? {
+            version: policy.consentVersion,
+            acceptedAt: iso(now),
+            adultDeclaredAt: iso(now),
+          }
         : null,
     createdAt: iso(now - 60000),
     registrationExpiresAt: iso(now + 86400000),
@@ -105,7 +105,8 @@ export function neetFixture({
             warningCount: 0,
             softWarningCount: 0,
             maxWarnings: 3,
-            autoSubmitEnabled: true,
+            autoSubmitEnabled: false,
+            reviewStatus: "NONE",
           }
         : null,
     hasResult: false,
@@ -173,6 +174,7 @@ export function neetFixture({
       correct: 1,
       incorrect: 0,
       unanswered: 0,
+      dropped: 0,
       markedForReview: 0,
       accuracyPercent: 100,
       durationUsedSeconds: 20,
@@ -186,10 +188,12 @@ export function neetFixture({
         correct: 1,
         incorrect: 0,
         unanswered: 0,
+        dropped: 0,
         score: 4,
         maxScore: 4,
       },
     ],
+    answerKeyVersion: 1,
     proctoring: null,
   }
   delete result.sections[0].maxMarks

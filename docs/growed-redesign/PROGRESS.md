@@ -274,3 +274,159 @@ Official name: **Prahit**. Completed the existing rebrand, then delivered it tog
 - [x] Delivered screenshots from the **real app**, not standalone HTML: [full desktop footer](screenshots/prahit-birds-localhost-footer-1440.png), [full mobile footer](screenshots/prahit-birds-localhost-footer-390.png), [bird detail](screenshots/prahit-birds-localhost-detail.png). Supplemental enlarged vector inspection: [four poses](screenshots/footer-bird-poses.png).
 
 **Completion:** requested frontend rebrand, bird-only correction and local web delivery are complete within the stated boundaries. No remaining bird or logo rendering issue was found. Protected checkout/backend names and the unrelated development-server import issue remain documented above; no application-wide/backend rebrand is claimed.
+
+## Homepage hero: white canvas and editorial type — 7 October 2026
+
+Capsule geometry, colours, materials, eye tracking, jump and motion tuning, navbar, other homepage sections, footer, routes, API calls and backend are unchanged.
+
+- **Background:** hero now uses `--sn-canvas` (`#ffffff`), the same white as the navbar. The WebGL canvas was already transparent and the SVG fallback has no backdrop; every empty-scene pixel sampled at 1440 reads `255,255,255` in both WebGL and static modes. The studio colour the capsules reflect moved to its own `--sn-hero-studio` token (still `#f2f1ed`, read by `capsuleScene.js`), so reflections and lighting are unchanged. A white-studio variant was compared and looked nearly identical, so the approved tone was kept.
+- **Type and colour:** Inter Tight and the italic Instrument Serif were replaced by the site's Poppins 700 heading (`-0.02em`, as on About/Services), near-black first line and `--sn-brand` second line. The CTA now uses the shared `sn-btn-primary` and the electric blue was removed. Body text is slate `#475569`. Heading sizes: 32–40px on mobile, 47–52px on tablet, and 46–68px on desktop (60px at 1440). The home chunk no longer imports the two display fonts. Their packages are still listed in `apps/web/package.json`; this change didn't touch dependencies.
+- **Copy:** "Learn at your pace. / Build skills that matter.", the requested description and CTA, and "Structured lessons — Follow a clear path through each course." The second point is "Track your progress — Completed lessons are saved to your account." The requested "Pick up where you left off." was not used, because "Continue learning" opens a course's first lesson (`getFirstLessonPath`), not the last lesson viewed. That phrase still appears in JoinCard, Enrolled Courses, Profile and Services' LearningShowcase, which this change didn't touch.
+- **Layout:** desktop reserves a copy column sized to the longest heading line (11.6× the heading size) at the container's left edge, and sizes the scene to fill the space to its right. Text-to-capsule clearance is 50–86px from 1024 to 2560px. Tablet and mobile keep characters above the heading, now with 39–55px clear space instead of the heading tucked under the bases. No horizontal overflow at 320–2560px.
+- **Finder:** scoped `.sn-capsule-finder` styles only: `--sn-border` hairline, 16px radius and a two-layer soft shadow. Real loading, empty and populated states and the disabled-until-subject behaviour were verified. Search went to `/catalog/data-science?q=python` with mocked categories, because the local DB has none. Services' finder is unaffected.
+- **Checks:** home and finder unit tests (9 passed), scoped ESLint and Prettier, `architecture:check`, typecheck. On localhost:3000: WebGL mode, gaze changes the render, a click jump was captured at its apex, CTA goes to `/services`, no page errors. `HomeHero.test.jsx` and `e2e/project-neet.spec.js` assert the new heading. The e2e suite was not run.
+- **Delivered:** `docker compose … build web` then `up -d --no-deps --no-build --wait web`; the web container runs image `0b6bdf07…`. A separate full-stack `compose up --build` from another process stopped and restarted all four containers at 11:34:43, during this build. Mongo and Redis were restarted, not recreated, and the `mongo-data` volume is intact. Screenshots: [desktop 1440](screenshots/white-hero-desktop-1440.png), [tablet 820](screenshots/white-hero-tablet-820.png), [mobile 390](screenshots/white-hero-mobile-390.png).
+
+
+## Official companion logo and placement update — 7 October 2026 (complete)
+
+- [x] Recovered the completed Glossy Blob Companions assets; no regeneration. The official two-character logo, navbar, versioned 16/32/48 favicons, Apple/manifest icons and checkout image remain intact. Earlier results verified from available logs: 32 tests, 10 synthetic desktop/mobile role/auth browser cases and web build passed; actual 18-case localhost evidence and fresh-tab favicon request remain in `verification/companions-localhost.json`. Logs archived as `verification/companions-{unit,browser,web-build,web-up}.log`. The prior companions container audit includes an unrelated concurrent full-stack restart; it is not an unchanged-container result.
+- [x] Latest instruction implemented: `shared/ui/AuthLayout.jsx` accepts default-on `showLogo`; `features/authentication/ui/Template.jsx` disables it only for login/signup. Recovery and verification logos remain. Removed the full footer logo link/import in `widgets/footer/ui/Footer.jsx`, and removed the obsolete tagline top margin in `footer.css`. `Footer.test.jsx` verifies the normal Home link remains and the redundant logo link is gone. No empty logo block or label. Normal Prahit copy/copyright, auth form behavior, illustration, navbar, landscape and birds remain.
+- [x] Current focused checks: **32 tests / 13 files**, **2 desktop/mobile auth Playwright cases**, scoped lint/format, typecheck, architecture (345 frontend / 55 bounded backend), web build and diff whitespace checks passed. [Unit log](verification/logo-removal-tests.log), [browser log](verification/logo-removal-browser.log), [build](verification/logo-removal-build.log). No entire matrix repeated.
+- [x] Real **localhost:3000** headless Chromium checks, **8 cases passed** (login, signup, Services footer, recovery at 1440/390), no API mocks, no page errors/overflow. Panel/footer logos absent in requested locations; navbar/recovery logo and auth illustration retained with existing mobile visibility. Inputs remain editable; no form submitted. Footer Home link navigates correctly; copyright remains. Navbar height stays 80/64px; favicon response bytes equal the retained new ICO. [Live evidence](verification/logo-removal-localhost.json).
+- [x] Checked for active builds before delivery; only an existing attached foreground Compose process remained, left untouched. Built **web only**, then `up -d --no-deps --no-build --wait web`. This update’s before/after audit confirms **API/MongoDB/Redis IDs, start times, images and mounts/volume identities unchanged**. [Audit](verification/logo-removal-containers.json), [update](verification/logo-removal-up.log).
+- [x] Source changes are exactly the five files above; docs/evidence also updated. The concurrent `docs/growed-redesign/artwork/auth-mascot/creature.js` change was detected and left untouched; no overlapping auth component edit occurred. All other existing files, including white hero/capsule animation, flask, icons, original baseline, NEET, backend/API/payment/session/deployment logic remain unchanged from continuation start. [Attribution](verification/logo-removal-preservation.json). No commit, push or external deployment.
+
+Screenshots: [login desktop](screenshots/logo-removal-login-1440.png), [login mobile](screenshots/logo-removal-login-390.png), [signup desktop](screenshots/logo-removal-signup-1440.png), [signup mobile](screenshots/logo-removal-signup-390.png), [footer desktop](screenshots/logo-removal-footer-1440.png), [footer mobile](screenshots/logo-removal-footer-390.png). [Existing native favicon previews](screenshots/companions-favicon-previews.png) remain valid. Earlier captures were preserved as historical evidence.
+
+The earlier optional headed homepage capture was not executed because automatic approval review could not complete due to its usage limit, not an unsafe-action determination. That command was not retried or bypassed. The separately permitted headless workflow completed all requested current screenshots. No remaining blocker for this placement update. The separate auth-creature work is not claimed as implemented here; the current login/signup still use their existing ProductCollage illustration.
+
+
+## Compact transparent logo — 7 October 2026
+
+Latest supplied `Glossy Jelly Blob Duo.png` archived unchanged and used for all remaining shared logo slots, checkout image, public/social image and browser/app icons. Actual source alpha retained; no generated artwork or recolouring. Shared BrandLogo imports `prahit-jelly-duo.webp`; navbar sizes reduced to 44px desktop / 38px mobile, other active panel logos to 80px width. Login/signup panel and footer removals retained. No auth/hero/loader/payment behavior changed. Generator, icon metadata (`jelly-duo-2`) and asset README updated.
+
+Five navbar/footer tests, scoped lint/format and web build passed. Ten real localhost desktop/mobile route checks passed with retained removals, no overflow, expected compact sizes and new favicon byte equality. Screenshots: [desktop](screenshots/jelly-logo-1440.png), [mobile](screenshots/jelly-logo-390.png). Evidence: `verification/jelly-logo-{live,containers}.json`, tests/build/up logs. Web-only build/update completed; API/MongoDB/Redis unchanged across our bounded update. A separate foreground full-stack Compose process subsequently restarted services during initial browser capture, causing a temporary connection refusal; capture retried successfully after it finished. That process was not stopped. No claim of unchanged uptimes across that later external restart. No commit/push.
+
+## Login and signup redesign with interactive mascot — 7 October 2026
+
+The reference was the supplied `~/Documents/login_v.png`. The Pinterest pin itself was not inspected and its animation was not verified, so the motion below is our own implementation of the brief.
+
+- **Artwork:** generated in-repo with `docs/growed-redesign/artwork/auth-mascot/` ([README](artwork/auth-mascot/README.md)). An offline three.js render in headless Chromium gives a white strand-fur creature (about 235k strands) with a blue face, ears, hands and feet, standing on a grassy ledge, plus volumetric-cloud skies. The exported layers are: page sky, panel sky, ledge, body, head (eye whites only, no pupils baked in) and foreground grass. `auth-mascot.json` holds the eye ellipses fitted from a mask render, lid colours sampled from the face, and the pivots. About 380 KB of WebP in total, loaded only by the auth route chunks. three.js is not used at runtime.
+- **Components:** new `shared/ui/auth-scene/`:
+  - `AuthScene` provides the layout and the privacy context.
+  - `AuthMascot` renders the layers, plus SVG pupils, highlights, upper lids and lower lids.
+  - `mascotMotion` is the pure model and `mascotController` runs one rAF loop that stops when settled.
+  - `usePrivateField` reports only focused/revealed status, never values.
+  - `authScene.css` holds all the styles, scoped to `.sn-auth-scene`.
+
+  `Template`, `LoginForm`, `SignupForm` and `Tab` were restyled with their handlers, validation, redirects, loading state, OTP flow and consent unchanged. Signup adds a visible password-rule hint next to the existing `title`. Google sign-in still shows only when configured. "Remember me" was not added because the feature doesn't exist. The heading font is Bricolage Grotesque, an existing dependency, at 75% width and 800 weight; form text stays Poppins.
+- **Motion:**
+  - Each pupil aims from its own rendered centre, which includes the current head transform, and is clamped inside its eye ellipse.
+  - The head turns up to 3.2°; the body moves less (0.7°).
+  - Damping is exponential, so it's frame-rate independent. Measurements are invalidated on scroll, resize and ResizeObserver.
+  - The creature returns to neutral when the pointer leaves the card.
+  - Blinks happen every 2.6–6.4 s.
+  - The lids close while either password field is focused or revealed. Reopening waits 180 ms so moving to the visibility toggle doesn't flutter.
+  - Touch devices get a static pose looking down at the form; reduced motion gets a static pose with no rAF loop. Password focus still closes the eyes in both.
+- **Checks:**
+  - Unit: auth, auth-scene and page tests, 70 passed / 21 files (new: `mascotMotion.test.js`, `AuthScene.test.jsx`).
+  - Scoped ESLint, Prettier, architecture check (353 files) and typecheck.
+  - Project Playwright UI auth tests with axe: 6 passed (desktop and mobile).
+  - Behaviour suite against the live **localhost:3000**: [36/36](verification/auth-scene-localhost.log). It covers:
+    - Tracking in 8 directions (≤10.7° error) and over the form.
+    - Tracking after scroll and resize, and re-aiming under a still pointer.
+    - Neutral pose, and head moving more than body.
+    - Focus and reveal closing the eyes.
+    - Validation, the password-mismatch toast, and loading, failure and success transitions.
+    - The OTP redirect.
+    - Reduced motion (0 rAF calls), touch, a 480px-tall keyboard viewport, and no overflow at 320–2560px.
+
+  API responses were mocked with synthetic data only.
+- **Fixes found while verifying:** a legacy global `.sn-auth-art` rule (2rem padding) shrank the art container, so the class was renamed to `.sn-auth-visual`. The volumetric-sky shader's per-pixel cloud list compiled incorrectly, causing hard cut lines, so it now evaluates all clouds. The error toast was missing only under the dev server; production builds show it, which was confirmed against the old UI.
+- **Concurrent work:** the separate logo task set `showLogo={false}` for the login/signup illustration panel in `Template.jsx`. That edit landed after this task had read the file, and this redesign replaced `Template.jsx`. The new form panel shows the official logo (80px) because this brief lists "Prahit logo" in the form structure. This needs a decision on which instruction should win. Other files from that task were not touched.
+- **Delivered:** after checking for active builds (only the existing idle attached `compose up` was running, and it was left alone), ran `build web` then `up -d --no-deps --no-build --wait web`. The API, MongoDB and Redis containers kept their IDs; `mongo-data` is intact. Screenshots: [login desktop](screenshots/auth-login-desktop-1440.png), [signup desktop](screenshots/auth-signup-desktop-1440.png), [signup with password focused](screenshots/auth-signup-password-focus-1440.png), [login mobile](screenshots/auth-login-mobile-390.png), [signup mobile](screenshots/auth-signup-mobile-390.png), [vs reference](screenshots/auth-login-vs-reference.png). Recording: [interaction](verification/auth-mascot-interaction.webm).
+
+## Auth mascot face and motion refinement — 7 October 2026
+
+This round was a visual and motion correction. Forms, validation, OTP, recovery, roles, errors and redirects are unchanged. The reference animation (Pinterest pin) was not inspected, so the motion follows the written brief.
+
+- **Face and artwork** (regenerated with `artwork/auth-mascot/`):
+  - Larger, slightly protruding eyeballs.
+  - A gentle open smile, as a decal conformed to the face.
+  - A lighter pastel-blue face.
+  - Small round ears clear of the fur, and rounded mitten hands and feet.
+  - Softer clumped fur with less jitter and droop.
+  - A lighter under-coat, so no dark fringe shows at the face edge.
+
+  The eye-mask fit now ignores the mouth's tongue, which had skewed the right eye. An alpha-to-coverage fur experiment made the body translucent and was dropped.
+- **Eyes:**
+  - Large dark pupils, with highlights kept upper-left on screen to match the key light.
+  - No lash line at rest, which removes the earlier worried look. The lash fades in only while closing.
+  - Closed lids are a soft radial bulge from the sampled skin into the socket ring, with a feathered mask instead of a hard clip.
+  - The eye SVG covers only the eye region, in its own compositing layer.
+  - The eyes stay hidden until the face image has loaded, and the mascot hides itself if any artwork fails to load.
+- **Motion:**
+  - One shared gaze from a stable anchor between the eyes, never including the animated head pose. It saturates with `tanh`.
+  - Pupil travel is isotropic in screen space, then rotated into each eye's tilt, so both eyes point the same way and stay inside their ellipses.
+  - The eyes lead (exponential, 16/s). The head follows the smoothed gaze on an exact critically damped spring (ω 8.5). The head is nested in the body, which only sways about the feet (ω 6), so the feet stay grounded and the neck stays connected.
+  - Priorities: privacy > blink > tracking > neutral. A closed state ignores blinks and pointer movement and settles the head.
+  - The loop pauses while the page is hidden or the stage is off-screen. Everything is cleaned up on unmount.
+- **Layout:**
+  - The decided branding is applied: no logo in the login/signup form panels.
+  - The art panel now fills the card's height, so there's no white gap under it on the long signup form.
+  - The card minimum height moved to the card itself, because a min-height on the panel left its `cqh` units at 0 in Chromium and collapsed the stage.
+- **Checks:**
+  - Unit: 16 auth-scene tests, including new controller tests for privacy over blink and pointer, the reopen delay, and cleanup.
+  - Scoped ESLint, Prettier, typecheck and the architecture check (354 files).
+  - Project Playwright auth UI tests with axe: 6 passed.
+  - Live **localhost:3000** behaviour suite: [37/37](verification/auth-scene-localhost.log). Each pupil points within 0.3° of the pointer direction relative to its eye, with 0.0° disagreement between eyes, in 8 directions.
+  - [Motion trace](verification/auth-mascot-motion-trace.txt): steady 60 fps with no backward steps during a slow sweep (max 0.28px per frame); eyes at 50% in 117ms versus head in 267ms; 0% head overshoot.
+  - Reviewed visually from the recording rather than inferred from values.
+- **Evidence:**
+  - Screenshots: [face states](screenshots/auth-mascot-face-states.png), [neutral face](screenshots/auth-mascot-face-neutral.png), [closed face](screenshots/auth-mascot-face-closed.png), [login desktop](screenshots/auth-login-desktop-1440.png), [signup desktop](screenshots/auth-signup-desktop-1440.png), [signup with password focused](screenshots/auth-signup-password-focus-1440.png), [login mobile](screenshots/auth-login-mobile-390.png), [signup mobile](screenshots/auth-signup-mobile-390.png), [vs reference](screenshots/auth-login-vs-reference.png).
+  - Recording with a visible pointer: [interaction](verification/auth-mascot-interaction.webm), with frame sheets for the [sweep](screenshots/auth-mascot-recording-sweep.png) and [privacy](screenshots/auth-mascot-recording-privacy.png) segments.
+- **Delivered:** web-only `build` then `up -d --no-deps --no-build --wait web` after checking for active builds. The existing attached `compose up` session had finished building and was left alone. API, MongoDB and Redis were untouched.
+
+## Auth mascot: supplied yeti artwork, layered and animated — 7 October 2026
+
+The login/signup mascot is now the supplied `Cute Waving Yeti Mascot.png` (kept unchanged in `apps/web/src/shared/assets/auth-scene/original/`), split into aligned layers by [`artwork/auth-yeti/build_layers.py`](artwork/auth-yeti/build_layers.py) (Pillow, NumPy, SciPy). Forms, validation, OTP, recovery, roles, redirects and APIs are unchanged.
+
+- **Layers** (WebP derivatives plus `yeti-layers.json`): body and feet, head (face, hair, ears), raised-arm fur cuff, hand, the cuff's inside behind the hand, irises, eye-opening masks and closed-lid skin. Nothing is redrawn. Only areas a moving part can uncover are rebuilt: torso fur behind the head and arm, the palm inside the cuff, the cuff interior, the eye whites under the irises (fitted sphere shading), iris edges hidden by the lids, and the closed-lid skin. The reassembled rest pose matches the source to a mean of 0.17/255.
+- **Hand cut-off fixes:**
+  - The stage is the box every part stays inside at its extreme pose, and it is sized to fit the panel, so the hand can never cross the edge.
+  - The cut during the greeting was a gap where the turning palm uncovered pixels no layer owned. A cuff-interior layer now sits behind the hand.
+  - The yeti stays hidden until every layer has loaded, then fades in, so it is never seen half assembled.
+  - Wave and blink start times use the animation frames' own clock.
+- **Motion:**
+  - Pupils travel about 15% of each eye's width.
+  - The head tilts up to 3.5° and shifts toward the pointer; the upper body leans 1.2°, sheared about planted feet.
+  - The greeting rocks the hand from the wrist while the cuff sways at the shoulder.
+  - Lids sweep like a lid turning over the eyeball and meet in a closed seam.
+  - A glance across the card brings a blink.
+  - Privacy closes the eyes and overrides blinks and tracking.
+  - Touch has no tracking; reduced motion is static.
+- **Layout:** the yeti stands on the grass above the tagline on desktop, and stands whole beside it on the mobile banner, where the tagline wraps if needed.
+- **Reference:** the Pinterest pin's video was inspected. Its eye and head tracking, blinks on big glances and greeting wave are reproduced. Its 3D body turns and arm lowering cannot be made from one flattened image.
+- **Checks:**
+  - Auth-scene, authentication and login/signup unit tests: 46 passed.
+  - ESLint, Prettier, typecheck and architecture check pass.
+  - On localhost:3000, per-frame bounds held across the full movement range at 1440, 1024, 820, 390 and 320 px and with reduced motion.
+  - Five reload-triggered greetings (three desktop, two mobile) were inspected frame by frame at the peaks. See [verification log](verification/auth-yeti-verify.txt).
+- **Evidence:**
+  - Screenshots: [login desktop](screenshots/auth-yeti-login-desktop-1440.png), [signup desktop](screenshots/auth-yeti-signup-desktop-1440.png), [login mobile 390](screenshots/auth-yeti-login-mobile-390.png), [signup mobile 390](screenshots/auth-yeti-signup-mobile-390.png), [mobile 320](screenshots/auth-yeti-login-mobile-320.png).
+  - Close-ups: [face at rest](screenshots/auth-yeti-face-rest.png), [face states vs source](screenshots/auth-yeti-face-states.png), [extreme-pose joints](screenshots/auth-yeti-extreme-poses-joints.png), [reload wave peaks](screenshots/auth-yeti-reload-wave-peaks.png), [wave close-up frames](screenshots/auth-yeti-wave-closeup-frames.png).
+  - Recordings: [interaction](verification/auth-yeti-interaction.webm), [reload greeting](verification/auth-yeti-reload-greeting.webm), [wave close-up](verification/auth-yeti-wave-closeup.webm).
+- **Delivered:** web-only `build`, then `up -d --no-deps --no-build --wait web`, with no other build running. API, MongoDB and Redis kept their containers; `mongo-data` is intact.
+
+
+### Yeti motion and sky refinement — 9 October 2026 (in progress)
+
+- [x] Recovered current uncommitted source; start hashes recorded separately in `/tmp/prahit-yeti-start.json`, original redesign baseline preserved.
+- [x] Reproduced actual localhost reload with no pointer input. Outward wrist rotation exposes a pale cuff sliver beside the thumb; hand bounds are inside the panel.
+- [x] Opened Pinterest pin and its actual 10.1-second video; recorded normal playback and sampled entire sequence. Visible: wave, lower arm, substantial 3D profile turns, glances, blinks. Input causality cannot be established from the video.
+- [ ] Connected wave rig and clean lowered resting pose.
+- [ ] Stronger coordinated page-wide tracking, neutral exit, privacy/touch/reduced motion preserved.
+- [ ] Authored SVG clouds replacing noisy raster cloud backgrounds.
+- [ ] Fresh/cached reload and combined-motion recordings, desktop/mobile login/signup, close-up joint inspection.
+- [ ] Focused tests, build, web-only Docker update, served-asset and preservation audit.

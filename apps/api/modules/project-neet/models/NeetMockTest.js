@@ -163,6 +163,12 @@ const neetMockTestSchema = new mongoose.Schema(
     },
     proctorPolicy: { type: proctorPolicySchema, default: () => ({}) },
     publishedAt: { type: Date, default: null },
+    // The paper version new attempts start on. Attempts pin their own copy.
+    currentPaperVersionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "NeetPaperVersion",
+      default: null,
+    },
     displayOrder: { type: Number, default: 100 },
   },
   { timestamps: true }

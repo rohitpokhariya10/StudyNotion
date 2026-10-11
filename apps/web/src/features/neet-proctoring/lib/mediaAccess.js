@@ -1,4 +1,4 @@
-// The ONLY place Project NEET asks for camera, microphone or screen access.
+// The ONLY place Prahit NEET Mocks asks for camera, microphone or screen access.
 //
 // Every request requires a consent grant created by `grantProctorConsent`,
 // which is called solely from the explicit proctored consent step (or, after
@@ -183,7 +183,7 @@ export const MEDIA_ERROR_GUIDANCE = Object.freeze({
   UNSUPPORTED: {
     title: "Not supported in this browser",
     action: null,
-    help: "Use a recent Chrome, Edge or Firefox on a laptop or desktop for proctored mode.",
+    help: "Use a recent Chrome, Edge or Firefox on a laptop or desktop for monitored mode.",
   },
   CONSENT_REQUIRED: {
     title: "Consent needed first",

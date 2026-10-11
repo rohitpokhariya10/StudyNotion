@@ -2,7 +2,8 @@ import { ACCOUNT_TYPE, setSignupData } from "@/entities/user"
 import { sendOtp } from "@/features/authentication/api/authApi"
 import PolicyAcknowledgement from "@/features/authentication/ui/PolicyAcknowledgement"
 import Tab from "@/features/authentication/ui/Tab"
-import { useState } from "react"
+import { usePrivateField } from "@/shared/ui/auth-scene"
+import { useId, useState } from "react"
 import { toast } from "react-hot-toast"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { useDispatch } from "react-redux"
@@ -11,6 +12,7 @@ import { useLocation, useNavigate } from "react-router"
 function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const id = useId()
   // An email typed into the footer sign-up strip is carried over as a
   // convenience only; the form's normal validation still applies.
   const { state } = useLocation()
@@ -34,6 +36,9 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
 
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  // Both password fields close the mascot's eyes while focused or shown.
+  const passwordPrivacy = usePrivateField(showPassword)
+  const confirmPrivacy = usePrivateField(showConfirmPassword)
 
   const { firstName, lastName, email, password, confirmPassword } = formData
 
@@ -83,16 +88,15 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
 
   return (
     <div>
-      {/* Tab */}
       <Tab tabData={tabData} field={accountType} setField={setAccountType} />
-      {/* Form */}
-      <form onSubmit={handleOnSubmit} className="flex w-full flex-col gap-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label>
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
-              First Name <sup className="text-danger">*</sup>
-            </p>
+      <form onSubmit={handleOnSubmit} className="sn-auth-form">
+        <div className="sn-auth-row">
+          <div className="sn-auth-field">
+            <label className="sn-auth-label" htmlFor={`${id}-first`}>
+              First name
+            </label>
             <input
+              id={`${id}-first`}
               required
               type="text"
               name="firstName"
@@ -100,14 +104,15 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
               value={firstName}
               onChange={handleOnChange}
               placeholder="Enter first name"
-              className="form-style w-full"
+              className="sn-auth-input"
             />
-          </label>
-          <label>
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
-              Last Name <sup className="text-danger">*</sup>
-            </p>
+          </div>
+          <div className="sn-auth-field">
+            <label className="sn-auth-label" htmlFor={`${id}-last`}>
+              Last name
+            </label>
             <input
+              id={`${id}-last`}
               required
               type="text"
               name="lastName"
@@ -115,15 +120,16 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
               value={lastName}
               onChange={handleOnChange}
               placeholder="Enter last name"
-              className="form-style w-full"
+              className="sn-auth-input"
             />
-          </label>
+          </div>
         </div>
-        <label className="w-full">
-          <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
-            Email Address <sup className="text-danger">*</sup>
-          </p>
+        <div className="sn-auth-field">
+          <label className="sn-auth-label" htmlFor={`${id}-email`}>
+            Email address
+          </label>
           <input
+            id={`${id}-email`}
             required
             type="email"
             name="email"
@@ -131,86 +137,96 @@ function SignupForm({ policyAcknowledgement, setPolicyAcknowledgement }) {
             value={email}
             onChange={handleOnChange}
             placeholder="Enter email address"
-            className="form-style w-full"
+            className="sn-auth-input"
           />
-        </label>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="relative">
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
-              Create Password <sup className="text-danger">*</sup>
-            </p>
-            <input
-              required
-              type={showPassword ? "text" : "password"}
-              name="password"
-              autoComplete="new-password"
-              minLength={8}
-              maxLength={72}
-              pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}"
-              title="Use 8 to 72 characters including uppercase, lowercase, and a number"
-              value={password}
-              onChange={handleOnChange}
-              placeholder="Enter Password"
-              className="form-style w-full pr-10!"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute top-[38px] right-3 z-[10] cursor-pointer"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              aria-pressed={showPassword}
-            >
-              {showPassword ? (
-                <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-              ) : (
-                <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-              )}
-            </button>
-          </label>
-          <label className="relative">
-            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
-              Confirm Password <sup className="text-danger">*</sup>
-            </p>
-            <input
-              required
-              type={showConfirmPassword ? "text" : "password"}
-              name="confirmPassword"
-              autoComplete="new-password"
-              minLength={8}
-              maxLength={72}
-              value={confirmPassword}
-              onChange={handleOnChange}
-              placeholder="Confirm Password"
-              className="form-style w-full pr-10!"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute top-[38px] right-3 z-[10] cursor-pointer"
-              aria-label={
-                showConfirmPassword
-                  ? "Hide password confirmation"
-                  : "Show password confirmation"
-              }
-              aria-pressed={showConfirmPassword}
-            >
-              {showConfirmPassword ? (
-                <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-              ) : (
-                <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-              )}
-            </button>
-          </label>
         </div>
+        <div className="sn-auth-row">
+          <div className="sn-auth-field">
+            <label className="sn-auth-label" htmlFor={`${id}-password`}>
+              Create password
+            </label>
+            <div className="sn-auth-password">
+              <input
+                id={`${id}-password`}
+                required
+                type={showPassword ? "text" : "password"}
+                name="password"
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}"
+                title="Use 8 to 72 characters including uppercase, lowercase, and a number"
+                aria-describedby={`${id}-password-rule`}
+                value={password}
+                onChange={handleOnChange}
+                {...passwordPrivacy}
+                placeholder="Enter Password"
+                className="sn-auth-input"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="sn-auth-toggle"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? (
+                  <AiOutlineEyeInvisible aria-hidden="true" fontSize={20} />
+                ) : (
+                  <AiOutlineEye aria-hidden="true" fontSize={20} />
+                )}
+              </button>
+            </div>
+          </div>
+          <div className="sn-auth-field">
+            <label className="sn-auth-label" htmlFor={`${id}-confirm`}>
+              Confirm password
+            </label>
+            <div className="sn-auth-password">
+              <input
+                id={`${id}-confirm`}
+                required
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+                value={confirmPassword}
+                onChange={handleOnChange}
+                {...confirmPrivacy}
+                placeholder="Confirm Password"
+                className="sn-auth-input"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="sn-auth-toggle"
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide password confirmation"
+                    : "Show password confirmation"
+                }
+                aria-pressed={showConfirmPassword}
+              >
+                {showConfirmPassword ? (
+                  <AiOutlineEyeInvisible aria-hidden="true" fontSize={20} />
+                ) : (
+                  <AiOutlineEye aria-hidden="true" fontSize={20} />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+        <p id={`${id}-password-rule`} className="sn-auth-hint">
+          Use 8 to 72 characters with an uppercase letter, a lowercase letter
+          and a number.
+        </p>
         <PolicyAcknowledgement
           idPrefix="email-signup-policy"
           value={policyAcknowledgement}
           onChange={setPolicyAcknowledgement}
         />
-        <button
-          type="submit"
-          className="mt-6 rounded-[8px] bg-brand-primary px-[12px] py-[8px] font-medium text-white"
-        >
+        <button type="submit" className="sn-auth-submit">
           Create Account
         </button>
       </form>

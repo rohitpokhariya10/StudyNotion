@@ -75,10 +75,9 @@ const resolveProctorPolicy = (stored = {}) => {
     monitoring: pick(source.monitoring, defaults.monitoring),
     signals: pick(source.signals, defaults.signals),
     warnings: pick(source.warnings, defaults.warnings),
-    autoSubmit: {
-      ...pick(source.autoSubmit, defaults.autoSubmit),
-      softSignalsCanSubmit: false,
-    },
+    // Not configurable: no stored override can make monitoring submit or
+    // cancel an attempt. Threshold breaches flag the attempt for review.
+    autoSubmit: { enabled: false, softSignalsCanSubmit: false },
     mediaStorage: "NONE",
     rules,
   }
@@ -92,7 +91,9 @@ const toPublicProctorPolicy = (policy) => ({
   monitoring: { ...policy.monitoring },
   signals: { ...policy.signals },
   warnings: { ...policy.warnings },
-  autoSubmit: { ...policy.autoSubmit },
+  // Always disabled, including for attempts whose stored policy predates the
+  // flag-only rule.
+  autoSubmit: { enabled: false, softSignalsCanSubmit: false },
   mediaStorage: "NONE",
 })
 
@@ -120,18 +121,13 @@ const severityFor = (policy, type, totalOccurrences) => {
   return rule.severity
 }
 
-const warningMessage = ({ counted, level, policy, rule, willSubmit }) => {
+const warningMessage = ({ counted, level, policy, rule }) => {
   if (!counted) return rule.message
-  if (willSubmit) {
-    return `${rule.message} The warning limit was exceeded, so this attempt was submitted under the proctoring policy.`
-  }
   if (level > policy.warnings.maxWarnings) {
-    return `${rule.message} The warning limit was exceeded and this has been recorded.`
+    return `${rule.message} This attempt has been flagged for review by a person. Your exam continues and your answers still count.`
   }
   if (level === policy.warnings.maxWarnings) {
-    return policy.autoSubmit.enabled
-      ? `Final warning: ${rule.message} Another warning will submit your attempt automatically.`
-      : `Final warning: ${rule.message}`
+    return `Final notice: ${rule.message} Further notices will flag this attempt for review by a person.`
   }
   if (level === 1) return `Notice: ${rule.message}`
   return `Warning ${level} of ${policy.warnings.maxWarnings}: ${rule.message}`
@@ -168,7 +164,6 @@ const evaluateProctorEvents = ({ events, now, policy, state }) => {
   const newWarnings = []
   const decisions = []
   let thresholdExceeded = false
-  let autoSubmit = false
   const nowMs = now.getTime()
   const cooldownMs = policy.warnings.cooldownSeconds * 1000
 
@@ -181,7 +176,7 @@ const evaluateProctorEvents = ({ events, now, policy, state }) => {
     decisions.push(decision)
     counters[event.type] = counter
 
-    if (autoSubmit || !isRuleActive(policy, rule) || !(rule.warnEvery > 0)) {
+    if (!isRuleActive(policy, rule) || !(rule.warnEvery > 0)) {
       continue
     }
 
@@ -195,15 +190,10 @@ const evaluateProctorEvents = ({ events, now, policy, state }) => {
     counter.lastWarnedAt = new Date(nowMs)
     const counted = !UNCERTAIN_SIGNALS.has(event.type) && rule.counted === true
     let level
-    let willSubmit = false
     if (counted) {
       warningCount += 1
       level = warningCount
-      if (warningCount > policy.warnings.maxWarnings) {
-        thresholdExceeded = true
-        willSubmit = policy.autoSubmit.enabled === true
-        autoSubmit = willSubmit
-      }
+      if (warningCount > policy.warnings.maxWarnings) thresholdExceeded = true
     } else {
       softWarningCount += 1
       level = softWarningCount
@@ -215,7 +205,7 @@ const evaluateProctorEvents = ({ events, now, policy, state }) => {
       counted,
       ruleType: event.type,
       severity,
-      message: warningMessage({ counted, level, policy, rule, willSubmit }),
+      message: warningMessage({ counted, level, policy, rule }),
       issuedAt: new Date(nowMs),
     }
     nextWarningNumber += 1
@@ -224,7 +214,9 @@ const evaluateProctorEvents = ({ events, now, policy, state }) => {
   }
 
   return {
-    autoSubmit,
+    // Kept for wire compatibility; monitoring never submits an attempt.
+    autoSubmit: false,
+    flagForReview: thresholdExceeded,
     decisions,
     newWarnings,
     state: {

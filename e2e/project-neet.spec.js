@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test"
 
 import { neetFixture, neetIds } from "../apps/web/test/neetFixtures"
 
-const attemptPath = `/project-neet/attempts/${neetIds.attempt}`
-const onboardingPath = `/project-neet/mocks/${neetIds.test}/start`
+const attemptPath = `/neet/attempts/${neetIds.attempt}`
+const onboardingPath = `/neet/mocks/${neetIds.test}/start`
 const json = (route, data, status = 200) =>
   route.fulfill({
     status,
@@ -31,6 +31,7 @@ async function mockNeet(context, options = {}) {
         ? {
             version: fixture.policy.consentVersion,
             acceptedAt: fixture.attempt.serverNow,
+            adultDeclaredAt: fixture.attempt.serverNow,
           }
         : null,
     serverNow: new Date().toISOString(),
@@ -227,7 +228,8 @@ test("practice onboarding through manual submit and server result", async ({
       }
   })
   await page.goto(onboardingPath)
-  await page.getByLabel("Mobile number").fill("9876543210")
+  // Only a display name is asked for, prefilled from the profile.
+  await expect(page.getByLabel("Full name")).toHaveValue("Asha Rao")
   await page.screenshot({
     path: testInfo.outputPath("onboarding-details.png"),
     fullPage: true,
@@ -387,7 +389,7 @@ test("landing keeps CTA and SVG fallback without WebGL and with reduced motion",
   page.on("request", (request) => {
     if (request.resourceType() === "script") scripts.push(request.url())
   })
-  await page.goto("/project-neet")
+  await page.goto("/neet")
   await expect(page.getByRole("link", { name: "Start a Mock" })).toBeVisible()
   await expect(page.getByRole("link", { name: "Explore Tests" })).toBeVisible()
   await expect(
@@ -430,9 +432,10 @@ test("proctored checks require consent, recover denied permission, and start mon
     }
   })
   await page.goto(onboardingPath)
-  await page.getByLabel("Mobile number").fill("9876543210")
+  // Only a display name is asked for, prefilled from the profile.
+  await expect(page.getByLabel("Full name")).toHaveValue("Asha Rao")
   await page.getByRole("button", { name: "Continue", exact: true }).click()
-  await page.getByRole("radio", { name: /Proctored mode/ }).check()
+  await page.getByRole("radio", { name: /Monitored mode/ }).check()
   await page.getByRole("button", { name: "Continue to instructions" }).click()
   await page.getByRole("checkbox").check()
   await page.getByRole("button", { name: "Continue to checks" }).click()
@@ -440,7 +443,12 @@ test("proctored checks require consent, recover denied permission, and start mon
   await expect(
     page.getByRole("button", { name: "I consent — check my devices" })
   ).toBeDisabled()
-  await page.getByRole("checkbox").check()
+  await page.getByLabel(/I understand what is monitored and stored/).check()
+  // Monitored mode is adults-only: consent stays disabled until declared.
+  await expect(
+    page.getByRole("button", { name: "I consent — check my devices" })
+  ).toBeDisabled()
+  await page.getByLabel("I confirm I am 18 years of age or older.").check()
   await page
     .getByRole("button", { name: "I consent — check my devices" })
     .click()
@@ -455,7 +463,7 @@ test("proctored checks require consent, recover denied permission, and start mon
   await page.getByRole("button", { name: "All set — continue" }).click()
   await page.getByRole("button", { name: "Start test", exact: true }).click()
   await expect(
-    page.getByRole("status", { name: /Proctored mode/ })
+    page.getByRole("status", { name: /Monitored mode/ })
   ).toBeVisible()
   await expect(
     page.getByRole("heading", { name: /SI unit of force/ })
@@ -488,7 +496,7 @@ test("normal StudyNotion entry remains separate from NEET heavy scripts", async 
   await page.goto("/")
   await expect(
     page.getByRole("heading", {
-      name: "Build your skills. Shape your future.",
+      name: "Learn at your pace. Build skills that matter.",
     })
   ).toBeVisible()
   expect(
@@ -496,7 +504,7 @@ test("normal StudyNotion entry remains separate from NEET heavy scripts", async 
   ).toBe(false)
   await page
     .getByRole("contentinfo")
-    .getByRole("link", { name: "Project NEET", exact: true })
+    .getByRole("link", { name: "NEET Mocks", exact: true })
     .click()
   await expect(page.getByRole("link", { name: "Start a Mock" })).toBeVisible()
 })

@@ -5,10 +5,7 @@ const {
   NEET_MAX_STORED_WARNINGS,
   NEET_PROCTOR_EVENT_RETENTION_DAYS,
 } = require("../config/defaults")
-const {
-  ATTEMPT_STATUS,
-  SUBMISSION_REASON,
-} = require("../domain/attemptStateMachine")
+const { ATTEMPT_STATUS } = require("../domain/attemptStateMachine")
 const { neetErrors } = require("../domain/errors")
 const {
   evaluateProctorEvents,
@@ -76,7 +73,6 @@ const createProctorService = ({
 
   const recordServerEvents = async ({
     attempt,
-    autoSubmit,
     now,
     thresholdExceeded,
     warnings,
@@ -103,14 +99,6 @@ const createProctorService = ({
         ...base,
         clientEventId: "srv:threshold-exceeded",
         type: "POLICY_THRESHOLD_EXCEEDED",
-        severity: "HIGH",
-      })
-    }
-    if (autoSubmit) {
-      documents.push({
-        ...base,
-        clientEventId: "srv:auto-submit",
-        type: "AUTO_SUBMIT",
         severity: "HIGH",
       })
     }
@@ -158,17 +146,29 @@ const createProctorService = ({
         evaluation.state.thresholdExceeded &&
         !attempt.proctoring.thresholdExceededAt
       if (firstThreshold) set["proctoring.thresholdExceededAt"] = now
-      if (evaluation.autoSubmit) {
-        set.status = ATTEMPT_STATUS.SUBMITTING
-        set.submissionReason = SUBMISSION_REASON.PROCTOR_POLICY
-        set.submissionRequestedAt = now
+      // A threshold breach flags the attempt for human review. It never
+      // changes the lifecycle status, the deadline, or the score.
+      const reviewStatus = attempt.review?.status || "NONE"
+      if (evaluation.flagForReview && reviewStatus === "NONE") {
+        set["review.status"] = "FLAGGED"
+        set["review.flaggedAt"] = now
       }
+      const flaggedTypes = [
+        ...new Set(
+          evaluation.newWarnings
+            .filter((warning) => warning.counted)
+            .map((warning) => warning.ruleType)
+        ),
+      ]
       const update = {
         $set: set,
         $inc: {
           "proctoring.revision": 1,
           "proctoring.eventCount": newEvents.length,
         },
+      }
+      if (evaluation.flagForReview && flaggedTypes.length) {
+        update.$addToSet = { "review.reasons": { $each: flaggedTypes } }
       }
       if (evaluation.newWarnings.length) {
         update.$push = {
@@ -200,30 +200,26 @@ const createProctorService = ({
       }
       await recordServerEvents({
         attempt,
-        autoSubmit: evaluation.autoSubmit,
         now,
         thresholdExceeded: firstThreshold,
         warnings: evaluation.newWarnings,
       })
-
-      let finalState = updated
-      if (evaluation.autoSubmit) {
-        logger.warn("neet.proctor.policy_auto_submit", {
+      if (firstThreshold) {
+        logger.warn("neet.proctor.flagged_for_review", {
           attemptId: String(attemptId),
           warningCount: evaluation.state.warningCount,
         })
-        finalState = (await lifecycle.finalize(attemptId)) || updated
       }
 
-      return responseFor(finalState, {
+      return responseFor(updated, {
         accepted: newEvents.length,
         duplicates,
         newWarnings: evaluation.newWarnings.map(toWarning),
         warningCount: evaluation.state.warningCount,
         softWarningCount: evaluation.state.softWarningCount,
         maxWarnings: policy.warnings.maxWarnings,
-        status: finalState.status,
-        autoSubmitted: evaluation.autoSubmit,
+        status: updated.status,
+        autoSubmitted: false,
       })
     }
     throw neetErrors.conflict()

@@ -1,4 +1,4 @@
-// Imperative Three.js scene for the Project NEET hero. Loaded only through a
+// Imperative Three.js scene for the Prahit NEET Mocks hero. Loaded only through a
 // dynamic import so `three` never enters the main StudyNotion bundle.
 //
 // Concept: a calm particle double helix (biology, preparation) that unwinds

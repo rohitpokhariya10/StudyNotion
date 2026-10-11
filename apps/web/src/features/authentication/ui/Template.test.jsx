@@ -24,13 +24,7 @@ const renderTemplate = () => {
   return render(
     <Provider store={store}>
       <MemoryRouter>
-        <Template
-          title="Sign in"
-          description1="Welcome"
-          description2="back"
-          image="/fixture.png"
-          formType="login"
-        />
+        <Template title="Sign in" description="Welcome back" formType="login" />
       </MemoryRouter>
     </Provider>
   )

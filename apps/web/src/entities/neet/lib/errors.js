@@ -10,7 +10,7 @@ const MESSAGES = Object.freeze({
     message: "Your connection may be slow. Please try again in a moment.",
   },
   NEET_SERVICE_UNAVAILABLE: {
-    title: "Project NEET is briefly unavailable",
+    title: "NEET Mocks are briefly unavailable",
     message: "We are reconnecting to our servers. Please retry in a moment.",
   },
   NEET_TEST_NOT_FOUND: {
@@ -51,7 +51,7 @@ const MESSAGES = Object.freeze({
     message: "Your Prahit session has ended.",
   },
   FORBIDDEN: {
-    title: "Project NEET mocks need a student account",
+    title: "NEET Mocks need a student account",
     message: "Sign in with a Prahit student account to attempt mocks.",
   },
   RESPONSE_CONTRACT_MISMATCH: {

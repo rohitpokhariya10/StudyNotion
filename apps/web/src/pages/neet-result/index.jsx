@@ -82,7 +82,12 @@ export function NeetResultView({ result }) {
     ["Time used", formatNeetDuration(summary.durationUsedSeconds)],
     ["Marks earned", `+${formatNeetMarks(summary.positiveMarks)}`],
     ["Negative marks", formatNeetMarks(summary.negativeMarks)],
+    // Dropped questions award marks to every candidate (NTA rule).
+    ...(summary.dropped ? [["Dropped (marks awarded)", summary.dropped]] : []),
   ]
+  const flagged =
+    attempt.proctoring?.reviewStatus &&
+    attempt.proctoring.reviewStatus !== "NONE"
   return (
     <div className="space-y-12">
       <section
@@ -256,12 +261,19 @@ export function NeetResultView({ result }) {
             Monitoring summary
           </h2>
           <p className="mt-3">
-            {proctoring.warningCount} counted warning
-            {proctoring.warningCount === 1 ? "" : "s"} (limit{" "}
+            {proctoring.warningCount} counted notice
+            {proctoring.warningCount === 1 ? "" : "s"} (review threshold{" "}
             {proctoring.maxWarnings}) · {proctoring.softWarningCount}{" "}
             camera/audio notice
             {proctoring.softWarningCount === 1 ? "" : "s"}
           </p>
+          {flagged && (
+            <p className="mt-3 rounded-xl border border-neet-line p-4">
+              This attempt has been flagged for review by a person because of
+              repeated monitoring signals. A flag is not a finding of misconduct
+              and does not change your score.
+            </p>
+          )}
           <p className="mt-2 text-sm text-neet-muted">
             Browser signals are observations, not proof of misconduct. No video,
             audio or screen recording was stored.
@@ -282,14 +294,11 @@ export function NeetResultView({ result }) {
       )}
 
       <div className="flex flex-wrap gap-3">
-        <Link
-          className="pn-btn pn-btn-primary pn-btn-lg"
-          to="/project-neet/mocks"
-        >
+        <Link className="pn-btn pn-btn-primary pn-btn-lg" to="/neet/mocks">
           Back to mock tests
         </Link>
-        <Link className="pn-btn pn-btn-secondary pn-btn-lg" to="/project-neet">
-          Project NEET home
+        <Link className="pn-btn pn-btn-secondary pn-btn-lg" to="/neet">
+          NEET Mocks home
         </Link>
       </div>
     </div>

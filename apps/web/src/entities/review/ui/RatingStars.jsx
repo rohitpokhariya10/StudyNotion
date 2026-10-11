@@ -4,7 +4,11 @@ import {
   TiStarOutline,
 } from "react-icons/ti"
 
-function RatingStars({ Review_Count, Star_Size, className = "text-yellow-100" }) {
+function RatingStars({
+  Review_Count,
+  Star_Size,
+  className = "text-yellow-100",
+}) {
   const rating = Math.min(5, Math.max(0, Number(Review_Count) || 0))
   const wholeStars = Math.floor(rating)
   const hasHalfStar = rating > wholeStars

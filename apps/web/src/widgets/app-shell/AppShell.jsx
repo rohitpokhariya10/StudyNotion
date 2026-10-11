@@ -12,7 +12,7 @@ import "@fontsource/poppins/700.css"
 
 function AppShell({ children }) {
   const { pathname, hash } = useLocation()
-  const neetExperience = /^\/project-neet(?:\/|$)/i.test(pathname)
+  const neetExperience = /^\/(?:neet|project-neet)(?:\/|$)/i.test(pathname)
   useEffect(() => {
     let observer
     const frame = requestAnimationFrame(() => {

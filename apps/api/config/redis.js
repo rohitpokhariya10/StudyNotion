@@ -21,9 +21,12 @@ const getClient = () => {
     },
     socket: {
       connectTimeout: env.redis?.connectTimeoutMs || 10000,
+      // Never give up: a Redis outage must not leave this process with a
+      // permanently dead client. Backoff is capped, with jitter so replicas
+      // do not reconnect in lockstep.
       reconnectStrategy(retries) {
-        if (retries > 10) return new Error("Redis reconnect limit reached")
-        return Math.min(100 * 2 ** retries, 3000)
+        const base = Math.min(100 * 2 ** Math.min(retries, 10), 5000)
+        return base + Math.floor(Math.random() * 250)
       },
     },
   })

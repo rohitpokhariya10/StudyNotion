@@ -56,14 +56,14 @@ test("live public home, catalog, and course detail are connected", async ({
 }, testInfo) => {
   await page.goto("/login")
   await expect(
-    page.getByRole("heading", { name: "Welcome Back", level: 1 })
+    page.getByRole("heading", { name: "Welcome back", level: 1 })
   ).toBeVisible()
   await capture(page, testInfo, "login")
 
   await page.goto("/signup")
   await expect(
     page.getByRole("heading", {
-      name: "Build practical skills with Prahit",
+      name: "Create your account",
       level: 1,
     })
   ).toBeVisible()

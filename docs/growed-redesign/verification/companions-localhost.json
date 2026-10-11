@@ -1,0 +1,732 @@
+{
+  "base": "http://localhost:3000",
+  "mocking": false,
+  "cases": [
+    {
+      "width": 1440,
+      "route": "/",
+      "overflow": 0,
+      "headerHeight": 80,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 75,
+          "height": 60,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/services",
+      "overflow": 0,
+      "headerHeight": 80,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 75,
+          "height": 60,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/login",
+      "overflow": 0,
+      "headerHeight": 80,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 75,
+          "height": 60,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/signup",
+      "overflow": 0,
+      "headerHeight": 80,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 75,
+          "height": 60,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/forgot-password",
+      "overflow": 0,
+      "headerHeight": 80,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 75,
+          "height": 60,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/contact",
+      "overflow": 0,
+      "headerHeight": 80,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 75,
+          "height": 60,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/services",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/signup",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/forgot-password",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/contact",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "route": "/",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "route": "/services",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "route": "/login",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "route": "/signup",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "route": "/forgot-password",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "route": "/contact",
+      "overflow": 0,
+      "headerHeight": 64,
+      "logos": [
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 60,
+          "height": 48,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 140,
+          "height": 112,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "Prahit",
+          "hidden": null,
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        },
+        {
+          "src": "/assets/prahit-companions-Cemufu2t.webp",
+          "width": 124,
+          "height": 99.1875,
+          "naturalWidth": 640,
+          "naturalHeight": 512,
+          "alt": "",
+          "hidden": "true",
+          "homeLabel": "Prahit home",
+          "fit": "contain",
+          "explicitWidth": "640",
+          "explicitHeight": "512"
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "rel": "icon",
+      "href": "/favicon-32.png?v=companions-1",
+      "sizes": "32x32",
+      "status": 200,
+      "byteMatches": true
+    },
+    {
+      "rel": "icon",
+      "href": "/favicon-16.png?v=companions-1",
+      "sizes": "16x16",
+      "status": 200,
+      "byteMatches": true
+    },
+    {
+      "rel": "icon",
+      "href": "/favicon-48.png?v=companions-1",
+      "sizes": "48x48",
+      "status": 200,
+      "byteMatches": true
+    },
+    {
+      "rel": "shortcut icon",
+      "href": "/favicon.ico?v=companions-1",
+      "sizes": null,
+      "status": 200,
+      "byteMatches": true
+    },
+    {
+      "rel": "apple-touch-icon",
+      "href": "/apple-touch-icon.png?v=companions-1",
+      "sizes": null,
+      "status": 200,
+      "byteMatches": true
+    },
+    {
+      "rel": "manifest",
+      "href": "/manifest.json?v=companions-1",
+      "sizes": null,
+      "status": 200,
+      "byteMatches": true
+    }
+  ],
+  "pageErrors": [],
+  "freshTabFaviconRequests": [
+    {
+      "url": "http://localhost:3000/favicon.ico?v=companions-1",
+      "status": 200
+    }
+  ]
+}

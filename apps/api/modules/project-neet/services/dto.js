@@ -1,7 +1,4 @@
-const {
-  normalizeNeetCandidateName,
-  normalizeNeetPhone,
-} = require("@studynotion/contracts/neet")
+const { normalizeNeetCandidateName } = require("@studynotion/contracts/neet")
 
 const { availabilityFor, computeTestTotals } = require("../domain/paper")
 const {
@@ -14,10 +11,9 @@ const { isScoredStatus } = require("../domain/attemptStateMachine")
 const id = (value) => String(value).toLowerCase()
 const iso = (value) => (value ? new Date(value).toISOString() : null)
 
+// Display name only; contact details are never copied onto attempts.
 const normalizeCandidate = (candidate) => ({
   fullName: normalizeNeetCandidateName(candidate.fullName),
-  email: String(candidate.email).trim().toLowerCase(),
-  phone: normalizeNeetPhone(candidate.phone),
 })
 
 const toTestSummary = (test, now) => {
@@ -66,7 +62,9 @@ const toProctoringSummary = (attempt) => {
     warningCount: attempt.proctoring.warningCount || 0,
     softWarningCount: attempt.proctoring.softWarningCount || 0,
     maxWarnings: policy.warnings.maxWarnings,
-    autoSubmitEnabled: policy.autoSubmit.enabled === true,
+    // Monitoring never submits an attempt, including legacy policy snapshots.
+    autoSubmitEnabled: false,
+    reviewStatus: attempt.review?.status || "NONE",
   }
 }
 
@@ -83,16 +81,13 @@ const toAttempt = (attempt, now) => ({
   },
   status: attempt.status,
   mode: attempt.mode || null,
-  candidate: {
-    fullName: attempt.candidate.fullName,
-    email: attempt.candidate.email,
-    phone: attempt.candidate.phone,
-  },
+  candidate: { fullName: attempt.candidate.fullName },
   instructionsAcceptedAt: iso(attempt.instructionsAcceptedAt),
   proctorConsent: attempt.proctorConsent
     ? {
         version: attempt.proctorConsent.version,
         acceptedAt: iso(attempt.proctorConsent.acceptedAt),
+        adultDeclaredAt: iso(attempt.proctorConsent.adultDeclaredAt),
       }
     : null,
   createdAt: iso(attempt.createdAt),
@@ -210,7 +205,11 @@ const toResult = (attempt, now) => {
     attempt.mode === "PROCTORED" ? attempt.proctoring?.policy : null
   return {
     attempt: toAttempt(attempt, now),
-    summary: { ...attempt.result.summary },
+    // Results scored before dropped questions existed default to zero.
+    summary: {
+      ...attempt.result.summary,
+      dropped: attempt.result.summary.dropped || 0,
+    },
     sections: attempt.result.sections.map((section) => ({
       key: section.key,
       title: section.title,
@@ -221,9 +220,11 @@ const toResult = (attempt, now) => {
       correct: section.correct,
       incorrect: section.incorrect,
       unanswered: section.unanswered,
+      dropped: section.dropped || 0,
       score: section.score,
       maxScore: section.maxScore,
     })),
+    answerKeyVersion: attempt.result.answerKeyVersion ?? null,
     proctoring: policy
       ? {
           warningCount: attempt.proctoring.warningCount || 0,

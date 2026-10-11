@@ -1,9 +1,11 @@
 const defaultLogger = require("../../../utils/logger")
 const attemptRepository = require("../repositories/attemptRepository")
+const paperVersionRepository = require("../repositories/paperVersionRepository")
 const proctorEventRepository = require("../repositories/proctorEventRepository")
 const testRepository = require("../repositories/testRepository")
 const { createAttemptService } = require("./attemptService")
 const { createLifecycle } = require("./lifecycle")
+const { createPaperService } = require("./paperService")
 const { createProctorService } = require("./proctorService")
 const { createTestService } = require("./testService")
 
@@ -14,9 +16,10 @@ const createNeetServices = ({
   clock = () => new Date(),
   events = proctorEventRepository,
   logger = defaultLogger,
+  papers = paperVersionRepository,
   tests = testRepository,
 } = {}) => {
-  const lifecycle = createLifecycle({ attempts, clock, logger, tests })
+  const lifecycle = createLifecycle({ attempts, clock, logger, papers, tests })
   const proctor = createProctorService({
     attempts,
     clock,
@@ -29,12 +32,14 @@ const createNeetServices = ({
     clock,
     lifecycle,
     logger,
+    papers,
     proctor,
     tests,
   })
   return {
     attempts: attemptService,
     lifecycle,
+    papers: createPaperService({ attempts, clock, logger, papers, tests }),
     proctor,
     tests: createTestService({ clock, tests }),
   }

@@ -1,0 +1,1096 @@
+[
+  {
+    "label": "desktop",
+    "route": "login",
+    "reloads": [
+      {
+        "first": {
+          "t": 192.69999999925494,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 46,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 58.900000002235174,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 43,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 64.69999999925494,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 249,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      }
+    ],
+    "corners": [
+      {
+        "name": "top-left",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(1.012deg)",
+        "head": "translate(-1.325%, -0.562%) rotate(-3.042deg)",
+        "pupils": [
+          "translate(-7.46 -18.31)",
+          "translate(9.75 -22.65)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "top-right",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(-1.452deg)",
+        "head": "translate(1.943%, -0.288%) rotate(4.556deg)",
+        "pupils": [
+          "translate(20.55 -12.98)",
+          "translate(44.30 -17.41)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "bottom-right",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(-1.531deg)",
+        "head": "translate(1.978%, 0.319%) rotate(4.479deg)",
+        "pupils": [
+          "translate(21.31 -0.00)",
+          "translate(45.25 -4.65)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "bottom-left",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(0.758deg)",
+        "head": "translate(-1.074%, 0.6%) rotate(-2.654deg)",
+        "pupils": [
+          "translate(-7.85 6.54)",
+          "translate(9.28 1.78)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "label": "desktop",
+    "route": "signup",
+    "reloads": [
+      {
+        "first": {
+          "t": 408.9000000022352,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 71,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 75.20000000298023,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 42,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 68.5,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 247,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      }
+    ],
+    "corners": [
+      {
+        "name": "top-left",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(0.746deg)",
+        "head": "translate(-0.977%, -0.646%) rotate(-2.243deg)",
+        "pupils": [
+          "translate(-4.51 -19.87)",
+          "translate(13.39 -24.19)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "top-right",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(-1.314deg)",
+        "head": "translate(1.759%, -0.405%) rotate(4.125deg)",
+        "pupils": [
+          "translate(18.73 -15.27)",
+          "translate(42.07 -19.66)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "bottom-right",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(-1.638deg)",
+        "head": "translate(2.125%, 0.179%) rotate(4.833deg)",
+        "pupils": [
+          "translate(22.44 -3.15)",
+          "translate(46.64 -7.75)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "bottom-left",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(1.057deg)",
+        "head": "translate(-1.486%, 0.435%) rotate(-3.645deg)",
+        "pupils": [
+          "translate(-11.75 2.65)",
+          "translate(4.46 -2.04)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "route": "login",
+    "reloads": [
+      {
+        "first": {
+          "t": 115.79999999701977,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 42,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 64.5,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 42,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 65.69999999925494,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 246,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      }
+    ],
+    "corners": [],
+    "errors": []
+  },
+  {
+    "label": "mobile",
+    "route": "signup",
+    "reloads": [
+      {
+        "first": {
+          "t": 103,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 43,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 71.5,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 42,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 40,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 247,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      }
+    ],
+    "corners": [],
+    "errors": []
+  },
+  {
+    "label": "reduced",
+    "route": "login",
+    "reloads": [
+      {
+        "first": {
+          "t": 115.29999999701977,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 43,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 72.69999999925494,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 42,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 48.5,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 247,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      }
+    ],
+    "corners": [],
+    "errors": []
+  },
+  {
+    "label": "reduced",
+    "route": "signup",
+    "reloads": [
+      {
+        "first": {
+          "t": 123.69999999925494,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 45,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 50,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 42,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 52.100000001490116,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 246,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      }
+    ],
+    "corners": [],
+    "errors": []
+  },
+  {
+    "label": "webkit",
+    "route": "login",
+    "reloads": [
+      {
+        "first": {
+          "t": 380,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 48,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 94,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 45,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      },
+      {
+        "first": {
+          "t": 75,
+          "body": "skewX(0deg)",
+          "parts": [
+            "body",
+            "head"
+          ]
+        },
+        "frames": 247,
+        "state": {
+          "parts": [
+            "body",
+            "head"
+          ],
+          "body": "skewX(0deg)",
+          "head": "translate(0%, 0%) rotate(0deg)",
+          "pupils": [
+            "translate(3.47 -5.83)",
+            "translate(23.24 -10.38)"
+          ],
+          "overflow": false,
+          "layers": [
+            {
+              "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+              "loaded": true
+            },
+            {
+              "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+              "loaded": true
+            }
+          ],
+          "privacy": "open"
+        }
+      }
+    ],
+    "corners": [
+      {
+        "name": "top-left",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(1.012deg)",
+        "head": "translate(-1.325%, -0.562%) rotate(-3.043deg)",
+        "pupils": [
+          "translate(-7.47 -18.31)",
+          "translate(9.75 -22.65)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "top-right",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(-1.452deg)",
+        "head": "translate(1.943%, -0.288%) rotate(4.556deg)",
+        "pupils": [
+          "translate(20.54 -12.98)",
+          "translate(44.30 -17.41)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "bottom-right",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(-1.531deg)",
+        "head": "translate(1.978%, 0.319%) rotate(4.478deg)",
+        "pupils": [
+          "translate(21.31 -0.00)",
+          "translate(45.25 -4.65)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      },
+      {
+        "name": "bottom-left",
+        "parts": [
+          "body",
+          "head"
+        ],
+        "body": "skewX(0.766deg)",
+        "head": "translate(-1.081%, 0.6%) rotate(-2.661deg)",
+        "pupils": [
+          "translate(-7.85 6.54)",
+          "translate(9.27 1.78)"
+        ],
+        "overflow": false,
+        "layers": [
+          {
+            "src": "http://localhost:3000/assets/body-SxZMkzE_.webp",
+            "loaded": true
+          },
+          {
+            "src": "http://localhost:3000/assets/head-nc9s25Xm.webp",
+            "loaded": true
+          }
+        ],
+        "privacy": "open"
+      }
+    ],
+    "errors": []
+  }
+]

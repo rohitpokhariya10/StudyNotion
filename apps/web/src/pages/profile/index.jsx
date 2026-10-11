@@ -30,9 +30,9 @@ export default function MyProfile() {
             <p className="sn-eyebrow">Pick up where you left off</p>
             <h2 className="text-2xl font-bold">Continue learning →</h2>
           </Link>
-          <Link to="/project-neet" className="sn-card bg-mint">
+          <Link to="/neet" className="sn-card bg-mint">
             <p className="sn-eyebrow">For your next practice session</p>
-            <h2 className="text-2xl font-bold">Explore Project NEET →</h2>
+            <h2 className="text-2xl font-bold">Explore Prahit NEET Mocks →</h2>
           </Link>
         </div>
       )}

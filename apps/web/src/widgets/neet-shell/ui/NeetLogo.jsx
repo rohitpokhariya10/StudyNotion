@@ -1,4 +1,4 @@
-// Original Project NEET mark: a pulse line resolving into a rising arc,
+// Original Prahit NEET Mocks mark: a pulse line resolving into a rising arc,
 // suggesting a heartbeat that becomes forward momentum.
 export function NeetMark({ className = "h-8 w-8" }) {
   return (
@@ -35,10 +35,10 @@ export function NeetWordmark({ className = "" }) {
       <NeetMark />
       <span className="flex flex-col leading-none">
         <span className="text-[0.62rem] font-bold tracking-[0.32em] text-neet-muted uppercase">
-          Project
+          Prahit
         </span>
         <span className="pn-display text-[1.32rem] font-extrabold tracking-tight">
-          NEET
+          NEET Mocks
         </span>
       </span>
     </span>

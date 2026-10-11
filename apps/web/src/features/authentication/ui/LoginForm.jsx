@@ -1,6 +1,7 @@
 import { login } from "@/features/authentication/api/authApi"
 import { sanitizeInternalRedirect } from "@/shared/lib/routing/internalRedirect"
-import { useState } from "react"
+import { usePrivateField } from "@/shared/ui/auth-scene"
+import { useId, useState } from "react"
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"
 import { useDispatch } from "react-redux"
 import { Link, useLocation, useNavigate } from "react-router"
@@ -9,12 +10,14 @@ function LoginForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
+  const id = useId()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
 
   const [showPassword, setShowPassword] = useState(false)
+  const passwordPrivacy = usePrivateField(showPassword)
 
   const { email, password } = formData
 
@@ -32,15 +35,13 @@ function LoginForm() {
   }
 
   return (
-    <form
-      onSubmit={handleOnSubmit}
-      className="mt-6 flex w-full flex-col gap-y-4"
-    >
-      <label className="w-full">
-        <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
-          Email Address <sup className="text-danger">*</sup>
-        </p>
+    <form onSubmit={handleOnSubmit} className="sn-auth-form">
+      <div className="sn-auth-field">
+        <label className="sn-auth-label" htmlFor={`${id}-email`}>
+          Email address
+        </label>
         <input
+          id={`${id}-email`}
           required
           type="email"
           name="email"
@@ -48,47 +49,48 @@ function LoginForm() {
           value={email}
           onChange={handleOnChange}
           placeholder="Enter email address"
-          className="form-style w-full"
+          className="sn-auth-input"
         />
-      </label>
-      <label className="relative">
-        <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-text-primary">
-          Password <sup className="text-danger">*</sup>
-        </p>
-        <input
-          required
-          type={showPassword ? "text" : "password"}
-          name="password"
-          maxLength={72}
-          autoComplete="current-password"
-          value={password}
-          onChange={handleOnChange}
-          placeholder="Enter Password"
-          className="form-style w-full pr-10!"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((prev) => !prev)}
-          className="absolute top-[38px] right-3 z-[10] cursor-pointer"
-          aria-label={showPassword ? "Hide password" : "Show password"}
-          aria-pressed={showPassword}
-        >
-          {showPassword ? (
-            <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-          ) : (
-            <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-          )}
-        </button>
-        <Link to="/forgot-password">
-          <p className="mt-1 ml-auto max-w-max text-xs text-brand-primary">
-            Forgot Password
-          </p>
+      </div>
+      <div className="sn-auth-field">
+        <label className="sn-auth-label" htmlFor={`${id}-password`}>
+          Password
+        </label>
+        <div className="sn-auth-password">
+          <input
+            id={`${id}-password`}
+            required
+            type={showPassword ? "text" : "password"}
+            name="password"
+            maxLength={72}
+            autoComplete="current-password"
+            value={password}
+            onChange={handleOnChange}
+            {...passwordPrivacy}
+            placeholder="Enter Password"
+            className="sn-auth-input"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="sn-auth-toggle"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+          >
+            {showPassword ? (
+              <AiOutlineEyeInvisible aria-hidden="true" fontSize={20} />
+            ) : (
+              <AiOutlineEye aria-hidden="true" fontSize={20} />
+            )}
+          </button>
+        </div>
+      </div>
+      <div className="sn-auth-options">
+        <Link to="/forgot-password" className="sn-auth-link">
+          Forgot password?
         </Link>
-      </label>
-      <button
-        type="submit"
-        className="mt-6 rounded-[8px] bg-brand-primary px-[12px] py-[8px] font-medium text-white"
-      >
+      </div>
+      <button type="submit" className="sn-auth-submit">
         Sign In
       </button>
     </form>

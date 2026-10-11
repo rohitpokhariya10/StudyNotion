@@ -31,13 +31,17 @@ const PANELS = {
 
 // Split authentication layout: illustration panel + calm form surface.
 // On small screens only the form is shown; the navbar already carries the brand.
-export default function AuthLayout({ children, variant = "login" }) {
+export default function AuthLayout({
+  children,
+  variant = "login",
+  showLogo = true,
+}) {
   const panel = PANELS[variant] || PANELS.login
   return (
     <main className="grid min-h-[calc(100dvh-var(--sn-header-height))] lg:grid-cols-2">
       <aside className="relative overflow-hidden bg-linear-to-br from-brand-soft via-[#eef4ff] to-white">
         <div className="mx-auto flex h-full max-w-[34rem] flex-col justify-center px-6 py-8 lg:px-10 lg:py-16">
-          <BrandLogo size="auth" className="mb-5" />
+          {showLogo && <BrandLogo size="auth" className="mb-5" />}
           <h2 className="sn-heading">{panel.heading}</h2>
           <ul className="mt-6 hidden space-y-3 lg:block">
             {panel.points.map((point) => (

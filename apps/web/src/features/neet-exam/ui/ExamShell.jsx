@@ -254,7 +254,7 @@ export function ExamShell({ children, engine, proctorStatus }) {
             </span>
             <div className="min-w-0">
               <p className="text-[0.65rem] font-bold tracking-[0.24em] text-neet-muted uppercase">
-                Project NEET
+                Prahit NEET Mocks
               </p>
               <h1 className="truncate text-base font-bold sm:text-lg">
                 {session.attempt.test.title}
@@ -395,6 +395,15 @@ export function ExamShell({ children, engine, proctorStatus }) {
                       }
                     >
                       Submit saved answers only
+                    </button>
+                  )}
+                  {phase === "save-error" && remainingMs > 0 && (
+                    <button
+                      type="button"
+                      className="pn-btn pn-btn-secondary"
+                      onClick={controller.returnToExam}
+                    >
+                      Return to exam
                     </button>
                   )}
                 </div>

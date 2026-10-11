@@ -73,10 +73,10 @@ export default function NeetMocks() {
                   attempt.status
                 )
                 const path = hasResult
-                  ? `/project-neet/attempts/${attempt.id}/result`
+                  ? `/neet/attempts/${attempt.id}/result`
                   : attempt.status === "IN_PROGRESS"
-                    ? `/project-neet/attempts/${attempt.id}`
-                    : `/project-neet/mocks/${attempt.testId}/start`
+                    ? `/neet/attempts/${attempt.id}`
+                    : `/neet/mocks/${attempt.testId}/start`
                 return (
                   <li
                     key={attempt.id}

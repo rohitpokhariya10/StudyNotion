@@ -16,12 +16,12 @@ VITE variables are build-time public values; changing only a running container e
 
 `compose.local.yml` and `compose.local.env.example` define the local container stack.
 
-| Service | Network/port                                | Storage/readiness/dependencies                                                         |
-| ------- | ------------------------------------------- | -------------------------------------------------------------------------------------- |
-| web     | Container 8080 → loopback host 3000         | Static image; waits for healthy API                                                    |
-| api     | Container 4000 → loopback host 4000         | Connects to service-name Mongo/Redis; waits for both healthy                           |
-| mongo   | Internal 27017; MongoDB 8                   | Named database volume; ping health check                                               |
-| redis   | Internal 6379; Redis 7.4 alpine             | Ephemeral tmpfs and persistence disabled; ping health check                            |
+| Service | Network/port                                | Storage/readiness/dependencies                                                    |
+| ------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
+| web     | Container 8080 → loopback host 3000         | Static image; waits for healthy API                                               |
+| api     | Container 4000 → loopback host 4000         | Connects to service-name Mongo/Redis; waits for both healthy                      |
+| mongo   | Internal 27017; MongoDB 8                   | Named database volume; ping health check                                          |
+| redis   | Internal 6379; Redis 7.4 alpine             | Ephemeral tmpfs and persistence disabled; ping health check                       |
 | seed    | Explicit `seed` profile; one-shot API image | Depends on healthy Mongo; invokes guarded demo seed; not normal automatic startup |
 
 Default Compose networking provides internal service-name DNS. Database/cache ports are not published by this local app Compose. Defaults deliberately use development posture, lax/non-secure localhost cookies, and opt-in local OTP behavior; they are not production settings.

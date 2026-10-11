@@ -17,6 +17,10 @@ export const initialExamState = {
   save: { status: "saved", pendingCount: 0 },
 }
 const scored = (status) => ["SUBMITTED", "AUTO_SUBMITTED"].includes(status)
+// In the last seconds every change is sent immediately, and the expiry
+// submission first flushes what is still queued.
+const URGENT_REMAINING_MS = 15_000
+const EXPIRY_FLUSH_BUDGET_MS = 2_000
 
 // A single owner for exam side effects. Views subscribe; renders never send requests.
 export function createExamController({
@@ -56,9 +60,11 @@ export function createExamController({
     })
     return response.data
   }
+  // Idempotent: expiry, server finalisation and submit can race to finish.
   const complete = () => {
+    if (state.phase === "completed") return
     queue?.stop()
-    storage.clear(attemptId, sessionId || storage.readSessionId(attemptId))
+    storage.clear(attemptId)
     patch({ phase: "completed" })
     onResult?.(attemptId)
   }
@@ -105,11 +111,18 @@ export function createExamController({
     )
       return
     const token = ++generation
-    const previousSession = storage.readSessionId(attemptId)
-    // Always fresh, even when a duplicated window cloned sessionStorage.
-    const newSession = randomId()
     patch({ phase: "loading", error: null })
     queue?.stop()
+    // A refresh in the same tab keeps its session, so the server does not
+    // treat it as a takeover. A duplicated window inherits sessionStorage, so
+    // the ID is reused only when no live peer tab already holds it.
+    const previousSession = storage.readSessionId(attemptId)
+    const peerHoldsPrevious = previousSession
+      ? await coordinator?.findPeerWithSession?.(previousSession)
+      : false
+    if (stopped || token !== generation) return
+    const newSession =
+      previousSession && !peerHoldsPrevious ? previousSession : randomId()
     try {
       const response =
         state.attempt?.status === "READY"
@@ -125,7 +138,7 @@ export function createExamController({
         session.responses.map((item) => [item.questionId, item])
       )
       const pending = storage
-        .readQueue(attemptId, previousSession)
+        .readQueue(attemptId)
         .filter(
           (write) =>
             responses[write.questionId] &&
@@ -157,7 +170,7 @@ export function createExamController({
       queue = createAutosaveQueue({
         initialPending: pending,
         isOnline,
-        persist: (writes) => storage.writeQueue(attemptId, writes, sessionId),
+        persist: (writes) => storage.writeQueue(attemptId, writes),
         send: async (writes) =>
           timed(await client.saveResponses(attemptId, newSession, writes)),
         onStatus: (save) => patch({ save }),
@@ -174,11 +187,20 @@ export function createExamController({
           patch({ responses: merged })
         },
         onFatal: (reason, error) => {
-          if (reason === "invalid") patch({ phase: "error", error })
-          else handleError(error)
+          // A write the server rejected as invalid must not freeze the exam:
+          // show a notice and reconcile local answers with the server.
+          if (reason === "invalid") {
+            patch({
+              error: {
+                message:
+                  "One change could not be saved and was reset to your last saved answer. Please check it.",
+              },
+            })
+            void resync()
+          } else handleError(error)
         },
       })
-      storage.writeQueue(attemptId, pending, sessionId)
+      storage.writeQueue(attemptId, pending)
       nextHeartbeat = clock.now() + session.heartbeatIntervalSeconds * 1000
       queue.resume()
       visit(index)
@@ -188,6 +210,29 @@ export function createExamController({
       if (error.code === "NEET_ATTEMPT_SUBMITTED")
         return void finishFromServer()
       patch({ phase: error.status === 401 ? "auth" : "error", error })
+    }
+  }
+
+  // Re-reads server state with the same session (not a takeover) and keeps
+  // any newer local writes that are still queued.
+  async function resync() {
+    if (!sessionId || state.phase !== "active") return
+    try {
+      const session = timed(await client.resumeAttempt(attemptId, sessionId))
+      if (stopped || state.phase !== "active") return
+      const responses = Object.fromEntries(
+        session.responses.map((item) => [item.questionId, item])
+      )
+      for (const write of queue?.pendingWrites?.() || []) {
+        if (
+          !responses[write.questionId] ||
+          write.seq > responses[write.questionId].seq
+        )
+          responses[write.questionId] = write
+      }
+      patch({ responses })
+    } catch (error) {
+      handleError(error)
     }
   }
 
@@ -246,6 +291,13 @@ export function createExamController({
     requestedReason = reason
     patch({ phase: "submitting", error: null })
     try {
+      // Expiry: best-effort flush of anything still queued, within a short
+      // budget. The server's deadline decides what counts.
+      if (reason === "TIME_EXPIRED" && queue?.pendingCount) {
+        await queue.drain({ timeoutMs: EXPIRY_FLUSH_BUDGET_MS })
+        if (stopped || ["duplicate", "auth", "completed"].includes(state.phase))
+          return
+      }
       if (reason === "MANUAL_SUBMIT" && !savedOnly) {
         const drained = await queue.drain({ timeoutMs: 10_000 })
         if (stopped || ["duplicate", "auth", "completed"].includes(state.phase))
@@ -302,6 +354,7 @@ export function createExamController({
       Date.parse(state.attempt.expiresAt) - clock.now()
     )
     patch({ remainingMs, online: isOnline() })
+    queue?.setUrgent?.(remainingMs <= URGENT_REMAINING_MS)
     if (remainingMs <= 0 && ["active", "save-error"].includes(state.phase))
       void submit("TIME_EXPIRED")
     else if (
@@ -341,6 +394,14 @@ export function createExamController({
       clearInterval(timer)
       queue?.stop()
       coordinator?.close()
+    },
+    // Leaves the "unsaved answers" submit prompt and continues answering while
+    // time remains.
+    returnToExam() {
+      if (state.phase !== "save-error") return
+      if (clock.now() >= Date.parse(state.attempt.expiresAt)) return
+      patch({ phase: "active", error: null })
+      queue?.resume()
     },
     reconnect() {
       patch({ online: isOnline() })

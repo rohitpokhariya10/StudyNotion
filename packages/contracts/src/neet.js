@@ -37,6 +37,22 @@ const NEET_OPTION_KEYS = Object.freeze(["A", "B", "C", "D"])
 const NEET_DIFFICULTIES = Object.freeze(["FOUNDATION", "STANDARD", "ADVANCED"])
 const NEET_AVAILABILITY_STATES = Object.freeze(["OPEN", "UPCOMING", "CLOSED"])
 const NEET_PROCTOR_SEVERITIES = Object.freeze(["INFO", "LOW", "MEDIUM", "HIGH"])
+// Human review of monitoring flags. Independent of submission status: a flag
+// never changes an attempt's lifecycle or score.
+const NEET_REVIEW_STATUSES = Object.freeze([
+  "NONE",
+  "FLAGGED",
+  "UNDER_REVIEW",
+  "CLEARED",
+  "ACTION_TAKEN",
+])
+// Per-question answer-key status (NTA NEET UG 2026 rules). Multiple correct
+// options are ACTIVE keys listing more than one option.
+const NEET_ANSWER_KEY_STATUSES = Object.freeze([
+  "ACTIVE",
+  "ALL_CORRECT",
+  "DROPPED",
+])
 
 // Signals a browser may report. The server derives severity and policy
 // outcomes; the client never chooses them.
@@ -93,7 +109,6 @@ const NEET_PROCTOR_DETECTORS = Object.freeze([
 const NEET_CANDIDATE_LIMITS = Object.freeze({
   fullNameMax: 80,
   fullNameMin: 2,
-  emailMax: 254,
 })
 
 const NEET_LIMITS = Object.freeze({
@@ -124,19 +139,6 @@ const isValidNeetCandidateName = (value) => {
   )
 }
 
-// Indian mobile numbers are normalized to +91XXXXXXXXXX. Candidates abroad
-// may supply an E.164 number with an explicit country code.
-const normalizeNeetPhone = (value) => {
-  const compact = String(value ?? "").replace(/[\s().-]/g, "")
-  if (/^(?:\+91|91|0)?[6-9]\d{9}$/.test(compact)) {
-    return `+91${compact.slice(-10)}`
-  }
-  if (/^\+[1-9]\d{7,14}$/.test(compact) && !compact.startsWith("+91")) {
-    return compact
-  }
-  return null
-}
-
 const neetOptionKeySchema = z.enum(NEET_OPTION_KEYS)
 const neetAttemptStatusSchema = z.enum(NEET_ATTEMPT_STATUSES)
 const neetExamModeSchema = z.enum(NEET_EXAM_MODES)
@@ -159,31 +161,18 @@ const neetSectionKeySchema = z
 const neetMarksSchema = z.number().finite().min(-100).max(100)
 
 // Candidate details --------------------------------------------------------
+// Only a display name is collected. Ownership is the authenticated user ID;
+// contact details stay on the user profile and are never copied per attempt.
 
 const neetCandidateInputSchema = z.strictObject({
   fullName: z
     .string()
     .max(200)
     .refine(isValidNeetCandidateName, "Enter your full name using letters"),
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .max(NEET_CANDIDATE_LIMITS.emailMax)
-    .pipe(z.email("Enter a valid email address")),
-  phone: z
-    .string()
-    .max(32)
-    .refine(
-      (value) => normalizeNeetPhone(value) !== null,
-      "Enter a valid mobile number"
-    ),
 })
 
 const neetCandidateSchema = z.strictObject({
   fullName: z.string().min(2).max(NEET_CANDIDATE_LIMITS.fullNameMax),
-  email: z.email().max(NEET_CANDIDATE_LIMITS.emailMax),
-  phone: z.string().min(8).max(16),
 })
 
 // Public test catalog --------------------------------------------------------
@@ -287,6 +276,9 @@ const neetAttemptListQuerySchema = z.strictObject({
 const neetProctorConsentSchema = z.strictObject({
   version: z.string().min(1).max(40),
   acceptedAt: isoDateTimeSchema,
+  // Self-declared 18+ confirmation. Monitored mode is adults-only until a
+  // legally reviewed approach for minors exists.
+  adultDeclaredAt: isoDateTimeSchema.nullable(),
 })
 
 const neetAttemptProctoringSummarySchema = z.strictObject({
@@ -295,6 +287,7 @@ const neetAttemptProctoringSummarySchema = z.strictObject({
   softWarningCount: z.number().int().min(0).max(1000),
   maxWarnings: z.number().int().min(1).max(20),
   autoSubmitEnabled: z.boolean(),
+  reviewStatus: z.enum(NEET_REVIEW_STATUSES),
 })
 
 const neetAttemptSchema = z.strictObject({
@@ -368,6 +361,7 @@ const neetReadyRequestSchema = z.strictObject({
     .strictObject({
       accepted: z.literal(true),
       version: z.string().min(1).max(40),
+      adultConfirmed: z.literal(true).optional(),
     })
     .optional(),
   systemCheck: z
@@ -604,6 +598,7 @@ const neetResultSectionSchema = z.strictObject({
   correct: z.number().int().min(0),
   incorrect: z.number().int().min(0),
   unanswered: z.number().int().min(0),
+  dropped: z.number().int().min(0),
   score: z.number().finite(),
   maxScore: z.number().finite().min(0),
 })
@@ -619,6 +614,9 @@ const neetResultSchema = z
       correct: z.number().int().min(0),
       incorrect: z.number().int().min(0),
       unanswered: z.number().int().min(0),
+      // Dropped/invalid questions award marks to every candidate and are
+      // counted separately from attempted and unanswered questions.
+      dropped: z.number().int().min(0),
       markedForReview: z.number().int().min(0),
       accuracyPercent: z.number().finite().min(0).max(100),
       durationUsedSeconds: z.number().int().min(0),
@@ -626,6 +624,9 @@ const neetResultSchema = z
       negativeMarks: z.number().finite().max(0),
     }),
     sections: z.array(neetResultSectionSchema).max(12),
+    // Answer-key version used for this result; null for results scored before
+    // versioned keys existed.
+    answerKeyVersion: z.number().int().min(1).nullable(),
     proctoring: z
       .strictObject({
         warningCount: z.number().int().min(0),
@@ -644,10 +645,14 @@ const neetResultSchema = z
         path: ["summary", "attempted"],
       })
     }
-    if (summary.attempted + summary.unanswered !== summary.questionCount) {
+    if (
+      summary.attempted + summary.unanswered + summary.dropped !==
+      summary.questionCount
+    ) {
       context.addIssue({
         code: "custom",
-        message: "Attempted plus unanswered must equal question count",
+        message:
+          "Attempted plus unanswered plus dropped must equal question count",
         path: ["summary", "unanswered"],
       })
     }
@@ -678,6 +683,7 @@ const neetResultResponseSchema = createSuccessResponseSchema(neetResultSchema)
 
 module.exports = {
   NEET_ATTEMPT_STATUSES,
+  NEET_ANSWER_KEY_STATUSES,
   NEET_AVAILABILITY_STATES,
   NEET_CANDIDATE_LIMITS,
   NEET_CLIENT_PROCTOR_EVENT_TYPES,
@@ -690,6 +696,7 @@ module.exports = {
   NEET_PROCTOR_EVENT_TYPES,
   NEET_PROCTOR_SEVERITIES,
   NEET_PROCTOR_SIGNAL_REASONS,
+  NEET_REVIEW_STATUSES,
   NEET_SERVER_PROCTOR_EVENT_TYPES,
   NEET_SUBMISSION_REASONS,
   NEET_SYSTEM_CHECK_STATES,
@@ -737,5 +744,4 @@ module.exports = {
   neetTestSummarySchema,
   neetUpdateAttemptRequestSchema,
   normalizeNeetCandidateName,
-  normalizeNeetPhone,
 }

@@ -1,0 +1,81 @@
+{
+  "before": {
+    "api": {
+      "id": "880e4de41ccac3050114ffa1b0490750c283c5dcb36918d57fd964b9957e0ff6",
+      "image": "sha256:4614e4d4debe337bd86e8df9f3065bc0af2cc2a3e2ab5917c34fdb02a425a8be",
+      "started": "2026-10-09T12:53:18.79914409Z",
+      "mounts": []
+    },
+    "mongo": {
+      "id": "d8d45288f3b803577a2cf0c85e186e9a9e3540351ed3f79ef224cd376685855e",
+      "image": "sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a",
+      "started": "2026-10-09T12:08:04.369032875Z",
+      "mounts": [
+        {
+          "name": "39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085",
+          "source": "/var/lib/docker/volumes/39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085/_data",
+          "destination": "/data/configdb"
+        },
+        {
+          "name": "studynotion-local_mongo-data",
+          "source": "/var/lib/docker/volumes/studynotion-local_mongo-data/_data",
+          "destination": "/data/db"
+        }
+      ]
+    },
+    "redis": {
+      "id": "43801c125ac1e258fd59e7295bfc8369c2b76960440c13b006f5baa7210fb2e3",
+      "image": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf",
+      "started": "2026-10-09T12:08:04.369798042Z",
+      "mounts": []
+    },
+    "web": {
+      "id": "e115f50db9718a1688929b11c6ce2c94c18c83d7b1a40c813ce4b02c3e8f5622",
+      "image": "sha256:3bea67004ae181f90370ee71a644779e5fd2935b1a7cc37eecdda6a56c0a0ed3",
+      "started": "2026-10-09T12:53:24.395287468Z",
+      "mounts": []
+    }
+  },
+  "after": {
+    "api": {
+      "id": "880e4de41ccac3050114ffa1b0490750c283c5dcb36918d57fd964b9957e0ff6",
+      "image": "sha256:4614e4d4debe337bd86e8df9f3065bc0af2cc2a3e2ab5917c34fdb02a425a8be",
+      "started": "2026-10-09T12:53:18.79914409Z",
+      "mounts": []
+    },
+    "mongo": {
+      "id": "d8d45288f3b803577a2cf0c85e186e9a9e3540351ed3f79ef224cd376685855e",
+      "image": "sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a",
+      "started": "2026-10-09T12:08:04.369032875Z",
+      "mounts": [
+        {
+          "name": "39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085",
+          "source": "/var/lib/docker/volumes/39f77f368ec6ec41a3171faece55312aec64ef6ff6022aca364efeee65a16085/_data",
+          "destination": "/data/configdb"
+        },
+        {
+          "name": "studynotion-local_mongo-data",
+          "source": "/var/lib/docker/volumes/studynotion-local_mongo-data/_data",
+          "destination": "/data/db"
+        }
+      ]
+    },
+    "redis": {
+      "id": "43801c125ac1e258fd59e7295bfc8369c2b76960440c13b006f5baa7210fb2e3",
+      "image": "sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf",
+      "started": "2026-10-09T12:08:04.369798042Z",
+      "mounts": []
+    },
+    "web": {
+      "id": "1c39a061eddd50af64eaf775fb7a68072146770aedf6cbf873def31896bf7b5d",
+      "image": "sha256:3aa4fe1aa1e875fad356c543226d61d140f850d50733aa760beeba810c5290eb",
+      "started": "2026-10-09T13:00:45.451774172Z",
+      "mounts": []
+    }
+  },
+  "unchanged": {
+    "api": true,
+    "mongo": true,
+    "redis": true
+  }
+}

@@ -5,7 +5,11 @@ const {
   finalStatusForReason,
 } = require("../domain/attemptStateMachine")
 const { neetErrors } = require("../domain/errors")
-const { NeetScoringDataError, scoreAttempt } = require("../domain/scoring")
+const {
+  NeetScoringDataError,
+  keysToMap,
+  scoreAttempt,
+} = require("../domain/scoring")
 
 const FINALIZE_ATTEMPTS = 3
 
@@ -20,7 +24,29 @@ const earliest = (...dates) =>
 //   SUBMITTING  --CAS--> SUBMITTED | AUTO_SUBMITTED (result written once)
 // Any reader that finds SUBMITTING completes the second step, so a crash
 // between the two steps is recovered by the next request.
-const createLifecycle = ({ attempts, clock, logger, tests }) => {
+const createLifecycle = ({ attempts, clock, logger, papers, tests }) => {
+  // Versioned attempts score against the latest answer-key version of their
+  // pinned paper (so a published correction applies to everyone). Legacy
+  // attempts started before paper versions existed read live keys.
+  const answerKeysFor = async (attempt) => {
+    if (attempt.paperVersionId) {
+      const key = await papers.findLatestAnswerKey(attempt.paperVersionId)
+      if (!key) return { answerKeys: new Map(), answerKeyVersion: null }
+      return { answerKeys: keysToMap(key.keys), answerKeyVersion: key.version }
+    }
+    const questionIds = attempt.paper.questions.map((entry) => entry.questionId)
+    const keyDocuments = await tests.findAnswerKeys(questionIds)
+    return {
+      answerKeys: new Map(
+        keyDocuments.map((document) => [
+          String(document._id),
+          document.answerKey,
+        ])
+      ),
+      answerKeyVersion: null,
+    }
+  }
+
   const finalize = async (attemptId) => {
     for (let round = 0; round < FINALIZE_ATTEMPTS; round += 1) {
       const attempt = await attempts.findById({
@@ -32,16 +58,7 @@ const createLifecycle = ({ attempts, clock, logger, tests }) => {
         return attempts.findById({ attemptId })
       }
 
-      const questionIds = attempt.paper.questions.map(
-        (entry) => entry.questionId
-      )
-      const keyDocuments = await tests.findAnswerKeys(questionIds)
-      const answerKeys = new Map(
-        keyDocuments.map((document) => [
-          String(document._id),
-          document.answerKey,
-        ])
-      )
+      const { answerKeys, answerKeyVersion } = await answerKeysFor(attempt)
       const now = clock()
       const endedAt = earliest(
         attempt.submissionRequestedAt || now,
@@ -51,6 +68,7 @@ const createLifecycle = ({ attempts, clock, logger, tests }) => {
       let scored
       try {
         scored = scoreAttempt({
+          answerKeyVersion,
           answerKeys,
           endedAt,
           paper: attempt.paper,
@@ -176,7 +194,42 @@ const createLifecycle = ({ attempts, clock, logger, tests }) => {
     return attempt
   }
 
-  return { beginSubmission, ensureFresh, finalize }
+  // Finalises abandoned attempts nobody reads: open attempts more than
+  // `graceMs` past their deadline, or stuck mid-finalisation. Safe to run on
+  // every replica at once; each transition is the same compare-and-set as
+  // the request path, so an attempt is finalised exactly once.
+  const sweep = async ({ graceMs = 30_000, limit = 100 } = {}) => {
+    const rows = await attempts.findStaleOpen({
+      expiredBefore: new Date(clock().getTime() - graceMs),
+      limit,
+    })
+    let finalized = 0
+    let failed = 0
+    for (const row of rows) {
+      try {
+        const fresh = await ensureFresh(
+          await attempts.findById({ attemptId: row._id })
+        )
+        if (fresh && fresh.status !== row.status) finalized += 1
+      } catch (error) {
+        failed += 1
+        logger.warn("neet.sweep.attempt_failed", {
+          attemptId: String(row._id),
+          errorType: String(error?.name || "Error"),
+        })
+      }
+    }
+    if (rows.length) {
+      logger.info("neet.sweep.completed", {
+        scanned: rows.length,
+        finalized,
+        failed,
+      })
+    }
+    return { scanned: rows.length, finalized, failed }
+  }
+
+  return { beginSubmission, ensureFresh, finalize, sweep }
 }
 
 module.exports = { createLifecycle }

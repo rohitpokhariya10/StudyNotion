@@ -30,20 +30,20 @@ export function ProjectNeetShell({ children, compactHeader = false }) {
         }`}
       >
         <Link
-          to="/project-neet"
-          aria-label="Project NEET home"
+          to="/neet"
+          aria-label="Prahit NEET Mocks home"
           className="rounded-xl"
         >
           <NeetWordmark />
         </Link>
         <nav
-          aria-label="Project NEET"
+          aria-label="Prahit NEET Mocks"
           className="hidden items-center gap-1 md:flex"
         >
-          <NavLink to="/project-neet" end className={navLinkClass}>
+          <NavLink to="/neet" end className={navLinkClass}>
             Overview
           </NavLink>
-          <NavLink to="/project-neet/mocks" className={navLinkClass}>
+          <NavLink to="/neet/mocks" className={navLinkClass}>
             Mock tests
           </NavLink>
         </nav>
@@ -58,7 +58,7 @@ export function ProjectNeetShell({ children, compactHeader = false }) {
             <span className="pn-skeleton h-9 w-24" aria-hidden="true" />
           ) : isAuthenticated && user ? (
             <Link
-              to="/project-neet/mocks"
+              to="/neet/mocks"
               className="pn-chip border-neet-line bg-neet-surface/70 py-1.5"
               aria-label={`Signed in as ${user.firstName || "student"}. View mocks.`}
             >
@@ -75,7 +75,7 @@ export function ProjectNeetShell({ children, compactHeader = false }) {
           ) : (
             <Link
               to="/login"
-              state={{ from: { pathname: "/project-neet/mocks" } }}
+              state={{ from: { pathname: "/neet/mocks" } }}
               className="pn-btn pn-btn-secondary min-h-0 px-4 py-2 text-sm"
             >
               Sign in
@@ -85,13 +85,13 @@ export function ProjectNeetShell({ children, compactHeader = false }) {
       </header>
 
       <nav
-        aria-label="Project NEET mobile"
+        aria-label="Prahit NEET Mocks mobile"
         className="flex flex-wrap items-center justify-center gap-1 border-y border-neet-line bg-neet-surface px-3 py-2 md:hidden"
       >
-        <NavLink to="/project-neet" end className={navLinkClass}>
+        <NavLink to="/neet" end className={navLinkClass}>
           Overview
         </NavLink>
-        <NavLink to="/project-neet/mocks" className={navLinkClass}>
+        <NavLink to="/neet/mocks" className={navLinkClass}>
           Mock tests
         </NavLink>
         <Link to="/" className="rounded-full px-3 py-2 text-sm font-semibold">
@@ -106,16 +106,16 @@ export function ProjectNeetShell({ children, compactHeader = false }) {
       <footer className="relative z-10 mt-auto border-t border-neet-line/70">
         <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-4 px-4 py-8 text-sm text-neet-muted sm:px-6 md:flex-row md:items-center md:justify-between">
           <p className="max-w-3xl leading-6">
-            Project NEET is an independent practice space inside Prahit. It is
-            not affiliated with or endorsed by the National Testing Agency
+            Prahit NEET Mocks is an independent practice space inside Prahit. It
+            is not affiliated with or endorsed by the National Testing Agency
             (NTA). Mock papers are original sample practice content; always
             follow the official NTA bulletin for exam rules.
           </p>
           <nav
-            aria-label="Project NEET footer"
+            aria-label="Prahit NEET Mocks footer"
             className="flex flex-wrap gap-x-5 gap-y-2"
           >
-            <Link to="/project-neet/mocks" className="hover:text-neet-ink">
+            <Link to="/neet/mocks" className="hover:text-neet-ink">
               Mock tests
             </Link>
             <Link to="/privacy-policy" className="hover:text-neet-ink">

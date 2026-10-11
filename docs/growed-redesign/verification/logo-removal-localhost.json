@@ -1,0 +1,71 @@
+{
+  "base": "http://localhost:3000",
+  "mocking": false,
+  "cases": [
+    {
+      "width": 1440,
+      "route": "/login",
+      "overflow": 0,
+      "panelLogos": 0,
+      "footerLogos": 0,
+      "headerHeight": 80
+    },
+    {
+      "width": 1440,
+      "route": "/signup",
+      "overflow": 0,
+      "panelLogos": 0,
+      "footerLogos": 0,
+      "headerHeight": 80
+    },
+    {
+      "width": 1440,
+      "route": "/services",
+      "overflow": 0,
+      "panelLogos": 0,
+      "footerLogos": 0,
+      "headerHeight": 80
+    },
+    {
+      "width": 1440,
+      "route": "/forgot-password",
+      "overflow": 0,
+      "panelLogos": 1,
+      "footerLogos": 0,
+      "headerHeight": 80
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "overflow": 0,
+      "panelLogos": 0,
+      "footerLogos": 0,
+      "headerHeight": 64
+    },
+    {
+      "width": 390,
+      "route": "/signup",
+      "overflow": 0,
+      "panelLogos": 0,
+      "footerLogos": 0,
+      "headerHeight": 64
+    },
+    {
+      "width": 390,
+      "route": "/services",
+      "overflow": 0,
+      "panelLogos": 0,
+      "footerLogos": 0,
+      "headerHeight": 64
+    },
+    {
+      "width": 390,
+      "route": "/forgot-password",
+      "overflow": 0,
+      "panelLogos": 1,
+      "footerLogos": 0,
+      "headerHeight": 64
+    }
+  ],
+  "errors": []
+}

@@ -111,10 +111,10 @@ export default function Navbar() {
       )}
       <Link
         className="sn-menu-link border-t border-border-default"
-        to="/project-neet"
+        to="/neet"
         onClick={onNavigate}
       >
-        Project NEET
+        NEET Mocks
       </Link>
     </>
   )

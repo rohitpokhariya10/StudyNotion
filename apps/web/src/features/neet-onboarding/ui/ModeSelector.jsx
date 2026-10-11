@@ -8,19 +8,20 @@ const MODES = [
     points: [
       "Server-kept timer and autosave",
       "Digital OMR and review marking",
-      "Full result and subject breakdown",
+      "Scored result with subject breakdown",
       "No camera or microphone needed",
     ],
   },
   {
     value: "PROCTORED",
-    title: "Proctored mode",
+    title: "Monitored mode (18+)",
     kicker: "Rehearse disciplined exam conditions",
     points: [
       "Everything in practice mode",
       "Full screen, tab and focus monitoring",
       "Camera and microphone activity signals, analysed on your device",
-      "Calm warnings, with policy-based submission if limits are exceeded",
+      "Calm notices; repeated signals are flagged for review by a person and never submit your exam",
+      "For candidates aged 18 or over",
     ],
   },
 ]

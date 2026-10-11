@@ -72,6 +72,21 @@ vi.mock("@/pages/policy-acceptance", () => ({
 vi.mock("@/pages/learning", () => ({
   default: () => <Outlet />,
 }))
+vi.mock("@/pages/neet-landing", () => ({
+  default: () => <h1>NEET landing route</h1>,
+}))
+vi.mock("@/pages/neet-mocks", () => ({
+  default: () => <h1>NEET mocks route</h1>,
+}))
+vi.mock("@/pages/neet-onboarding", () => ({
+  default: () => <h1>NEET onboarding route</h1>,
+}))
+vi.mock("@/pages/neet-exam", () => ({
+  default: () => <h1>NEET exam route</h1>,
+}))
+vi.mock("@/pages/neet-result", () => ({
+  default: () => <h1>NEET result route</h1>,
+}))
 vi.mock("@/features/lesson-playback/ui/VideoDetails", () => ({
   default: () => <h1>Protected playback route</h1>,
 }))
@@ -194,6 +209,56 @@ describe("Router 8 public route parity", () => {
       expectedUrl
     )
   })
+})
+
+describe("Prahit NEET Mocks routes", () => {
+  const attempt = "507f1f77bcf86cd799439012"
+  it.each([
+    ["/neet", "NEET landing route", "/neet"],
+    ["/neet/mocks", "NEET mocks route", "/neet/mocks"],
+    // Earlier /project-neet links redirect, keeping query and hash.
+    ["/project-neet", "NEET landing route", "/neet"],
+    [
+      "/project-neet/mocks?from=mail#list",
+      "NEET mocks route",
+      "/neet/mocks?from=mail#list",
+    ],
+  ])("maps %s", async (path, heading, expectedUrl) => {
+    renderRouter(path)
+    expect(await screen.findByRole("heading", { name: heading })).toBeVisible()
+    expect(screen.getByLabelText("Current location")).toHaveTextContent(
+      expectedUrl
+    )
+  })
+
+  it.each([
+    [
+      `/neet/attempts/${attempt}`,
+      "NEET exam route",
+      `/neet/attempts/${attempt}`,
+    ],
+    [
+      `/project-neet/attempts/${attempt}/result`,
+      "NEET result route",
+      `/neet/attempts/${attempt}/result`,
+    ],
+    [
+      "/project-neet/mocks/507f1f77bcf86cd799439011/start",
+      "NEET onboarding route",
+      "/neet/mocks/507f1f77bcf86cd799439011/start",
+    ],
+  ])(
+    "keeps student pages behind the student guard: %s",
+    async (path, heading, expectedUrl) => {
+      renderRouter(path, authenticatedState(ACCOUNT_TYPE.STUDENT))
+      expect(
+        await screen.findByRole("heading", { name: heading })
+      ).toBeVisible()
+      expect(screen.getByLabelText("Current location")).toHaveTextContent(
+        expectedUrl
+      )
+    }
+  )
 })
 
 describe("Router 8 authentication redirect parity", () => {

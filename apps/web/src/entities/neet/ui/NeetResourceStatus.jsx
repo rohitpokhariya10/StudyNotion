@@ -1,6 +1,6 @@
 import { describeNeetError } from "../lib/errors"
 
-// Loading / failure presentation for Project NEET reads. Success renders
+// Loading / failure presentation for Prahit NEET Mocks reads. Success renders
 // nothing; the caller owns the content.
 export function NeetResourceStatus({ loading, resource }) {
   if (resource.status === "loading") {
@@ -8,7 +8,7 @@ export function NeetResourceStatus({ loading, resource }) {
       loading || (
         <div
           role="status"
-          aria-label="Loading Project NEET"
+          aria-label="Loading Prahit NEET Mocks"
           className="space-y-4 py-6"
         >
           <div className="pn-skeleton h-10 w-2/3" />

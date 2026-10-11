@@ -17,7 +17,10 @@ describe("Footer", () => {
     const footer = screen.getByRole("contentinfo")
     expect(within(footer).queryByRole("textbox")).toBeNull()
     expect(
-      within(footer).getByRole("link", { name: "Prahit home" })
+      within(footer).queryByRole("link", { name: "Prahit home" })
+    ).toBeNull()
+    expect(
+      within(footer).getByRole("link", { name: "Home", exact: true })
     ).toHaveAttribute("href", "/")
     expect(
       within(footer).getByText(/Prahit\. All rights reserved/)
@@ -36,7 +39,7 @@ describe("Footer", () => {
       .getAllByRole("link")
       .map((link) => link.getAttribute("href"))
     expect(hrefs).toEqual(
-      expect.arrayContaining(["/project-neet", "/privacy-policy", "/contact"])
+      expect.arrayContaining(["/neet", "/privacy-policy", "/contact"])
     )
     for (const href of hrefs)
       expect(href.startsWith("/") || href.startsWith("mailto:")).toBe(true)

@@ -12,22 +12,6 @@ const FIELDS = [
     hint: "As you would like it to appear on your attempt summary.",
     type: "text",
   },
-  {
-    name: "email",
-    label: "Email",
-    autoComplete: "email",
-    hint: "Used to identify this attempt. We won't email you about it.",
-    type: "email",
-    inputMode: "email",
-  },
-  {
-    name: "phone",
-    label: "Mobile number",
-    autoComplete: "tel",
-    hint: "10-digit Indian mobile, or include your country code.",
-    type: "tel",
-    inputMode: "tel",
-  },
 ]
 
 export function CandidateDetailsForm({
@@ -40,7 +24,9 @@ export function CandidateDetailsForm({
   const formId = useId()
   const [values, setValues] = useState(() => ({
     ...candidateFromProfile(profileUser),
-    ...(initialCandidate || {}),
+    ...(initialCandidate?.fullName
+      ? { fullName: initialCandidate.fullName }
+      : {}),
   }))
   const [touched, setTouched] = useState({})
   const [submitAttempted, setSubmitAttempted] = useState(false)
@@ -55,11 +41,7 @@ export function CandidateDetailsForm({
       document.getElementById(`${formId}-${firstInvalid.name}`)?.focus()
       return
     }
-    onSubmit({
-      fullName: values.fullName.trim(),
-      email: values.email.trim(),
-      phone: values.phone.trim(),
-    })
+    onSubmit({ fullName: values.fullName.trim() })
   }
 
   return (
@@ -93,9 +75,7 @@ export function CandidateDetailsForm({
               inputMode={field.inputMode}
               autoComplete={field.autoComplete}
               value={values[field.name]}
-              maxLength={
-                field.name === "email" ? 254 : field.name === "phone" ? 24 : 80
-              }
+              maxLength={80}
               onChange={(event) =>
                 setValues((current) => ({
                   ...current,
@@ -126,8 +106,10 @@ export function CandidateDetailsForm({
         id={`${formId}-privacy`}
         className="rounded-2xl border border-neet-line bg-neet-surface-muted/60 p-4 text-sm leading-6 text-neet-muted"
       >
-        We only ask for what this mock needs. Project NEET will never ask for
-        your Aadhaar number, NTA application password or any OTP.
+        We only ask for the name to show on your result. Your attempt is linked
+        to your Prahit account, so we do not ask for your phone number or email
+        again. Prahit NEET Mocks will never ask for your Aadhaar number, NTA
+        application password or any OTP.
       </p>
       <button
         type="submit"

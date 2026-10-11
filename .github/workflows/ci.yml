@@ -186,6 +186,100 @@ jobs:
           MONGOOSE_TEST_MONGODB_URI: mongodb://127.0.0.1:27017/studynotion_mongoose_test_ci
           PREFLIGHT_TEST_MONGODB_URI: mongodb://127.0.0.1:27017/studynotion_preflight_test_ci
 
+  neet-integration:
+    name: Project NEET real-Mongo integration (replica set)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - run: npm ci
+
+      # Compare-and-set and majority write concern must be exercised on a
+      # replica set, as in production; a service container cannot pass
+      # --replSet, so the same pinned image is started directly.
+      - name: Start a single-node MongoDB replica set
+        run: |
+          docker run -d --name neet-mongo -p 127.0.0.1:27117:27117 \
+            mongo:8.0@sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a \
+            --replSet neet-ci --port 27117 --bind_ip_all
+          for attempt in $(seq 1 60); do
+            docker exec neet-mongo mongosh --port 27117 --quiet \
+              --eval 'db.runCommand({ ping: 1 }).ok' | grep -q 1 && break
+            sleep 1
+          done
+          docker exec neet-mongo mongosh --port 27117 --quiet --eval \
+            'rs.initiate({ _id: "neet-ci", members: [{ _id: 0, host: "127.0.0.1:27117" }] })'
+          for attempt in $(seq 1 60); do
+            docker exec neet-mongo mongosh --port 27117 --quiet \
+              --eval 'db.hello().isWritablePrimary' | grep -q true && exit 0
+            sleep 1
+          done
+          echo "Replica set did not elect a primary" >&2
+          exit 1
+
+      - run: node --test apps/api/test/project-neet.integration.test.js
+        env:
+          STUDYNOTION_RUN_NEET_INTEGRATION: "1"
+          NEET_TEST_MONGODB_URI: mongodb://127.0.0.1:27117/studynotion_neet_test_ci
+
+  neet-real-e2e:
+    name: Project NEET real browser flows and API smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Start a single-node MongoDB replica set
+        run: |
+          docker run -d --name neet-mongo -p 127.0.0.1:27117:27117 \
+            mongo:8.0@sha256:02a0cc7939f5ed38f30f9bc714ef5f682d49baf9350c54acf302ce833087fe8a \
+            --replSet neet-ci --port 27117 --bind_ip_all
+          for attempt in $(seq 1 60); do
+            docker exec neet-mongo mongosh --port 27117 --quiet \
+              --eval 'db.runCommand({ ping: 1 }).ok' | grep -q 1 && break
+            sleep 1
+          done
+          docker exec neet-mongo mongosh --port 27117 --quiet --eval \
+            'rs.initiate({ _id: "neet-ci", members: [{ _id: 0, host: "127.0.0.1:27117" }] })'
+          for attempt in $(seq 1 60); do
+            docker exec neet-mongo mongosh --port 27117 --quiet \
+              --eval 'db.hello().isWritablePrimary' | grep -q true && exit 0
+            sleep 1
+          done
+          echo "Replica set did not elect a primary" >&2
+          exit 1
+
+      # No request interception: the real API, a real web build, real Mongo.
+      - run: npm run test:neet:e2e:real
+        env:
+          NEET_STACK_MONGODB_HOST: 127.0.0.1:27117
+
+      # Correctness smoke for saves and submissions (zero lost acknowledged
+      # answers, one result per attempt, independently recomputed scores).
+      # Not a capacity test; the latency bar is loose for shared runners.
+      - run: npm run test:neet:smoke -- --students 25 --save-p95-ms 1500
+        env:
+          NEET_STACK_MONGODB_HOST: 127.0.0.1:27117
+
   catalog-e2e:
     name: Catalog Playwright
     runs-on: ubuntu-latest

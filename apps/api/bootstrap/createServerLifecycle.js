@@ -2,6 +2,7 @@ const { cloudinaryConnect } = require("../config/cloudinary")
 const database = require("../config/database")
 const env = require("../config/env")
 const redis = require("../config/redis")
+const { projectNeetSweeper } = require("../modules/project-neet")
 const logger = require("../utils/logger")
 
 const defaultServices = Object.freeze({
@@ -9,6 +10,7 @@ const defaultServices = Object.freeze({
   database,
   env,
   logger,
+  neetSweeper: projectNeetSweeper,
   redis,
 })
 
@@ -33,6 +35,7 @@ const createServerLifecycle = ({
     server.headersTimeout = Math.min(services.env.requestTimeoutMs, 60000)
     server.keepAliveTimeout = 5000
     server.maxRequestsPerSocket = 1000
+    services.neetSweeper?.start()
     return server
   }
 
@@ -54,6 +57,7 @@ const createServerLifecycle = ({
   const shutdown = async (reason, exitCode = 0) => {
     if (lifecycleState.isShuttingDown) return
     lifecycleState.isShuttingDown = true
+    services.neetSweeper?.stop()
     services.logger.info("api.shutdown_started", { reason, exitCode })
 
     const forceExit = setTimeout(() => {

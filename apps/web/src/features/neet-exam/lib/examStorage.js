@@ -1,8 +1,14 @@
 // Per-attempt browser persistence. Every access is guarded: private modes,
 // blocked storage, or quota errors degrade to in-memory behavior and never
 // break the exam.
-const QUEUE_KEY = (attemptId, sessionId) =>
-  `pn:exam:${attemptId}:queue:${sessionId || "legacy"}`
+//
+// Unsent answers are keyed by attempt, not by tab session, so a new tab or a
+// restored crash recovers them. localStorage writes are synchronous, so a
+// change persisted before a crash survives it. Older builds stored queues per
+// session ("…:queue:<session>"); those are merged in and removed on read.
+const KEY_PREFIX = (attemptId) => `pn:exam:${attemptId}:`
+const QUEUE_KEY = (attemptId) => `pn:exam:${attemptId}:queue`
+const LEGACY_QUEUE_PREFIX = (attemptId) => `pn:exam:${attemptId}:queue:`
 const SEQ_KEY = (attemptId) => `pn:exam:${attemptId}:seq`
 const POSITION_KEY = (attemptId) => `pn:exam:${attemptId}:position`
 const SESSION_KEY = (attemptId) => `pn:exam:${attemptId}:session`
@@ -57,33 +63,68 @@ const isWrite = (value) =>
   Number.isSafeInteger(value.timeSpentMs) &&
   value.timeSpentMs >= 0
 
-export const examStorage = Object.freeze({
-  readQueue(attemptId, sessionId) {
-    try {
-      const parsed = JSON.parse(
-        read(local(), QUEUE_KEY(attemptId, sessionId)) || "[]"
-      )
-      return Array.isArray(parsed)
-        ? parsed.filter(isWrite).map((item) => ({
-            questionId: item.questionId,
-            selectedOption: item.selectedOption,
-            markedForReview: item.markedForReview,
-            visited: true,
-            timeSpentMs: item.timeSpentMs,
-            seq: item.seq,
-          }))
-        : []
-    } catch {
-      return []
+const parseWrites = (raw) => {
+  try {
+    const parsed = JSON.parse(raw || "[]")
+    return Array.isArray(parsed)
+      ? parsed.filter(isWrite).map((item) => ({
+          questionId: item.questionId,
+          selectedOption: item.selectedOption,
+          markedForReview: item.markedForReview,
+          visited: true,
+          timeSpentMs: item.timeSpentMs,
+          seq: item.seq,
+        }))
+      : []
+  } catch {
+    return []
+  }
+}
+
+const keysWithPrefix = (storage, prefix) => {
+  const keys = []
+  try {
+    for (let index = 0; index < (storage?.length || 0); index += 1) {
+      const key = storage.key(index)
+      if (key?.startsWith(prefix)) keys.push(key)
     }
+  } catch {
+    // storage unavailable
+  }
+  return keys
+}
+
+// Latest write per question wins (highest sequence).
+const mergeWrites = (lists) => {
+  const latest = new Map()
+  for (const write of lists.flat()) {
+    const existing = latest.get(write.questionId)
+    if (!existing || write.seq > existing.seq) {
+      latest.set(write.questionId, write)
+    }
+  }
+  return [...latest.values()]
+}
+
+export const examStorage = Object.freeze({
+  // Every unsent write for the attempt, from any earlier tab or session.
+  readQueue(attemptId) {
+    const store = local()
+    const legacyKeys = keysWithPrefix(store, LEGACY_QUEUE_PREFIX(attemptId))
+    const merged = mergeWrites([
+      parseWrites(read(store, QUEUE_KEY(attemptId))),
+      ...legacyKeys.map((key) => parseWrites(read(store, key))),
+    ])
+    if (legacyKeys.length) {
+      if (merged.length)
+        write(store, QUEUE_KEY(attemptId), JSON.stringify(merged))
+      legacyKeys.forEach((key) => remove(store, key))
+    }
+    return merged
   },
-  writeQueue(attemptId, writes, sessionId) {
-    if (!writes.length) return remove(local(), QUEUE_KEY(attemptId, sessionId))
-    return write(
-      local(),
-      QUEUE_KEY(attemptId, sessionId),
-      JSON.stringify(writes)
-    )
+  writeQueue(attemptId, writes) {
+    if (!writes.length) return remove(local(), QUEUE_KEY(attemptId))
+    return write(local(), QUEUE_KEY(attemptId), JSON.stringify(writes))
   },
   readSeq(attemptId) {
     const value = Number(read(local(), SEQ_KEY(attemptId)))
@@ -106,18 +147,13 @@ export const examStorage = Object.freeze({
   writeSessionId(attemptId, value) {
     write(session(), SESSION_KEY(attemptId), value)
   },
-  clear(attemptId, sessionId) {
-    remove(local(), QUEUE_KEY(attemptId, sessionId))
-    remove(local(), SEQ_KEY(attemptId))
-    remove(session(), POSITION_KEY(attemptId))
-    remove(session(), SESSION_KEY(attemptId))
+  // Removes everything stored for the attempt, in both storages, including
+  // queues left by earlier tabs (important on shared computers).
+  clear(attemptId) {
+    for (const store of [local(), session()]) {
+      keysWithPrefix(store, KEY_PREFIX(attemptId)).forEach((key) =>
+        remove(store, key)
+      )
+    }
   },
 })
-
-export const ensureExamSessionId = (attemptId) => {
-  const existing = examStorage.readSessionId(attemptId)
-  if (existing) return existing
-  const created = globalThis.crypto.randomUUID()
-  examStorage.writeSessionId(attemptId, created)
-  return created
-}

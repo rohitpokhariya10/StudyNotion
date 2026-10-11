@@ -10,7 +10,7 @@ export const FooterLink2 = [
       { title: "Services", link: "/services" },
       { title: "Careers", link: "/careers" },
       { title: "Blogs", link: "/blogs" },
-      { title: "Project NEET", link: "/project-neet" },
+      { title: "NEET Mocks", link: "/neet" },
     ],
   },
   {

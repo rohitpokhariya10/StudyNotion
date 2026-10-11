@@ -16,7 +16,7 @@ export default function NeetExam() {
   const { attemptId } = useParams()
   const navigate = useNavigate()
   const result = useCallback(
-    (id) => navigate(`/project-neet/attempts/${id}/result`, { replace: true }),
+    (id) => navigate(`/neet/attempts/${id}/result`, { replace: true }),
     [navigate]
   )
   const engine = useExamEngine({ attemptId, onResult: result })
@@ -138,7 +138,7 @@ export default function NeetExam() {
                   className="pn-btn pn-btn-secondary"
                   onClick={() => {
                     setLeaveOpen(false)
-                    navigate("/project-neet/mocks")
+                    navigate("/neet/mocks")
                   }}
                 >
                   Leave exam
@@ -228,13 +228,13 @@ export default function NeetExam() {
               </p>
               <Link
                 className="pn-btn pn-btn-primary"
-                to={`/project-neet/mocks/${attempt.testId}/start`}
+                to={`/neet/mocks/${attempt.testId}/start`}
               >
                 Return to onboarding
               </Link>
             </>
           )}
-          <Link to="/project-neet/mocks" className="block text-sm underline">
+          <Link to="/neet/mocks" className="block text-sm underline">
             Back to mock tests
           </Link>
         </main>

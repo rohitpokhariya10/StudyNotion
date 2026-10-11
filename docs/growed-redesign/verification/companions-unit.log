@@ -1,0 +1,17 @@
+
+> studynotion@0.1.0 test:frontend
+> npm run test --workspace studynotion-web src/widgets/navbar/ui/Navbar.test.jsx src/widgets/footer/ui/Footer.test.jsx src/features/authentication
+
+
+> studynotion-web@0.1.0 test
+> vitest run src/widgets/navbar/ui/Navbar.test.jsx src/widgets/footer/ui/Footer.test.jsx src/features/authentication
+
+
+ RUN  v4.1.10 /Users/rohitpokhariya/Documents/Prahit/apps/web
+
+
+ Test Files  13 passed (13)
+      Tests  32 passed (32)
+   Start at  11:45:02
+   Duration  1.72s (transform 874ms, setup 995ms, import 2.25s, tests 2.06s, environment 7.26s)
+

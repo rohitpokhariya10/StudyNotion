@@ -13,8 +13,10 @@ const Item = ({ children, title }) => (
 // ticks the consent box and presses the consent button.
 export function ProctorConsentPanel({ onAccept, onBack, policy }) {
   const checkboxId = useId()
+  const adultId = useId()
   const [agreed, setAgreed] = useState(false)
-  const { autoSubmit, monitoring, requirements, signals, warnings } = policy
+  const [adult, setAdult] = useState(false)
+  const { monitoring, requirements, signals, warnings } = policy
 
   const devices = [
     requirements.camera && "your camera",
@@ -28,14 +30,14 @@ export function ProctorConsentPanel({ onAccept, onBack, policy }) {
         <Item title="What is accessed">
           <p>
             {devices.length
-              ? `During the exam, Project NEET will use ${devices.join(", ")}`
+              ? `During the exam, Prahit NEET Mocks will use ${devices.join(", ")}`
               : "No camera, microphone or screen is accessed"}
             {requirements.fullscreen
               ? ", and the exam runs in full screen."
               : "."}
           </p>
           <p>
-            Your browser will ask for permission. You can decline; proctored
+            Your browser will ask for permission. You can decline; monitored
             mode will then be unavailable and practice mode remains open to you.
           </p>
         </Item>
@@ -94,35 +96,51 @@ export function ProctorConsentPanel({ onAccept, onBack, policy }) {
         </Item>
       </div>
 
-      <Item title="Warnings and automatic submission">
+      <Item title="Notices and human review">
         <p>
-          Brief, natural movements never raise warnings. Repeated or sustained
+          Brief, natural movements never raise notices. Repeated or sustained
           signals lead to calm notices, then stronger ones.
         </p>
         <p>
-          After {warnings.maxWarnings} counted warning
-          {warnings.maxWarnings === 1 ? "" : "s"}, the next counted violation{" "}
-          {autoSubmit.enabled
-            ? "submits your attempt automatically"
-            : "is recorded on your result"}
-          . Counted violations are tab switches, leaving full screen, repeated
-          focus loss or copy/paste
+          Monitoring{" "}
+          <strong className="text-neet-ink">
+            never submits, ends or cancels your exam
+          </strong>
+          , and it never changes your score. After {warnings.maxWarnings}{" "}
+          counted notice
+          {warnings.maxWarnings === 1 ? "" : "s"}, further counted signals flag
+          this attempt for review by a person. Counted signals are tab switches,
+          leaving full screen, repeated focus loss, copy/paste, opening this
+          attempt in a second live window
           {requirements.screenShare ? ", and stopping screen sharing" : ""}.
+          Refreshing this same tab is not counted.
         </p>
-        {!autoSubmit.softSignalsCanSubmit && (
-          <p>
-            Camera and audio signals are uncertain, so they can only produce
-            notices — they never submit your attempt.
-          </p>
-        )}
+        <p>
+          Camera and audio signals are uncertain, so they only produce notices
+          and are never counted.
+        </p>
         <p>Losing your internet connection is never treated as a violation.</p>
+        <p>The exam is submitted automatically only when its timer ends.</p>
       </Item>
 
       <p className="rounded-2xl border border-neet-sun/40 bg-neet-sun/10 p-4 text-sm leading-6 text-neet-ink">
-        If you are under 18, please review this notice with a parent or guardian
-        before continuing. Browser monitoring has real limits: it cannot see
-        other devices or lock your computer.
+        Monitored mode is available only to candidates aged 18 or over. Practice
+        mode is open to everyone. Browser monitoring has real limits: it cannot
+        see other devices or lock your computer.
       </p>
+
+      <div className="flex items-start gap-3 rounded-2xl border border-neet-line bg-neet-surface-muted/50 p-4">
+        <input
+          id={adultId}
+          type="checkbox"
+          checked={adult}
+          onChange={(event) => setAdult(event.target.checked)}
+          className="mt-1 h-5 w-5 flex-none accent-[rgb(var(--pn-accent))]"
+        />
+        <label htmlFor={adultId} className="leading-6 font-semibold">
+          I confirm I am 18 years of age or older.
+        </label>
+      </div>
 
       <div className="flex items-start gap-3 rounded-2xl border border-neet-line bg-neet-surface-muted/50 p-4">
         <input
@@ -133,8 +151,8 @@ export function ProctorConsentPanel({ onAccept, onBack, policy }) {
           className="mt-1 h-5 w-5 flex-none accent-[rgb(var(--pn-accent))]"
         />
         <label htmlFor={checkboxId} className="leading-6 font-semibold">
-          I understand what is monitored and stored, and I consent to proctored
-          monitoring for this mock attempt.
+          I understand what is monitored and stored, and I consent to monitoring
+          for this mock attempt.
         </label>
       </div>
 
@@ -142,8 +160,8 @@ export function ProctorConsentPanel({ onAccept, onBack, policy }) {
         <button
           type="button"
           className="pn-btn pn-btn-primary pn-btn-lg"
-          disabled={!agreed}
-          onClick={onAccept}
+          disabled={!agreed || !adult}
+          onClick={() => onAccept({ adultConfirmed: true })}
         >
           I consent — check my devices
         </button>

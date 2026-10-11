@@ -1,13 +1,10 @@
 import { Template } from "@/features/authentication"
-import signupImg from "@/shared/assets/Images/signup.webp"
 
 function Signup() {
   return (
     <Template
-      title="Build practical skills with Prahit"
-      description1="Build skills for today, tomorrow, and beyond."
-      description2="Education to future-proof your career."
-      image={signupImg}
+      title="Create your account"
+      description="Join Prahit to explore courses and track your progress as you learn."
       formType="signup"
     />
   )

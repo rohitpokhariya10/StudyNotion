@@ -8,6 +8,10 @@
 //   batches with at most one request in flight — no request storm per click.
 // - Unsent changes are persisted locally, survive reloads and outages, and
 //   are retried with backoff (honoring Retry-After) until acknowledged.
+// - Retries continue while the browser reports offline: navigator.onLine and
+//   the "online" event are hints, not the only path back to saving.
+// - In urgent mode (the final seconds of the exam) every change is sent
+//   immediately instead of being debounced.
 
 export const AUTOSAVE_STATUS = Object.freeze({
   SAVED: "saved",
@@ -25,6 +29,7 @@ const CLOSED_CODES = new Set([
   "NEET_ATTEMPT_NOT_STARTED",
 ])
 const DROP_CODES = new Set(["NEET_QUESTION_NOT_IN_PAPER", "INVALID_BODY"])
+const OFFLINE_PROBE_MS = Object.freeze([5_000, 10_000, 15_000])
 
 export const createAutosaveQueue = ({
   debounceMs = 700,
@@ -48,6 +53,8 @@ export const createAutosaveQueue = ({
   let failures = 0
   let stopped = false
   let blocked = null
+  let urgent = false
+  let offlineProbes = 0
   let status = pending.size ? AUTOSAVE_STATUS.PENDING : AUTOSAVE_STATUS.SAVED
   let lastSavedAt = null
   const drainWaiters = new Set()
@@ -79,7 +86,9 @@ export const createAutosaveQueue = ({
     }, delayMs)
   }
 
-  async function flush() {
+  // `probe` sends even while the browser reports offline, so recovery never
+  // depends solely on the "online" event.
+  async function flush({ probe = false } = {}) {
     if (stopped || blocked || inFlight || !pending.size) {
       if (!pending.size && !inFlight) {
         setStatus(AUTOSAVE_STATUS.SAVED)
@@ -87,8 +96,16 @@ export const createAutosaveQueue = ({
       }
       return
     }
-    if (!isOnline()) {
+    if (!isOnline() && !probe) {
       setStatus(AUTOSAVE_STATUS.OFFLINE)
+      const delay =
+        OFFLINE_PROBE_MS[Math.min(offlineProbes, OFFLINE_PROBE_MS.length - 1)]
+      offlineProbes += 1
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        timer = null
+        void flush({ probe: true })
+      }, delay)
       return
     }
     clearTimeout(timer)
@@ -101,6 +118,7 @@ export const createAutosaveQueue = ({
       const result = await send(batch)
       if (stopped) return
       failures = 0
+      offlineProbes = 0
       for (const state of result.responses) {
         const queued = pending.get(state.questionId)
         // Acknowledge only what the server now holds; a newer local change
@@ -144,12 +162,16 @@ export const createAutosaveQueue = ({
         onFatal?.("auth", error)
       } else if (DROP_CODES.has(error?.code)) {
         // A write the server can never accept would block every later save.
+        // The caller reconciles the dropped questions with the server.
+        const dropped = []
         for (const write of batch) {
-          if (pending.get(write.questionId)?.seq === write.seq)
+          if (pending.get(write.questionId)?.seq === write.seq) {
             pending.delete(write.questionId)
+            dropped.push(write)
+          }
         }
         save()
-        onFatal?.("invalid", error)
+        onFatal?.("invalid", error, dropped)
         if (pending.size) schedule(0)
         else {
           setStatus(AUTOSAVE_STATUS.SAVED)
@@ -162,7 +184,16 @@ export const createAutosaveQueue = ({
         setStatus(
           isOnline() ? AUTOSAVE_STATUS.RETRYING : AUTOSAVE_STATUS.OFFLINE
         )
-        schedule(error?.retryAfterMs ?? backoff + jitter)
+        const delay = error?.retryAfterMs ?? backoff + jitter
+        if (isOnline()) schedule(delay)
+        else {
+          // Keep probing while offline instead of waiting for "online".
+          clearTimeout(timer)
+          timer = setTimeout(() => {
+            timer = null
+            void flush({ probe: true })
+          }, delay)
+        }
       }
     }
   }
@@ -181,10 +212,21 @@ export const createAutosaveQueue = ({
         setStatus(
           isOnline() ? AUTOSAVE_STATUS.PENDING : AUTOSAVE_STATUS.OFFLINE
         )
-        schedule(time - firstPendingAt >= maxWaitMs ? 0 : debounceMs)
+        schedule(urgent || time - firstPendingAt >= maxWaitMs ? 0 : debounceMs)
       }
     },
     flush,
+    // Final seconds: send each change immediately rather than debouncing.
+    setUrgent(value) {
+      const next = Boolean(value)
+      if (next === urgent) return
+      urgent = next
+      if (urgent && pending.size && !inFlight && !blocked) schedule(0)
+    },
+    // Unsent writes, for reconciling local state with the server.
+    pendingWrites() {
+      return [...pending.values()]
+    },
     // Sends everything now and resolves true once nothing is pending, or
     // false if the deadline passes first (for example while offline).
     drain({ timeoutMs = 10_000 } = {}) {
@@ -208,6 +250,7 @@ export const createAutosaveQueue = ({
       if (stopped) return
       blocked = null
       failures = 0
+      offlineProbes = 0
       if (pending.size) void flush()
       else setStatus(AUTOSAVE_STATUS.SAVED)
     },
