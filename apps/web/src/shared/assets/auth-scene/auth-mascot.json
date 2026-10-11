@@ -1,0 +1,76 @@
+{
+  "generator": "docs/growed-redesign/artwork/auth-mascot/generate-auth-mascot.mjs",
+  "frame": {
+    "width": 1040,
+    "height": 1196
+  },
+  "layers": {
+    "ledge": {
+      "x": -556,
+      "y": 949,
+      "width": 2178,
+      "height": 247
+    },
+    "body": {
+      "x": 85,
+      "y": 435,
+      "width": 845,
+      "height": 658
+    },
+    "head": {
+      "x": 198,
+      "y": 35,
+      "width": 679,
+      "height": 631
+    },
+    "grass-front": {
+      "x": -453,
+      "y": 1017,
+      "width": 1987,
+      "height": 179
+    }
+  },
+  "eyes": [
+    {
+      "cx": 455.94,
+      "cy": 331.49,
+      "rx": 49.56,
+      "ry": 58.37,
+      "angle": 19.34,
+      "area": 9085,
+      "lid": {
+        "top": "#95b3df",
+        "middle": "#96b7e5",
+        "bottom": "#adcffc",
+        "skin": "#a3c4ee",
+        "rim": "#9cbbe8"
+      }
+    },
+    {
+      "cx": 621.96,
+      "cy": 331.46,
+      "rx": 49.24,
+      "ry": 58.41,
+      "angle": -19.28,
+      "area": 9034,
+      "lid": {
+        "top": "#89a4cd",
+        "middle": "#809fcb",
+        "bottom": "#8fb0df",
+        "skin": "#94b3df",
+        "rim": "#82a0cd"
+      }
+    }
+  ],
+  "pivots": {
+    "head": {
+      "x": 537.83,
+      "y": 540.47
+    },
+    "body": {
+      "x": 537.73,
+      "y": 1042.69
+    }
+  },
+  "strands": 240017
+}

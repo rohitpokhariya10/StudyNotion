@@ -1,22 +1,21 @@
-/* Homepage hero: display headline beside two glossy 3D capsule characters.
-   Scoped to the home page. Scene geometry comes from capsuleLayout.js:
-   the scene box keeps FRAME_WIDTH / FRAME_HEIGHT (2.35 / 2.4), and the
-   fractions below locate the capsules and the tall capsule's eyes in it. */
+/* Homepage hero: headline beside the 3D Prahit yeti on the same white
+   canvas as the navbar. Scoped to the home page; type and blue follow the
+   editorial About/Services pages. The yeti stands on a grassy hill inside a
+   round window of sky (HeroYeti.jsx), so its white coat reads against the
+   white page. */
 .sn-capsule-hero {
-  --sn-hero-canvas: #f2f1ed;
-  --sn-hero-ink: #0d0d12;
-  --sn-hero-muted: #55544f;
-  --sn-hero-electric: #2b3bff;
-  --sn-hero-electric-hover: #1d29d9;
-  --capsule-aspect: 0.9792;
-  /* Scene box width; height follows the frame aspect. */
-  --scene-w: min(100%, 22rem);
-  --scene-h: calc(var(--scene-w) / var(--capsule-aspect));
+  --sn-hero-ink: var(--sn-ink);
+  --sn-hero-muted: #475569;
+  --sn-hero-accent: var(--sn-brand);
+  /* Scene box (window plus the yeti crossing its edge); height follows. */
+  --scene-aspect: 1.04;
+  --scene-w: min(100%, 21rem);
+  --scene-h: calc(var(--scene-w) / var(--scene-aspect));
   position: relative;
   isolation: isolate;
   overflow-x: clip;
   padding-bottom: 3rem;
-  background: var(--sn-hero-canvas);
+  background: var(--sn-canvas);
   color: var(--sn-hero-ink);
 }
 .sn-capsule-stage {
@@ -25,100 +24,118 @@
 .sn-capsule-scene {
   position: relative;
   width: var(--scene-w);
-  aspect-ratio: var(--capsule-aspect);
+  aspect-ratio: var(--scene-aspect);
   margin-inline: auto;
   pointer-events: none;
 }
-.sn-capsule-layer {
+/* The window: 86% of the box wide, the auth panel's sky gradient and
+   clouds, the grass ledge across its lower part. */
+.sn-hero-yeti-window {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  width: 86%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 50%;
+  background: linear-gradient(175deg, #91badd 0%, #b8d6eb 57%, #e0edf5 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.35),
+    0 28px 60px -32px rgb(31 58 99 / 0.45);
+}
+.sn-hero-yeti-window svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+/* The hill's crest sits at ~70% of the window's height. */
+.sn-hero-yeti-ledge {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 260%;
+  max-width: none;
+  translate: -50% 0;
+}
+/* Feet on the grass just below the crest (73% down the window), with sky
+   around the head and hands; the waving hand stays inside the window. */
+.sn-hero-yeti-stage {
+  position: absolute;
+  bottom: 29%;
+  left: 50%;
+  width: 80%;
+  translate: -50% 0;
 }
 .sn-capsule-content {
   position: relative;
   z-index: 1;
 }
 
-/* Headline: a dominant sans line and an electric-blue italic serif line. */
+/* One sans heading: a near-black line and a blue line, each kept whole. */
 .sn-capsule-title {
-  margin: 0.25rem 0 0;
-  font-size: clamp(2.75rem, 12.6vw, 5rem);
-  line-height: 0.94;
-  font-weight: 500;
-  text-wrap: initial;
-}
-.sn-capsule-title-sans {
-  display: block;
-  font-family: "Inter Tight Variable", "Inter Tight", var(--sn-font-display);
-  letter-spacing: -0.045em;
+  margin: 1.5rem 0 0;
+  font-family: var(--sn-font-display);
+  font-size: clamp(2rem, 1.2rem + 3.6vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   color: var(--sn-hero-ink);
 }
-.sn-capsule-title-serif {
+.sn-capsule-title > span {
   display: block;
-  margin-top: 0.04em;
-  font-family: "Instrument Serif", Georgia, "Times New Roman", serif;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 0.98;
-  color: var(--sn-hero-electric);
+  text-wrap: balance;
+}
+.sn-capsule-title-accent {
+  color: var(--sn-hero-accent);
 }
 
 .sn-capsule-intro {
-  margin-top: 1.75rem;
-  max-width: 30rem;
+  margin-top: 1.25rem;
+  max-width: 34rem;
   color: var(--sn-hero-muted);
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.65;
 }
 .sn-capsule-actions {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 }
 .sn-capsule-cta {
-  min-height: 3rem;
-  padding-inline: 1.5rem;
-  border-radius: 999px;
-  background: var(--sn-hero-electric);
-  color: #ffffff;
-  font-weight: 500;
-}
-.sn-capsule-cta:hover {
-  background: var(--sn-hero-electric-hover);
-  box-shadow: 0 10px 24px rgb(43 59 255 / 0.24);
-}
-.sn-capsule-cta:focus-visible {
-  outline-color: var(--sn-hero-electric);
+  gap: 0.625rem;
 }
 
 .sn-capsule-points {
-  margin-top: 2rem;
+  margin-top: 2.25rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
-  max-width: 30rem;
+  gap: 1.5rem;
+  max-width: 34rem;
 }
 .sn-capsule-points li {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-content: start;
-  column-gap: 0.625rem;
-  font-size: 0.875rem;
-  line-height: 1.45;
+  column-gap: 0.75rem;
+  row-gap: 0.125rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
   color: var(--sn-hero-muted);
 }
 .sn-capsule-points svg {
   grid-row: span 2;
-  margin-top: 0.1rem;
+  margin-top: 0.125rem;
   font-size: 1.25rem;
-  color: var(--sn-hero-electric);
+  color: var(--sn-hero-accent);
 }
 .sn-capsule-points .font-semibold {
   color: var(--sn-hero-ink);
-  font-size: 0.9375rem;
+  font-size: 1rem;
 }
 
-/* Course finder as a full-width bar below the composition. */
+/* Course finder as a full-width bar below the composition: a white card set
+   off from the white hero by a hairline border and a soft shadow. */
 .sn-capsule-finder {
   position: relative;
   z-index: 1;
@@ -126,9 +143,11 @@
 }
 .sn-capsule-finder .sn-finder {
   max-width: none;
-  border-color: rgb(13 13 18 / 0.08);
-  border-radius: 1.25rem;
-  box-shadow: 0 18px 50px rgb(13 13 18 / 0.08);
+  border-color: var(--sn-border);
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 2px rgb(16 24 40 / 0.04),
+    0 12px 32px -8px rgb(16 24 40 / 0.1);
 }
 
 @media (max-width: 479px) {
@@ -139,69 +158,86 @@
 }
 @media (min-width: 640px) {
   .sn-capsule-hero {
-    --scene-w: min(100%, 30rem);
+    --scene-w: min(100%, 24rem);
   }
 }
 
-/* Tablet: characters above the headline, which tucks under their bases. */
+/* Tablet: the yeti above the headline. */
 @media (min-width: 768px) and (max-width: 1023px) {
   .sn-capsule-hero {
-    --scene-w: min(100%, 33rem);
+    --scene-w: min(100%, 27rem);
     padding-bottom: 4rem;
   }
   .sn-capsule-title {
-    margin-top: calc(var(--scene-h) * -0.06);
+    margin-top: 2rem;
+    font-size: clamp(2.5rem, 1rem + 4vw, 3.25rem);
+  }
+  .sn-capsule-intro {
+    font-size: 1.0625rem;
   }
 }
 
-/* Desktop: headline on the left, characters to the right. The headline's
-   first line starts just below the tall capsule's eyes and runs across it. */
+/* Desktop: copy in a left column sized to its longest headline line; the
+   yeti fills the space to its right (bleeding past the content edge on
+   wide screens), both centred on the same line. */
 @media (min-width: 1024px) {
   .sn-capsule-hero {
-    --scene-w: clamp(30rem, 52vw, 47.5rem);
-    --scene-top: calc(4rem - var(--scene-h) * 0.146);
-    --scene-right: max(1rem, calc(50% - var(--sn-content) / 2 - 9rem));
+    --title-size: clamp(2.875rem, 0.72rem + 3.37vw, 4.25rem);
+    /* "Build skills that matter." is 11.4em in Poppins 700. */
+    --copy-w: calc(var(--title-size) * 11.6);
+    /* Left edge of .sn-container at this width (64px side margins). */
+    --copy-left: max(4rem, calc(50vw - var(--sn-content) / 2));
+    --scene-gap: clamp(2.5rem, 4vw, 4.5rem);
+    --scene-right: max(1rem, calc(50vw - var(--sn-content) / 2 - 16rem));
+    /* The box starts `--scene-gap` after the copy. */
+    --scene-w: min(
+      34rem,
+      calc(
+        100vw - var(--scene-right) - var(--copy-left) - var(--copy-w) -
+          var(--scene-gap)
+      )
+    );
+    --scene-pad: clamp(0.75rem, 1.5vw, 1.5rem);
     padding-bottom: 4.5rem;
   }
   .sn-capsule-stage {
-    /* Room for the characters when the copy is shorter than they are. */
-    min-height: calc(4rem + var(--scene-h) * 0.854 + 1.5rem);
+    display: flex;
+    align-items: center;
+    /* Tall enough for the yeti; when the copy is taller (narrow desktops)
+       it keeps clear space below the navbar. */
+    min-height: calc(var(--scene-h) + 2 * var(--scene-pad));
+    padding-block: clamp(1.5rem, 3vw, 2.5rem);
   }
   .sn-capsule-scene {
     position: absolute;
-    top: var(--scene-top);
+    /* Above the full-width copy container so a click reaches the yeti; the
+       box itself passes clicks through. */
+    z-index: 2;
+    top: 50%;
     right: var(--scene-right);
     margin: 0;
+    translate: 0 -50%;
   }
-  .sn-capsule-content {
-    padding-top: calc(4rem + var(--scene-h) * 0.33);
+  .sn-capsule-content > * {
+    max-width: var(--copy-w);
   }
   .sn-capsule-title {
     margin: 0;
-    font-size: clamp(4.25rem, 7.5vw, 8rem);
-    line-height: 0.92;
+    font-size: var(--title-size);
+    line-height: 1.12;
   }
-  .sn-capsule-title-serif {
-    padding-left: 0.5em;
+  .sn-capsule-intro {
+    max-width: min(34rem, var(--copy-w));
+    margin-top: 1.5rem;
+    font-size: 1.125rem;
   }
-  .sn-capsule-title-serif > span {
-    display: block;
-  }
-  /* CTA and the two points share one row, below the capsule bases. */
   .sn-capsule-actions {
-    display: flex;
-    align-items: center;
-    gap: 2.5rem;
-    margin-top: 1.75rem;
-  }
-  .sn-capsule-cta {
-    flex: none;
+    margin-top: 2.25rem;
   }
   .sn-capsule-points {
-    grid-template-columns: repeat(2, minmax(0, 15rem));
+    grid-template-columns: repeat(2, minmax(0, 16rem));
     gap: 2rem;
-    max-width: none;
-    margin: 0;
+    margin-top: 2.5rem;
   }
   .sn-capsule-finder {
     margin-top: 3rem;

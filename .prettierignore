@@ -12,3 +12,13 @@ pnpm-lock.yaml
 .env.development
 .env.test
 .env.production
+
+# Generated artifacts: whole-repository source exports and recorded
+# verification output. Reformatting them would rewrite captured content.
+STUDYNOTION_AI_CONTEXT.md
+STUDYNOTION_CODEBASE.md
+STUDYNOTION_GROWED_UI_UX_REDESIGN.md
+docs/growed-redesign/verification/
+
+# Vendored Draco decoder (three.js) and binary mascot models.
+apps/web/public/mascot/

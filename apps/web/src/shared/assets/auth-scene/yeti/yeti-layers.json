@@ -1,0 +1,154 @@
+{
+  "source": "Cute Waving Yeti Mascot.png",
+  "sha256": "a37255d6298053935a5725c786e7f10a6723ae3f7ca7c070087d0015c7b67169",
+  "canvas": {
+    "width": 1254,
+    "height": 1254
+  },
+  "frame": {
+    "x": 82,
+    "y": -12,
+    "width": 1288,
+    "height": 1239
+  },
+  "pivots": {
+    "neck": {
+      "x": 560,
+      "y": 726
+    },
+    "feet": {
+      "x": 600,
+      "y": 1210
+    }
+  },
+  "limits": {
+    "head_rotate": 5.0,
+    "head_shift_x": 14,
+    "head_shift_y": 9,
+    "lean": 1.7
+  },
+  "layers": {
+    "body": {
+      "x": 97,
+      "y": 461,
+      "width": 1041,
+      "height": 759
+    },
+    "head": {
+      "x": 211,
+      "y": 10,
+      "width": 736,
+      "height": 728
+    },
+    "pupil-0": {
+      "x": 380,
+      "y": 451,
+      "width": 80,
+      "height": 102
+    },
+    "lid-0": {
+      "x": 358,
+      "y": 424,
+      "width": 131,
+      "height": 143
+    },
+    "opening-0": {
+      "x": 370,
+      "y": 437,
+      "width": 107,
+      "height": 118
+    },
+    "pupil-1": {
+      "x": 585,
+      "y": 400,
+      "width": 90,
+      "height": 99
+    },
+    "lid-1": {
+      "x": 575,
+      "y": 367,
+      "width": 156,
+      "height": 141
+    },
+    "opening-1": {
+      "x": 590,
+      "y": 379,
+      "width": 129,
+      "height": 117
+    }
+  },
+  "eyes": [
+    {
+      "cx": 422.58,
+      "cy": 495.91,
+      "rx": 63.38,
+      "ry": 65.71,
+      "angle": -14.02,
+      "travel": {
+        "x": 19.26,
+        "y": 15.47
+      },
+      "iris": {
+        "cx": 419.11,
+        "cy": 501.74,
+        "a": 38.38,
+        "b": 49.73,
+        "theta": 172.53
+      },
+      "pupil": {
+        "x": 380,
+        "y": 451,
+        "width": 80,
+        "height": 102
+      },
+      "opening": {
+        "x": 370,
+        "y": 437,
+        "width": 107,
+        "height": 118
+      },
+      "lid": {
+        "x": 358,
+        "y": 424,
+        "width": 131,
+        "height": 143
+      }
+    },
+    {
+      "cx": 652.38,
+      "cy": 438.53,
+      "rx": 69.55,
+      "ry": 64.6,
+      "angle": -14.02,
+      "travel": {
+        "x": 23.76,
+        "y": 15.21
+      },
+      "iris": {
+        "cx": 629.14,
+        "cy": 448.91,
+        "a": 48.89,
+        "b": 43.0,
+        "theta": -107.76
+      },
+      "pupil": {
+        "x": 585,
+        "y": 400,
+        "width": 90,
+        "height": 99
+      },
+      "opening": {
+        "x": 590,
+        "y": 379,
+        "width": 129,
+        "height": 117
+      },
+      "lid": {
+        "x": 575,
+        "y": 367,
+        "width": 156,
+        "height": 141
+      }
+    }
+  ]
+}

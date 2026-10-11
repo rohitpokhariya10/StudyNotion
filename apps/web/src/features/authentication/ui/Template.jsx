@@ -2,13 +2,13 @@ import { emptyPolicyAcknowledgement } from "@/features/authentication/lib/policy
 import GoogleSignInButton from "@/features/authentication/ui/GoogleSignInButton"
 import LoginForm from "@/features/authentication/ui/LoginForm"
 import SignupForm from "@/features/authentication/ui/SignupForm"
-import AuthLayout, { AuthHeading } from "@/shared/ui/AuthLayout"
+import { AuthScene } from "@/shared/ui/auth-scene"
 import FlaskLoader from "@/shared/ui/FlaskLoader"
 import { useState } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router"
 
-function Template({ title, description1, description2, formType }) {
+function Template({ title, description, formType }) {
   const { loading } = useSelector((state) => state.auth)
   const [policyAcknowledgement, setPolicyAcknowledgement] = useState(
     emptyPolicyAcknowledgement
@@ -19,9 +19,13 @@ function Template({ title, description1, description2, formType }) {
   )
 
   return (
-    <AuthLayout variant={formType === "signup" ? "signup" : "login"}>
+    <AuthScene form={formType}>
+      <header className="sn-auth-head">
+        <h1 className="sn-auth-title">{title}</h1>
+        <p className="sn-auth-lead">{description}</p>
+      </header>
       {loading ? (
-        <div className="grid min-h-80 place-items-center" aria-busy="true">
+        <div className="sn-auth-loading" aria-busy="true">
           <FlaskLoader
             replacesLoadingToast
             label={
@@ -31,14 +35,6 @@ function Template({ title, description1, description2, formType }) {
         </div>
       ) : (
         <>
-          <AuthHeading title={title}>
-            <p className="mt-3 text-[0.9375rem] leading-relaxed">
-              <span className="text-text-secondary">{description1}</span>{" "}
-              <span className="font-medium text-brand-primary">
-                {description2}
-              </span>
-            </p>
-          </AuthHeading>
           {formType === "signup" ? (
             <SignupForm
               policyAcknowledgement={policyAcknowledgement}
@@ -49,49 +45,33 @@ function Template({ title, description1, description2, formType }) {
           )}
           {googleIdentityEnabled && (
             <>
-              <div className="my-6 flex w-full items-center gap-x-3">
-                <div className="h-px flex-1 bg-border-default" />
-                <span className="text-sm text-text-secondary">or</span>
-                <div className="h-px flex-1 bg-border-default" />
-              </div>
+              <div className="sn-auth-divider">or</div>
               <GoogleSignInButton
                 requirePolicyAcknowledgement={formType === "signup"}
                 policyAcknowledgement={policyAcknowledgement}
               />
               {formType === "signup" && (
-                <p className="mt-3 text-center text-xs text-text-secondary">
+                <p className="sn-auth-note">
                   Google sign-up creates a Student account. Instructor
                   onboarding is completed separately.
                 </p>
               )}
             </>
           )}
-          <p className="mt-8 text-center text-sm text-text-secondary">
+          <p className="sn-auth-switch">
             {formType === "signup" ? (
               <>
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  className="font-medium text-brand-primary hover:underline"
-                >
-                  Log in
-                </Link>
+                Already have an account? <Link to="/login">Sign in</Link>
               </>
             ) : (
               <>
-                New to Prahit?{" "}
-                <Link
-                  to="/signup"
-                  className="font-medium text-brand-primary hover:underline"
-                >
-                  Create a free account
-                </Link>
+                Don’t have an account? <Link to="/signup">Sign up</Link>
               </>
             )}
           </p>
         </>
       )}
-    </AuthLayout>
+    </AuthScene>
   )
 }
 

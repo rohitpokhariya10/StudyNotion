@@ -1,0 +1,76 @@
+/* Yeti mascot stage. Placement and size come from the caller's class; the
+   stage keeps the camera framing's aspect (--yeti-aspect), so the poster and
+   the canvas line up exactly and the layout never shifts when the 3D scene
+   arrives. Nothing here receives pointer input. */
+:where(.sn-yeti) {
+  position: relative;
+}
+.sn-yeti {
+  aspect-ratio: var(--yeti-aspect);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+/* A click or tap on an interactive yeti waves (the canvas itself never
+   takes input). */
+.sn-yeti[data-interactive] {
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Soft contact shadow under the feet. */
+.sn-yeti::before {
+  content: "";
+  position: absolute;
+  left: 27%;
+  right: 27%;
+  bottom: -1.2%;
+  height: 6%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgb(18 42 30 / 0.34),
+    rgb(18 42 30 / 0.14) 62%,
+    transparent
+  );
+}
+.sn-yeti-poster,
+.sn-yeti-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+.sn-yeti-poster {
+  object-fit: contain;
+  object-position: center bottom;
+}
+/* The rest-pose poster stays under the canvas until the canvas has fully
+   faded in (a cross-fade would thin the coat's soft edges midway). */
+.sn-yeti-poster[data-visible="false"] {
+  opacity: 0;
+  transition: opacity 0s linear var(--yeti-fade);
+}
+/* Eyes-closed poster (no WebGL): a quick lid swap over the open poster. */
+.sn-yeti-poster--closed {
+  transition: opacity 110ms ease-out;
+}
+.sn-yeti-poster--closed[data-visible="false"] {
+  opacity: 0;
+  transition: opacity 160ms ease-in;
+}
+.sn-yeti-canvas {
+  opacity: 0;
+  transition: opacity var(--yeti-fade) ease-out;
+}
+.sn-yeti-canvas[data-visible="true"] {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sn-yeti-poster,
+  .sn-yeti-poster[data-visible="false"],
+  .sn-yeti-canvas {
+    transition: none;
+  }
+}

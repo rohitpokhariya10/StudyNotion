@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -15,8 +15,8 @@ vi.mock("@/entities/catalog", () => ({
 describe("Home hero", () => {
   afterEach(() => vi.restoreAllMocks())
 
-  it("keeps semantic copy and links beside decorative static characters", () => {
-    // No WebGL: the scene must stay on its static rendering.
+  it("keeps semantic copy and links beside the decorative yeti", async () => {
+    // No WebGL: the yeti stays on its rest-pose poster.
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null)
     const { container } = render(
       <MemoryRouter>
@@ -26,7 +26,7 @@ describe("Home hero", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Build your skills. Shape your future.",
+        name: "Learn at your pace. Build skills that matter.",
       })
     ).toBeInTheDocument()
     expect(
@@ -35,10 +35,16 @@ describe("Home hero", () => {
     expect(screen.getByLabelText("Choose a subject")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Find courses" })).toBeDisabled()
 
-    const scene = container.querySelector("[data-scene-mode]")
-    expect(scene).toHaveAttribute("aria-hidden", "true")
-    expect(scene).toHaveAttribute("data-scene-mode", "static")
-    expect(scene.querySelector("svg")).toBeInTheDocument()
-    expect(scene.querySelectorAll("svg ellipse")).toHaveLength(4)
+    // The capsule characters are gone; the yeti stands in its sky window.
+    expect(container.querySelector("[data-scene-mode]")).toBeNull()
+    const hero = container.querySelector(".sn-hero-yeti")
+    expect(hero).toHaveAttribute("aria-hidden", "true")
+    expect(hero.querySelector(".sn-hero-yeti-window svg")).toBeInTheDocument()
+    expect(hero.querySelector(".sn-hero-yeti-ledge")).toHaveAttribute("alt", "")
+    const yeti = hero.querySelector(".sn-yeti")
+    await waitFor(() => expect(yeti).toHaveAttribute("data-state", "static"))
+    expect(yeti.querySelector("img")).toHaveAttribute("alt", "")
+    expect(yeti.querySelector("img")).toHaveAttribute("fetchpriority", "high")
+    expect(yeti.querySelector("canvas")).toBeNull()
   })
 })

@@ -58,7 +58,11 @@ export default defineConfig({
     ].map(([name, use]) => ({
       name,
       use: { ...use, reducedMotion: "reduce" },
-      testMatch: "ui-transformation.spec.js",
+      testMatch: [
+        "ui-transformation.spec.js",
+        "auth-mascot.spec.js",
+        "home-hero.spec.js",
+      ],
     })),
   ],
 })
