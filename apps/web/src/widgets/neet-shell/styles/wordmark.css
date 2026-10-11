@@ -1,0 +1,33 @@
+/*
+ * Prahit NEET Mocks wordmark. Inter Tight at a heavy/regular weight contrast,
+ * tuned at display sizes: caps tracked a hair open, lowercase a hair tight,
+ * and the word space narrowed so the open foot of the T doesn't read as a gap.
+ * Kept in the components layer so Tailwind size utilities can override it.
+ */
+@layer components {
+  .neet-wordmark {
+    display: inline-block;
+    font-family:
+      "Inter Tight Variable",
+      "Inter Tight",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
+    font-kerning: normal;
+    font-optical-sizing: auto;
+    line-height: 1;
+    white-space: nowrap;
+    word-spacing: -0.07em;
+  }
+  .neet-wordmark-strong {
+    font-weight: 800;
+    letter-spacing: 0.008em;
+  }
+  .neet-wordmark-light {
+    font-weight: 400;
+    letter-spacing: -0.014em;
+    transition: color 160ms ease;
+  }
+}

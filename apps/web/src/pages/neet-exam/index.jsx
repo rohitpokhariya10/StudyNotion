@@ -163,7 +163,7 @@ export default function NeetExam() {
         </ExamShell>
       ) : (
         <main className="mx-auto my-auto w-full max-w-2xl space-y-6 p-6 sm:p-10">
-          <NeetWordmark />
+          <NeetWordmark className="text-[1.5rem]" />
           <h1 className="pn-display text-4xl font-bold sm:text-5xl">
             {attempt?.test.title || "Your exam"}
           </h1>

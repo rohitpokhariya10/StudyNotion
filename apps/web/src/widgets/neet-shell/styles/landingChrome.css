@@ -1,0 +1,224 @@
+/*
+ * Prahit NEET Mocks landing: design tokens and header. The footer is the
+ * shared Prahit landscape footer (widgets/footer), which keeps its own styles.
+ * A white canvas, warm neutral surfaces and one charcoal action colour.
+ * Inter Tight carries every size: tight display tracking, relaxed body copy.
+ * Everything is scoped to .pn-landing-page so other NEET screens keep the
+ * shared Project NEET visual system.
+ */
+.pn-landing-page {
+  --np-font:
+    "Inter Tight Variable", "Inter Tight", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --np-ink: #232323;
+  --np-ink-soft: #3d3d3d;
+  --np-muted: #626262;
+  --np-quiet: #767676;
+  --np-line: #ebe7e1;
+  --np-surface: #f8f7f4;
+  --np-surface-deep: #f1eee8;
+  --np-beige: #e8dfd2;
+  --np-focus: #1a66cc;
+  --np-blue: #5ec1ff;
+  --np-red: #ff4a1c;
+  --np-yellow: #ffcd5e;
+  --np-green: #00c46f;
+  --np-gutter: clamp(1rem, 4vw, 2.5rem);
+  --np-max: 75rem;
+  --np-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  font-family: var(--np-font);
+  background: #fff;
+  color: var(--np-ink);
+}
+/* The app-wide heading rule sets Poppins; the landing typesets in Inter Tight.
+   Both overrides stop at the shared footer, which matches the homepage. */
+.pn-landing-page :is(h1, h2, h3, h4):not(.sn-footer *) {
+  font-family: inherit;
+}
+.pn-landing-page :is(a, button):not(.sn-footer *):focus-visible {
+  outline: 3px solid var(--np-focus);
+  outline-offset: 3px;
+}
+
+/* Header ------------------------------------------------------------------ */
+.np-header {
+  position: relative;
+  z-index: 40;
+  width: min(var(--np-max), 100% - 2 * var(--np-gutter));
+  margin-inline: auto;
+}
+.np-header-bar {
+  display: flex;
+  min-height: 5rem;
+  align-items: center;
+  gap: 1.5rem;
+}
+/* Padding gives the focus ring room; the negative margin keeps the text on
+   the container edge. */
+.np-brand {
+  display: inline-flex;
+  align-items: center;
+  margin-right: auto;
+  margin-left: -0.5rem;
+  border-radius: 0.625rem;
+  padding: 0.375rem 0.5rem;
+  color: var(--np-ink);
+  font-size: 1.5rem;
+}
+.np-brand:hover .neet-wordmark-light {
+  color: var(--np-focus);
+}
+.np-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.np-nav-link {
+  position: relative;
+  border-radius: 999px;
+  padding: 0.5rem 0.875rem;
+  color: var(--np-ink-soft);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+.np-nav-link:hover {
+  background: var(--np-surface);
+  color: var(--np-ink);
+}
+.np-nav-link[aria-current="page"] {
+  color: var(--np-ink);
+  font-weight: 600;
+}
+.np-nav-link[aria-current="page"]::after {
+  position: absolute;
+  bottom: 0.2rem;
+  left: 50%;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+  translate: -50% 0;
+}
+.np-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.np-sign-in,
+.np-account {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--np-line);
+  border-radius: 999px;
+  padding: 0 1.125rem;
+  color: var(--np-ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+.np-account {
+  padding-left: 0.375rem;
+}
+.np-sign-in:hover,
+.np-account:hover {
+  border-color: #d9d4cc;
+  background: var(--np-surface);
+}
+.np-account-initial {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--np-ink);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.np-account-name {
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.np-account-skeleton {
+  width: 5.5rem;
+  height: 2.75rem;
+  border-radius: 999px;
+}
+.np-menu-button {
+  display: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--np-surface-deep);
+  color: var(--np-ink);
+  font-size: 1.25rem;
+}
+.np-mobile-menu {
+  display: none;
+}
+
+@media (max-width: 47.99rem) {
+  .np-header-bar {
+    min-height: 4.25rem;
+    gap: 0.75rem;
+  }
+  .np-brand {
+    font-size: 1.3125rem;
+  }
+  .np-nav {
+    display: none;
+  }
+  .np-menu-button {
+    display: grid;
+  }
+  .np-mobile-menu:not([hidden]) {
+    position: absolute;
+    top: calc(100% - 0.25rem);
+    right: 0;
+    left: 0;
+    display: grid;
+    gap: 0.125rem;
+    border: 1px solid var(--np-line);
+    border-radius: 1.5rem;
+    padding: 0.5rem;
+    background: #fff;
+    box-shadow: 0 24px 48px -28px rgb(35 35 35 / 0.35);
+  }
+  .np-mobile-menu .np-nav-link {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    border-radius: 1rem;
+    padding-inline: 1rem;
+    font-size: 1.0625rem;
+  }
+  .np-mobile-menu .np-nav-link[aria-current="page"] {
+    background: var(--np-surface);
+  }
+  .np-mobile-menu .np-nav-link[aria-current="page"]::after {
+    position: static;
+    margin-left: auto;
+    translate: none;
+  }
+}
+@media (max-width: 22.5rem) {
+  .np-brand {
+    font-size: 1.1875rem;
+  }
+  .np-sign-in {
+    padding-inline: 0.875rem;
+  }
+}

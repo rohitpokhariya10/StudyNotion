@@ -258,7 +258,9 @@ test("practice onboarding through manual submit and server result", async ({
   await page
     .getByRole("button", { name: "Mark for review", exact: true })
     .click()
-  if (testInfo.project.name === "neet-mobile") {
+  const paletteToggle = page.getByRole("button", { name: /^OMR/ })
+  const drawerPalette = await paletteToggle.isVisible()
+  if (drawerPalette) {
     await page.getByRole("button", { name: /^OMR/ }).click()
   }
   await expect(
@@ -266,7 +268,7 @@ test("practice onboarding through manual submit and server result", async ({
       name: "Question 1: Answered & marked for review",
     })
   ).toBeVisible()
-  if (testInfo.project.name === "neet-mobile") {
+  if (drawerPalette) {
     await page
       .getByRole("dialog", { name: "Question palette" })
       .getByRole("button", { name: "Close", exact: true })
@@ -372,7 +374,7 @@ test("ownership denial exposes no questions or result", async ({
   )
   await expect(page.getByRole("table")).toHaveCount(0)
 })
-test("landing keeps CTA and SVG fallback without WebGL and with reduced motion", async ({
+test("landing keeps its CTA and drawn artwork without WebGL and with reduced motion", async ({
   page,
   context,
 }, testInfo) => {
@@ -390,12 +392,15 @@ test("landing keeps CTA and SVG fallback without WebGL and with reduced motion",
     if (request.resourceType() === "script") scripts.push(request.url())
   })
   await page.goto("/neet")
-  await expect(page.getByRole("link", { name: "Start a Mock" })).toBeVisible()
+  await expect(
+    page.getByRole("link", { name: "Start a Mock" }).first()
+  ).toBeVisible()
   await expect(page.getByRole("link", { name: "Explore Tests" })).toBeVisible()
   await expect(
-    page.getByRole("heading", { name: "Pick today's sitting." })
+    page.getByRole("heading", { name: "Pick today’s sitting." })
   ).toBeVisible()
-  await expect(page.locator("[data-hero-mode=static]")).toBeVisible()
+  await expect(page.locator(".np-cluster-left .np-scene")).toBeVisible()
+  await expect(page.locator("canvas")).toHaveCount(0)
   expect(scripts.some((url) => url.includes("helixScene"))).toBe(false)
   await page.screenshot({
     path: testInfo.outputPath("landing.png"),
@@ -506,5 +511,7 @@ test("normal StudyNotion entry remains separate from NEET heavy scripts", async 
     .getByRole("contentinfo")
     .getByRole("link", { name: "NEET Mocks", exact: true })
     .click()
-  await expect(page.getByRole("link", { name: "Start a Mock" })).toBeVisible()
+  await expect(
+    page.getByRole("link", { name: "Start a Mock" }).first()
+  ).toBeVisible()
 })

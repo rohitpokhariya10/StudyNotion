@@ -45,6 +45,22 @@ describe("Footer", () => {
       expect(href.startsWith("/") || href.startsWith("mailto:")).toBe(true)
   })
 
+  it("adds a page notice only when one is supplied", () => {
+    const { container, unmount } = renderFooter()
+    expect(container.querySelector(".sn-footer-note")).toBeNull()
+    unmount()
+    render(
+      <MemoryRouter>
+        <Footer note="Independent practice notice." />
+      </MemoryRouter>
+    )
+    expect(
+      within(screen.getByRole("contentinfo")).getByText(
+        "Independent practice notice."
+      )
+    ).toHaveClass("sn-footer-note")
+  })
+
   it("keeps the landscape decorative and falls back if it cannot load", () => {
     const { container } = renderFooter()
     const scene = container.querySelector(".sn-footer-scene")

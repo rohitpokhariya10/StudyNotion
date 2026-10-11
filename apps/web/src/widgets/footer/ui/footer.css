@@ -252,6 +252,19 @@
   stroke-width: 1.5;
 }
 
+/* Optional page notice below the columns, e.g. a legal statement. */
+.sn-footer-note {
+  max-width: 760px;
+  margin: 48px auto 24px;
+  border-top: 1px solid rgb(255 255 255 / 0.24);
+  padding-top: 20px;
+  color: rgb(255 255 255 / 0.82);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  text-wrap: pretty;
+}
+
 .sn-footer :focus-visible {
   outline: 2px solid #ffffff;
   outline-offset: 3px;
@@ -349,6 +362,9 @@
   }
   .sn-footer-contact li > span {
     padding-block: 10px;
+  }
+  .sn-footer-note {
+    margin-top: 32px;
   }
 }
 @media (max-width: 359px) {

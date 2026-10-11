@@ -9,7 +9,9 @@ import "./footer.css"
 
 // Contact details come only from deployment configuration; anything that is
 // not configured (phone, social profiles) is left out rather than invented.
-export default function Footer() {
+// `note` carries a page-specific notice (for example the NEET Mocks
+// non-affiliation statement); pages without one render nothing extra.
+export default function Footer({ note }) {
   return (
     <footer className="sn-footer">
       <FooterLandscape />
@@ -73,6 +75,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
+        {note && <p className="sn-footer-note">{note}</p>}
       </div>
     </footer>
   )
